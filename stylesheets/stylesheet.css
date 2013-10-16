@@ -122,14 +122,11 @@ a {
   -ms-transition: text-shadow 0.5s ease;
 }
 
-#main_content a:hover {
-  color: #0069ba;
-  text-shadow: #0090ff 0px 0px 2px;
-}
+a:hover, a:focus {text-decoration: underline;}
 
-footer a:hover {
-  color: #43adff;
-  text-shadow: #0090ff 0px 0px 2px;
+footer a {
+  color: #F2F2F2;
+  text-decoration: underline;
 }
 
 em {
