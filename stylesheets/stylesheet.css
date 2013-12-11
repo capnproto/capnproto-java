@@ -3,46 +3,8 @@ Slate Theme for GitHub Pages
 by Jason Costello, @jsncostello
 *******************************************************************************/
 
+@import url(normalize.css);
 @import url(pygment_trac.css);
-
-/*******************************************************************************
-MeyerWeb Reset
-*******************************************************************************/
-
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font: inherit;
-  vertical-align: baseline;
-}
-
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
-
-ol, ul {
-  list-style: none;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
 
 /*******************************************************************************
 Theme Styles
@@ -191,23 +153,16 @@ pre code {
 
 blockquote {
   color: #666;
-  margin-bottom: 20px;
-  padding: 0 0 0 20px;
+  margin: 0 0 20px 2px;
+  padding-left: 20px;
   border-left: 3px solid #bbb;
+  font-style: italic;
 }
 
 ul, ol, dl {
-  margin-bottom: 15px
-}
-
-ul {
-  list-style: inside;
+  margin: 0 0 15px 0;
   padding-left: 20px;
-}
 
-ol {
-  list-style: decimal inside;
-  padding-left: 20px;
 }
 
 dl dt {
@@ -215,7 +170,8 @@ dl dt {
 }
 
 dl dd {
-  padding-left: 20px;
+  margin-left: 0;
+  padding-left: 0;
   font-style: italic;
 }
 
