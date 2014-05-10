@@ -8,7 +8,15 @@ class ListPointer extends WirePointer {
         super(buffer, buffer_offset);
     }
 
+    public byte elementSize() {
+        return (byte)(this.buffer.getInt(buffer_offset * 2 + 1) & 7);
+    }
+
     public int elementCount() {
-        return this.buffer.getInt(buffer_offset * 2) >> 3;
+        return this.buffer.getInt(buffer_offset * 2 + 1) >> 3;
+    }
+
+    public int inlineCompositeWordCount() {
+        return this.elementCount();
     }
 }
