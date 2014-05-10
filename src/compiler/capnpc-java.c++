@@ -192,13 +192,13 @@ private:
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
 
-  kj::StringTree cppFullName(Schema schema) {
+  kj::StringTree javaFullName(Schema schema) {
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
       for (auto annotation: node.getAnnotations()) {
         if (annotation.getId() == NAMESPACE_ANNOTATION_ID) {
-          return kj::strTree(" ::", annotation.getValue().getText());
+          return kj::strTree("", annotation.getValue().getText());
         }
       }
       return kj::strTree(" ");
@@ -206,12 +206,13 @@ private:
       Schema parent = schemaLoader.get(node.getScopeId());
       for (auto nested: parent.getProto().getNestedNodes()) {
         if (nested.getId() == node.getId()) {
-          return kj::strTree(cppFullName(parent), "::", nested.getName());
+          return kj::strTree(javaFullName(parent), ".", nested.getName());
         }
       }
       KJ_FAIL_REQUIRE("A schema Node's supposed scope did not contain the node as a NestedNode.");
     }
   }
+
 
   kj::String toUpperCase(kj::StringPtr name) {
     kj::Vector<char> result(name.size() + 4);
@@ -242,17 +243,17 @@ private:
 
   kj::StringTree typeName(schema::Type::Reader type) {
     switch (type.which()) {
-      case schema::Type::VOID: return kj::strTree(" ::capnp::Void");
+      case schema::Type::VOID: return kj::strTree("void");
 
       case schema::Type::BOOL: return kj::strTree("boolean");
-      case schema::Type::INT8: return kj::strTree(" byte");
-      case schema::Type::INT16: return kj::strTree(" short");
-      case schema::Type::INT32: return kj::strTree(" int");
-      case schema::Type::INT64: return kj::strTree(" long");
-      case schema::Type::UINT8: return kj::strTree(" byte");
-      case schema::Type::UINT16: return kj::strTree(" short");
-      case schema::Type::UINT32: return kj::strTree(" int");
-      case schema::Type::UINT64: return kj::strTree(" long");
+      case schema::Type::INT8: return kj::strTree("byte");
+      case schema::Type::INT16: return kj::strTree("short");
+      case schema::Type::INT32: return kj::strTree("int");
+      case schema::Type::INT64: return kj::strTree("long");
+      case schema::Type::UINT8: return kj::strTree("byte");
+      case schema::Type::UINT16: return kj::strTree("short");
+      case schema::Type::UINT32: return kj::strTree("int");
+      case schema::Type::UINT64: return kj::strTree("long");
       case schema::Type::FLOAT32: return kj::strTree("float");
       case schema::Type::FLOAT64: return kj::strTree("double");
 
@@ -260,14 +261,15 @@ private:
       case schema::Type::DATA: return kj::strTree(" capnp.Data");
 
       case schema::Type::ENUM:
-        return cppFullName(schemaLoader.get(type.getEnum().getTypeId()));
+        return javaFullName(schemaLoader.get(type.getEnum().getTypeId()));
       case schema::Type::STRUCT:
-        return cppFullName(schemaLoader.get(type.getStruct().getTypeId()));
+        return javaFullName(schemaLoader.get(type.getStruct().getTypeId()));
       case schema::Type::INTERFACE:
-        return cppFullName(schemaLoader.get(type.getInterface().getTypeId()));
+        return javaFullName(schemaLoader.get(type.getInterface().getTypeId()));
 
       case schema::Type::LIST:
-        return kj::strTree(" ::capnp::List<", typeName(type.getList().getElementType()), ">");
+        // XXX
+        return kj::strTree(" capnp.StructList<", typeName(type.getList().getElementType()), ">");
 
       case schema::Type::ANY_POINTER:
         // Not used.
@@ -294,10 +296,10 @@ private:
         EnumSchema schema = schemaLoader.get(type.getEnum().getTypeId()).asEnum();
         if (value.getEnum() < schema.getEnumerants().size()) {
           return kj::strTree(
-              cppFullName(schema), "::",
+              javaFullName(schema), "::",
               toUpperCase(schema.getEnumerants()[value.getEnum()].getProto().getName()));
         } else {
-          return kj::strTree("static_cast<", cppFullName(schema), ">(", value.getEnum(), ")");
+          return kj::strTree("static_cast<", javaFullName(schema), ">(", value.getEnum(), ")");
         }
       }
 
@@ -546,13 +548,13 @@ private:
             "  _builder.setDataField<", scope, "Which>(\n"
             "      ", discrimOffset, " * ::capnp::ELEMENTS, ",
                       scope, upperCase, ");\n"),
-          kj::strTree(spaces(indent), "  public bool is", titleCase, "();\n"),
-          kj::strTree(spaces(indent), "  public bool is", titleCase, "();\n"),
+          kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
+          kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
         kj::strTree(
-            "inline bool ", scope, "Reader::is", titleCase, "() const {\n"
+            "inline boolean ", scope, "Reader::is", titleCase, "() const {\n"
             "  return which() == ", scope, upperCase, ";\n"
             "}\n"
-            "inline bool ", scope, "Builder::is", titleCase, "() {\n"
+            "inline boolean ", scope, "Builder::is", titleCase, "() {\n"
             "  return which() == ", scope, upperCase, ";\n"
             "}\n")
     };
@@ -760,7 +762,9 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            spaces(indent), "  public", type, " get", titleCase, "();\n"
+            spaces(indent), "  public ", type, " get", titleCase, "() {\n",
+            spaces(indent), "    return _reader.get", toTitleCase(type), "Field(", offset, ");\n",
+            spaces(indent), "  }\n",
             "\n"),
 
         kj::strTree(
@@ -798,13 +802,13 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            "  inline bool has", titleCase, "() const;\n"
+            "  inline boolean has", titleCase, "() const;\n"
             "  inline ::capnp::AnyPointer::Reader get", titleCase, "() const;\n"
             "\n"),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
-            "  inline bool has", titleCase, "();\n"
+            "  inline boolean has", titleCase, "();\n"
             "  inline ::capnp::AnyPointer::Builder get", titleCase, "();\n"
             "  inline ::capnp::AnyPointer::Builder init", titleCase, "();\n"
             "\n"),
@@ -813,11 +817,11 @@ private:
 
         kj::strTree(
             kj::mv(unionDiscrim.isDefs),
-            "inline bool ", scope, "Reader::has", titleCase, "() const {\n",
+            "inline boolean ", scope, "Reader::has", titleCase, "() const {\n",
             unionDiscrim.has,
             "  return !_reader.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
             "}\n"
-            "inline bool ", scope, "Builder::has", titleCase, "() {\n",
+            "inline boolean ", scope, "Builder::has", titleCase, "() {\n",
             unionDiscrim.has,
             "  return !_builder.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
             "}\n"
@@ -894,16 +898,23 @@ private:
             primitiveElement ? "" : interface ? "::Client" : "::Reader");
       }
 
+
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            spaces(indent), "  public bool has", titleCase, "();\n",
-            spaces(indent), "  public ", type, ".Reader get", titleCase, "();\n"
+            spaces(indent), "  public boolean has", titleCase, "() {\n",
+            spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
+            spaces(indent), "    return _reader.getPointerField(", offset, ").get",
+            (kind == FieldKind::LIST ? "List" : (kind == FieldKind::BLOB ? "Text" : "Struct")), "();\n",  // XXX
+            spaces(indent), "  }\n",
             "\n"),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
-            "  inline bool has", titleCase, "();\n"
+            "  inline boolean has", titleCase, "();\n"
             "  inline ", type, "::Builder get", titleCase, "();\n"
             "  inline void set", titleCase, "(", type, "::Reader value);\n",
             kind == FieldKind::LIST && !isStructOrCapList
@@ -1006,7 +1017,7 @@ private:
                                bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(spaces(indent), "public static class Reader {\n",
-                       spaces(indent), "  public Reader(capnp.StructReader base){ this.reader = base; }\n",
+                       spaces(indent), "  public Reader(capnp.StructReader base){ this._reader = base; }\n",
                        "\n",
                        isUnion ? kj::strTree(spaces(indent), "  inline Which which() const;\n") : kj::strTree(),
                        kj::mv(methodDecls),
@@ -1049,16 +1060,18 @@ private:
           kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                     indent + 1)),
-          structNode.getDiscriminantCount() == 0 ? kj::strTree() : kj::strTree(
-              "  enum Which: uint16_t {\n",
-              KJ_MAP(f, structNode.getFields()) {
-                if (hasDiscriminantValue(f)) {
-                  return kj::strTree("    ", toUpperCase(f.getName()), ",\n");
-                } else {
-                  return kj::strTree();
-                }
-              },
-              "  };\n"),
+          structNode.getDiscriminantCount() == 0 ?
+                    kj::strTree() :
+                    kj::strTree(
+                                spaces(indent), "  public enum Which {\n",
+                                KJ_MAP(f, structNode.getFields()) {
+                                  if (hasDiscriminantValue(f)) {
+                                    return kj::strTree(spaces(indent), "    ", toUpperCase(f.getName()), ",\n");
+                                  } else {
+                                    return kj::strTree();
+                                  }
+                                },
+                                spaces(indent), "  };\n"),
                     KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
                     spaces(indent), "};\n"
           "\n"),
@@ -1512,7 +1525,6 @@ private:
           "\n"
           "import capnp;\n",
           hasInterfaces ? kj::strTree("#include <capnp/capability.h>\n") : kj::strTree(),
-          "\n"
           "\n",
           KJ_MAP(path, includes) {
             if (path.startsWith("/")) {

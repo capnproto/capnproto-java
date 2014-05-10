@@ -24,6 +24,10 @@ public class PointerReader {
         return new PointerReader(segment, location.offset, nestingLimit);
     }
 
+    public boolean isNull() {
+        return this.segment.ptr.getLong(this.pointer) == 0;
+    }
+
     public StructReader getStruct() {
         WirePointer ref = new WirePointer(this.segment.ptr, this.pointer);
         return WireHelpers.readStructPointer(this.segment,
