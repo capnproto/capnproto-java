@@ -598,7 +598,9 @@ private:
         return FieldText {
             kj::strTree(
                 kj::mv(unionDiscrim.readerIsDecl),
-                spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "();\n"
+                spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
+                spaces(indent), "    return new ", scope, titleCase, ".Reader(_reader);\n",
+                spaces(indent), "  }\n",
                 "\n"),
 
             kj::strTree(
@@ -1045,7 +1047,7 @@ private:
                             kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
     auto proto = schema.getProto();
     auto fullName = kj::str(scope, name);
-    auto subScope = kj::str(fullName, "::");
+    auto subScope = kj::str(fullName, ".");
     auto fieldTexts = KJ_MAP(f, schema.getFields()) { return makeFieldText(subScope, f, indent + 1); };
 
     auto structNode = proto.getStruct();
@@ -1056,7 +1058,7 @@ private:
           "  struct ", name, ";\n"),
 
         kj::strTree(
-                    spaces(indent), "public static class ", fullName, " {\n",
+                    spaces(indent), "public static class ", name, " {\n",
           kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                     indent + 1)),
@@ -1216,7 +1218,7 @@ private:
                         int indent) {
     auto proto = schema.getProto();
     auto fullName = kj::str(scope, name);
-    auto subScope = kj::str(fullName, "::");
+    auto subScope = kj::str(fullName, ".");
     auto hexId = kj::hex(proto.getId());
 
     // Compute nested nodes, including groups.
@@ -1392,20 +1394,14 @@ private:
         auto enumerants = schema.asEnum().getEnumerants();
 
         return NodeTextNoSchema {
-          scope.size() == 0 ? kj::strTree() : kj::strTree(
-              "  enum class ", name, ": uint16_t {\n",
-              KJ_MAP(e, enumerants) {
-                return kj::strTree("    ", toUpperCase(e.getProto().getName()), ",\n");
-              },
-              "  };\n"
-              "\n"),
+         kj::strTree(),
 
-          scope.size() > 0 ? kj::strTree() : kj::strTree(
-              "enum class ", name, ": uint16_t {\n",
-            KJ_MAP(e, enumerants) {
-                return kj::strTree("  ", toUpperCase(e.getProto().getName()), ",\n");
-              },
-              "};\n"
+          kj::strTree(
+                      spaces(indent), "public enum ", name, " {\n",
+                      KJ_MAP(e, enumerants) {
+                        return kj::strTree(spaces(indent), "  ", toUpperCase(e.getProto().getName()), ",\n");
+                      },
+                      spaces(indent), "};\n"
               "\n"),
 
           kj::strTree(),
