@@ -1,9 +1,14 @@
 CXX=g++ -std=c++11
 
 CAPNP_SOURCES=\
+	src/capnp/ListPointer.java\
 	src/capnp/PointerReader.java\
 	src/capnp/SegmentReader.java\
-	src/capnp/StructReader.java
+	src/capnp/StructReader.java\
+	src/capnp/Text.java\
+	src/capnp/WireHelpers.java\
+	src/capnp/WirePointer.java\
+	src/capnp/WordPointer.java
 
 CAPNPC_JAVA_SOURCES=src/compiler/capnpc-java.c++
 
