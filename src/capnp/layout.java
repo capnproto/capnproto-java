@@ -1,5 +1,3 @@
 package capnp;
 
-class PointerReader {
 
-}
