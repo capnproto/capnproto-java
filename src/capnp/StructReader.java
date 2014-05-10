@@ -11,6 +11,18 @@ public class StructReader {
     public int nestingLimit;
 
 
+    public StructReader(SegmentReader segment, int data,
+                        int pointers, int dataSize, short pointerCount,
+                        byte bit0Offset, int nestingLimit) {
+        this.segment = segment;
+        this.data = data;
+        this.pointers = pointers;
+        this.dataSize = dataSize;
+        this.pointerCount = pointerCount;
+        this.bit0Offset = bit0Offset;
+        this.nestingLimit = nestingLimit;
+    }
+
     public boolean getBoolField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
