@@ -10,6 +10,34 @@ public class ListReader {
     int nestingLimit;
 
 
+    public ListReader () {
+        this.segment = null;
+        this.ptr = 0;
+        this.elementCount = 0;
+        this.step = 0;
+        this.structDataSize = 0;
+        this.structPointerCount = 0;
+        this.nestingLimit = 0x7fffffff;
+    }
+
+    public ListReader(SegmentReader segment, int ptr,
+                      int elementCount, int step,
+                      int structDataSize, short structPointerCount,
+                      int nestingLimit) {
+        this.segment = segment;
+        this.ptr = ptr;
+        this.elementCount = elementCount;
+        this.step = step;
+        this.structDataSize = structDataSize;
+        this.structPointerCount = structPointerCount;
+        this.nestingLimit = nestingLimit;
+
+    }
+
+    public int size() {
+        return this.elementCount;
+    }
+
     public StructReader getStructElement(int index) {
         // TODO check nesting limit
 
