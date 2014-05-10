@@ -1375,16 +1375,8 @@ private:
           kj::mv(structText.readerBuilderDefs),
           kj::mv(structText.inlineMethodDefs),
 
-          kj::strTree(
-              "CAPNP_DECLARE_STRUCT(\n"
-              "    ", namespace_, "::", fullName, ", ", hexId, ",\n"
-              "    ", structNode.getDataWordCount(), ", ",
-                      structNode.getPointerCount(), ", ",
-                      FIELD_SIZE_NAMES[static_cast<uint>(structNode.getPreferredListEncoding())],
-                      ");\n"),
-          kj::strTree(
-              "CAPNP_DEFINE_STRUCT(\n"
-              "    ", namespace_, "::", fullName, ");\n"),
+            kj::strTree(),
+            kj::strTree(),
 
           kj::strTree(),
         };
@@ -1407,12 +1399,8 @@ private:
           kj::strTree(),
           kj::strTree(),
 
-          kj::strTree(
-              "CAPNP_DECLARE_ENUM(\n"
-              "    ", namespace_, "::", fullName, ", ", hexId, ");\n"),
-          kj::strTree(
-              "CAPNP_DEFINE_ENUM(\n"
-              "    ", namespace_, "::", fullName, ");\n"),
+           kj::strTree(),
+           kj::strTree(),
 
           kj::strTree(),
         };
