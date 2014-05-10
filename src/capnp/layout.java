@@ -1,0 +1,5 @@
+package capnp;
+
+class PointerReader {
+
+}
