@@ -1165,9 +1165,7 @@ private:
           "  struct ", name, ";\n"),
 
       kj::strTree(
-          "class ", fullName, " {\n",
-          "  ", name, "() = delete;\n"
-          "\n"
+          "public static class ", fullName, " {\n",
           "  class Reader;\n"
           "  class Builder;\n"
           "  class Pipeline;\n",
@@ -1206,219 +1204,6 @@ private:
     };
   }
 
-  // -----------------------------------------------------------------
-
-  struct MethodText {
-    kj::StringTree clientDecls;
-    kj::StringTree serverDecls;
-    kj::StringTree inlineDefs;
-    kj::StringTree sourceDefs;
-    kj::StringTree dispatchCase;
-  };
-
-  MethodText makeMethodText(kj::StringPtr interfaceName, InterfaceSchema::Method method) {
-    auto proto = method.getProto();
-    auto name = proto.getName();
-    auto titleCase = toTitleCase(name);
-    auto paramSchema = schemaLoader.get(proto.getParamStructType()).asStruct();
-    auto resultSchema = schemaLoader.get(proto.getResultStructType()).asStruct();
-    auto identifierName = safeIdentifier(name);
-
-    auto paramProto = paramSchema.getProto();
-    auto resultProto = resultSchema.getProto();
-
-    kj::String paramType = paramProto.getScopeId() == 0 ?
-        kj::str(interfaceName, "::", titleCase, "Params") : cppFullName(paramSchema).flatten();
-    kj::String resultType = resultProto.getScopeId() == 0 ?
-        kj::str(interfaceName, "::", titleCase, "Results") : cppFullName(resultSchema).flatten();
-
-    kj::String shortParamType = paramProto.getScopeId() == 0 ?
-        kj::str(titleCase, "Params") : cppFullName(paramSchema).flatten();
-    kj::String shortResultType = resultProto.getScopeId() == 0 ?
-        kj::str(titleCase, "Results") : cppFullName(resultSchema).flatten();
-
-    auto interfaceProto = method.getContainingInterface().getProto();
-    uint64_t interfaceId = interfaceProto.getId();
-    auto interfaceIdHex = kj::hex(interfaceId);
-    uint16_t methodId = method.getIndex();
-
-    return MethodText {
-      kj::strTree(
-          "  ::capnp::Request<", paramType, ", ", resultType, "> ", name, "Request(\n"
-          "      ::kj::Maybe< ::capnp::MessageSize> sizeHint = nullptr);\n"),
-
-      kj::strTree(
-          paramProto.getScopeId() != 0 ? kj::strTree() : kj::strTree(
-              "  typedef ", paramType, " ", titleCase, "Params;\n"),
-          resultProto.getScopeId() != 0 ? kj::strTree() : kj::strTree(
-              "  typedef ", resultType, " ", titleCase, "Results;\n"),
-          "  typedef ::capnp::CallContext<", shortParamType, ", ", shortResultType, "> ",
-                titleCase, "Context;\n"
-          "  virtual ::kj::Promise<void> ", identifierName, "(", titleCase, "Context context);\n"),
-
-      kj::strTree(),
-
-      kj::strTree(
-          "::capnp::Request<", paramType, ", ", resultType, ">\n",
-          interfaceName, "::Client::", name, "Request(::kj::Maybe< ::capnp::MessageSize> sizeHint) {\n"
-          "  return newCall<", paramType, ", ", resultType, ">(\n"
-          "      0x", interfaceIdHex, "ull, ", methodId, ", sizeHint);\n"
-          "}\n"
-          "::kj::Promise<void> ", interfaceName, "::Server::", identifierName, "(", titleCase, "Context) {\n"
-          "  return ::capnp::Capability::Server::internalUnimplemented(\n"
-          "      \"", interfaceProto.getDisplayName(), "\", \"", name, "\",\n"
-          "      0x", interfaceIdHex, "ull, ", methodId, ");\n"
-          "}\n"),
-
-      kj::strTree(
-          "    case ", methodId, ":\n"
-          "      return ", identifierName, "(::capnp::Capability::Server::internalGetTypedContext<\n"
-          "          ", paramType, ", ", resultType, ">(context));\n")
-    };
-  }
-
-  struct InterfaceText {
-    kj::StringTree outerTypeDecl;
-    kj::StringTree outerTypeDef;
-    kj::StringTree clientServerDefs;
-    kj::StringTree inlineMethodDefs;
-    kj::StringTree sourceDefs;
-  };
-
-  struct ExtendInfo {
-    kj::String typeName;
-    uint64_t id;
-  };
-
-  InterfaceText makeInterfaceText(kj::StringPtr scope, kj::StringPtr name, InterfaceSchema schema,
-                                  kj::Array<kj::StringTree> nestedTypeDecls) {
-    auto fullName = kj::str(scope, name);
-    auto methods = KJ_MAP(m, schema.getMethods()) { return makeMethodText(fullName, m); };
-
-    auto proto = schema.getProto();
-
-    auto extends = KJ_MAP(id, proto.getInterface().getExtends()) {
-      Schema schema = schemaLoader.get(id);
-      return ExtendInfo { cppFullName(schema).flatten(), schema.getProto().getId() };
-    };
-
-    return InterfaceText {
-      kj::strTree(
-          "  struct ", name, ";\n"),
-
-      kj::strTree(
-          "struct ", fullName, " {\n",
-          "  ", name, "() = delete;\n"
-          "\n"
-          "  class Client;\n"
-          "  class Server;\n"
-          "\n",
-          KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-          "};\n"
-          "\n"),
-
-      kj::strTree(
-          "class ", fullName, "::Client\n"
-          "    : public virtual ::capnp::Capability::Client",
-          KJ_MAP(e, extends) {
-            return kj::strTree(",\n      public virtual ", e.typeName, "::Client");
-          }, " {\n"
-          "public:\n"
-          "  typedef ", fullName, " Calls;\n"
-          "  typedef ", fullName, " Reads;\n"
-          "\n"
-          "  Client(decltype(nullptr));\n"
-          "  explicit Client(::kj::Own< ::capnp::ClientHook>&& hook);\n"
-          "  template <typename T, typename = ::kj::EnableIf< ::kj::canConvert<T*, Server*>()>>\n"
-          "  Client(::kj::Own<T>&& server);\n"
-          "  template <typename T, typename = ::kj::EnableIf< ::kj::canConvert<T*, Client*>()>>\n"
-          "  Client(::kj::Promise<T>&& promise);\n"
-          "  Client(::kj::Exception&& exception);\n"
-          "  Client(Client&) = default;\n"
-          "  Client(Client&&) = default;\n"
-          "  Client& operator=(Client& other);\n"
-          "  Client& operator=(Client&& other);\n"
-          "\n",
-          KJ_MAP(m, methods) { return kj::mv(m.clientDecls); },
-          "\n"
-          "protected:\n"
-          "  Client() = default;\n"
-          "};\n"
-          "\n"
-          "class ", fullName, "::Server\n"
-          "    : public virtual ::capnp::Capability::Server",
-          KJ_MAP(e, extends) {
-            return kj::strTree(",\n      public virtual ", e.typeName, "::Server");
-          }, " {\n"
-          "public:\n",
-          "  typedef ", fullName, " Serves;\n"
-          "\n"
-          "  ::kj::Promise<void> dispatchCall(uint64_t interfaceId, uint16_t methodId,\n"
-          "      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context)\n"
-          "      override;\n"
-          "\n"
-          "protected:\n",
-          KJ_MAP(m, methods) { return kj::mv(m.serverDecls); },
-          "\n"
-          "  ::kj::Promise<void> dispatchCallInternal(uint16_t methodId,\n"
-          "      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context);\n"
-          "};\n"
-          "\n"),
-
-      kj::strTree(
-          "inline ", fullName, "::Client::Client(decltype(nullptr))\n"
-          "    : ::capnp::Capability::Client(nullptr) {}\n"
-          "inline ", fullName, "::Client::Client(\n"
-          "    ::kj::Own< ::capnp::ClientHook>&& hook)\n"
-          "    : ::capnp::Capability::Client(::kj::mv(hook)) {}\n"
-          "template <typename T, typename>\n"
-          "inline ", fullName, "::Client::Client(::kj::Own<T>&& server)\n"
-          "    : ::capnp::Capability::Client(::kj::mv(server)) {}\n"
-          "template <typename T, typename>\n"
-          "inline ", fullName, "::Client::Client(::kj::Promise<T>&& promise)\n"
-          "    : ::capnp::Capability::Client(::kj::mv(promise)) {}\n"
-          "inline ", fullName, "::Client::Client(::kj::Exception&& exception)\n"
-          "    : ::capnp::Capability::Client(::kj::mv(exception)) {}\n"
-          "inline ", fullName, "::Client& ", fullName, "::Client::operator=(Client& other) {\n"
-          "  ::capnp::Capability::Client::operator=(other);\n"
-          "  return *this;\n"
-          "}\n"
-          "inline ", fullName, "::Client& ", fullName, "::Client::operator=(Client&& other) {\n"
-          "  ::capnp::Capability::Client::operator=(kj::mv(other));\n"
-          "  return *this;\n"
-          "}\n"
-          "\n"),
-
-      kj::strTree(
-          KJ_MAP(m, methods) { return kj::mv(m.sourceDefs); },
-          "::kj::Promise<void> ", fullName, "::Server::dispatchCall(\n"
-          "    uint64_t interfaceId, uint16_t methodId,\n"
-          "    ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context) {\n"
-          "  switch (interfaceId) {\n"
-          "    case 0x", kj::hex(proto.getId()), "ull:\n"
-          "      return dispatchCallInternal(methodId, context);\n",
-          KJ_MAP(e, extends) {
-            return kj::strTree(
-              "    case 0x", kj::hex(e.id), "ull:\n"
-              "      return ", e.typeName, "::Server::dispatchCallInternal(methodId, context);\n");
-          },
-          "    default:\n"
-          "      return internalUnimplemented(\"", proto.getDisplayName(), "\", interfaceId);\n"
-          "  }\n"
-          "}\n"
-          "::kj::Promise<void> ", fullName, "::Server::dispatchCallInternal(\n"
-          "    uint16_t methodId,\n"
-          "    ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context) {\n"
-          "  switch (methodId) {\n",
-          KJ_MAP(m, methods) { return kj::mv(m.dispatchCase); },
-          "    default:\n"
-          "      return ::capnp::Capability::Server::internalUnimplemented(\n"
-          "          \"", proto.getDisplayName(), "\",\n"
-          "          0x", kj::hex(proto.getId()), "ull, methodId);\n"
-          "  }\n"
-          "}\n")
-    };
-  }
 
   // -----------------------------------------------------------------
 
@@ -1559,24 +1344,7 @@ private:
         }
       }
     } else if (proto.isInterface()) {
-      for (auto method: proto.getInterface().getMethods()) {
-        {
-          Schema params = schemaLoader.get(method.getParamStructType());
-          auto paramsProto = schemaLoader.get(method.getParamStructType()).getProto();
-          if (paramsProto.getScopeId() == 0) {
-            nestedTexts.add(makeNodeText(namespace_, subScope,
-                toTitleCase(kj::str(method.getName(), "Params")), params));
-          }
-        }
-        {
-          Schema results = schemaLoader.get(method.getResultStructType());
-          auto resultsProto = schemaLoader.get(method.getResultStructType()).getProto();
-          if (resultsProto.getScopeId() == 0) {
-            nestedTexts.add(makeNodeText(namespace_, subScope,
-                toTitleCase(kj::str(method.getName(), "Results")), results));
-          }
-        }
-      }
+      KJ_FAIL_REQUIRE("interfaces not implemented");
     }
 
     // Convert the encoded schema to a literal byte array.
@@ -1741,7 +1509,7 @@ private:
 
           scope.size() > 0 ? kj::strTree() : kj::strTree(
               "enum class ", name, ": uint16_t {\n",
-              KJ_MAP(e, enumerants) {
+            KJ_MAP(e, enumerants) {
                 return kj::strTree("  ", toUpperCase(e.getProto().getName()), ",\n");
               },
               "};\n"
@@ -1763,25 +1531,7 @@ private:
 
       case schema::Node::INTERFACE: {
         hasInterfaces = true;
-
-        InterfaceText interfaceText =
-            makeInterfaceText(scope, name, schema.asInterface(), kj::mv(nestedTypeDecls));
-
-        return NodeTextNoSchema {
-          kj::mv(interfaceText.outerTypeDecl),
-          kj::mv(interfaceText.outerTypeDef),
-          kj::mv(interfaceText.clientServerDefs),
-          kj::mv(interfaceText.inlineMethodDefs),
-
-          kj::strTree(
-              "CAPNP_DECLARE_INTERFACE(\n"
-              "    ", namespace_, "::", fullName, ", ", hexId, ");\n"),
-          kj::strTree(
-              "CAPNP_DEFINE_INTERFACE(\n"
-              "    ", namespace_, "::", fullName, ");\n"),
-
-          kj::mv(interfaceText.sourceDefs),
-        };
+        KJ_FAIL_REQUIRE("unimplemented");
       }
 
       case schema::Node::CONST: {
