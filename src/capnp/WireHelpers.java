@@ -2,8 +2,30 @@ package capnp;
 
 class WireHelpers {
 
+    public static StructReader readStructPointer(SegmentReader segment,
+                                                 WirePointer ref,
+                                                 int nestingLimit) {
+
+        // TODO error handling
+
+        WordPointer ptr = ref.target();
+        StructPointer structPtr = (StructPointer)ref;
+        int dataSizeWords = structPtr.dataSize();
+
+        return new StructReader(segment,
+                                ptr.offset * 8,
+                                (ptr.offset + dataSizeWords) * 8,
+                                dataSizeWords * 64,
+                                structPtr.ptrCount(),
+                                (byte)0,
+                                nestingLimit - 1);
+
+    }
+
+
     public static ListReader readListPointer(SegmentReader segment,
                                              WirePointer ref,
+                                             byte expectedElementSize,
                                              int nestingLimit) {
 
         // TODO check for null, follow fars, nestingLimit
@@ -30,7 +52,7 @@ class WireHelpers {
             // TODO check whether the size is compatible
 
             return new ListReader(segment,    // TODO follow fars
-                                  ptr.offset, //
+                                  ptr.offset * 8, //
                                   size,
                                   wordsPerElement * 64,
                                   structPtr.dataSize() * 64,

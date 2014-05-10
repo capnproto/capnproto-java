@@ -1,6 +1,7 @@
 CXX=g++ -std=c++11
 
 CAPNP_SOURCES=\
+	src/capnp/AnyPointer.java\
 	src/capnp/FieldSize.java\
 	src/capnp/FromStructReader.java\
 	src/capnp/InputStreamMessageReader.java\
