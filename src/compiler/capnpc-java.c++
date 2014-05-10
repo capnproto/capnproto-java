@@ -42,6 +42,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <string>
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -163,6 +165,10 @@ kj::String safeIdentifier(kj::StringPtr identifier) {
     return kj::heapString(identifier);
   }
 }
+
+  kj::String spaces(int n) {
+    return kj::str(std::string(" ", n));
+  }
 
 // =======================================================================================
 
@@ -1064,27 +1070,24 @@ private:
   };
 
   kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                               bool isUnion, kj::Array<kj::StringTree>&& methodDecls) {
+                               bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
+                               int indent) {
     return kj::strTree(
-        "public static class Reader {\n"
-        "  public Reader(::capnp::_::StructReader base): _reader(base) {}\n"
-        "\n"
-        "  inline ::capnp::MessageSize totalSize() const {\n"
-        "    return _reader.totalSize().asPublic();\n"
-        "  }\n"
-        "\n",
-        isUnion ? kj::strTree("  inline Which which() const;\n") : kj::strTree(),
-        kj::mv(methodDecls),
-        "private:\n"
-        "  ::capnp::_::StructReader _reader;\n"
-        "  template <typename T, ::capnp::Kind k>\n"
-        "  friend struct ::capnp::ToDynamic_;\n"
-        "  template <typename T, ::capnp::Kind k>\n"
-        "  friend struct ::capnp::_::PointerHelpers;\n"
-        "  template <typename T, ::capnp::Kind k>\n"
-        "  friend struct ::capnp::List;\n"
-        "};\n"
-        "\n");
+                       spaces(indent), "public static class Reader {\n",
+                       spaces(indent), "  public Reader(::capnp::_::StructReader base): _reader(base) {}\n",
+                       "\n",
+                       spaces(indent), "  inline ::capnp::MessageSize totalSize() const {\n",
+                       spaces(indent), "    return _reader.totalSize().asPublic();\n",
+                       spaces(indent), "  }\n",
+                       "\n",
+                       isUnion ? kj::strTree(spaces(indent), "  inline Which which() const;\n") : kj::strTree(),
+                       kj::mv(methodDecls),
+                       spaces(indent), "  ::capnp::_::StructReader _reader;\n",
+                       spaces(indent), "  template <typename T, ::capnp::Kind k>\n",
+                       spaces(indent), "  friend struct ::capnp::ToDynamic_;\n",
+                       spaces(indent), "  template <typename T, ::capnp::Kind k>\n",
+                       spaces(indent), "};\n"
+                       "\n");
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
@@ -1104,7 +1107,7 @@ private:
   }
 
   StructText makeStructText(kj::StringPtr scope, kj::StringPtr name, StructSchema schema,
-                            kj::Array<kj::StringTree> nestedTypeDecls) {
+                            kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
     auto proto = schema.getProto();
     auto fullName = kj::str(scope, name);
     auto subScope = kj::str(fullName, "::");
@@ -1120,7 +1123,8 @@ private:
         kj::strTree(
           "public static class ", fullName, " {\n",
           kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
-                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); })),
+                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
+                                    indent)),
           "  class Reader;\n"
           "  class Builder;\n"
           "  class Pipeline;\n",
@@ -1274,7 +1278,8 @@ private:
   };
 
   NodeText makeNodeText(kj::StringPtr namespace_, kj::StringPtr scope,
-                        kj::StringPtr name, Schema schema) {
+                        kj::StringPtr name, Schema schema,
+                        int indent) {
     auto proto = schema.getProto();
     auto fullName = kj::str(scope, name);
     auto subScope = kj::str(fullName, "::");
@@ -1284,7 +1289,8 @@ private:
     kj::Vector<NodeText> nestedTexts(proto.getNestedNodes().size());
     for (auto nested: proto.getNestedNodes()) {
       nestedTexts.add(makeNodeText(
-          namespace_, subScope, nested.getName(), schemaLoader.get(nested.getId())));
+                                   namespace_,
+                                   subScope, nested.getName(), schemaLoader.get(nested.getId()), indent + 1));
     };
 
     if (proto.isStruct()) {
@@ -1292,7 +1298,7 @@ private:
         if (field.isGroup()) {
           nestedTexts.add(makeNodeText(
               namespace_, subScope, toTitleCase(field.getName()),
-              schemaLoader.get(field.getGroup().getTypeId())));
+              schemaLoader.get(field.getGroup().getTypeId()), indent + 1));
         }
       }
     } else if (proto.isInterface()) {
@@ -1371,7 +1377,7 @@ private:
 
     NodeTextNoSchema top = makeNodeTextWithoutNested(
         namespace_, scope, name, schema,
-        KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDecl); });
+        KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDecl); }, indent);
 
     return NodeText {
       kj::mv(top.outerTypeDecl),
@@ -1412,7 +1418,8 @@ private:
 
   NodeTextNoSchema makeNodeTextWithoutNested(kj::StringPtr namespace_, kj::StringPtr scope,
                                              kj::StringPtr name, Schema schema,
-                                             kj::Array<kj::StringTree> nestedTypeDecls) {
+                                             kj::Array<kj::StringTree> nestedTypeDecls,
+                                             int indent) {
     auto proto = schema.getProto();
     auto fullName = kj::str(scope, name);
     auto hexId = kj::hex(proto.getId());
@@ -1423,7 +1430,7 @@ private:
 
       case schema::Node::STRUCT: {
         StructText structText =
-            makeStructText(scope, name, schema.asStruct(), kj::mv(nestedTypeDecls));
+          makeStructText(scope, name, schema.asStruct(), kj::mv(nestedTypeDecls), indent);
         auto structNode = proto.getStruct();
 
         return NodeTextNoSchema {
@@ -1562,7 +1569,7 @@ private:
     }
 
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
-      return makeNodeText(namespacePrefix, "", nested.getName(), schemaLoader.get(nested.getId()));
+      return makeNodeText(namespacePrefix, "", nested.getName(), schemaLoader.get(nested.getId()), 0);
     };
 
     kj::String separator = kj::str("// ", kj::repeat('=', 87), "\n");
