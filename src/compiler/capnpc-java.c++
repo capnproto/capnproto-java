@@ -190,7 +190,7 @@ private:
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
 
-  kj::StringPtr outerClassName;
+  kj::String outerClassName;
 
   kj::StringTree javaFullName(Schema schema) {
     auto node = schema.getProto();
