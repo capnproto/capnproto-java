@@ -918,7 +918,12 @@ private:
             spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
+            spaces(indent), "  public ", type, ".Reader",
+            (kind == FieldKind::LIST ?
+             kj::strTree("<",  elementReaderType, ">") :
+             kj::strTree()
+             ),
+            " get", titleCase, "() {\n",
             (kind == FieldKind::LIST ?
              kj::strTree(spaces(indent),
                          "    return new ", type, ".Reader(_reader.getPointerField(",
