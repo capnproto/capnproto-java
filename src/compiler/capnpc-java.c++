@@ -190,6 +190,8 @@ private:
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
 
+  kj::StringPtr outerClassName;
+
   kj::StringTree javaFullName(Schema schema) {
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
@@ -199,7 +201,7 @@ private:
           return kj::strTree("", annotation.getValue().getText());
           }*/
       }
-      return kj::strTree(" Addressbook"); // CHEATING!
+      return kj::strTree(outerClassName);
     } else {
       Schema parent = schemaLoader.get(node.getScopeId());
       for (auto nested: parent.getProto().getNestedNodes()) {
@@ -1457,8 +1459,7 @@ private:
   };
 
   FileText makeFileText(Schema schema,
-                        schema::CodeGeneratorRequest::RequestedFile::Reader request,
-                        kj::StringPtr outerClassName) {
+                        schema::CodeGeneratorRequest::RequestedFile::Reader request) {
     usedImports.clear();
 
     auto node = schema.getProto();
@@ -1592,11 +1593,11 @@ private:
       KJ_IF_MAYBE(dotpos, filename.findLast('.')) {
         stemend = *dotpos;
       }
-      auto outerClassName = toTitleCase(kj::str(filename.slice(stemstart, stemend)));
+      outerClassName = toTitleCase(kj::str(filename.slice(stemstart, stemend)));
 
       auto genFileName = kj::str(filename.slice(0, stemstart), outerClassName, ".java");
 
-      auto fileText = makeFileText(schema, requestedFile, outerClassName);
+      auto fileText = makeFileText(schema, requestedFile);
 
       writeFile(genFileName, fileText.header);
       //      writeFile(kj::str(schema.getProto().getDisplayName(), ".c++"), fileText.source);
