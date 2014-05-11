@@ -25,20 +25,20 @@ class WirePointer {
         return this.buffer.getLong(this.buffer_offset * 8) == 0;
     }
 
-    public int offset_and_kind() {
+    public int offsetAndKind() {
         return this.buffer.getInt(this.buffer_offset * 8);
     }
 
     public byte kind() {
-        return (byte) (this.offset_and_kind() & 3);
+        return (byte) (this.offsetAndKind() & 3);
     }
 
     public WordPointer target() {
         return new WordPointer(buffer,
-                               this.buffer_offset + 1 + (this.offset_and_kind() >> 2));
+                               this.buffer_offset + 1 + (this.offsetAndKind() >> 2));
     }
 
     public int inlineCompositeListElementCount() {
-        return this.offset_and_kind() >> 2;
+        return this.offsetAndKind() >> 2;
     }
 }
