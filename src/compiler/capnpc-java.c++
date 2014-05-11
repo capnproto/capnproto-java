@@ -1464,7 +1464,6 @@ private:
   // -----------------------------------------------------------------
 
   struct FileText {
-    kj::StringTree header;
     kj::StringTree source;
   };
 
@@ -1523,24 +1522,10 @@ private:
           "// source: ", baseName(displayName), "\n",
           "\n",
           //"import capnp;\n",
-          hasInterfaces ? kj::strTree("#include <capnp/capability.h>\n") : kj::strTree(),
-          "\n",
-          KJ_MAP(path, includes) {
-            if (path.startsWith("/")) {
-              return kj::strTree("#include <", path.slice(1), ".h>\n");
-            } else {
-              return kj::strTree("#include \"", path, ".h\"\n");
-            }
-          },
-          "\n",
-
           //          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
           "public class ", outerClassName, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
-          KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); }, "\n"),
-
-
-        kj::strTree()
+          KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); }, "\n")
     };
   }
 
@@ -1609,8 +1594,7 @@ private:
 
       auto fileText = makeFileText(schema, requestedFile);
 
-      writeFile(genFileName, fileText.header);
-      //      writeFile(kj::str(schema.getProto().getDisplayName(), ".c++"), fileText.source);
+      writeFile(genFileName, fileText.source);
     }
 
     return true;

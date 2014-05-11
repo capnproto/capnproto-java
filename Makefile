@@ -27,7 +27,7 @@ CAPNPC_JAVA_SOURCES=src/compiler/capnpc-java.c++
 all : capnpc-java addressbook capnp
 
 clean :
-	rm -rf capnpc-java capnp
+	rm -rf capnpc-java capnp examples/*.class
 
 capnp : $(CAPNP_COMPILATION_MARKER)
 
