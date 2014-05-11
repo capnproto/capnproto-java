@@ -1,4 +1,4 @@
-public class Addressbook {
+public class AddressbookMain {
 
     public static void writeAddressBook() {
         System.out.println("writing addressbook ...");

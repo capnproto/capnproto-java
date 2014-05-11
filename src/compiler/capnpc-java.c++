@@ -1492,6 +1492,9 @@ private:
       }
     }
 
+    auto filename = request.getFilename();
+    //    filename.findLast(
+
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
       return makeNodeText(namespacePrefix, "", nested.getName(), schemaLoader.get(nested.getId()), 1);
     };

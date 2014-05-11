@@ -38,6 +38,6 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 	$(CXX) -I/usr/local/include -L/usr/local/lib -lkj -lcapnp $(CAPNPC_JAVA_SOURCES) -o capnpc-java
 
 
-addressbook : capnp capnpc-java examples/Addressbook.java
+addressbook : capnp capnpc-java examples/AddressbookMain.java
 	capnp compile -o ./capnpc-java examples/addressbook.capnp
-	javac examples/Addressbook.java
+	javac examples/AddressbookMain.java
