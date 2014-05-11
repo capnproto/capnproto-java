@@ -1026,6 +1026,13 @@ private:
                                bool isUnion, uint discriminantOffset, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(spaces(indent), "public static class Reader {\n",
+                       spaces(indent),
+                       "  public static class Factory implements capnp.FromStructReader<Reader> {\n",
+                       spaces(indent), "    public Reader fromStructReader(capnp.StructReader reader) {\n",
+                       spaces(indent), "      return new Reader(reader);\n",
+                       spaces(indent), "    }\n",
+                       spaces(indent), "  }\n",
+                       spaces(indent), "  public static final Factory factory = new Factory();\n",
                        spaces(indent), "  public Reader(capnp.StructReader base){ this._reader = base; }\n",
                        "\n",
                        (isUnion ?
