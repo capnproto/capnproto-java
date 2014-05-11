@@ -70,7 +70,7 @@ class WireHelpers {
 
     public static Text.Reader readTextPointer(SegmentReader segment,
                                               WirePointer ref) {
-        ref.target();
+        WordPointer ptr = ref.target();
         ListPointer listPtr = new ListPointer(ref);
         return new Text.Reader(listPtr);
     }

@@ -22,7 +22,7 @@ class WirePointer {
     }
 
     public int offset_and_kind() {
-        return this.buffer.getInt(buffer_offset * 8);
+        return this.buffer.getInt(this.buffer_offset * 8);
     }
 
     public byte kind() {

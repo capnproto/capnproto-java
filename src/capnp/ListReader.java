@@ -4,7 +4,7 @@ public class ListReader {
     SegmentReader segment;
     int ptr; // byte offset to front of list
     int elementCount;
-    int step;
+    int step; // in bits
     int structDataSize; // in bits
     short structPointerCount;
     int nestingLimit;
@@ -46,7 +46,7 @@ public class ListReader {
         int structData = this.ptr + (indexBit / 8);
         int structPointers = structData + (this.structDataSize / 8);
 
-        return new StructReader(this.segment, structData, structPointers, this.structDataSize,
+        return new StructReader(this.segment, structData, structPointers / 8, this.structDataSize,
                                 this.structPointerCount, (byte)(indexBit % 8), this.nestingLimit - 1);
     }
 }

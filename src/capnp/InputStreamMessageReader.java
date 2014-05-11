@@ -46,6 +46,7 @@ public class InputStreamMessageReader {
             throw new IOException("too many segments");
         }
 
+        // in words
         Vector<Integer> moreSizes = new Vector<Integer>();
 
         if (segmentCount > 1) {
@@ -63,13 +64,13 @@ public class InputStreamMessageReader {
 
         ByteBuffer[] segmentSlices = new ByteBuffer[segmentCount];
 
-        segmentSlices[0] = ByteBuffer.wrap(allSegments, 0, segment0Size);
+        segmentSlices[0] = ByteBuffer.wrap(allSegments, 0, segment0Size * 8);
         segmentSlices[0].order(ByteOrder.LITTLE_ENDIAN);
 
         int offset = segment0Size;
 
         for (int ii = 1; ii < segmentCount; ++ii) {
-            segmentSlices[ii] = ByteBuffer.wrap(allSegments, offset, moreSizes.get(ii - 1));
+            segmentSlices[ii] = ByteBuffer.wrap(allSegments, offset * 8, moreSizes.get(ii - 1) * 8);
             segmentSlices[ii].order(ByteOrder.LITTLE_ENDIAN);
             offset += moreSizes.get(ii - 1);
         }
