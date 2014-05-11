@@ -45,8 +45,6 @@ class WireHelpers {
 
             int size = tag.inlineCompositeListElementCount();
 
-            System.out.println("size = " + size);
-
             StructPointer structPtr = new StructPointer(tag);
             int wordsPerElement = structPtr.wordSize();
 

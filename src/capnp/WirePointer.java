@@ -22,7 +22,7 @@ class WirePointer {
     }
 
     public int offset_and_kind() {
-        return this.buffer.getInt(buffer_offset * 2);
+        return this.buffer.getInt(buffer_offset * 8);
     }
 
     public byte kind() {
@@ -31,7 +31,7 @@ class WirePointer {
 
     public WordPointer target() {
         return new WordPointer(buffer,
-                               1 + (this.offset_and_kind() >> 2));
+                               this.buffer_offset + 1 + (this.offset_and_kind() >> 2));
     }
 
     public int inlineCompositeListElementCount() {

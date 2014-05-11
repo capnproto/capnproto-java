@@ -10,7 +10,10 @@ public class AddressbookMain {
         capnp.MessageReader message = capnp.InputStreamMessageReader.create(System.in);
         Addressbook.AddressBook.Reader addressbook = message.getRoot(Addressbook.AddressBook.Reader.factory);
         capnp.StructList.Reader<Addressbook.Person> people = addressbook.getPeople();
-        System.out.println("there are " + people.size() + "people");
+        int size = people.size();
+        for(int ii = 0; ii < size; ++ii) {
+            people.get(ii);
+        }
     }
 
     public static void usage() {
