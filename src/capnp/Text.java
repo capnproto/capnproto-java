@@ -18,10 +18,8 @@ public class Text {
         public String toString() {
             byte[] bytes = new byte[this.size];
 
-            // why is there no absolute get() method on ByteArray?
-            for (int ii = 0; ii < this.size; ++ii) {
-                bytes[ii] = this.buffer.get(this.offset + ii);
-            }
+            this.buffer.position(this.offset);
+            this.buffer.get(bytes, 0, this.size);
 
             try {
                 return new String(bytes, "UTF-8");
