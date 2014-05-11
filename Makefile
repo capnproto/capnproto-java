@@ -40,4 +40,4 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 
 addressbook : capnp capnpc-java examples/AddressbookMain.java
 	capnp compile -o ./capnpc-java examples/addressbook.capnp
-	javac examples/AddressbookMain.java
+	javac -cp .:examples examples/AddressbookMain.java

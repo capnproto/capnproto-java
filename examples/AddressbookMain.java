@@ -1,11 +1,16 @@
+
 public class AddressbookMain {
 
     public static void writeAddressBook() {
-        System.out.println("writing addressbook ...");
+        System.out.println("writing is yet unimplemented");
     }
 
-    public static void printAddressBook() {
+    public static void printAddressBook() throws java.io.IOException {
         System.out.println("printing addressbook ...");
+        capnp.MessageReader message = capnp.InputStreamMessageReader.create(System.in);
+        Addressbook.AddressBook.Reader addressbook = message.getRoot(Addressbook.AddressBook.Reader.factory);
+        capnp.StructList.Reader<Addressbook.Person> people = addressbook.getPeople();
+        System.out.println("there are " + people.size() + "people");
     }
 
     public static void usage() {
@@ -13,14 +18,18 @@ public class AddressbookMain {
     }
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            usage();
-        } else if (args[0].equals("write")) {
-            writeAddressBook();
-        } else if (args[0].equals("read")) {
-            printAddressBook();
-        } else {
-            usage();
+        try {
+            if (args.length < 1) {
+                usage();
+            } else if (args[0].equals("write")) {
+                writeAddressBook();
+            } else if (args[0].equals("read")) {
+                printAddressBook();
+            } else {
+                usage();
+            }
+        } catch (java.io.IOException e) {
+            System.out.println("io exception: "  + e);
         }
     }
 }
