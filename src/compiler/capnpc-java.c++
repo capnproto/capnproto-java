@@ -21,7 +21,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 // This program is a code generator plugin for `capnp compile` which generates java code.
+// It is a modified version of the C++ code generator plugin, capnpc-c++.
+
 
 #include <capnp/schema.capnp.h>
 #include "capnp/serialize.h"

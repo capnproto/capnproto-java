@@ -29,6 +29,9 @@ class WireHelpers {
                                              int nestingLimit) {
 
         // TODO check for null, follow fars, nestingLimit
+        if (ref.isNull()) {
+            return new ListReader();
+        }
 
         ListPointer listPtr = new ListPointer(ref);
 

@@ -21,6 +21,10 @@ class WirePointer {
         this.buffer_offset = word.offset;
     }
 
+    public boolean isNull() {
+        return this.buffer.getLong(this.buffer_offset * 8) == 0;
+    }
+
     public int offset_and_kind() {
         return this.buffer.getInt(this.buffer_offset * 8);
     }
