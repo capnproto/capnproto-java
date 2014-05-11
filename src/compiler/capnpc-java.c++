@@ -548,8 +548,10 @@ private:
             "  _builder.setDataField<", scope, "Which>(\n"
             "      ", discrimOffset, " * ::capnp::ELEMENTS, ",
                       scope, upperCase, ");\n"),
-          kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
-          kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
+          kj::strTree(spaces(indent), "  public boolean is", titleCase, "() {\n",
+                      spaces(indent), "    return which() == ", scope, upperCase,";\n",
+                      spaces(indent), "  }\n"),
+        kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
         kj::strTree(
             "inline boolean ", scope, "Reader::is", titleCase, "() const {\n"
             "  return which() == ", scope, upperCase, ";\n"
@@ -765,7 +767,12 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public ", type, " get", titleCase, "() {\n",
-            spaces(indent), "    return _reader.get", toTitleCase(type), "Field(", offset, ");\n",
+            spaces(indent),
+            (typeBody.which() == schema::Type::ENUM ?
+             kj::strTree("    return ", type, ".values[_reader.getShortField(", offset, ")];\n") :
+             (typeBody.which() == schema::Type::VOID ?
+              kj::strTree("    // nothing to return\n") :
+              kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 
@@ -1016,31 +1023,26 @@ private:
   };
 
   kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                               bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
+                               bool isUnion, uint discriminantOffset, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(spaces(indent), "public static class Reader {\n",
                        spaces(indent), "  public Reader(capnp.StructReader base){ this._reader = base; }\n",
                        "\n",
-                       isUnion ? kj::strTree(spaces(indent), "  inline Which which() const;\n") : kj::strTree(),
+                       (isUnion ?
+                        kj::strTree(spaces(indent), "  public Which which() {\n",
+                                    spaces(indent), "    return Which.values()[_reader.getShortField(",
+                                    discriminantOffset, ")];\n",
+                                    spaces(indent), "  }\n")
+                        : kj::strTree()),
                        kj::mv(methodDecls),
                        spaces(indent), "  public capnp.StructReader _reader;\n",
-                       spaces(indent), "};\n"
+                       spaces(indent), "}\n"
                        "\n");
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
                                 bool isUnion, kj::Array<kj::StringTree>&& methodDecls) {
-    return kj::strTree();/*spaces(indent), "public static class Builder {\n",
-                       spaces(indent), "  public Builder(::capnp::_::StructBuilder base): _builder(base) {}\n",
-                       "  inline operator Reader() const { return Reader(_builder.asReader()); }\n"
-                       "  inline Reader asReader() const { return *this; }\n"
-                       "\n"
-                       "  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }\n"
-                       "\n",
-                       isUnion ? kj::strTree("  inline Which which();\n") : kj::strTree(),
-                       kj::mv(methodDecls),
-                       "};\n"
-                       "\n"); */
+    return kj::strTree();
   }
 
   StructText makeStructText(kj::StringPtr scope, kj::StringPtr name, StructSchema schema,
@@ -1057,9 +1059,9 @@ private:
       kj::strTree(
           "  struct ", name, ";\n"),
 
-        kj::strTree(
-                    spaces(indent), "public static class ", name, " {\n",
+        kj::strTree(spaces(indent), "public static class ", name, " {\n",
           kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
+                                    structNode.getDiscriminantOffset(),
                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                     indent + 1)),
           structNode.getDiscriminantCount() == 0 ?
@@ -1083,16 +1085,7 @@ private:
           makeBuilderDef(fullName, name, structNode.getDiscriminantCount() != 0,
                          KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); })),
 
-      kj::strTree(
-          structNode.getDiscriminantCount() == 0 ? kj::strTree() : kj::strTree(
-              "inline ", fullName, "::Which ", fullName, "::Reader::which() const {\n"
-              "  return _reader.getDataField<Which>(", discrimOffset, " * ::capnp::ELEMENTS);\n"
-              "}\n"
-              "inline ", fullName, "::Which ", fullName, "::Builder::which() {\n"
-              "  return _builder.getDataField<Which>(", discrimOffset, " * ::capnp::ELEMENTS);\n"
-              "}\n"
-              "\n"),
-          KJ_MAP(f, fieldTexts) { return kj::mv(f.inlineMethodDefs); })
+        kj::strTree()
     };
   }
 
@@ -1521,14 +1514,8 @@ private:
 
           KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
-          KJ_MAP(n, namespaceParts) { return kj::strTree("}  // namespace\n"); }, "\n",
-
-          "\n", separator, "\n",
-          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
-          KJ_MAP(n, nodeTexts) { return kj::mv(n.readerBuilderDefs); },
-          separator, "\n",
-          KJ_MAP(n, nodeTexts) { return kj::mv(n.inlineMethodDefs); },
           KJ_MAP(n, namespaceParts) { return kj::strTree("}  // namespace\n"); }, "\n"),
+
 
       kj::strTree(
           "// Generated by Cap'n Proto compiler, DO NOT EDIT\n"

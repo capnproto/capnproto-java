@@ -44,6 +44,14 @@ public class StructReader {
         }
     }
 
+    public byte getShortField(int offset) {
+        if ((offset + 1) * 16 <= this.dataSize) {
+            return this.segment.ptr.get(this.data / 2 + offset);
+        } else {
+            return 0;
+        }
+    }
+
     public int getIntField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
             return this.segment.ptr.getInt((this.data / 4) + offset);
