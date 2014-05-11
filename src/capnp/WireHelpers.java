@@ -14,7 +14,7 @@ class WireHelpers {
 
         return new StructReader(segment,
                                 ptr.offset * 8,
-                                (ptr.offset + dataSizeWords) * 8,
+                                (ptr.offset + dataSizeWords),
                                 dataSizeWords * 64,
                                 structPtr.ptrCount(),
                                 (byte)0,
@@ -44,6 +44,9 @@ class WireHelpers {
             // TODO bounds check
 
             int size = tag.inlineCompositeListElementCount();
+
+            System.out.println("size = " + size);
+
             StructPointer structPtr = new StructPointer(tag);
             int wordsPerElement = structPtr.wordSize();
 

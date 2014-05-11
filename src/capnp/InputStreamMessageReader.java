@@ -64,10 +64,13 @@ public class InputStreamMessageReader {
         ByteBuffer[] segmentSlices = new ByteBuffer[segmentCount];
 
         segmentSlices[0] = ByteBuffer.wrap(allSegments, 0, segment0Size);
+        segmentSlices[0].order(ByteOrder.LITTLE_ENDIAN);
+
         int offset = segment0Size;
 
         for (int ii = 1; ii < segmentCount; ++ii) {
             segmentSlices[ii] = ByteBuffer.wrap(allSegments, offset, moreSizes.get(ii - 1));
+            segmentSlices[ii].order(ByteOrder.LITTLE_ENDIAN);
             offset += moreSizes.get(ii - 1);
         }
 

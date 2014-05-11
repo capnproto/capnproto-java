@@ -66,7 +66,6 @@ public class StructReader {
                                      this.pointers + ptrIndex,
                                      this.nestingLimit);
         } else {
-            System.out.println("pointer count: " + this.pointerCount);
             return new PointerReader();
         }
     }
