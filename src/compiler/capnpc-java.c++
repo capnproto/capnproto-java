@@ -926,7 +926,9 @@ private:
             " get", titleCase, "() {\n",
             (kind == FieldKind::LIST ?
              kj::strTree(spaces(indent),
-                         "    return new ", type, ".Reader(_reader.getPointerField(",
+                         "    return new ", type, ".Reader<",
+                         elementReaderType,
+                         ">(_reader.getPointerField(",
                          offset, ").getList(capnp.FieldSize.INLINE_COMPOSITE), ", elementReaderType, ".factory);\n") :
              (kind == FieldKind::BLOB ?
               kj::strTree(spaces(indent), "    return _reader.getPointerField(",
