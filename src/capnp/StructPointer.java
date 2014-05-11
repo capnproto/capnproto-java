@@ -10,11 +10,11 @@ class StructPointer{
     }
 
     public short dataSize() {
-        return this.ptr.buffer.getShort(this.ptr.buffer_offset * 4 + 2);
+        return this.ptr.buffer.getShort(this.ptr.buffer_offset * 8 + 4);
     }
 
     public short ptrCount() {
-        return this.ptr.buffer.getShort(this.ptr.buffer_offset * 4 + 3);
+        return this.ptr.buffer.getShort(this.ptr.buffer_offset * 8 + 6);
     }
 
     public int wordSize() {

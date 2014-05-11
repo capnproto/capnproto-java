@@ -2,18 +2,19 @@ package capnp;
 
 import java.nio.ByteBuffer;
 
-class ListPointer extends WirePointer {
+class ListPointer {
+    public WirePointer ptr;
 
-    public ListPointer(ByteBuffer buffer, int buffer_offset) {
-        super(buffer, buffer_offset);
+    public ListPointer(WirePointer ptr) {
+        this.ptr = ptr;
     }
 
     public byte elementSize() {
-        return (byte)(this.buffer.getInt(buffer_offset * 2 + 1) & 7);
+        return (byte)(this.ptr.buffer.getInt(this.ptr.buffer_offset * 8 + 4) & 7);
     }
 
     public int elementCount() {
-        return this.buffer.getInt(buffer_offset * 2 + 1) >> 3;
+        return this.ptr.buffer.getInt(this.ptr.buffer_offset * 8 + 4) >> 3;
     }
 
     public int inlineCompositeWordCount() {

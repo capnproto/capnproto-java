@@ -30,7 +30,7 @@ class WireHelpers {
 
         // TODO check for null, follow fars, nestingLimit
 
-        ListPointer listPtr = (ListPointer)ref;
+        ListPointer listPtr = new ListPointer(ref);
 
         WordPointer ptr = ref.target();
 
@@ -70,7 +70,7 @@ class WireHelpers {
     public static Text.Reader readTextPointer(SegmentReader segment,
                                               WirePointer ref) {
         ref.target();
-        ListPointer listPtr = (ListPointer)ref;
+        ListPointer listPtr = new ListPointer(ref);
         return new Text.Reader(listPtr);
     }
 }

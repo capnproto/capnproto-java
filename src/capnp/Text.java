@@ -10,8 +10,8 @@ public class Text {
         public final int size; // in bytes
 
         public Reader(ListPointer ptr) {
-            this.buffer = ptr.buffer;
-            this.offset = ptr.buffer_offset * 8;
+            this.buffer = ptr.ptr.buffer;
+            this.offset = ptr.ptr.buffer_offset * 8;
             this.size = ptr.elementCount();
         }
 

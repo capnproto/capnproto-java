@@ -26,9 +26,7 @@ public class InputStreamMessageReader {
 
     static ByteBuffer makeByteBuffer(byte[] bytes) {
         ByteBuffer result = ByteBuffer.wrap(bytes);
-
-        // something odd is happening here.
-        //        result.order(ByteOrder.LITTLE_ENDIAN);
+        result.order(ByteOrder.LITTLE_ENDIAN);
         return result;
     }
 
@@ -37,14 +35,10 @@ public class InputStreamMessageReader {
 
         int segmentCount = 1 + firstWord.getInt(0);
 
-        System.out.println("segmentCount = " + segmentCount);
-
         int segment0Size = 0;
         if (segmentCount > 0) {
-            segment0Size = firstWord.getInt(1);
+            segment0Size = firstWord.getInt(4);
         }
-
-        System.out.println("segment0Size = " + segment0Size);
 
         int totalWords = segment0Size;
 
@@ -57,7 +51,7 @@ public class InputStreamMessageReader {
         if (segmentCount > 1) {
             ByteBuffer moreSizesRaw = makeByteBuffer(readExact(is, 4 * (segmentCount & ~1)));
             for(int ii = 0; ii < segmentCount - 1; ++ii) {
-                int size = moreSizesRaw.getInt(ii);
+                int size = moreSizesRaw.getInt(ii * 4);
                 moreSizes.add(size);
                 totalWords += size;
             }
