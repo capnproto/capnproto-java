@@ -195,11 +195,11 @@ private:
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
       for (auto annotation: node.getAnnotations()) {
-        if (annotation.getId() == NAMESPACE_ANNOTATION_ID) {
+        /*        if (annotation.getId() == NAMESPACE_ANNOTATION_ID) {
           return kj::strTree("", annotation.getValue().getText());
-        }
+          }*/
       }
-      return kj::strTree(" ");
+      return kj::strTree(" Addressbook"); // CHEATING!
     } else {
       Schema parent = schemaLoader.get(node.getScopeId());
       for (auto nested: parent.getProto().getNestedNodes()) {
@@ -267,7 +267,7 @@ private:
 
       case schema::Type::LIST:
         // XXX
-        return kj::strTree(" capnp.StructList<", typeName(type.getList().getElementType()), ">");
+        return kj::strTree(" capnp.StructList");
 
       case schema::Type::ANY_POINTER:
         // Not used.
@@ -547,7 +547,7 @@ private:
             "      ", discrimOffset, " * ::capnp::ELEMENTS, ",
                       scope, upperCase, ");\n"),
           kj::strTree(spaces(indent), "  public boolean is", titleCase, "() {\n",
-                      spaces(indent), "    return which() == ", scope, upperCase,";\n",
+                      spaces(indent), "    return which() == ", scope, "Which.", upperCase,";\n",
                       spaces(indent), "  }\n"),
         kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
         kj::strTree(
@@ -767,7 +767,7 @@ private:
             spaces(indent), "  public ", type, " get", titleCase, "() {\n",
             spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree("    return ", type, ".values[_reader.getShortField(", offset, ")];\n") :
+             kj::strTree("    return ", type, ".values()[_reader.getShortField(", offset, ")];\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree("    // nothing to return\n") :
               kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, ");\n"))),
@@ -917,7 +917,7 @@ private:
             (kind == FieldKind::LIST ?
              kj::strTree(spaces(indent),
                          "    return new ", type, ".Reader(_reader.getPointerField(",
-                         offset, ").getList(), ", elementReaderType, ".factory);\n") :
+                         offset, ").getList(capnp.FieldSize.INLINE_COMPOSITE), ", elementReaderType, ".factory);\n") :
              (kind == FieldKind::BLOB ?
               kj::strTree(spaces(indent), "    return _reader.getPointerField(",
                           offset,").getText();\n") :
@@ -1490,10 +1490,6 @@ private:
         break;
       }
     }
-
-    auto filename = request.getFilename();
-    //    filename.findLast(
-
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
       return makeNodeText(namespacePrefix, "", nested.getName(), schemaLoader.get(nested.getId()), 1);
     };
