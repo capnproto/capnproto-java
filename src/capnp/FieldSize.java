@@ -1,4 +1,4 @@
-package capnp;
+package org.capnproto;
 
 public class FieldSize {
     public static final byte VOID = 0;

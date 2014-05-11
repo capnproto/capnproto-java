@@ -1,3 +1,3 @@
-package capnp;
+package org.capnproto;
 
 

@@ -1,4 +1,4 @@
-package capnp;
+package org.capnproto;
 
 import java.io.InputStream;
 import java.io.IOException;

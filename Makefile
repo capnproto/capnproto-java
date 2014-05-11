@@ -18,7 +18,7 @@ CAPNP_SOURCES=\
 	src/capnp/WirePointer.java\
 	src/capnp/WordPointer.java
 
-CAPNP_COMPILATION_MARKER=capnp/PointerReader.class
+CAPNP_COMPILATION_MARKER=org/capnproto/PointerReader.class
 
 CAPNPC_JAVA_SOURCES=src/compiler/capnpc-java.c++
 
@@ -27,11 +27,11 @@ CAPNPC_JAVA_SOURCES=src/compiler/capnpc-java.c++
 all : capnpc-java addressbook capnp
 
 clean :
-	rm -rf capnpc-java capnp examples/*.class
+	rm -rf capnpc-java org examples/*.class
 
 capnp : $(CAPNP_COMPILATION_MARKER)
 
-capnp/PointerReader.class : $(CAPNP_SOURCES)
+$(CAPNP_COMPILATION_MARKER) : $(CAPNP_SOURCES)
 	javac -d . $(CAPNP_SOURCES)
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)

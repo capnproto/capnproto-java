@@ -1,4 +1,4 @@
-package capnp;
+package org.capnproto;
 
 public class StructReader {
     public SegmentReader segment;
