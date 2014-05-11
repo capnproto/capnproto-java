@@ -26,19 +26,25 @@ public class InputStreamMessageReader {
 
     static ByteBuffer makeByteBuffer(byte[] bytes) {
         ByteBuffer result = ByteBuffer.wrap(bytes);
-        result.order(ByteOrder.LITTLE_ENDIAN);
+
+        // something odd is happening here.
+        //        result.order(ByteOrder.LITTLE_ENDIAN);
         return result;
     }
 
     public static MessageReader create(InputStream is) throws IOException {
         ByteBuffer firstWord = makeByteBuffer(readExact(is, 8));
 
-        int segmentCount = 1 + firstWord.getInt();
+        int segmentCount = 1 + firstWord.getInt(0);
+
+        System.out.println("segmentCount = " + segmentCount);
 
         int segment0Size = 0;
         if (segmentCount > 0) {
             segment0Size = firstWord.getInt(1);
         }
+
+        System.out.println("segment0Size = " + segment0Size);
 
         int totalWords = segment0Size;
 

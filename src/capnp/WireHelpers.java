@@ -9,7 +9,7 @@ class WireHelpers {
         // TODO error handling
 
         WordPointer ptr = ref.target();
-        StructPointer structPtr = (StructPointer)ref;
+        StructPointer structPtr = new StructPointer(ref);
         int dataSizeWords = structPtr.dataSize();
 
         return new StructReader(segment,
@@ -44,7 +44,7 @@ class WireHelpers {
             // TODO bounds check
 
             int size = tag.inlineCompositeListElementCount();
-            StructPointer structPtr = (StructPointer)tag;
+            StructPointer structPtr = new StructPointer(tag);
             int wordsPerElement = structPtr.wordSize();
 
             // TODO check that elemements do not overrun word count
