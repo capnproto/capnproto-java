@@ -72,6 +72,7 @@ class WireHelpers {
                                               WirePointer ref) {
         WordPointer ptr = ref.target();
         ListPointer listPtr = new ListPointer(ref);
-        return new Text.Reader(listPtr);
+        int size = listPtr.elementCount();
+        return new Text.Reader(ptr, size);
     }
 }

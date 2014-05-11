@@ -6,14 +6,49 @@ public class AddressbookMain {
     }
 
     public static void printAddressBook() throws java.io.IOException {
-        System.out.println("printing addressbook ...");
         capnp.MessageReader message = capnp.InputStreamMessageReader.create(System.in);
         Addressbook.AddressBook.Reader addressbook = message.getRoot(Addressbook.AddressBook.Reader.factory);
         capnp.StructList.Reader<Addressbook.Person.Reader> people = addressbook.getPeople();
         int size = people.size();
         for(int ii = 0; ii < size; ++ii) {
             Addressbook.Person.Reader person = people.get(ii);
-            System.out.println(person.getName().toString() + ": ");
+            System.out.println(person.getName().toString() + ": " + person.getEmail().toString());
+
+            capnp.StructList.Reader<Addressbook.Person.PhoneNumber.Reader> phones = person.getPhones();
+            for (int jj = 0; jj < phones.size(); ++jj) {
+                Addressbook.Person.PhoneNumber.Reader phone = phones.get(jj);
+                String typeName = "UNKNOWN";
+                switch (phone.getType()) {
+                case MOBILE :
+                    typeName = "mobile";
+                    break;
+                case HOME :
+                    typeName = "home";
+                    break;
+                case WORK :
+                    typeName = "work";
+                    break;
+                }
+                System.out.println("  " + typeName + " phone: " + phone.getNumber().toString());
+            }
+
+            Addressbook.Person.Employment.Reader employment = person.getEmployment();
+            switch (employment.which()) {
+            case UNEMPLOYED :
+                System.out.println("  unemployed");
+                break;
+            case EMPLOYER :
+                System.out.println("  employer: " + employment.getEmployer().toString());
+                break;
+            case SCHOOL :
+                System.out.println("  student at: " + employment.getSchool().toString());
+                break;
+            case SELF_EMPLOYED:
+                System.out.println("  self-employed");
+                break;
+            default :
+                break;
+            }
         }
     }
 
