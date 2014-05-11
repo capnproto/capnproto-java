@@ -1459,7 +1459,8 @@ private:
   };
 
   FileText makeFileText(Schema schema,
-                        schema::CodeGeneratorRequest::RequestedFile::Reader request) {
+                        schema::CodeGeneratorRequest::RequestedFile::Reader request,
+                        kj::StringPtr outerClassName) {
     usedImports.clear();
 
     auto node = schema.getProto();
@@ -1528,9 +1529,10 @@ private:
           },
           "\n",
 
-          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
+          //          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
+          "public class ", outerClassName, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
-          KJ_MAP(n, namespaceParts) { return kj::strTree("}  // namespace\n"); }, "\n"),
+          KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); }, "\n"),
 
 
         kj::strTree()
@@ -1586,9 +1588,23 @@ private:
 
     for (auto requestedFile: request.getRequestedFiles()) {
       auto schema = schemaLoader.get(requestedFile.getId());
-      auto fileText = makeFileText(schema, requestedFile);
 
-      writeFile(kj::str(schema.getProto().getDisplayName(), ".java"), fileText.header);
+      auto filename = requestedFile.getFilename();
+      size_t stemstart = 0;
+      size_t stemend = filename.size();
+      KJ_IF_MAYBE(slashpos, filename.findLast('/')) {
+        stemstart = *slashpos + 1;
+      }
+      KJ_IF_MAYBE(dotpos, filename.findLast('.')) {
+        stemend = *dotpos;
+      }
+      auto outerClassName = toTitleCase(kj::str(filename.slice(stemstart, stemend)));
+
+      auto genFileName = kj::str(filename.slice(0, stemstart), outerClassName, ".java");
+
+      auto fileText = makeFileText(schema, requestedFile, outerClassName);
+
+      writeFile(genFileName, fileText.header);
       //      writeFile(kj::str(schema.getProto().getDisplayName(), ".c++"), fileText.source);
     }
 
