@@ -1,10 +1,10 @@
 package org.capnproto;
 
 
-public class StructList {
-    public static class Reader<T> {
+public final class StructList {
+    public static final class Reader<T> {
         public ListReader reader;
-        public FromStructReader<T> factory;
+        public final FromStructReader<T> factory;
 
         public Reader(ListReader reader, FromStructReader<T> factory) {
             this.reader = reader;
@@ -18,6 +18,17 @@ public class StructList {
         public T get(int index) {
             return this.factory.fromStructReader(this.reader.getStructElement(index));
         }
+    }
+
+    public static final class Builder<T> {
+        public ListBuilder builder;
+        public final FromStructBuilder<T> factory;
+
+        public Builder(ListBuilder builder, FromStructBuilder<T> factory) {
+            this.builder = builder;
+            this.factory = factory;
+        }
+
     }
 
 }

@@ -16,9 +16,10 @@ CAPNP_SOURCES=\
 	src/capnp/SegmentBuilder.java\
 	src/capnp/SegmentReader.java\
 	src/capnp/StructBuilder.java\
+	src/capnp/StructList.java\
 	src/capnp/StructPointer.java\
 	src/capnp/StructReader.java\
-	src/capnp/StructList.java\
+	src/capnp/StructSize.java\
 	src/capnp/Text.java\
 	src/capnp/WireHelpers.java\
 	src/capnp/WirePointer.java\
