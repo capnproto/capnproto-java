@@ -15,7 +15,7 @@ public class AddressbookMain {
         int size = people.size();
         for(int ii = 0; ii < size; ++ii) {
             Addressbook.Person.Reader person = people.get(ii);
-            System.out.println(person.getName().toString() + ": " + person.getEmail().toString());
+            System.out.println(person.getName() + ": " + person.getEmail());
 
             StructList.Reader<Addressbook.Person.PhoneNumber.Reader> phones = person.getPhones();
             for (int jj = 0; jj < phones.size(); ++jj) {
@@ -32,7 +32,7 @@ public class AddressbookMain {
                     typeName = "work";
                     break;
                 }
-                System.out.println("  " + typeName + " phone: " + phone.getNumber().toString());
+                System.out.println("  " + typeName + " phone: " + phone.getNumber());
             }
 
             Addressbook.Person.Employment.Reader employment = person.getEmployment();
@@ -41,10 +41,10 @@ public class AddressbookMain {
                 System.out.println("  unemployed");
                 break;
             case EMPLOYER :
-                System.out.println("  employer: " + employment.getEmployer().toString());
+                System.out.println("  employer: " + employment.getEmployer());
                 break;
             case SCHOOL :
-                System.out.println("  student at: " + employment.getSchool().toString());
+                System.out.println("  student at: " + employment.getSchool());
                 break;
             case SELF_EMPLOYED:
                 System.out.println("  self-employed");

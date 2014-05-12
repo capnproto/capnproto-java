@@ -2,6 +2,7 @@ CXX=g++ -std=c++11
 
 CAPNP_SOURCES=\
 	src/capnp/AnyPointer.java\
+	src/capnp/DecodeException.java\
 	src/capnp/FieldSize.java\
 	src/capnp/FromStructBuilder.java\
 	src/capnp/FromStructReader.java\

@@ -81,6 +81,21 @@ final class WireHelpers {
         int ptrOffset = WirePointer.target(refOffset, ref);
         int listPtr = WirePointer.listPointer(ref);
         int size = ListPointer.elementCount(listPtr);
-        return new Text.Reader(segment.buffer, ptrOffset, size);
+
+        if (WirePointer.kind(ref) != WirePointer.LIST) {
+            throw new DecodeException("Message contains non-list pointer where text was expected.");
+        }
+
+        if (ListPointer.elementSize(listPtr) != FieldSize.BYTE) {
+            throw new DecodeException("Message contains list pointer of non-bytes where text was expected.");
+        }
+
+        // TODO bounds check?
+
+        if (size == 0 || segment.buffer.get(8 * ptrOffset + size - 1) != 0) {
+            throw new DecodeException("Message containts text that is not NUL-terminated.");
+        }
+
+        return new Text.Reader(segment.buffer, ptrOffset, size - 1);
     }
 }
