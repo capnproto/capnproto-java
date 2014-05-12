@@ -1041,7 +1041,7 @@ private:
   kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
                                bool isUnion, uint discriminantOffset, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
-    return kj::strTree(spaces(indent), "public static class Reader {\n",
+    return kj::strTree(spaces(indent), "public static final class Reader {\n",
                        spaces(indent),
                        "  public static class Factory implements org.capnproto.FromStructReader<Reader> {\n",
                        spaces(indent),
@@ -1065,8 +1065,12 @@ private:
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                                bool isUnion, kj::Array<kj::StringTree>&& methodDecls) {
-    return kj::strTree();
+                                bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
+                                int indent) {
+    return kj::strTree(spaces(indent), "public static final class Builder {\n",
+                       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
+                       spaces(indent), "}\n",
+                       "\n");
   }
 
   StructText makeStructText(kj::StringPtr scope, kj::StringPtr name, StructSchema schema,
@@ -1088,6 +1092,10 @@ private:
                                     structNode.getDiscriminantOffset(),
                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                     indent + 1)),
+          makeBuilderDef(fullName, name, structNode.getDiscriminantCount() != 0,
+                         KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
+                         indent + 1),
+
           structNode.getDiscriminantCount() == 0 ?
                     kj::strTree() :
                     kj::strTree(
@@ -1102,13 +1110,10 @@ private:
                                 spaces(indent), "  }\n"),
                     KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
                     spaces(indent), "}\n"
-          "\n"),
+                    "\n",
+                    "\n"),
 
-      kj::strTree(
-
-          makeBuilderDef(fullName, name, structNode.getDiscriminantCount() != 0,
-                         KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); })),
-
+      kj::strTree(),
         kj::strTree()
     };
   }
