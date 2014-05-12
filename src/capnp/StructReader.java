@@ -3,7 +3,6 @@ package org.capnproto;
 public class StructReader {
     public SegmentReader segment;
     public int data; //byte offset to data section
-
     public int pointers; // word offset of pointer section
     public int dataSize; // in bits
     public short pointerCount;

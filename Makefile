@@ -6,12 +6,16 @@ CAPNP_SOURCES=\
 	src/capnp/FromStructReader.java\
 	src/capnp/InputStreamMessageReader.java\
 	src/capnp/ListPointer.java\
+	src/capnp/ListBuilder.java\
 	src/capnp/ListReader.java\
 	src/capnp/MessageReader.java\
+	src/capnp/PointerBuilder.java\
 	src/capnp/PointerReader.java\
+	src/capnp/SegmentBuilder.java\
 	src/capnp/SegmentReader.java\
-	src/capnp/StructReader.java\
+	src/capnp/StructBuilder.java\
 	src/capnp/StructPointer.java\
+	src/capnp/StructReader.java\
 	src/capnp/StructList.java\
 	src/capnp/Text.java\
 	src/capnp/WireHelpers.java\
