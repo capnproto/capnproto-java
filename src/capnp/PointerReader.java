@@ -29,17 +29,15 @@ public class PointerReader {
     }
 
     public StructReader getStruct() {
-        WirePointer ref = new WirePointer(this.segment.ptr, this.pointer);
         return WireHelpers.readStructPointer(this.segment,
-                                             ref,
+                                             this.pointer,
                                              this.nestingLimit);
     }
 
     public ListReader getList(byte expectedElementSize) {
         // TODO check nullness
-        WirePointer ref = new WirePointer(this.segment.ptr, this.pointer);
         return WireHelpers.readListPointer(this.segment,
-                                           ref,
+                                           this.pointer,
                                            expectedElementSize,
                                            this.nestingLimit);
     }

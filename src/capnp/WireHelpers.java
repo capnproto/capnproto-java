@@ -1,22 +1,23 @@
 package org.capnproto;
 
-class WireHelpers {
+final class WireHelpers {
 
     public static StructReader readStructPointer(SegmentReader segment,
-                                                 WirePointer ref,
+                                                 int refOffset,
                                                  int nestingLimit) {
 
         // TODO error handling
 
-        WordPointer ptr = ref.target();
-        StructPointer structPtr = new StructPointer(ref);
-        int dataSizeWords = structPtr.dataSize();
+        long ref = WirePointer.get(segment.ptr, refOffset);
+        int ptrOffset = WirePointer.target(refOffset, ref);
+        int structPtr = WirePointer.structPointer(ref);
+        int dataSizeWords = StructPointer.dataSize(structPtr);
 
         return new StructReader(segment,
-                                ptr.offset * 8,
-                                (ptr.offset + dataSizeWords),
+                                ptrOffset * 8,
+                                (ptrOffset + dataSizeWords),
                                 dataSizeWords * 64,
-                                structPtr.ptrCount(),
+                                StructPointer.ptrCount(structPtr),
                                 (byte)0,
                                 nestingLimit - 1);
 
@@ -24,43 +25,46 @@ class WireHelpers {
 
 
     public static ListReader readListPointer(SegmentReader segment,
-                                             WirePointer ref,
+                                             int refOffset,
                                              byte expectedElementSize,
                                              int nestingLimit) {
 
+        long ref = WirePointer.get(segment.ptr, refOffset);
+
         // TODO check for null, follow fars, nestingLimit
-        if (ref.isNull()) {
+        if (WirePointer.isNull(ref)) {
             return new ListReader();
         }
 
-        ListPointer listPtr = new ListPointer(ref);
+        int listPtr = WirePointer.listPointer(ref);
 
-        WordPointer ptr = ref.target();
+        int ptrOffset = WirePointer.target(refOffset, ref);
+        long ptr = WirePointer.get(segment.ptr, ptrOffset);
 
-        switch (listPtr.elementSize()) {
+        switch (ListPointer.elementSize(listPtr)) {
         case FieldSize.INLINE_COMPOSITE : {
-            int wordCount = listPtr.inlineCompositeWordCount();
+            int wordCount = ListPointer.inlineCompositeWordCount(listPtr);
 
-            WirePointer tag = new WirePointer(ptr);
-            ptr.offset += 1;
+            long tag = ptr;
+            ptrOffset += 1;
 
             // TODO bounds check
 
-            int size = tag.inlineCompositeListElementCount();
+            int size = WirePointer.inlineCompositeListElementCount(tag);
 
-            StructPointer structPtr = new StructPointer(tag);
-            int wordsPerElement = structPtr.wordSize();
+            int structPtr = WirePointer.structPointer(tag);
+            int wordsPerElement = StructPointer.wordSize(structPtr);
 
             // TODO check that elemements do not overrun word count
 
             // TODO check whether the size is compatible
 
             return new ListReader(segment,    // TODO follow fars
-                                  ptr.offset * 8, //
+                                  ptrOffset * 8, //
                                   size,
                                   wordsPerElement * 64,
-                                  structPtr.dataSize() * 64,
-                                  structPtr.ptrCount(),
+                                  StructPointer.dataSize(structPtr) * 64,
+                                  StructPointer.ptrCount(structPtr),
                                   nestingLimit - 1);
         }
         case FieldSize.VOID : break;
@@ -75,7 +79,6 @@ class WireHelpers {
                                               int refOffset) {
         long ref = WirePointer.get(segment.ptr, refOffset);
         int ptrOffset = WirePointer.target(refOffset, ref);
-        long ptr = WirePointer.get(segment.ptr, ptrOffset);
         int listPtr = WirePointer.listPointer(ref);
         int size = ListPointer.elementCount(listPtr);
         return new Text.Reader(segment.ptr, ptrOffset, size);
