@@ -9,9 +9,9 @@ public class Text {
         public final int offset; // in bytes
         public final int size; // in bytes
 
-        public Reader(WordPointer ptr, int size) {
-            this.buffer = ptr.buffer;
-            this.offset = ptr.offset * 8;
+        public Reader(ByteBuffer buffer, int offset, int size) {
+            this.buffer = buffer;
+            this.offset = offset * 8;
             this.size = size;
         }
 

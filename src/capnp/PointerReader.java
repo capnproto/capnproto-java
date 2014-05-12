@@ -46,7 +46,6 @@ public class PointerReader {
 
     public Text.Reader getText() {
         return WireHelpers.readTextPointer(this.segment,
-                                           new WirePointer(this.segment.ptr,
-                                                           this.pointer));
+                                           this.pointer);
     }
 }

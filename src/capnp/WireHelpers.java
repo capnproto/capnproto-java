@@ -72,10 +72,12 @@ class WireHelpers {
     }
 
     public static Text.Reader readTextPointer(SegmentReader segment,
-                                              WirePointer ref) {
-        WordPointer ptr = ref.target();
-        ListPointer listPtr = new ListPointer(ref);
-        int size = listPtr.elementCount();
-        return new Text.Reader(ptr, size);
+                                              int refOffset) {
+        long ref = WirePointer.get(segment.ptr, refOffset);
+        int ptrOffset = WirePointer.target(refOffset, ref);
+        long ptr = WirePointer.get(segment.ptr, ptrOffset);
+        int listPtr = WirePointer.listPointer(ref);
+        int size = ListPointer.elementCount(listPtr);
+        return new Text.Reader(segment.ptr, ptrOffset, size);
     }
 }
