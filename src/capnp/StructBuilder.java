@@ -19,13 +19,20 @@ public final class StructBuilder {
         this.bit0Offset = bit0Offset;
     }
 
-
-    public int getIntField(int offset) {
-        return this.segment.ptr.getInt(this.data + offset * 4);
+    public final int getShortField(int offset) {
+        return this.segment.buffer.getShort(this.data + offset * 2);
     }
 
-    public void setIntField(int offset, int value) {
-        this.segment.ptr.putInt(this.data + offset * 4, value);
+    public final void setShortField(int offset, short value) {
+        this.segment.buffer.putShort(this.data + offset * 2, value);
+    }
+
+    public final int getIntField(int offset) {
+        return this.segment.buffer.getInt(this.data + offset * 4);
+    }
+
+    public final void setIntField(int offset, int value) {
+        this.segment.buffer.putInt(this.data + offset * 4, value);
     }
 
 }

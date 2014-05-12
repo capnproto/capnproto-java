@@ -1,6 +1,6 @@
 package org.capnproto;
 
-public class StructReader {
+public final class StructReader {
     public SegmentReader segment;
     public int data; //byte offset to data section
     public int pointers; // word offset of pointer section
@@ -22,44 +22,44 @@ public class StructReader {
         this.nestingLimit = nestingLimit;
     }
 
-    public boolean getBoolField(int offset) {
+    public final boolean getBoolField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
             if (offset == 0) {
                 offset = this.bit0Offset;
             }
-            byte b = this.segment.ptr.get(offset / 8);
+            byte b = this.segment.buffer.get(offset / 8);
             return (b & (1 << (offset % 8))) != 0;
         } else {
             return false;
         }
     }
 
-    public byte getByteField(int offset) {
+    public final byte getByteField(int offset) {
         if ((offset + 1) * 8 <= this.dataSize) {
-            return this.segment.ptr.get(this.data + offset);
+            return this.segment.buffer.get(this.data + offset);
         } else {
             return 0;
         }
     }
 
-    public byte getShortField(int offset) {
+    public final byte getShortField(int offset) {
         if ((offset + 1) * 16 <= this.dataSize) {
-            return this.segment.ptr.get(this.data + offset * 2);
+            return this.segment.buffer.get(this.data + offset * 2);
         } else {
             return 0;
         }
     }
 
-    public int getIntField(int offset) {
+    public final int getIntField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
-            return this.segment.ptr.getInt(this.data + offset * 4);
+            return this.segment.buffer.getInt(this.data + offset * 4);
         } else {
             return 0;
         }
     }
 
-    public PointerReader getPointerField(int ptrIndex) {
+    public final PointerReader getPointerField(int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return new PointerReader(this.segment,
                                      this.pointers + ptrIndex,

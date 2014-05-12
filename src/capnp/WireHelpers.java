@@ -8,7 +8,7 @@ final class WireHelpers {
 
         // TODO error handling
 
-        long ref = WirePointer.get(segment.ptr, refOffset);
+        long ref = WirePointer.get(segment.buffer, refOffset);
         int ptrOffset = WirePointer.target(refOffset, ref);
         int structPtr = WirePointer.structPointer(ref);
         int dataSizeWords = StructPointer.dataSize(structPtr);
@@ -29,7 +29,7 @@ final class WireHelpers {
                                              byte expectedElementSize,
                                              int nestingLimit) {
 
-        long ref = WirePointer.get(segment.ptr, refOffset);
+        long ref = WirePointer.get(segment.buffer, refOffset);
 
         // TODO check for null, follow fars, nestingLimit
         if (WirePointer.isNull(ref)) {
@@ -39,7 +39,7 @@ final class WireHelpers {
         int listPtr = WirePointer.listPointer(ref);
 
         int ptrOffset = WirePointer.target(refOffset, ref);
-        long ptr = WirePointer.get(segment.ptr, ptrOffset);
+        long ptr = WirePointer.get(segment.buffer, ptrOffset);
 
         switch (ListPointer.elementSize(listPtr)) {
         case FieldSize.INLINE_COMPOSITE : {
@@ -77,10 +77,10 @@ final class WireHelpers {
 
     public static Text.Reader readTextPointer(SegmentReader segment,
                                               int refOffset) {
-        long ref = WirePointer.get(segment.ptr, refOffset);
+        long ref = WirePointer.get(segment.buffer, refOffset);
         int ptrOffset = WirePointer.target(refOffset, ref);
         int listPtr = WirePointer.listPointer(ref);
         int size = ListPointer.elementCount(listPtr);
-        return new Text.Reader(segment.ptr, ptrOffset, size);
+        return new Text.Reader(segment.buffer, ptrOffset, size);
     }
 }

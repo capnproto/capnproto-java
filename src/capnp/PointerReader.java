@@ -25,7 +25,7 @@ public class PointerReader {
     }
 
     public boolean isNull() {
-        return this.segment.ptr.getLong(this.pointer) == 0;
+        return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
     public StructReader getStruct() {

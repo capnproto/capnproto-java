@@ -3,9 +3,9 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 
 public class SegmentReader {
-    ByteBuffer ptr;
+    ByteBuffer buffer;
 
-    public SegmentReader(ByteBuffer ptr) {
-        this.ptr = ptr;
+    public SegmentReader(ByteBuffer buffer) {
+        this.buffer = buffer;
     }
 }
