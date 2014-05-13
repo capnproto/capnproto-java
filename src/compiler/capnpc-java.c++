@@ -1041,36 +1041,48 @@ private:
   kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
                                bool isUnion, uint discriminantOffset, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
-    return kj::strTree(spaces(indent), "public static final class Reader {\n",
-                       spaces(indent),
-                       "  public static class Factory implements org.capnproto.FromStructReader<Reader> {\n",
-                       spaces(indent),
-                       "    public Reader fromStructReader(org.capnproto.StructReader reader) {\n",
-                       spaces(indent), "      return new Reader(reader);\n",
-                       spaces(indent), "    }\n",
-                       spaces(indent), "  }\n",
-                       spaces(indent), "  public static final Factory factory = new Factory();\n",
-                       spaces(indent), "  public Reader(org.capnproto.StructReader base){ this._reader = base; }\n",
-                       "\n",
-                       (isUnion ?
-                        kj::strTree(spaces(indent), "  public Which which() {\n",
-                                    spaces(indent), "    return Which.values()[_reader.getShortField(",
-                                    discriminantOffset, ")];\n",
-                                    spaces(indent), "  }\n")
-                        : kj::strTree()),
-                       kj::mv(methodDecls),
-                       spaces(indent), "  public org.capnproto.StructReader _reader;\n",
-                       spaces(indent), "}\n"
-                       "\n");
+    return kj::strTree(
+      spaces(indent), "public static final class Reader {\n",
+      spaces(indent),
+      "  public static class Factory implements org.capnproto.FromStructReader<Reader> {\n",
+      spaces(indent),
+      "    public final Reader fromStructReader(org.capnproto.StructReader reader) {\n",
+      spaces(indent), "      return new Reader(reader);\n",
+      spaces(indent), "    }\n",
+      spaces(indent), "  }\n",
+      spaces(indent), "  public static final Factory factory = new Factory();\n",
+      spaces(indent), "  public Reader(org.capnproto.StructReader base){ this._reader = base; }\n",
+      "\n",
+      (isUnion ?
+       kj::strTree(spaces(indent), "  public Which which() {\n",
+                   spaces(indent), "    return Which.values()[_reader.getShortField(",
+                   discriminantOffset, ")];\n",
+                   spaces(indent), "  }\n")
+       : kj::strTree()),
+      kj::mv(methodDecls),
+      spaces(indent), "  public org.capnproto.StructReader _reader;\n",
+      spaces(indent), "}\n"
+      "\n");
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
                                 bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
-    return kj::strTree(spaces(indent), "public static final class Builder {\n",
-                       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
-                       spaces(indent), "}\n",
-                       "\n");
+    return kj::strTree(
+      spaces(indent), "public static final class Builder {\n",
+      spaces(indent), "  public static class Factory implements org.capnproto.FromStructBuilder<Builder> {\n",
+      spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.StructBuilder builder) {\n",
+      spaces(indent), "      return new Builder(builder);\n",
+      spaces(indent), "    }\n",
+      spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
+      spaces(indent), "      throw new Error();\n",
+      spaces(indent), "    }\n",
+      spaces(indent), "  }\n",
+      spaces(indent), "  public static final Factory factory = new Factory();\n",
+      spaces(indent), "  public Builder(org.capnproto.StructBuilder base){ this._builder = base; }\n",
+      spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
+      spaces(indent), "}\n",
+      "\n");
   }
 
   StructText makeStructText(kj::StringPtr scope, kj::StringPtr name, StructSchema schema,
