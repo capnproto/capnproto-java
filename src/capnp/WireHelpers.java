@@ -2,11 +2,37 @@ package org.capnproto;
 
 final class WireHelpers {
 
+    public static ListBuilder initListPointer(int refOffset,
+                                              SegmentBuilder segment,
+                                              int elementCount,
+                                              byte elementSize) {
+        throw new Error("unimplemented");
+    }
+
+    public static ListBuilder initStructListPointer(int refOffset,
+                                                    SegmentBuilder segment,
+                                                    int elementCount,
+                                                    StructSize elementSize) {
+        if (elementSize.preferredListEncoding != FieldSize.INLINE_COMPOSITE) {
+            //# Small data-only struct. Allocate a list of primitives instead.
+            return initListPointer(refOffset, segment, elementCount,
+                                   elementSize.preferredListEncoding);
+        }
+
+        int wordsPerElement = elementSize.total();
+
+        throw new Error("unimplemented");
+    }
+
     public static StructReader readStructPointer(SegmentReader segment,
                                                  int refOffset,
                                                  int nestingLimit) {
 
         // TODO error handling
+
+        if (nestingLimit < 0) {
+            throw new DecodeException("Message is too deeply nested or contains cycles.");
+        }
 
         long ref = WirePointer.get(segment.buffer, refOffset);
         int ptrOffset = WirePointer.target(refOffset, ref);
@@ -78,6 +104,12 @@ final class WireHelpers {
     public static Text.Reader readTextPointer(SegmentReader segment,
                                               int refOffset) {
         long ref = WirePointer.get(segment.buffer, refOffset);
+
+        if (WirePointer.isNull(ref)) {
+            // XXX should use the default value
+            return new Text.Reader(java.nio.ByteBuffer.wrap(new byte[0]), 0, 0);
+        }
+
         int ptrOffset = WirePointer.target(refOffset, ref);
         int listPtr = WirePointer.listPointer(ref);
         int size = ListPointer.elementCount(listPtr);
@@ -93,7 +125,7 @@ final class WireHelpers {
         // TODO bounds check?
 
         if (size == 0 || segment.buffer.get(8 * ptrOffset + size - 1) != 0) {
-            throw new DecodeException("Message containts text that is not NUL-terminated.");
+            throw new DecodeException("Message contains text that is not NUL-terminated.");
         }
 
         return new Text.Reader(segment.buffer, ptrOffset, size - 1);

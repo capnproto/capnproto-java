@@ -8,4 +8,10 @@ public final class PointerBuilder {
         this.segment = segment;
         this.pointer = pointer;
     }
+
+    public final ListBuilder initStructList(int elementCount, StructSize elementSize) {
+        return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
+    }
+
+
 }
