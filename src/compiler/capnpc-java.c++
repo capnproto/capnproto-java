@@ -929,7 +929,11 @@ private:
                          "    return new ", type, ".Reader<",
                          elementReaderType,
                          ">(_reader.getPointerField(",
-                         offset, ").getList(org.capnproto.FieldSize.INLINE_COMPOSITE), ", elementReaderType, ".factory);\n") :
+                         offset, ").getList(",
+
+                         // XXX what about lists of non-structs?
+                         typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding), ",
+                         elementReaderType, ".factory);\n") :
              (kind == FieldKind::BLOB ?
               kj::strTree(spaces(indent), "    return _reader.getPointerField(",
                           offset,").getText();\n") :
@@ -1066,8 +1070,10 @@ private:
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                                bool isUnion, kj::Array<kj::StringTree>&& methodDecls,
+                                schema::Node::Struct::Reader structNode,
+                                kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
+    bool isUnion = structNode.getDiscriminantCount() != 0;
     return kj::strTree(
       spaces(indent), "public static final class Builder {\n",
       spaces(indent), "  public static class Factory implements org.capnproto.FromStructBuilder<Builder> {\n",
@@ -1075,7 +1081,7 @@ private:
       spaces(indent), "      return new Builder(builder);\n",
       spaces(indent), "    }\n",
       spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
-      spaces(indent), "      throw new Error();\n",
+      spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
       spaces(indent), "    }\n",
       spaces(indent), "  }\n",
       spaces(indent), "  public static final Factory factory = new Factory();\n",
@@ -1094,19 +1100,27 @@ private:
 
     auto structNode = proto.getStruct();
     uint discrimOffset = structNode.getDiscriminantOffset();
+    structNode.getPointerCount();
 
     return StructText {
       kj::strTree(
           "  struct ", name, ";\n"),
 
-        kj::strTree(spaces(indent), "public static class ", name, " {\n",
+        kj::strTree(
+          spaces(indent), "public static class ", name, " {\n",
+          kj::strTree(
+            spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
+            spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
+            ",(short)", structNode.getPointerCount(),
+            ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
+
           kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
                                     structNode.getDiscriminantOffset(),
                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
-                                    indent + 1)),
-          makeBuilderDef(fullName, name, structNode.getDiscriminantCount() != 0,
-                         KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
-                         indent + 1),
+                                    indent + 1),
+                      makeBuilderDef(fullName, name, structNode,
+                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
+                                     indent + 1)),
 
           structNode.getDiscriminantCount() == 0 ?
                     kj::strTree() :
