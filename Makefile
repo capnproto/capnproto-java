@@ -1,4 +1,5 @@
-CXX=g++ -std=c++11
+CXX=g++
+CXX_FLAGS=-std=c++11
 
 CAPNP_SOURCES=\
 	src/capnp/AnyPointer.java\
