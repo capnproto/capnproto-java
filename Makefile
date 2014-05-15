@@ -44,7 +44,7 @@ $(CAPNP_COMPILATION_MARKER) : $(CAPNP_SOURCES)
 	javac -d . $(CAPNP_SOURCES)
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
-	$(CXX) $(CXX_FLAGS) -I/usr/local/include -L/usr/local/lib -lkj -lcapnp $(CAPNPC_JAVA_SOURCES) -o capnpc-java
+	$(CXX) $(CXX_FLAGS) -I/usr/local/include -L/usr/local/lib $(CAPNPC_JAVA_SOURCES) -lkj -lcapnp -o capnpc-java
 
 
 addressbook : capnp capnpc-java examples/AddressbookMain.java
