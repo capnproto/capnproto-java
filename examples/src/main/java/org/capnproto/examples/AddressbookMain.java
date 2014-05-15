@@ -4,6 +4,8 @@ import org.capnproto.MessageReader;
 import org.capnproto.StructList;
 import org.capnproto.InputStreamMessageReader;
 
+import org.capnproto.examples.Addressbook.*;
+
 public class AddressbookMain {
 
     public static void writeAddressBook() {
@@ -12,16 +14,16 @@ public class AddressbookMain {
 
     public static void printAddressBook() throws java.io.IOException {
         MessageReader message = InputStreamMessageReader.create(System.in);
-        Addressbook.AddressBook.Reader addressbook = message.getRoot(Addressbook.AddressBook.Reader.factory);
-        StructList.Reader<Addressbook.Person.Reader> people = addressbook.getPeople();
+        AddressBook.Reader addressbook = message.getRoot(AddressBook.Reader.factory);
+        StructList.Reader<Person.Reader> people = addressbook.getPeople();
         int size = people.size();
         for(int ii = 0; ii < size; ++ii) {
-            Addressbook.Person.Reader person = people.get(ii);
+            Person.Reader person = people.get(ii);
             System.out.println(person.getName() + ": " + person.getEmail());
 
-            StructList.Reader<Addressbook.Person.PhoneNumber.Reader> phones = person.getPhones();
+            StructList.Reader<Person.PhoneNumber.Reader> phones = person.getPhones();
             for (int jj = 0; jj < phones.size(); ++jj) {
-                Addressbook.Person.PhoneNumber.Reader phone = phones.get(jj);
+                Person.PhoneNumber.Reader phone = phones.get(jj);
                 String typeName = "UNKNOWN";
                 switch (phone.getType()) {
                 case MOBILE :
@@ -37,7 +39,7 @@ public class AddressbookMain {
                 System.out.println("  " + typeName + " phone: " + phone.getNumber());
             }
 
-            Addressbook.Person.Employment.Reader employment = person.getEmployment();
+            Person.Employment.Reader employment = person.getEmployment();
             switch (employment.which()) {
             case UNEMPLOYED :
                 System.out.println("  unemployed");

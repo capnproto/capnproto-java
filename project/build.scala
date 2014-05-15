@@ -1,5 +1,6 @@
 import sbt.Keys._
 import sbt._
+import org.sbtidea.SbtIdeaPlugin._
 
 object Build extends sbt.Build {
 
@@ -21,6 +22,7 @@ object Build extends sbt.Build {
       id = "examples",
       base = file("examples")
     ).dependsOn(generator)
+    .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
     .settings(publish := {})
     .settings(publishLocal := {})
     .settings(fork in run := true)

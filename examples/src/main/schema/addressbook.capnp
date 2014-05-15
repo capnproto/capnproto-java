@@ -26,6 +26,9 @@
 using Cxx = import "/capnp/c++.capnp";
 $Cxx.namespace("addressbook");
 
+using Java = import "/java_support/java.capnp";
+$Java.package("org.capnproto.examples");
+
 struct Person {
   id @0 :UInt32;
   name @1 :Text;
