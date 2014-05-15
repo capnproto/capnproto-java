@@ -27,6 +27,7 @@ public class InputStreamMessageReader {
     static ByteBuffer makeByteBuffer(byte[] bytes) {
         ByteBuffer result = ByteBuffer.wrap(bytes);
         result.order(ByteOrder.LITTLE_ENDIAN);
+        result.mark();
         return result;
     }
 
@@ -66,12 +67,14 @@ public class InputStreamMessageReader {
 
         segmentSlices[0] = ByteBuffer.wrap(allSegments, 0, segment0Size * 8);
         segmentSlices[0].order(ByteOrder.LITTLE_ENDIAN);
+        segmentSlices[0].mark();
 
         int offset = segment0Size;
 
         for (int ii = 1; ii < segmentCount; ++ii) {
             segmentSlices[ii] = ByteBuffer.wrap(allSegments, offset * 8, moreSizes.get(ii - 1) * 8);
             segmentSlices[ii].order(ByteOrder.LITTLE_ENDIAN);
+            segmentSlices[ii].mark();
             offset += moreSizes.get(ii - 1);
         }
 

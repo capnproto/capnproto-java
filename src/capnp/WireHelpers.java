@@ -6,7 +6,18 @@ final class WireHelpers {
                                SegmentBuilder segment,
                                int amount,
                                byte kind) {
-        throw new Error("unimplemented");
+
+        // TODO check for nullness, amount == 0 case.
+
+        int allocation = segment.allocate(amount);
+        if (allocation == SegmentBuilder.FAILED_ALLOCATION) {
+            //# Need to allocate in a new segment. We'll need to
+            //# allocate an extra pointer worth of space to act as
+            //# the landing pad for a far pointer.
+            throw new Error("unimplemented");
+        } else {
+            throw new Error("unimplemented");
+        }
     }
 
     public static ListBuilder initListPointer(int refOffset,
