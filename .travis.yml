@@ -7,7 +7,7 @@ before_install:
   - yes | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   - sudo apt-get update
 install:
-  - sudo apt-get install g++-4.8
+  - sudo apt-get install g++-4.8 gcc-4.8
   - curl -O https://capnproto.org/capnproto-c++-0.4.1.tar.gz
   - tar zxf capnproto-c++-0.4.1.tar.gz
   - export CC=gcc-4.8
