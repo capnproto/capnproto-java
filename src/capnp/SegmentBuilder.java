@@ -14,7 +14,7 @@ public class SegmentBuilder extends SegmentReader {
     // the total number of words the buffer can hold
     private final int capacity() {
         this.buffer.reset();
-        return (this.buffer.limit() - this.buffer.position()) / 8;
+        return this.buffer.remaining() / 8;
     }
 
     // return how many words have already been allocated
