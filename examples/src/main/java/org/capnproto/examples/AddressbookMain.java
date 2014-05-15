@@ -1,3 +1,5 @@
+package org.capnproto.examples;
+
 import org.capnproto.MessageReader;
 import org.capnproto.StructList;
 import org.capnproto.InputStreamMessageReader;
