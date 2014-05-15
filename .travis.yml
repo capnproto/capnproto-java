@@ -13,4 +13,4 @@ install:
   - export CC=gcc-4.8
   - export CXX=g++-4.8
   - cd capnproto-c++-0.4.1 && ./configure && make -j5 && sudo make install && cd ..
-script: make
+script: make CXX=g++-4.8
