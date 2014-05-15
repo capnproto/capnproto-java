@@ -13,5 +13,8 @@ public final class PointerBuilder {
         return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
     }
 
+    public final void setText(Text.Reader value) {
+        WireHelpers.setTextPointer(this.pointer, this.segment, value);
+    }
 
 }

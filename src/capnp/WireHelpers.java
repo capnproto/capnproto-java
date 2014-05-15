@@ -2,6 +2,13 @@ package org.capnproto;
 
 final class WireHelpers {
 
+    public static int allocate(int ref,
+                               SegmentBuilder segment,
+                               int amount,
+                               byte kind) {
+        throw new Error("unimplemented");
+    }
+
     public static ListBuilder initListPointer(int refOffset,
                                               SegmentBuilder segment,
                                               int elementCount,
@@ -21,6 +28,18 @@ final class WireHelpers {
 
         int wordsPerElement = elementSize.total();
 
+        throw new Error("unimplemented");
+    }
+
+    public static void initTextPointer(int refOffset,
+                                       SegmentBuilder segment,
+                                       int size) {
+        throw new Error("unimplemented");
+    }
+
+    public static void setTextPointer(int refOffset,
+                                      SegmentBuilder segment,
+                                      Text.Reader value) {
         throw new Error("unimplemented");
     }
 

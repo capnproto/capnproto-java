@@ -15,7 +15,19 @@ public class Text {
             this.size = size;
         }
 
-        public String toString() {
+        public Reader(String value) {
+            try {
+                byte[] bytes = value.getBytes("UTF-8");
+                this.buffer = ByteBuffer.wrap(bytes);
+                this.offset = 0;
+                this.size = bytes.length;
+            } catch (java.io.UnsupportedEncodingException e) {
+                throw new Error("UTF-8 is unsupported");
+            }
+        }
+
+        @Override
+        public final String toString() {
             byte[] bytes = new byte[this.size];
 
             this.buffer.position(this.offset);
@@ -27,6 +39,7 @@ public class Text {
                 return "unsupported encoding"; // XXX
             }
         }
+
     }
 
 }

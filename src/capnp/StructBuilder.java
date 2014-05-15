@@ -35,4 +35,8 @@ public final class StructBuilder {
         this.segment.buffer.putInt(this.data + offset * 4, value);
     }
 
+    public final PointerBuilder getPointerField(int index) {
+        return new PointerBuilder(this.segment, this.pointers + index);
+    }
+
 }
