@@ -3,4 +3,14 @@ jdk:
   - oraclejdk7
   - openjdk7
   - openjdk6
+before_install:
+  - yes | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
+install:
+  - sudo apt-get install g++-4.8
+  - curl -O https://capnproto.org/capnproto-c++-0.4.1.tar.gz
+  - tar zxf capnproto-c++-0.4.1.tar.gz
+  - export CC=gcc-4.7
+  - export CXX=g++-4.7
+  - cd capnproto-c++-0.4.1 && ./configure && make -j5 && sudo make install
 script: make
