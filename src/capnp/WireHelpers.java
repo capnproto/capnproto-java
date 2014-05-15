@@ -2,7 +2,11 @@ package org.capnproto;
 
 final class WireHelpers {
 
-    public static int allocate(int ref,
+    public static int roundBytesUpToWords(int bytes) {
+        return (bytes + 7) / 8;
+    }
+
+    public static int allocate(int refOffset,
                                SegmentBuilder segment,
                                int amount,
                                byte kind) {
@@ -16,7 +20,8 @@ final class WireHelpers {
             //# the landing pad for a far pointer.
             throw new Error("unimplemented");
         } else {
-            throw new Error("unimplemented");
+            WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, allocation);
+            return allocation;
         }
     }
 
@@ -42,9 +47,15 @@ final class WireHelpers {
         throw new Error("unimplemented");
     }
 
+    // size is in bytes
     public static void initTextPointer(int refOffset,
                                        SegmentBuilder segment,
                                        int size) {
+        //# The byte list must include a NUL terminator.
+        int byteSize = size + 1;
+
+        int ptrOffset = allocate(refOffset, segment, roundBytesUpToWords(byteSize), WirePointer.LIST);
+
         throw new Error("unimplemented");
     }
 

@@ -24,6 +24,11 @@ final class WirePointer {
         return offset + 1 + (offsetAndKind(wirePointer) >> 2);
     }
 
+    public static void setKindAndTarget(ByteBuffer buffer, int offset, byte kind, int targetOffset) {
+        buffer.putInt(offset * 8,
+                      (((targetOffset - offset) - 1) << 2) | kind);
+    }
+
     public static int inlineCompositeListElementCount(long wirePointer) {
         return offsetAndKind(wirePointer) >> 2;
     }
