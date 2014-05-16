@@ -12,10 +12,10 @@ clean :
 	sbt clean
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
-	$(CXX) $(CXX_FLAGS) -g $(CAPNPC_JAVA_SOURCES) -o capnpc-java
+	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -g -o capnpc-java
 
 addressbook : capnpc-java
 	PWD=pwd
-	mkdir examples/src/main/generated
+	mkdir -p examples/src/main/generated
 	capnp compile -I$(PWD)/generator/src/main/cpp/compiler --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
 	sbt examples/"compile"
