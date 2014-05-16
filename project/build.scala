@@ -23,17 +23,10 @@ object Build extends sbt.Build {
       id = "examples",
       base = file("examples")
     ).dependsOn(generator)
+      .settings(makeExamplesTask)
+      .settings(compile <<= compile in Compile dependsOn makeExamples)
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
-      .settings(publish := {})
-      .settings(publishLocal := {})
-      .settings(fork in run := true)
-      .settings(outputStrategy := Some(StdoutOutput))
-      .settings(javaOptions in run ++= Seq(
-      "-ms2g",
-      "-mx2g",
-      "-XX:+AlwaysPreTouch",
-      "-XX:+TieredCompilation"
-    ))
+      .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
 
   def project(id: String, base: File) =
     Project(
@@ -49,6 +42,13 @@ object Build extends sbt.Build {
   val makeCppTask = makeCpp := {
     val makeResult = "make".!!
     println(s"**** C++ Build Started\n$makeResult\n**** C++ Build Complete")
+  }
+
+  val makeExamples = taskKey[Unit]("Run capnp-java compiler against the addressbook schema")
+  val makeExamplesTask = makeExamples := {
+    Thread.sleep(1000)
+    val makeResult = "make addressbook".!!
+    println(s"**** CodeGen for Addressbook Started\n$makeResult\n**** CodeGen for Addressbook Complete")
   }
 }
 
