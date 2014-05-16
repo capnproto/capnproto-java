@@ -10,3 +10,9 @@ When you first build the project, try running `sbt update gen-idea`. This will b
 
 When running `make`, the supporting Java code will be built, and the sample schema will be run through the code generator as well to produce the Java binding. You can find the generated code in `/examples/src/main/generated/Addressbook.java`
 
+Example of building and running from the command line:
+
+```
+$ make CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
+$ echo '(people = [(id = 123, name = "Alice", email = "alice@example.com", employment = (school = "MIT"))])'   | capnp encode examples/src/main/schema/addressbook.capnp AddressBook | java -cp generator/target/scala-2.11/classes:examples/target/scala-2.11/classes/ org.capnproto.examples.AddressbookMain read
+```
