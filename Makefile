@@ -18,4 +18,4 @@ addressbook : capnpc-java
 	PWD=pwd
 	mkdir examples/src/main/generated
 	capnp compile -I$(PWD)/generator/src/main/cpp/compiler --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
-#	sbt examples/"run read"
+	sbt examples/"compile"
