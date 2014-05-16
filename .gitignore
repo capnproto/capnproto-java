@@ -4,3 +4,5 @@ project/target
 .idea
 *.ipr
 *.iws
+capnpc-java
+generated/

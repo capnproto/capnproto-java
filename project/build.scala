@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import org.sbtidea.SbtIdeaPlugin._
 
 object Build extends sbt.Build {
 
@@ -9,25 +8,27 @@ object Build extends sbt.Build {
       id = "capnproto-java",
       base = file(".")
     ).aggregate(generator, examples)
+      .settings(cleanFiles <+= baseDirectory { base => base / "capnpc-java"})
 
   lazy val generator =
     project(
       id = "generator",
       base = file("generator")
     ).settings(Defaults.itSettings: _*)
-    .settings(compile <<= compile in Compile dependsOn(compile in Test, compile in IntegrationTest))
+      .settings(makeCppTask)
+      .settings(compile <<= compile in Compile dependsOn makeCpp)
 
   lazy val examples =
     project(
       id = "examples",
       base = file("examples")
     ).dependsOn(generator)
-    .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
-    .settings(publish := {})
-    .settings(publishLocal := {})
-    .settings(fork in run := true)
-    .settings(outputStrategy := Some(StdoutOutput))
-    .settings(javaOptions in run ++= Seq(
+      .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
+      .settings(publish := {})
+      .settings(publishLocal := {})
+      .settings(fork in run := true)
+      .settings(outputStrategy := Some(StdoutOutput))
+      .settings(javaOptions in run ++= Seq(
       "-ms2g",
       "-mx2g",
       "-XX:+AlwaysPreTouch",
@@ -43,6 +44,12 @@ object Build extends sbt.Build {
         Shared.settings ++
         Seq(libraryDependencies ++= Shared.testDeps)
     ).configs(IntegrationTest)
+
+  val makeCpp = taskKey[Unit]("Run make against the C++ code to create the Java code generator")
+  val makeCppTask = makeCpp := {
+    val makeResult = "make".!!
+    println(s"**** C++ Build Started\n$makeResult\n**** C++ Build Complete")
+  }
 }
 
 object Shared {
@@ -76,9 +83,9 @@ object ShellPrompt {
   }
 
   def currBranch = (
-                   ("git status -sb" lines_! devnull headOption)
-                   getOrElse "-" stripPrefix "## "
-                   )
+    ("git status -sb" lines_! devnull headOption)
+    getOrElse "-" stripPrefix "## "
+    )
 
   val buildShellPrompt = {
     (state: State) => {
