@@ -1,52 +1,19 @@
-CXX=g++
-CXX_FLAGS=-std=c++11
+CXX=clang++ -std=c++11 -stdlib=libc++ `pkg-config capnp --cflags --libs`
 
-CAPNP_SOURCES=\
-	src/capnp/AnyPointer.java\
-	src/capnp/DecodeException.java\
-	src/capnp/FieldSize.java\
-	src/capnp/FromStructBuilder.java\
-	src/capnp/FromStructReader.java\
-	src/capnp/InputStreamMessageReader.java\
-	src/capnp/ListPointer.java\
-	src/capnp/ListBuilder.java\
-	src/capnp/ListReader.java\
-	src/capnp/MessageBuilder.java\
-	src/capnp/MessageReader.java\
-	src/capnp/PointerBuilder.java\
-	src/capnp/PointerReader.java\
-	src/capnp/SegmentBuilder.java\
-	src/capnp/SegmentReader.java\
-	src/capnp/StructBuilder.java\
-	src/capnp/StructList.java\
-	src/capnp/StructPointer.java\
-	src/capnp/StructReader.java\
-	src/capnp/StructSize.java\
-	src/capnp/Text.java\
-	src/capnp/WireHelpers.java\
-	src/capnp/WirePointer.java\
-	src/capnp/WordPointer.java
-
-CAPNP_COMPILATION_MARKER=org/capnproto/PointerReader.class
-
-CAPNPC_JAVA_SOURCES=src/compiler/capnpc-java.c++
+CAPNPC_JAVA_SOURCES=generator/src/main/cpp/compiler/capnpc-java.c++
 
 .PHONY: all clean addressbook
 
-all : capnpc-java addressbook capnp
+all : capnpc-java addressbook
 
 clean :
-	rm -rf capnpc-java org examples/*.class
-
-capnp : $(CAPNP_COMPILATION_MARKER)
-
-$(CAPNP_COMPILATION_MARKER) : $(CAPNP_SOURCES)
-	javac -d . $(CAPNP_SOURCES)
+	rm capnpc-java
+	sbt clean
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
-	$(CXX) $(CXX_FLAGS) -I/usr/local/include -L/usr/local/lib $(CAPNPC_JAVA_SOURCES) -lkj -lcapnp -o capnpc-java
+	$(CXX) -I/usr/local/include -g $(CAPNPC_JAVA_SOURCES) -o capnpc-java
 
-
-addressbook : capnp capnpc-java examples/AddressbookMain.java
-	capnp compile -o ./capnpc-java examples/addressbook.capnp
-	javac -cp .:examples examples/AddressbookMain.java
+addressbook : capnpc-java
+	PWD=pwd
+	capnp compile -I$(PWD)/generator/src/main/cpp/compiler --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
+	sbt examples/"run read"
