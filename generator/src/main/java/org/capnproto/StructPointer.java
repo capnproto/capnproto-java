@@ -16,7 +16,7 @@ final class StructPointer{
     }
 
     public static void setFromStructSize(ByteBuffer buffer, int offset, StructSize size) {
-//        buffer.putInt(8 * offset + 4,
-        throw new Error("unimplemented");
+        buffer.putShort(8 * offset + 4, size.data);
+        buffer.putShort(8 * offset + 6, size.pointers);
     }
 }

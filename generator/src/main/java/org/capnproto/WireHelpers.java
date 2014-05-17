@@ -52,8 +52,12 @@ final class WireHelpers {
         ListPointer.setInlineComposite(segment.buffer, refOffset, wordCount);
         WirePointer.setKindAndInlineCompositeListElementCount(segment.buffer, ptrOffset,
                                                               WirePointer.STRUCT, elementCount);
+        StructPointer.setFromStructSize(segment.buffer, ptrOffset, elementSize);
 
-        throw new Error("unimplemented");
+        ptrOffset += 1;
+
+        return new ListBuilder(segment, ptrOffset, elementCount, wordsPerElement * 64,
+                               elementSize.data * 64, elementSize.pointers);
     }
 
     // size is in bytes
@@ -63,7 +67,11 @@ final class WireHelpers {
         //# The byte list must include a NUL terminator.
         int byteSize = size + 1;
 
+        //# Allocate the space.
         int ptrOffset = allocate(refOffset, segment, roundBytesUpToWords(byteSize), WirePointer.LIST);
+
+        //# Initialize the pointer.
+        ListPointer.set(segment.buffer, refOffset, FieldSize.BYTE, byteSize);
 
         throw new Error("unimplemented");
     }

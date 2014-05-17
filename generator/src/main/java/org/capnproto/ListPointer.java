@@ -15,7 +15,14 @@ final class ListPointer {
         return elementCount(elementSizeAndCount);
     }
 
+    public static void set(ByteBuffer buffer, int offset, byte elementSize, int elementCount) {
+        // TODO length assertion
+        buffer.putInt(8 * offset + 4,
+                      (elementCount << 3) | elementSize);
+    }
+
     public static void setInlineComposite(ByteBuffer buffer, int offset, int wordCount) {
+        // TODO length assertion
         buffer.putInt(8 * offset + 4,
                       (wordCount << 3) | FieldSize.INLINE_COMPOSITE);
     }

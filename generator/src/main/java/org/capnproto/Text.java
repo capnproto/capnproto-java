@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class Text {
 
-    public static class Reader {
+    public static final class Reader {
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes
@@ -40,6 +40,14 @@ public class Text {
             }
         }
 
+    }
+
+    public static final class Builder {
+        public final ByteBuffer buffer;
+
+        public Builder(ByteBuffer buffer) {
+            this.buffer = buffer;
+        }
     }
 
 }
