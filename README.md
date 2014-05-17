@@ -10,7 +10,10 @@ You will need [SBT](http://scala-sbt.org). We recommend [this version](https://g
 
 ```
 $ sbt compile
-$ echo '(people = [(id = 123, name = "Alice", email = "alice@example.com", employment = (school = "MIT"))])'   | capnp encode examples/src/main/schema/addressbook.capnp AddressBook | java -cp generator/target/scala-2.11/classes:examples/target/scala-2.11/classes/ org.capnproto.examples.AddressbookMain read
+$ echo '(people = [(id = 123, name = "Alice", email = "alice@example.com", employment = (school = "MIT"))])' \
+ | capnp encode examples/src/main/schema/addressbook.capnp AddressBook \
+ | java -cp generator/target/scala-2.11/classes:examples/target/scala-2.11/classes/ \
+   org.capnproto.examples.AddressbookMain read
 ```
 
 To generate IntelliJ project files, do `sbt update gen-idea`.
