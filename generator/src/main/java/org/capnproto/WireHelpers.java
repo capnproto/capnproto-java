@@ -44,6 +44,15 @@ final class WireHelpers {
 
         int wordsPerElement = elementSize.total();
 
+        //# Allocate the list, prefixed by a single WirePointer.
+        int wordCount = elementCount * wordsPerElement;
+        int ptrOffset = allocate(refOffset, segment, 1 + wordCount, WirePointer.LIST);
+
+        //# Initialize the pointer.
+        ListPointer.setInlineComposite(segment.buffer, refOffset, wordCount);
+        WirePointer.setKindAndInlineCompositeListElementCount(segment.buffer, ptrOffset,
+                                                              WirePointer.STRUCT, elementCount);
+
         throw new Error("unimplemented");
     }
 

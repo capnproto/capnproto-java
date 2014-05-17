@@ -33,6 +33,13 @@ final class WirePointer {
         return offsetAndKind(wirePointer) >> 2;
     }
 
+    public static void setKindAndInlineCompositeListElementCount(ByteBuffer buffer,
+                                                                 int offset,
+                                                                 byte kind,
+                                                                 int elementCount) {
+        buffer.putInt(offset * 8, (elementCount << 2) | kind);
+    }
+
     public static int upper32Bits(long wirePointer) {
         return (int)(wirePointer >> 32);
     }

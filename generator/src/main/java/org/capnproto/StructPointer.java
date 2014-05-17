@@ -14,4 +14,9 @@ final class StructPointer{
     public static int wordSize(int structRef) {
         return (int)dataSize(structRef) + (int)ptrCount(structRef);
     }
+
+    public static void setFromStructSize(ByteBuffer buffer, int offset, StructSize size) {
+//        buffer.putInt(8 * offset + 4,
+        throw new Error("unimplemented");
+    }
 }

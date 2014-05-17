@@ -14,4 +14,9 @@ final class ListPointer {
     public static int inlineCompositeWordCount(int elementSizeAndCount) {
         return elementCount(elementSizeAndCount);
     }
+
+    public static void setInlineComposite(ByteBuffer buffer, int offset, int wordCount) {
+        buffer.putInt(8 * offset + 4,
+                      (wordCount << 3) | FieldSize.INLINE_COMPOSITE);
+    }
 }
