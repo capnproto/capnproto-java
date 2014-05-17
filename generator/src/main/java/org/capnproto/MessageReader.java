@@ -11,8 +11,7 @@ public class MessageReader {
 
     public <T> T getRoot(FromStructReader<T> factory) {
         SegmentReader segment = new SegmentReader(this.segmentSlices[0]);
-        PointerReader pointerReader = PointerReader.getRoot(segment,
-                                                            new WordPointer(this.segmentSlices[0], 0),
+        PointerReader pointerReader = PointerReader.getRoot(segment, 0,
                                                             0x7fffffff /* XXX */);
         AnyPointer.Reader any = new AnyPointer.Reader(pointerReader);
         return any.getAsStruct(factory);

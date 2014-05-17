@@ -18,10 +18,10 @@ public class PointerReader {
     }
 
     public static PointerReader getRoot(SegmentReader segment,
-                                        WordPointer location,
+                                        int location,
                                         int nestingLimit) {
         // TODO bounds check
-        return new PointerReader(segment, location.offset, nestingLimit);
+        return new PointerReader(segment, location, nestingLimit);
     }
 
     public boolean isNull() {
