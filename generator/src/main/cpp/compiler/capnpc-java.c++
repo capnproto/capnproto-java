@@ -552,11 +552,13 @@ private:
             "  _builder.setDataField<", scope, "Which>(\n"
             "      ", discrimOffset, " * ::capnp::ELEMENTS, ",
                       scope, upperCase, ");\n"),
-          kj::strTree(spaces(indent), "  public boolean is", titleCase, "() {\n",
+          kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
                       spaces(indent), "    return which() == ", scope, "Which.", upperCase,";\n",
                       spaces(indent), "  }\n"),
-        kj::strTree(spaces(indent), "  public boolean is", titleCase, "();\n"),
-        kj::strTree(
+          kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
+                      spaces(indent), "    return which() == ", scope, "Which.", upperCase, ";\n",
+                      spaces(indent), "  }\n"),
+          kj::strTree(
             "inline boolean ", scope, "Reader::is", titleCase, "() const {\n"
             "  return which() == ", scope, upperCase, ";\n"
             "}\n"
@@ -611,8 +613,12 @@ private:
 
             kj::strTree(
               kj::mv(unionDiscrim.builderIsDecl),
-              "  public final ", titleCase, ".Builder get", titleCase, "();\n"
-              "  public final ", titleCase, ".Builder init", titleCase, "();\n"
+              spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
+              spaces(indent), "    throw new Error();\n",
+              spaces(indent), "  }\n",
+              spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
+              spaces(indent), "    throw new Error();\n",
+              spaces(indent), "  }\n",
               "\n"),
 
             kj::strTree(),
@@ -769,7 +775,7 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            spaces(indent), "  public ", type, " get", titleCase, "() {\n",
+            spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
              kj::strTree("    return ", type, ".values()[_reader.getShortField(", offset, ")];\n") :
@@ -779,10 +785,18 @@ private:
             spaces(indent), "  }\n",
             "\n"),
 
-        kj::strTree(
+          kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
-            "  inline ", type, " get", titleCase, "();\n"
-            "  inline void set", titleCase, "(", type, " value", setterDefault, ");\n"
+            spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
+            spaces(indent),
+            (typeBody.which() == schema::Type::ENUM ?
+             kj::strTree("    return ", type, ".values()[_builder.getShortField(", offset, ")];\n") :
+             (typeBody.which() == schema::Type::VOID ?
+              kj::strTree("    // nothing to return\n") :
+              kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, ");\n"))),
+            spaces(indent), "  }\n",
+
+            //spaces(indent), "  public final void set", titleCase, "(", type, " value", setterDefault, ");\n",
             "\n"),
 
         kj::strTree(),
@@ -943,21 +957,18 @@ private:
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
-            "  inline boolean has", titleCase, "();\n"
-            "  inline ", type, "::Builder get", titleCase, "();\n"
-            "  inline void set", titleCase, "(", type, "::Reader value);\n",
-            kind == FieldKind::LIST && !isStructOrCapList
-            ? kj::strTree(
-              "  inline void set", titleCase, "(::kj::ArrayPtr<const ", elementReaderType, "> value);\n")
-            : kj::strTree(),
-            kind == FieldKind::STRUCT
-            ? kj::strTree(
-              "  inline ", type, "::Builder init", titleCase, "();\n")
-            : kj::strTree(
-              "  inline ", type, "::Builder init", titleCase, "(unsigned int size);\n"),
-            "  inline void adopt", titleCase, "(::capnp::Orphan<", type, ">&& value);\n"
-            "  inline ::capnp::Orphan<", type, "> disown", titleCase, "();\n"
-            "\n"),
+            spaces(indent), "  public final boolean has", titleCase, "() {\n",
+            spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "  }\n",
+            spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "  }\n",
+            spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "  }\n",
+            spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
+            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "  }\n"),
 
         kj::strTree(
             kind == FieldKind::STRUCT && !hasDiscriminantValue(proto)
@@ -1093,6 +1104,7 @@ private:
                    structNode.getDiscriminantOffset(), ")];\n",
                    spaces(indent), "  }\n")
        : kj::strTree()),
+      kj::mv(methodDecls),
       spaces(indent), "}\n",
       "\n");
   }

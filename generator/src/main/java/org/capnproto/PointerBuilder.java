@@ -9,6 +9,10 @@ public final class PointerBuilder {
         this.pointer = pointer;
     }
 
+    public final boolean isNull() {
+        return this.segment.buffer.getLong(this.pointer) == 0;
+    }
+
     public final ListBuilder initStructList(int elementCount, StructSize elementSize) {
         return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
     }
