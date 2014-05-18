@@ -1087,6 +1087,12 @@ private:
       spaces(indent), "  public static final Factory factory = new Factory();\n",
       spaces(indent), "  public Builder(org.capnproto.StructBuilder base){ this._builder = base; }\n",
       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
+      (isUnion ?
+       kj::strTree(spaces(indent), "  public Which which() {\n",
+                   spaces(indent), "   return Which.values()[_builder.getShortField(",
+                   structNode.getDiscriminantOffset(), ")];\n",
+                   spaces(indent), "  }\n")
+       : kj::strTree()),
       spaces(indent), "}\n",
       "\n");
   }
