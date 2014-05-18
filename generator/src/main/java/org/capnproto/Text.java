@@ -7,7 +7,7 @@ public class Text {
     public static final class Reader {
         public final ByteBuffer buffer;
         public final int offset; // in bytes
-        public final int size; // in bytes
+        public final int size; // in bytes, not including NUL terminator
 
         public Reader(ByteBuffer buffer, int offset, int size) {
             this.buffer = buffer;
@@ -44,9 +44,15 @@ public class Text {
 
     public static final class Builder {
         public final ByteBuffer buffer;
+        public final int offset;
 
-        public Builder(ByteBuffer buffer) {
+        // size not including the NUL terminator
+        public final int size;
+
+        public Builder(ByteBuffer buffer, int offset, int size) {
             this.buffer = buffer;
+            this.offset = offset;
+            this.size = size;
         }
     }
 

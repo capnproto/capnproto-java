@@ -61,9 +61,9 @@ final class WireHelpers {
     }
 
     // size is in bytes
-    public static void initTextPointer(int refOffset,
-                                       SegmentBuilder segment,
-                                       int size) {
+    public static Text.Builder initTextPointer(int refOffset,
+                                               SegmentBuilder segment,
+                                               int size) {
         //# The byte list must include a NUL terminator.
         int byteSize = size + 1;
 
@@ -73,13 +73,19 @@ final class WireHelpers {
         //# Initialize the pointer.
         ListPointer.set(segment.buffer, refOffset, FieldSize.BYTE, byteSize);
 
-        throw new Error("unimplemented");
+        return new Text.Builder(segment.buffer, ptrOffset, size);
     }
 
-    public static void setTextPointer(int refOffset,
-                                      SegmentBuilder segment,
-                                      Text.Reader value) {
-        throw new Error("unimplemented");
+    public static Text.Builder setTextPointer(int refOffset,
+                                              SegmentBuilder segment,
+                                              Text.Reader value) {
+        Text.Builder builder = initTextPointer(refOffset, segment, value.size);
+
+        // TODO is there a way to do this with bulk methods?
+        for (int i = 0; i < builder.size; ++i) {
+            builder.buffer.put(builder.offset + i, value.buffer.get(value.offset + i));
+        }
+        return builder;
     }
 
     public static StructReader readStructPointer(SegmentReader segment,
