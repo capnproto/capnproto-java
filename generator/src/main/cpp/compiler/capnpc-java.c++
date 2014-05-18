@@ -602,21 +602,20 @@ private:
         auto slots = getSortedSlots(schemaLoader.get(
             field.getProto().getGroup().getTypeId()).asStruct());
         return FieldText {
-            kj::strTree(
-                kj::mv(unionDiscrim.readerIsDecl),
-                spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
-                spaces(indent), "    return new ", scope, titleCase, ".Reader(_reader);\n",
-                spaces(indent), "  }\n",
-                "\n"),
+          kj::strTree(
+            kj::mv(unionDiscrim.readerIsDecl),
+            spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
+            spaces(indent), "    return new ", scope, titleCase, ".Reader(_reader);\n",
+            spaces(indent), "  }\n",
+            "\n"),
 
             kj::strTree(
-                kj::mv(unionDiscrim.builderIsDecl),
-                "  inline ", titleCase, "::Builder get", titleCase, "();\n"
-                "  inline ", titleCase, "::Builder init", titleCase, "();\n"
-                "\n"),
+              kj::mv(unionDiscrim.builderIsDecl),
+              "  public final ", titleCase, ".Builder get", titleCase, "();\n"
+              "  public final ", titleCase, ".Builder init", titleCase, "();\n"
+              "\n"),
 
-            hasDiscriminantValue(proto) ? kj::strTree() :
-                kj::strTree("  inline ", titleCase, "::Pipeline get", titleCase, "();\n"),
+            kj::strTree(),
 
             kj::strTree(
                 kj::mv(unionDiscrim.isDefs),
