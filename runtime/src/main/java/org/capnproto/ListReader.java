@@ -1,16 +1,15 @@
 package org.capnproto;
 
-public class ListReader {
-    SegmentReader segment;
-    int ptr; // byte offset to front of list
-    int elementCount;
-    int step; // in bits
-    int structDataSize; // in bits
-    short structPointerCount;
-    int nestingLimit;
+public final class ListReader {
+    final SegmentReader segment;
+    final int ptr; // byte offset to front of list
+    final int elementCount;
+    final int step; // in bits
+    final int structDataSize; // in bits
+    final short structPointerCount;
+    final int nestingLimit;
 
-
-    public ListReader () {
+    public ListReader() {
         this.segment = null;
         this.ptr = 0;
         this.elementCount = 0;
@@ -47,6 +46,6 @@ public class ListReader {
         int structPointers = structData + (this.structDataSize / 8);
 
         return new StructReader(this.segment, structData, structPointers / 8, this.structDataSize,
-                                this.structPointerCount, (byte)(indexBit % 8), this.nestingLimit - 1);
+            this.structPointerCount, (byte) (indexBit % 8), this.nestingLimit - 1);
     }
 }

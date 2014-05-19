@@ -1,6 +1,6 @@
 package org.capnproto;
 
-public class FieldSize {
+public final class FieldSize {
     public static final byte VOID = 0;
     public static final byte BIT = 1;
     public static final byte BYTE = 2;

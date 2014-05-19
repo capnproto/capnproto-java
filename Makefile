@@ -1,7 +1,7 @@
 CXX=clang++
 CXX_FLAGS=-std=c++11 -stdlib=libc++ `pkg-config capnp --cflags --libs`
 
-CAPNPC_JAVA_SOURCES=generator/src/main/cpp/compiler/capnpc-java.c++
+CAPNPC_JAVA_SOURCES=compiler/src/main/cpp/capnpc-java.c++
 
 .PHONY: all clean addressbook
 
@@ -16,4 +16,4 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 addressbook : capnpc-java
 	PWD=pwd
 	mkdir -p examples/src/main/generated
-	capnp compile -I$(PWD)/generator/src/main/cpp/compiler --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
+	capnp compile -I$(PWD)/compiler/src/main/cpp --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp

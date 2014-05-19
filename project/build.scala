@@ -7,22 +7,27 @@ object Build extends sbt.Build {
     project(
       id = "capnproto-java",
       base = file(".")
-    ).aggregate(generator, examples)
+    ).aggregate(compiler, runtime, examples)
       .settings(cleanFiles <+= baseDirectory { base => base / "capnpc-java"})
 
-  lazy val generator =
+  lazy val compiler =
     project(
-      id = "generator",
-      base = file("generator")
-    ).settings(Defaults.itSettings: _*)
-      .settings(makeCppTask)
+      id = "compiler",
+      base = file("compiler")
+    ).settings(makeCppTask)
       .settings(compile <<= compile in Compile dependsOn makeCpp)
+
+  lazy val runtime =
+    project(
+      id = "runtime",
+      base = file("runtime")
+    )
 
   lazy val examples =
     project(
       id = "examples",
       base = file("examples")
-    ).dependsOn(generator)
+    ).dependsOn(runtime)
       .settings(makeExamplesTask)
       .settings(compile <<= compile in Compile dependsOn makeExamples)
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")

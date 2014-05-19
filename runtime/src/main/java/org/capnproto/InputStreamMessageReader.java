@@ -1,13 +1,12 @@
 package org.capnproto;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
-
-public class InputStreamMessageReader {
+public final class InputStreamMessageReader {
 
     static byte[] readExact(InputStream is, int length) throws IOException {
         byte[] bytes = new byte[length];
@@ -52,7 +51,7 @@ public class InputStreamMessageReader {
 
         if (segmentCount > 1) {
             ByteBuffer moreSizesRaw = makeByteBuffer(readExact(is, 4 * (segmentCount & ~1)));
-            for(int ii = 0; ii < segmentCount - 1; ++ii) {
+            for (int ii = 0; ii < segmentCount - 1; ++ii) {
                 int size = moreSizesRaw.getInt(ii * 4);
                 moreSizes.add(size);
                 totalWords += size;

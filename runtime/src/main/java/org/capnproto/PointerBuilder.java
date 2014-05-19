@@ -1,8 +1,8 @@
 package org.capnproto;
 
 public final class PointerBuilder {
-    public SegmentBuilder segment;
-    public int pointer; // word offset
+    public final SegmentBuilder segment;
+    public final int pointer; // word offset
 
     public PointerBuilder(SegmentBuilder segment, int pointer) {
         this.segment = segment;
