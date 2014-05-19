@@ -1,9 +1,9 @@
 package org.capnproto;
 
-public class PointerReader {
-    public SegmentReader segment;
-    public int pointer; // word offset
-    public int nestingLimit;
+public final class PointerReader {
+    public final SegmentReader segment;
+    public final int pointer; // word offset
+    public final int nestingLimit;
 
     public PointerReader() {
         this.segment = null;

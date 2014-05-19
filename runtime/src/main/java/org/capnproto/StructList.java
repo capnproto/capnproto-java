@@ -1,6 +1,5 @@
 package org.capnproto;
 
-
 public final class StructList {
     public static final class Reader<T> {
         public ListReader reader;

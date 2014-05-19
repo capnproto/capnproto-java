@@ -1,9 +1,9 @@
 package org.capnproto;
 
-public class AnyPointer {
+public final class AnyPointer {
 
-    public static class Reader {
-        public PointerReader reader;
+    public final static class Reader {
+        public final PointerReader reader;
 
         public Reader(PointerReader reader) {
             this.reader = reader;

@@ -1,12 +1,12 @@
 package org.capnproto;
 
 public final class ListBuilder {
-    SegmentBuilder segment;
-    int ptr; // byte offset to front of list
-    int elementCount;
-    int step; // in bits
-    int structDataSize; // in bits
-    short structPointerCount;
+    final SegmentBuilder segment;
+    final int ptr; // byte offset to front of list
+    final int elementCount;
+    final int step; // in bits
+    final int structDataSize; // in bits
+    final short structPointerCount;
 
     public ListBuilder(SegmentBuilder segment, int ptr,
                        int elementCount, int step,

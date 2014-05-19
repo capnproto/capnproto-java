@@ -2,8 +2,8 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 
-public class MessageReader {
-    ByteBuffer[] segmentSlices;
+public final class MessageReader {
+    final ByteBuffer[] segmentSlices;
 
     public MessageReader(ByteBuffer[] segmentSlices) {
         this.segmentSlices = segmentSlices;
