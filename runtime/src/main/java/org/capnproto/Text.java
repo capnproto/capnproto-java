@@ -2,7 +2,7 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 
-public class Text {
+public final class Text {
 
     public static final class Reader {
         public final ByteBuffer buffer;
@@ -35,7 +35,7 @@ public class Text {
 
             try {
                 return new String(bytes, "UTF-8");
-            } catch(java.io.UnsupportedEncodingException e) {
+            } catch (java.io.UnsupportedEncodingException e) {
                 return "unsupported encoding"; // XXX
             }
         }

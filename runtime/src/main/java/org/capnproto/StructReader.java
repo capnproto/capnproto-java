@@ -1,14 +1,13 @@
 package org.capnproto;
 
 public final class StructReader {
-    public SegmentReader segment;
-    public int data; //byte offset to data section
-    public int pointers; // word offset of pointer section
-    public int dataSize; // in bits
-    public short pointerCount;
-    public byte bit0Offset;
-    public int nestingLimit;
-
+    public final SegmentReader segment;
+    public final int data; //byte offset to data section
+    public final int pointers; // word offset of pointer section
+    public final int dataSize; // in bits
+    public final short pointerCount;
+    public final byte bit0Offset;
+    public final int nestingLimit;
 
     public StructReader(SegmentReader segment, int data,
                         int pointers, int dataSize, short pointerCount,
@@ -62,8 +61,8 @@ public final class StructReader {
     public final PointerReader getPointerField(int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return new PointerReader(this.segment,
-                                     this.pointers + ptrIndex,
-                                     this.nestingLimit);
+                this.pointers + ptrIndex,
+                this.nestingLimit);
         } else {
             return new PointerReader();
         }

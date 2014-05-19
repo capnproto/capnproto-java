@@ -2,10 +2,10 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 
-public class SegmentBuilder extends SegmentReader {
-    public int pos = 0; // in words
-
+public final class SegmentBuilder extends SegmentReader {
     public static final int FAILED_ALLOCATION = -1;
+
+    public int pos = 0; // in words
 
     public SegmentBuilder(ByteBuffer buf) {
         super(buf);
