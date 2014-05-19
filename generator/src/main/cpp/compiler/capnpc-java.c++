@@ -978,14 +978,6 @@ private:
 
         kj::strTree(
             kj::mv(unionDiscrim.isDefs),
-            "inline bool ", scope, "Reader::has", titleCase, "() const {\n",
-            unionDiscrim.has,
-            "  return !_reader.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
-            "}\n"
-            "inline bool ", scope, "Builder::has", titleCase, "() {\n",
-            unionDiscrim.has,
-            "  return !_builder.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
-            "}\n"
             "inline ", type, "::Reader ", scope, "Reader::get", titleCase, "() const {\n",
             unionDiscrim.check,
             "  return ::capnp::_::PointerHelpers<", type, ">::get(\n"
