@@ -871,8 +871,44 @@ private:
             "\n")
       };
 
-    } else {
-      // Blob, struct, or list.  These have only minor differences.
+    } else if (kind == FieldKind::STRUCT) {
+      KJ_FAIL_REQUIRE("unimplemented");
+
+    } else if (kind == FieldKind::BLOB) {
+
+      return FieldText {
+        kj::strTree(
+          kj::mv(unionDiscrim.readerIsDecl),
+          spaces(indent), "  public boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+
+          spaces(indent), "  public ", type, ".Reader",
+          " get", titleCase, "() {\n",
+          spaces(indent), "    return _reader.getPointerField(",
+          offset, ").getText();\n", // XXX
+          spaces(indent), "  }\n", "\n"),
+
+        kj::strTree(
+          kj::mv(unionDiscrim.builderIsDecl),
+          spaces(indent), "  public final boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n"),
+
+        kj::strTree(),
+
+        kj::strTree()
+      };
+    } else if (kind == FieldKind::LIST) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
       kj::String defaultParam = defaultOffset == 0 ? kj::str() : kj::str(
@@ -880,6 +916,7 @@ private:
           defaultSize == 0 ? kj::strTree() : kj::strTree(", ", defaultSize));
 
       kj::String elementReaderType;
+      kj::String elementBuilderType;
       bool isStructOrCapList = false;
       if (kind == FieldKind::LIST) {
         bool primitiveElement = false;
@@ -922,6 +959,9 @@ private:
         elementReaderType = kj::str(
             typeName(typeBody.getList().getElementType()),
             primitiveElement ? "" : interface ? "::Client" : ".Reader");
+        elementBuilderType = kj::str(
+            typeName(typeBody.getList().getElementType()),
+            primitiveElement ? "" : interface ? "::Client" : ".Builder");
       }
 
 
@@ -932,11 +972,7 @@ private:
             spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public ", type, ".Reader",
-            (kind == FieldKind::LIST ?
-             kj::strTree("<",  elementReaderType, ">") :
-             kj::strTree()
-             ),
+            spaces(indent), "  public final ", type, ".Reader<",  elementReaderType, ">",
             " get", titleCase, "() {\n",
             (kind == FieldKind::LIST ?
              kj::strTree(spaces(indent),
@@ -948,10 +984,7 @@ private:
                          // XXX what about lists of non-structs?
                          typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding), ",
                          elementReaderType, ".factory);\n") :
-             (kind == FieldKind::BLOB ?
-              kj::strTree(spaces(indent), "    return _reader.getPointerField(",
-                          offset,").getText();\n") :
-              kj::strTree(spaces(indent), "Struct\n"))),  // XXX
+              kj::strTree(spaces(indent), "Struct\n")),  // XXX
             spaces(indent), "  }\n",
             "\n"),
 
@@ -960,13 +993,15 @@ private:
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
-            spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+            spaces(indent), "  public final ", type, ".Builder<",elementBuilderType, ">",
+            " get", titleCase, "() {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
             spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
-            spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
+            spaces(indent), "  public final ", type, ".Builder<", elementBuilderType,">",
+            " init", titleCase, "(int size) {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n"),
 
@@ -1033,6 +1068,8 @@ private:
             "}\n"
             "\n")
       };
+    } else {
+      KJ_UNREACHABLE;
     }
   }
 

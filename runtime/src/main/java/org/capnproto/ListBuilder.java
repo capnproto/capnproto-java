@@ -19,6 +19,18 @@ public final class ListBuilder {
         this.structPointerCount = structPointerCount;
     }
 
+    public final StructBuilder getStructElement(int index) {
+        int indexBit = index * this.step;
+        int structData = this.ptr + indexBit / 8 ;
+        int structPointers = (structData + (this.structDataSize / 8)) / 8;
+
+        return new StructBuilder(this.segment,
+                                 structData,
+                                 structPointers,
+                                 this.structDataSize,
+                                 this.structPointerCount,
+                                 (byte)(indexBit % 8));
+    }
 
 
 }

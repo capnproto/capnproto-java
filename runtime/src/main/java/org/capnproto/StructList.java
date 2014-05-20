@@ -28,6 +28,10 @@ public final class StructList {
             this.factory = factory;
         }
 
+        public T get(int index) {
+            return this.factory.fromStructBuilder(this.builder.getStructElement(index));
+        }
+
     }
 
 }

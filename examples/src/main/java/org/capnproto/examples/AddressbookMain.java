@@ -13,7 +13,10 @@ public class AddressbookMain {
         System.out.println("WARNING: writing is not yet fully implemented");
         MessageBuilder message = new MessageBuilder();
         AddressBook.Builder addressbook = message.initRoot(AddressBook.Builder.factory);
-        //addressbook.initPeople(2);
+        StructList.Builder<Person.Builder> people = addressbook.initPeople(2);
+
+        Person.Builder alice = people.get(0);
+        //alice.setId(123);
     }
 
     public static void printAddressBook() throws java.io.IOException {
