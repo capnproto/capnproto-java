@@ -28,7 +28,13 @@ public final class StructList {
             this.factory = factory;
         }
 
-        public T get(int index) {
+        // init
+        Builder(PointerBuilder builder, int size, FromStructBuilder<T> factory) {
+            this.builder = builder.initStructList(size, factory.structSize());
+            this.factory = factory;
+        }
+
+        public final T get(int index) {
             return this.factory.fromStructBuilder(this.builder.getStructElement(index));
         }
 

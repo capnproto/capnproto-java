@@ -968,23 +968,17 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            spaces(indent), "  public boolean has", titleCase, "() {\n",
+            spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", type, ".Reader<",  elementReaderType, ">",
+            spaces(indent), "  public final ", type, ".Reader<", elementReaderType, ">",
             " get", titleCase, "() {\n",
-            (kind == FieldKind::LIST ?
-             kj::strTree(spaces(indent),
-                         "    return new ", type, ".Reader<",
-                         elementReaderType,
-                         ">(_reader.getPointerField(",
-                         offset, ").getList(",
-
-                         // XXX what about lists of non-structs?
-                         typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding), ",
-                         elementReaderType, ".factory);\n") :
-              kj::strTree(spaces(indent), "Struct\n")),  // XXX
+            spaces(indent), "    return new ", type, ".Reader<",
+            elementReaderType, ">(_reader.getPointerField(", offset, ").getList(",
+            // XXX what about lists of non-structs?
+            typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding), ",
+            elementReaderType, ".factory);\n",
             spaces(indent), "  }\n",
             "\n"),
 
@@ -1002,7 +996,10 @@ private:
             spaces(indent), "  }\n",
             spaces(indent), "  public final ", type, ".Builder<", elementBuilderType,">",
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "    return new ", type, ".Builder<", elementBuilderType, ">",
+            "(_builder.getPointerField(", offset, ").initStructList(", // XXX what about non-struct lists?
+            "size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE), ",
+            elementBuilderType, ".factory);\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
