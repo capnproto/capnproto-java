@@ -554,9 +554,9 @@ private:
           kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
                       spaces(indent), "    return which() == ", scope, "Which.", upperCase,";\n",
                       spaces(indent), "  }\n"),
-          kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
-                      spaces(indent), "    return which() == ", scope, "Which.", upperCase, ";\n",
-                      spaces(indent), "  }\n"),
+          kj::strTree(spaces(indent), "public final boolean is", titleCase, "() {\n",
+                      spaces(indent), "  return which() == ", scope, "Which.", upperCase, ";\n",
+                      spaces(indent), "}\n"),
           kj::strTree(
             "inline boolean ", scope, "Reader::is", titleCase, "() const {\n"
             "  return which() == ", scope, upperCase, ";\n"
@@ -796,10 +796,13 @@ private:
             spaces(indent), "  }\n",
 
             (typeBody.which() == schema::Type::VOID ?
-             kj::strTree(spaces(indent), "  public final void set", titleCase, "() {}\n") :
+             kj::strTree(spaces(indent), "  public final void set", titleCase, "() {\n",
+                         unionDiscrim.set,
+                         spaces(indent), "  }\n") :
              (typeBody.which() == schema::Type::ENUM ?
               kj::strTree(
                 spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+                unionDiscrim.set,
                 spaces(indent), "    _builder.setShortField(", offset, ", (short)value.ordinal());\n",
                 spaces(indent), "  }\n") :
               kj::strTree(
