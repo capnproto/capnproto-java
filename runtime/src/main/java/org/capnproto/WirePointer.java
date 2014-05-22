@@ -21,7 +21,7 @@ final class WirePointer {
     }
 
     public static int target(int offset, long wirePointer) {
-        return offset + 1 + (offsetAndKind(wirePointer) >> 2);
+        return offset + 1 + (offsetAndKind(wirePointer) >>> 2);
     }
 
     public static void setKindAndTarget(ByteBuffer buffer, int offset, byte kind, int targetOffset) {
@@ -30,7 +30,7 @@ final class WirePointer {
     }
 
     public static int inlineCompositeListElementCount(long wirePointer) {
-        return offsetAndKind(wirePointer) >> 2;
+        return offsetAndKind(wirePointer) >>> 2;
     }
 
     public static void setKindAndInlineCompositeListElementCount(ByteBuffer buffer,
@@ -41,7 +41,7 @@ final class WirePointer {
     }
 
     public static int upper32Bits(long wirePointer) {
-        return (int)(wirePointer >> 32);
+        return (int)(wirePointer >>> 32);
     }
 
     public static int listPointer(long wirePointer) {

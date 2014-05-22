@@ -8,7 +8,7 @@ final class ListPointer {
     }
 
     public static int elementCount(int elementSizeAndCount) {
-        return elementSizeAndCount >> 3;
+        return elementSizeAndCount >>> 3;
     }
 
     public static int inlineCompositeWordCount(int elementSizeAndCount) {

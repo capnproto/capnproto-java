@@ -8,7 +8,7 @@ final class StructPointer{
     }
 
     public static short ptrCount(int structRef) {
-        return (short)(structRef >> 16);
+        return (short)(structRef >>> 16);
     }
 
     public static int wordSize(int structRef) {
