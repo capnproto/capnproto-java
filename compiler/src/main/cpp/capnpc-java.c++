@@ -546,12 +546,11 @@ private:
         kj::str(
             "  if (which() != ", scope, upperCase, ") return false;\n"),
         kj::str(
-            "  KJ_IREQUIRE(which() == ", scope, upperCase, ",\n"
-            "              \"Must check which() before get()ing a union member.\");\n"),
+          "  KJ_IREQUIRE(which() == ", scope, upperCase, ",\n"
+          "              \"Must check which() before get()ing a union member.\");\n"),
         kj::str(
-            "  _builder.setDataField<", scope, "Which>(\n"
-            "      ", discrimOffset, " * ::capnp::ELEMENTS, ",
-                      scope, upperCase, ");\n"),
+          spaces(indent), "  _builder.setShortField(", discrimOffset, ", (short)",
+          scope, "Which.", upperCase, ".ordinal());\n"),
           kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
                       spaces(indent), "    return which() == ", scope, "Which.", upperCase,";\n",
                       spaces(indent), "  }\n"),
@@ -592,7 +591,7 @@ private:
 
     DiscriminantChecks unionDiscrim;
     if (hasDiscriminantValue(proto)) {
-      unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent);
+      unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
 
     switch (proto.which()) {
@@ -805,6 +804,7 @@ private:
                 spaces(indent), "  }\n") :
               kj::strTree(
                 spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+                unionDiscrim.set,
                 spaces(indent), "    _builder.set", toTitleCase(type),
                 "Field(", offset, ", value);\n",
                 spaces(indent), "  }\n"))),
@@ -909,7 +909,8 @@ private:
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
-          spaces(indent), "    throw new Error();\n",
+          unionDiscrim.set,
+          spaces(indent), "    _builder.getPointerField(", offset, ").setText(value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
           spaces(indent), "    throw new Error();\n",
