@@ -796,7 +796,18 @@ private:
               kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, ");\n"))),
             spaces(indent), "  }\n",
 
-            //spaces(indent), "  public final void set", titleCase, "(", type, " value", setterDefault, ");\n",
+            (typeBody.which() == schema::Type::VOID ?
+             kj::strTree(spaces(indent), "  public final void set", titleCase, "() {}\n") :
+             (typeBody.which() == schema::Type::ENUM ?
+              kj::strTree(
+                spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+                spaces(indent), "    _builder.setShortField(", offset, ", (short)value.ordinal());\n",
+                spaces(indent), "  }\n") :
+              kj::strTree(
+                spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+                spaces(indent), "    _builder.set", toTitleCase(type),
+                "Field(", offset, ", value);\n",
+                spaces(indent), "  }\n"))),
             "\n"),
 
         kj::strTree(),
