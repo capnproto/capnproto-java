@@ -990,10 +990,12 @@ private:
             spaces(indent), "  public final ", type, ".Reader<", elementReaderType, ">",
             " get", titleCase, "() {\n",
             spaces(indent), "    return new ", type, ".Reader<",
-            elementReaderType, ">(_reader.getPointerField(", offset, ").getList(",
+            elementReaderType, ">(\n",
+            spaces(indent), "      ", elementReaderType, ".factory,\n",
+            spaces(indent), "      _reader.getPointerField(", offset, ").getList(",
             // XXX what about lists of non-structs?
-            typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding), ",
-            elementReaderType, ".factory);\n",
+            typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding)",
+            ");\n",
             spaces(indent), "  }\n",
             "\n"),
 
@@ -1011,10 +1013,12 @@ private:
             spaces(indent), "  }\n",
             spaces(indent), "  public final ", type, ".Builder<", elementBuilderType,">",
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return new ", type, ".Builder<", elementBuilderType, ">",
-            "(_builder.getPointerField(", offset, ").initStructList(", // XXX what about non-struct lists?
-            "size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE), ",
-            elementBuilderType, ".factory);\n",
+            spaces(indent), "    return new ", type, ".Builder<", elementBuilderType, ">(\n",
+            spaces(indent), "      ", elementBuilderType,".factory,\n",
+            // XXX what about non-struct lists?
+            spaces(indent), "      _builder.getPointerField(", offset, ").initStructList(",
+            "size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)",
+            ");\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
