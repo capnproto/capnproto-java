@@ -23,7 +23,9 @@ public class AddressbookMain {
 
         Person.Builder alice = people.get(0);
         alice.setId(123);
+
         alice.setName(new Text.Reader("Alice"));
+
         alice.setEmail(new Text.Reader("alice@example.com"));
 
         StructList.Builder<Person.PhoneNumber.Builder> alicePhones = alice.initPhones(1);
@@ -31,7 +33,7 @@ public class AddressbookMain {
         alicePhones.get(0).setType(Person.PhoneNumber.Type.MOBILE);
         alice.getEmployment().setSchool(new Text.Reader("MIT"));
 
-        Person.Builder bob = people.get(0);
+        Person.Builder bob = people.get(1);
         bob.setId(456);
         bob.setName(new Text.Reader("Bob"));
         bob.setEmail(new Text.Reader("bob@example.com"));

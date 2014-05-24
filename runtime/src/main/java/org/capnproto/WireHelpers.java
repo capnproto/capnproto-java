@@ -82,7 +82,7 @@ final class WireHelpers {
         //# Initialize the pointer.
         ListPointer.set(segment.buffer, refOffset, FieldSize.BYTE, byteSize);
 
-        return new Text.Builder(segment.buffer, ptrOffset, size);
+        return new Text.Builder(segment.buffer, ptrOffset * 8, size);
     }
 
     public static Text.Builder setTextPointer(int refOffset,
