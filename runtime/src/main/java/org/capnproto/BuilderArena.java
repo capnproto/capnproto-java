@@ -13,6 +13,7 @@ public final class BuilderArena implements Arena {
         this.segments = new Vector<SegmentBuilder>();
         SegmentBuilder segment0 = new SegmentBuilder(ByteBuffer.allocate(1024 * 8));
         segment0.buffer.mark();
+        segment0.buffer.order(ByteOrder.LITTLE_ENDIAN);
         this.segments.add(segment0);
     }
 
