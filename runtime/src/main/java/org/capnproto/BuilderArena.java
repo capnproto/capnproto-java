@@ -33,4 +33,8 @@ public final class BuilderArena implements Arena {
     public AllocateResult allocate(int amount) {
         throw new Error("unimplemented");
     }
+
+    public final Vector<ByteBuffer> getSegmentsForOutput() {
+        throw new Error();
+    }
 }

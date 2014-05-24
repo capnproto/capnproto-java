@@ -613,7 +613,7 @@ private:
             kj::strTree(
               kj::mv(unionDiscrim.builderIsDecl),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
-              spaces(indent), "    throw new Error();\n",
+              spaces(indent), "    return new ", scope, titleCase, ".Builder(_builder);\n",
               spaces(indent), "  }\n",
               spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
               spaces(indent), "    throw new Error();\n",

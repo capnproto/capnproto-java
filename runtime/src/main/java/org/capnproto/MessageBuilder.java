@@ -22,4 +22,6 @@ public final class MessageBuilder {
         AnyPointer.Builder ptr = new AnyPointer.Builder(PointerBuilder.getRoot(rootSegment, location));
         return ptr.initAsStruct(factory);
     }
+
+    //public final getSegmentsForOutput()
 }
