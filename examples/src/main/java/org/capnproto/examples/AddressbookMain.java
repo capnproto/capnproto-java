@@ -15,8 +15,6 @@ import org.capnproto.examples.Addressbook.*;
 public class AddressbookMain {
 
     public static void writeAddressBook() throws java.io.IOException {
-        System.err.println("WARNING: writing is not yet fully implemented");
-
         MessageBuilder message = new MessageBuilder();
         AddressBook.Builder addressbook = message.initRoot(AddressBook.Builder.factory);
         StructList.Builder<Person.Builder> people = addressbook.initPeople(2);
