@@ -25,6 +25,15 @@ final class WireHelpers {
         }
     }
 
+    public static StructBuilder initStructPointer(int refOffset,
+                                                  SegmentBuilder segment,
+                                                  StructSize size) {
+        int ptrOffset = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
+        StructPointer.setFromStructSize(segment.buffer, refOffset, size);
+        return new StructBuilder(segment, ptrOffset * 8, ptrOffset + size.data,
+                                 size.data * 64, size.pointers, (byte)0);
+    }
+
     public static ListBuilder initListPointer(int refOffset,
                                               SegmentBuilder segment,
                                               int elementCount,
@@ -56,7 +65,7 @@ final class WireHelpers {
 
         ptrOffset += 1;
 
-        return new ListBuilder(segment, ptrOffset, elementCount, wordsPerElement * 64,
+        return new ListBuilder(segment, ptrOffset * 8, elementCount, wordsPerElement * 64,
                                elementSize.data * 64, elementSize.pointers);
     }
 

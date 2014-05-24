@@ -22,6 +22,9 @@ public final class SegmentBuilder extends SegmentReader {
         return this.pos;
     }
 
+    /**
+       Allocate `amount` words.
+     */
     public final int allocate(int amount) {
         if (amount > this.capacity() - this.currentSize()) {
             return FAILED_ALLOCATION; // no space left;

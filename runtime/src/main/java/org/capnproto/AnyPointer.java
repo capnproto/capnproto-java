@@ -9,8 +9,20 @@ public final class AnyPointer {
             this.reader = reader;
         }
 
-        public <T> T getAsStruct(FromStructReader<T> factory) {
+        public final <T> T getAsStruct(FromStructReader<T> factory) {
             return factory.fromStructReader(this.reader.getStruct());
+        }
+    }
+
+    public static final class Builder {
+        public final PointerBuilder builder;
+
+        public Builder(PointerBuilder builder) {
+            this.builder = builder;
+        }
+
+        public final <T> T initAsStruct(FromStructBuilder<T> factory) {
+            return factory.fromStructBuilder(this.builder.initStruct(factory.structSize()));
         }
     }
 
