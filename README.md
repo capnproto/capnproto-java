@@ -1,6 +1,6 @@
 # capnproto-java: Cap'n Proto for Java
 
-[![Build Status](https://travis-ci.org/dwrensha/capnproto-java.svg?branch=master)]
+![Build Status](https://travis-ci.org/dwrensha/capnproto-java.svg?branch=master)
 
 This is an experimental pure Java implementation of [Cap'n Proto](http://capnproto.org).
 
