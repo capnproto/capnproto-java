@@ -1,17 +1,22 @@
 package org.capnproto.examples;
 
+import java.io.FileOutputStream;
+import java.io.FileDescriptor;
+
 import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;
-import org.capnproto.StructList;
 import org.capnproto.InputStreamMessageReader;
+import org.capnproto.Serialize;
+import org.capnproto.StructList;
 import org.capnproto.Text;
 
 import org.capnproto.examples.Addressbook.*;
 
 public class AddressbookMain {
 
-    public static void writeAddressBook() {
-        System.out.println("WARNING: writing is not yet fully implemented");
+    public static void writeAddressBook() throws java.io.IOException {
+        System.err.println("WARNING: writing is not yet fully implemented");
+
         MessageBuilder message = new MessageBuilder();
         AddressBook.Builder addressbook = message.initRoot(AddressBook.Builder.factory);
         StructList.Builder<Person.Builder> people = addressbook.initPeople(2);
@@ -36,6 +41,9 @@ public class AddressbookMain {
         bobPhones.get(1).setNumber(new Text.Reader("555-7654"));
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed();
+
+        Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
+                               message);
     }
 
     public static void printAddressBook() throws java.io.IOException {

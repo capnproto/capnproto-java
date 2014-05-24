@@ -5,6 +5,8 @@ import java.nio.ByteOrder;
 import java.util.Vector;
 
 public final class BuilderArena implements Arena {
+
+    // Maybe this should be ArrayList?
     public final Vector<SegmentBuilder> segments;
 
     public BuilderArena() {
@@ -34,7 +36,15 @@ public final class BuilderArena implements Arena {
         throw new Error("unimplemented");
     }
 
-    public final Vector<ByteBuffer> getSegmentsForOutput() {
-        throw new Error();
+    public final ByteBuffer[] getSegmentsForOutput() {
+        ByteBuffer[] result = new ByteBuffer[this.segments.size()];
+        for (int ii = 0; ii < this.segments.size(); ++ii) {
+            SegmentBuilder segment = segments.get(ii);
+            segment.buffer.reset();
+            ByteBuffer slice = segment.buffer.slice();
+            slice.limit(segment.currentSize() * 8);
+            result[ii] = slice;
+        }
+        return result;
     }
 }

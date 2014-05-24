@@ -23,5 +23,7 @@ public final class MessageBuilder {
         return ptr.initAsStruct(factory);
     }
 
-    //public final getSegmentsForOutput()
+    public final java.nio.ByteBuffer[] getSegmentsForOutput() {
+        return this.arena.getSegmentsForOutput();
+    }
 }

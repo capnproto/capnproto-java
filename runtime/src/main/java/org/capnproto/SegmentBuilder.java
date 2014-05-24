@@ -18,7 +18,7 @@ public final class SegmentBuilder extends SegmentReader {
     }
 
     // return how many words have already been allocated
-    private final int currentSize() {
+    public final int currentSize() {
         return this.pos;
     }
 
