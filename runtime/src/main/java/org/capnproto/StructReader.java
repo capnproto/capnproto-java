@@ -58,6 +58,14 @@ public final class StructReader {
         }
     }
 
+    public final long getLongField(int offset) {
+        if ((offset + 1) * 64 <= this.dataSize) {
+            return this.segment.buffer.getLong(this.data + offset * 8);
+        } else {
+            return 0;
+        }
+    }
+
     public final PointerReader getPointerField(int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return new PointerReader(this.segment,
