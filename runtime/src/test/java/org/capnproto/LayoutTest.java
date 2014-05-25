@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import org.junit.Assert;
 
 public class LayoutTest {
 
@@ -19,19 +19,30 @@ public class LayoutTest {
         PointerReader pointerReader = new PointerReader(new SegmentReader(buffer), 0, 0x7fffffff);
         StructReader reader = pointerReader.getStruct();
 
-        assertThat(reader.getLongField(0), equalTo(0xefcdab8967452301L));
-        assertThat(reader.getLongField(1), equalTo(0L));
-        assertThat(reader.getIntField(0), equalTo(0x67452301));
-        assertThat(reader.getIntField(1), equalTo(0xefcdab89));
-        assertThat(reader.getIntField(2), equalTo(0));
-        assertThat(reader.getShortField(0), equalTo((short) 0x2301));
-        assertThat(reader.getShortField(1), equalTo((short)0x6745));
-        assertThat(reader.getShortField(2), equalTo((short)0xab89));
-        assertThat(reader.getShortField(3), equalTo((short)0xefcd));
-        assertThat(reader.getShortField(4), equalTo((short)0));
+        Assert.assertThat(reader.getLongField(0), equalTo(0xefcdab8967452301L));
+        Assert.assertThat(reader.getLongField(1), equalTo(0L));
+        Assert.assertThat(reader.getIntField(0), equalTo(0x67452301));
+        Assert.assertThat(reader.getIntField(1), equalTo(0xefcdab89));
+        Assert.assertThat(reader.getIntField(2), equalTo(0));
+        Assert.assertThat(reader.getShortField(0), equalTo((short) 0x2301));
+        Assert.assertThat(reader.getShortField(1), equalTo((short)0x6745));
+        Assert.assertThat(reader.getShortField(2), equalTo((short)0xab89));
+        Assert.assertThat(reader.getShortField(3), equalTo((short)0xefcd));
+        Assert.assertThat(reader.getShortField(4), equalTo((short)0));
 
         // TODO masking
 
+        Assert.assertTrue(reader.getBoolField(0));
+        Assert.assertFalse(reader.getBoolField(1));
+        Assert.assertFalse(reader.getBoolField(2));
+        Assert.assertFalse(reader.getBoolField(3));
+        Assert.assertFalse(reader.getBoolField(4));
+        Assert.assertFalse(reader.getBoolField(5));
+        Assert.assertFalse(reader.getBoolField(6));
+        Assert.assertFalse(reader.getBoolField(7));
+
+        Assert.assertTrue(reader.getBoolField(8));
+        Assert.assertTrue(reader.getBoolField(9));
     }
 
 }

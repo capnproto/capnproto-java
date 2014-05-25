@@ -60,7 +60,7 @@ object Build extends sbt.Build {
 object Shared {
 
   val testDeps = Seq(
-//    "org.scalatest" %% "scalatest" % "2.1.6" % "it,test",
+    "org.scalatest" %% "scalatest" % "2.1.6" % "it,test",
 //    "org.scalacheck" %% "scalacheck" % "1.11.4" % "it,test",
     "com.novocode" % "junit-interface" % "0.10" % "test",
     "junit" % "junit" % "4.11" % "test"

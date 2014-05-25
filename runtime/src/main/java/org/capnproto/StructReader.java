@@ -27,7 +27,8 @@ public final class StructReader {
             if (offset == 0) {
                 offset = this.bit0Offset;
             }
-            byte b = this.segment.buffer.get(offset / 8);
+            byte b = this.segment.buffer.get(this.data + offset / 8);
+
             return (b & (1 << (offset % 8))) != 0;
         } else {
             return false;
