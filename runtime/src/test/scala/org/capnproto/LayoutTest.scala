@@ -56,9 +56,46 @@ class ExampleSuite extends FunSuite {
 
   }
 
+  def setupStruct(builder : StructBuilder) = {
+    builder.setLongField(0, 0x1011121314151617L);
+    builder.setIntField(2, 0x20212223);
+    builder.setShortField(6, 0x3031.toShort);
+    builder.setByteField(14, 0x40);
+    builder.setBoolField(120, false);
+    builder.setBoolField(121, false);
+    builder.setBoolField(122, true);
+    builder.setBoolField(123, false);
+    builder.setBoolField(124, true);
+    builder.setBoolField(125, true);
+    builder.setBoolField(126, true);
+    builder.setBoolField(127, false);
+  }
+
+  def checkStruct(builder : StructBuilder) {
+    assert(0x1011121314151617L === builder.getLongField(0));
+    assert(0x20212223 == builder.getIntField(2));
+    assert(0x3031 === builder.getShortField(6));
+    assert(0x40 === builder.getByteField(14));
+    assert(false === builder.getBoolField(120));
+    assert(false === builder.getBoolField(121));
+    assert(true === builder.getBoolField(122));
+    assert(false === builder.getBoolField(123));
+    assert(true === builder.getBoolField(124));
+    assert(true === builder.getBoolField(125));
+    assert(true === builder.getBoolField(126));
+    assert(false === builder.getBoolField(127));
+  }
+
   test("StructRoundTrip_OneSegment") {
-    val message = new MessageBuilder();
-    // ...
+    val buffer = java.nio.ByteBuffer.allocate(1024 * 8);
+    buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buffer.mark();
+
+    val pointerBuilder = PointerBuilder.getRoot(new SegmentBuilder(buffer), 0);
+    val builder = pointerBuilder.initStruct(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE));
+    setupStruct(builder);
+
+    checkStruct(builder);
   }
 
 }
