@@ -14,6 +14,7 @@ install:
   - export CXX=g++-4.8
   - cd capnproto-c++-0.4.1 && ./configure && make -j5 && sudo make install && cd ..
 script:
-  - sbt compile
+  - make CXX=g++-4.8 CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
+  - make addressbook
   - sbt test
 
