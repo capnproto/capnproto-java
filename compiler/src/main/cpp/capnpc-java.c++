@@ -1633,7 +1633,9 @@ private:
           //          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
           "public class ", outerClassName, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
-          KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); }, "\n")
+          //KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); },
+          "}\n",
+          "\n")
     };
   }
 

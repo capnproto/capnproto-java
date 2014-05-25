@@ -2,7 +2,7 @@ package org.capnproto;
 
 import org.scalatest.FunSuite
 
-class ExampleSuite extends FunSuite {
+class LayoutSuite extends FunSuite {
 
   test("SimpleRawDataStruct") {
     val data : Array[Byte] =

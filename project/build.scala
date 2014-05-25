@@ -16,6 +16,9 @@ object Build extends sbt.Build {
       base = file("compiler")
     ).settings(makeCppTask)
       .settings(compile <<= compile in Compile dependsOn makeCpp)
+      .settings(compileTestSchemaTask)
+//      .settings(test <<= test in Test dependsOn compileTestSchema)
+//      .settings(unmanagedSourceDirectories in Test += sourceDirectory.value / "test" / "generated")
 
   lazy val runtime =
     project(
@@ -44,13 +47,19 @@ object Build extends sbt.Build {
         Seq(libraryDependencies ++= Shared.testDeps)
     ).configs(IntegrationTest)
 
+  val compileTestSchema = taskKey[Unit]("Run capnpc-java on test schema")
+  val compileTestSchemaTask = compileTestSchema := {
+    val result = "capnp compile -I compiler/src/main/cpp/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp".!!
+    println(s"**** CodeGen for test.capnp started\n$result\n**** CodeGen complete.");
+  }
+
   val makeCpp = taskKey[Unit]("Run make against the C++ code to create the Java code generator")
   val makeCppTask = makeCpp := {
     val makeResult = "make capnpc-java".!!
     println(s"**** C++ Build Started\n$makeResult\n**** C++ Build Complete")
   }
 
-  val makeExamples = taskKey[Unit]("Run capnp-java compiler against the addressbook schema")
+  val makeExamples = taskKey[Unit]("Run capnpc-java compiler against the addressbook schema")
   val makeExamplesTask = makeExamples := {
     Thread.sleep(1000)
     val makeResult = "make addressbook".!!
