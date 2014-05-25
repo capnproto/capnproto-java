@@ -3,7 +3,7 @@ CXX_FLAGS=-std=c++11 -stdlib=libc++ `pkg-config capnp --cflags --libs`
 
 CAPNPC_JAVA_SOURCES=compiler/src/main/cpp/capnpc-java.c++
 
-.PHONY: all clean addressbook
+.PHONY: all clean
 
 all : capnpc-java
 

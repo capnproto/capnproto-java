@@ -27,8 +27,9 @@ object Build extends sbt.Build {
     project(
       id = "examples",
       base = file("examples")
-    ).dependsOn(runtime)
+    ).dependsOn(runtime, compiler)
       .settings(makeExamplesTask)
+      .settings(test <<= test in Test dependsOn makeExamples)
       .settings(compile <<= compile in Compile dependsOn makeExamples)
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
       .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
@@ -45,7 +46,7 @@ object Build extends sbt.Build {
 
   val makeCpp = taskKey[Unit]("Run make against the C++ code to create the Java code generator")
   val makeCppTask = makeCpp := {
-    val makeResult = "make".!!
+    val makeResult = "make capnpc-java".!!
     println(s"**** C++ Build Started\n$makeResult\n**** C++ Build Complete")
   }
 
