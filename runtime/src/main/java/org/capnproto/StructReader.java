@@ -42,9 +42,9 @@ public final class StructReader {
         }
     }
 
-    public final byte getShortField(int offset) {
+    public final short getShortField(int offset) {
         if ((offset + 1) * 16 <= this.dataSize) {
-            return this.segment.buffer.get(this.data + offset * 2);
+            return this.segment.buffer.getShort(this.data + offset * 2);
         } else {
             return 0;
         }
