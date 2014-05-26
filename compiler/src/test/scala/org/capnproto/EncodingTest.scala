@@ -11,6 +11,7 @@ class EncodingSuite extends FunSuite {
     val allTypes = message.initRoot(TestAllTypes.Builder.factory);
     allTypes.setVoidField();
     allTypes.setBoolField(true);
+    // ...
   }
 
 }

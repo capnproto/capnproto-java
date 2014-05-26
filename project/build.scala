@@ -14,12 +14,13 @@ object Build extends sbt.Build {
     project(
       id = "compiler",
       base = file("compiler")
-    ).settings(makeCppTask).dependsOn(runtime)
+    ).dependsOn(runtime)
+      .settings(makeCppTask)
       .settings(compile <<= compile in Compile dependsOn makeCpp)
       .settings(compileTestSchemaTask)
-
-      .settings(test <<= test in Test dependsOn compileTestSchema )
+      .settings(test <<= test in Test dependsOn compileTestSchema)
       .settings(unmanagedSourceDirectories in Test += sourceDirectory.value / "test" / "generated")
+      .settings(cleanFiles += sourceDirectory.value / "test" / "generated")
 
   lazy val runtime =
     project(

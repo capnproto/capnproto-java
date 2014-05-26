@@ -67,6 +67,22 @@ public final class StructReader {
         }
     }
 
+    public final float getFloatField(int offset) {
+        if ((offset + 1) * 32 <= this.dataSize) {
+            return this.segment.buffer.getFloat(this.data + offset * 4);
+        } else {
+            return 0;
+        }
+    }
+
+    public final double getDoubleField(int offset) {
+        if ((offset + 1) * 64 <= this.dataSize) {
+            return this.segment.buffer.getDouble(this.data + offset * 8);
+        } else {
+            return 0;
+        }
+    }
+
     public final PointerReader getPointerField(int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return new PointerReader(this.segment,

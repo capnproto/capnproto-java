@@ -67,6 +67,23 @@ public final class StructBuilder {
         this.segment.buffer.putLong(this.data + offset * 8, value);
     }
 
+    public final float getFloatField(int offset) {
+        return this.segment.buffer.getFloat(this.data + offset * 4);
+    }
+
+    public final void setFloatField(int offset, float value) {
+        this.segment.buffer.putFloat(this.data + offset * 4, value);
+    }
+
+    public final double getDoubleField(int offset) {
+        return this.segment.buffer.getDouble(this.data + offset * 8);
+    }
+
+    public final void setDoubleField(int offset, double value) {
+        this.segment.buffer.putDouble(this.data + offset * 8, value);
+    }
+
+
     public final PointerBuilder getPointerField(int index) {
         return new PointerBuilder(this.segment, this.pointers + index);
     }

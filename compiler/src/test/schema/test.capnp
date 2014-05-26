@@ -26,8 +26,9 @@ struct TestAllTypes {
   uInt16Field    @7  : UInt16;
   uInt32Field    @8  : UInt32;
   uInt64Field    @9  : UInt64;
-#  float32Field   @10 : Float32;
-#  float64Field   @11 : Float64;
+  float32Field   @10 : Float32;
+  float64Field   @11 : Float64;
+  textField      @12 : Text;
 # ...
 }
 
