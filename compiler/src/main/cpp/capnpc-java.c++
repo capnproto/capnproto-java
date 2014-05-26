@@ -56,7 +56,7 @@
 namespace capnp {
 namespace {
 
-static constexpr uint64_t NAMESPACE_ANNOTATION_ID = 0xb9c6f99ebf805f2cull;
+static constexpr uint64_t OUTER_CLASSNAME_ANNOTATION_ID = 0x9b066bb4881f7cd3;
 static constexpr uint64_t PACKAGE_ANNOTATION_ID = 0x9ee4c8f803b3b596ull;
 
 static constexpr const char* FIELD_SIZE_NAMES[] = {
@@ -194,18 +194,16 @@ private:
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
 
-  kj::String outerClassName;
-
   kj::StringTree javaFullName(Schema schema) {
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
       for (auto annotation: node.getAnnotations()) {
-        /*        if (annotation.getId() == NAMESPACE_ANNOTATION_ID) {
-          return kj::strTree("", annotation.getValue().getText());
-          }*/
+        if (annotation.getId() == OUTER_CLASSNAME_ANNOTATION_ID) {
+          return kj::strTree("", toTitleCase(annotation.getValue().getText()));
+        }
       }
-      return kj::strTree(outerClassName);
+      return kj::strTree(" ");//kj::strTree(outerClassName);
     } else {
       Schema parent = schemaLoader.get(node.getScopeId());
       for (auto nested: parent.getProto().getNestedNodes()) {
@@ -1324,7 +1322,7 @@ private:
     kj::StringTree sourceFileDefs;
   };
 
-  NodeText makeNodeText(kj::StringPtr namespace_, kj::StringPtr scope,
+  NodeText makeNodeText(kj::StringPtr scope,
                         kj::StringPtr name, Schema schema,
                         int indent) {
     auto proto = schema.getProto();
@@ -1336,15 +1334,13 @@ private:
     kj::Vector<NodeText> nestedTexts(proto.getNestedNodes().size());
     for (auto nested: proto.getNestedNodes()) {
       nestedTexts.add(makeNodeText(
-                                   namespace_,
                                    subScope, nested.getName(), schemaLoader.get(nested.getId()), indent + 1));
     };
 
     if (proto.isStruct()) {
       for (auto field: proto.getStruct().getFields()) {
         if (field.isGroup()) {
-          nestedTexts.add(makeNodeText(
-              namespace_, subScope, toTitleCase(field.getName()),
+          nestedTexts.add(makeNodeText(subScope, toTitleCase(field.getName()),
               schemaLoader.get(field.getGroup().getTypeId()), indent + 1));
         }
       }
@@ -1423,7 +1419,7 @@ private:
         "};\n");
 
     NodeTextNoSchema top = makeNodeTextWithoutNested(
-        namespace_, scope, name, schema,
+        scope, name, schema,
         KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }, indent);
 
     return NodeText {
@@ -1463,7 +1459,7 @@ private:
     };
   }
 
-  NodeTextNoSchema makeNodeTextWithoutNested(kj::StringPtr namespace_, kj::StringPtr scope,
+  NodeTextNoSchema makeNodeTextWithoutNested(kj::StringPtr scope,
                                              kj::StringPtr name, Schema schema,
                                              kj::Array<kj::StringTree> nestedTypeDecls,
                                              int indent) {
@@ -1559,6 +1555,7 @@ private:
   // -----------------------------------------------------------------
 
   struct FileText {
+    kj::String outerClassname;
     kj::StringTree source;
   };
 
@@ -1569,47 +1566,26 @@ private:
     auto node = schema.getProto();
     auto displayName = node.getDisplayName();
 
-    kj::Vector<kj::ArrayPtr<const char>> namespaceParts;
-    kj::String namespacePrefix;
     kj::StringPtr packageName;
-
-    for (auto annotation: node.getAnnotations()) {
-      if (annotation.getId() == NAMESPACE_ANNOTATION_ID) {
-        kj::StringPtr ns = annotation.getValue().getText();
-        kj::StringPtr ns2 = ns;
-        namespacePrefix = kj::str("::", ns);
-
-        for (;;) {
-          KJ_IF_MAYBE(colonPos, ns.findFirst(':')) {
-            namespaceParts.add(ns.slice(0, *colonPos));
-            ns = ns.slice(*colonPos);
-            if (!ns.startsWith("::")) {
-              context.exitError(kj::str(displayName, ": invalid namespace spec: ", ns2));
-            }
-            ns = ns.slice(2);
-          } else {
-            namespaceParts.add(ns);
-            break;
-          }
-        }
-
-        break;
-      }
-    }
+    kj::StringPtr outerClassname;
 
     for (auto annotation: node.getAnnotations()) {
       if (annotation.getId() == PACKAGE_ANNOTATION_ID) {
         packageName = annotation.getValue().getText();
-        break;
+      } else if (annotation.getId() == OUTER_CLASSNAME_ANNOTATION_ID) {
+        outerClassname = annotation.getValue().getText();
       }
     }
 
     if (packageName.size() == 0) {
       context.exitError(kj::str(displayName, ": must provide a Java package name."));
     }
+    if (outerClassname.size() == 0) {
+      context.exitError(kj::str(displayName, ": must provide a Java outer classname."));
+    }
 
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
-      return makeNodeText(namespacePrefix, "", nested.getName(), schemaLoader.get(nested.getId()), 1);
+      return makeNodeText("", nested.getName(), schemaLoader.get(nested.getId()), 1);
     };
 
     kj::String separator = kj::str("// ", kj::repeat('=', 87), "\n");
@@ -1625,15 +1601,14 @@ private:
         KJ_MAP(n, nodeTexts) { return kj::mv(n.sourceFileDefs); });
 
     return FileText {
+      kj::str(outerClassname),
       kj::strTree(
           "// Generated by Cap'n Proto compiler, DO NOT EDIT\n"
           "// source: ", baseName(displayName), "\n\n",
           "package ", packageName, ";\n\n",
           //"import org.capnproto;\n",
-          //          KJ_MAP(n, namespaceParts) { return kj::strTree("namespace ", n, " {\n"); }, "\n",
-          "public class ", outerClassName, " {\n",
+          "public class ", outerClassname, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
-          //KJ_MAP(n, namespaceParts) { return kj::strTree("}\n"); },
           "}\n",
           "\n")
     };
@@ -1698,13 +1673,10 @@ private:
       KJ_IF_MAYBE(dotpos, filename.findLast('.')) {
         stemend = *dotpos;
       }
-      outerClassName = toTitleCase(kj::str(filename.slice(stemstart, stemend)));
-
-      auto genFileName = kj::str(filename.slice(0, stemstart), outerClassName, ".java");
 
       auto fileText = makeFileText(schema, requestedFile);
 
-      writeFile(genFileName, fileText.source);
+      writeFile(kj::str(filename.slice(0, stemstart), fileText.outerClassname, ".java"), fileText.source);
     }
 
     return true;

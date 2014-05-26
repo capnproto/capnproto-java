@@ -28,6 +28,7 @@ $Cxx.namespace("addressbook");
 
 using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.examples");
+$Java.outerClassname("Addressbook");
 
 struct Person {
   id @0 :UInt32;
