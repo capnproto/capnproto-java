@@ -30,27 +30,27 @@ class LayoutSuite extends FunSuite {
 
     // TODO masking
 
-    assert(reader.getBoolField(0) === true);
-    assert(reader.getBoolField(1) === false);
-    assert(reader.getBoolField(2) === false);
+    assert(reader.getBooleanField(0) === true);
+    assert(reader.getBooleanField(1) === false);
+    assert(reader.getBooleanField(2) === false);
 
-    assert(reader.getBoolField(3) === false);
-    assert(reader.getBoolField(4) === false);
-    assert(reader.getBoolField(5) === false);
-    assert(reader.getBoolField(6) === false);
-    assert(reader.getBoolField(7) == false);
+    assert(reader.getBooleanField(3) === false);
+    assert(reader.getBooleanField(4) === false);
+    assert(reader.getBooleanField(5) === false);
+    assert(reader.getBooleanField(6) === false);
+    assert(reader.getBooleanField(7) == false);
 
-    assert(reader.getBoolField(8) === true);
-    assert(reader.getBoolField(9) === true);
-    assert(reader.getBoolField(10) === false);
-    assert(reader.getBoolField(11) === false);
-    assert(reader.getBoolField(12) === false);
-    assert(reader.getBoolField(13) === true);
-    assert(reader.getBoolField(14) === false);
-    assert(reader.getBoolField(15) === false);
+    assert(reader.getBooleanField(8) === true);
+    assert(reader.getBooleanField(9) === true);
+    assert(reader.getBooleanField(10) === false);
+    assert(reader.getBooleanField(11) === false);
+    assert(reader.getBooleanField(12) === false);
+    assert(reader.getBooleanField(13) === true);
+    assert(reader.getBooleanField(14) === false);
+    assert(reader.getBooleanField(15) === false);
 
-    assert(reader.getBoolField(63) === true);
-    assert(reader.getBoolField(64) === false);
+    assert(reader.getBooleanField(63) === true);
+    assert(reader.getBooleanField(64) === false);
 
     // TODO masking
 
@@ -61,14 +61,14 @@ class LayoutSuite extends FunSuite {
     builder.setIntField(2, 0x20212223);
     builder.setShortField(6, 0x3031.toShort);
     builder.setByteField(14, 0x40);
-    builder.setBoolField(120, false);
-    builder.setBoolField(121, false);
-    builder.setBoolField(122, true);
-    builder.setBoolField(123, false);
-    builder.setBoolField(124, true);
-    builder.setBoolField(125, true);
-    builder.setBoolField(126, true);
-    builder.setBoolField(127, false);
+    builder.setBooleanField(120, false);
+    builder.setBooleanField(121, false);
+    builder.setBooleanField(122, true);
+    builder.setBooleanField(123, false);
+    builder.setBooleanField(124, true);
+    builder.setBooleanField(125, true);
+    builder.setBooleanField(126, true);
+    builder.setBooleanField(127, false);
   }
 
   def checkStruct(builder : StructBuilder) {
@@ -76,14 +76,14 @@ class LayoutSuite extends FunSuite {
     assert(0x20212223 == builder.getIntField(2));
     assert(0x3031 === builder.getShortField(6));
     assert(0x40 === builder.getByteField(14));
-    assert(false === builder.getBoolField(120));
-    assert(false === builder.getBoolField(121));
-    assert(true === builder.getBoolField(122));
-    assert(false === builder.getBoolField(123));
-    assert(true === builder.getBoolField(124));
-    assert(true === builder.getBoolField(125));
-    assert(true === builder.getBoolField(126));
-    assert(false === builder.getBoolField(127));
+    assert(false === builder.getBooleanField(120));
+    assert(false === builder.getBooleanField(121));
+    assert(true === builder.getBooleanField(122));
+    assert(false === builder.getBooleanField(123));
+    assert(true === builder.getBooleanField(124));
+    assert(true === builder.getBooleanField(125));
+    assert(true === builder.getBooleanField(126));
+    assert(false === builder.getBooleanField(127));
   }
 
   test("StructRoundTrip_OneSegment") {

@@ -14,11 +14,12 @@ object Build extends sbt.Build {
     project(
       id = "compiler",
       base = file("compiler")
-    ).settings(makeCppTask)
+    ).settings(makeCppTask).dependsOn(runtime)
       .settings(compile <<= compile in Compile dependsOn makeCpp)
       .settings(compileTestSchemaTask)
-//      .settings(test <<= test in Test dependsOn compileTestSchema)
-//      .settings(unmanagedSourceDirectories in Test += sourceDirectory.value / "test" / "generated")
+
+      .settings(test <<= test in Test dependsOn compileTestSchema )
+      .settings(unmanagedSourceDirectories in Test += sourceDirectory.value / "test" / "generated")
 
   lazy val runtime =
     project(
@@ -49,6 +50,7 @@ object Build extends sbt.Build {
 
   val compileTestSchema = taskKey[Unit]("Run capnpc-java on test schema")
   val compileTestSchemaTask = compileTestSchema := {
+    val result0 = "mkdir -p compiler/src/test/generated".!!
     val result = "capnp compile -I compiler/src/main/cpp/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp".!!
     println(s"**** CodeGen for test.capnp started\n$result\n**** CodeGen complete.");
   }

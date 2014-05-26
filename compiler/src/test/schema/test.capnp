@@ -2,6 +2,7 @@
 
 using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.test");
+$Java.outerClassname("Test");
 
 enum TestEnum {
   foo @0;
@@ -12,6 +13,22 @@ enum TestEnum {
   corge @5;
   grault @6;
   garply @7;
+}
+
+struct TestAllTypes {
+  voidField      @0  : Void;
+  boolField      @1  : Bool;
+  int8Field      @2  : Int8;
+  int16Field     @3  : Int16;
+  int32Field     @4  : Int32;
+  int64Field     @5  : Int64;
+  uInt8Field     @6  : UInt8;
+  uInt16Field    @7  : UInt16;
+  uInt32Field    @8  : UInt32;
+  uInt64Field    @9  : UInt64;
+#  float32Field   @10 : Float32;
+#  float64Field   @11 : Float64;
+# ...
 }
 
 struct TestOutOfOrder {

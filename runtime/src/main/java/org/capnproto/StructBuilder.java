@@ -19,13 +19,13 @@ public final class StructBuilder {
         this.bit0Offset = bit0Offset;
     }
 
-    public final boolean getBoolField(int offset) {
+    public final boolean getBooleanField(int offset) {
         int bitOffset = (offset == 0 ? this.bit0Offset : offset);
         int position = this.data + (bitOffset / 8);
         return (this.segment.buffer.get(position) & (1 << (bitOffset % 8))) != 0;
     }
 
-    public final void setBoolField(int offset, boolean value) {
+    public final void setBooleanField(int offset, boolean value) {
         int bitOffset = offset;
         if (offset == 0) { bitOffset = this.bit0Offset; }
         byte bitnum = (byte)(bitOffset % 8);

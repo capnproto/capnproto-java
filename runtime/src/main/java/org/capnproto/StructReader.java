@@ -21,7 +21,7 @@ public final class StructReader {
         this.nestingLimit = nestingLimit;
     }
 
-    public final boolean getBoolField(int offset) {
+    public final boolean getBooleanField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
             if (offset == 0) {
