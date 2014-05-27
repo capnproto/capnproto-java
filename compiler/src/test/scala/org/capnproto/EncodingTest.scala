@@ -6,12 +6,12 @@ import org.scalatest.FunSuite
 
 
 class EncodingSuite extends FunSuite {
+
   test("AllTypes") {
     val message = new MessageBuilder();
     val allTypes = message.initRoot(TestAllTypes.Builder.factory);
-    allTypes.setVoidField();
-    allTypes.setBoolField(true);
-    // ...
+    TestUtil.initTestMessage(allTypes);
+    TestUtil.checkTestMessage(allTypes);
   }
 
 }

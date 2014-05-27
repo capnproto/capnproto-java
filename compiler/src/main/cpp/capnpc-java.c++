@@ -884,7 +884,38 @@ private:
       };
 
     } else if (kind == FieldKind::STRUCT) {
-      KJ_FAIL_REQUIRE("unimplemented");
+
+      return FieldText {
+        kj::strTree(
+          kj::mv(unionDiscrim.readerIsDecl),
+          spaces(indent), "  public boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+
+          spaces(indent), "  public ", type, ".Reader",
+          " get", titleCase, "() {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n", "\n"),
+
+        kj::strTree(
+          kj::mv(unionDiscrim.builderIsDecl),
+          spaces(indent), "  public final boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+          unionDiscrim.set,
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n"),
+
+        kj::strTree(),
+        kj::strTree()
+      };
 
     } else if (kind == FieldKind::BLOB) {
 
@@ -920,7 +951,6 @@ private:
           spaces(indent), "  }\n"),
 
         kj::strTree(),
-
         kj::strTree()
       };
     } else if (kind == FieldKind::LIST) {

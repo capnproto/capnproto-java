@@ -30,6 +30,8 @@ struct TestAllTypes {
   float64Field   @11 : Float64;
   textField      @12 : Text;
   dataField      @13 : Data;
+  structField    @14 : TestAllTypes;
+  enumField      @15 : TestEnum;
 # ...
 }
 
