@@ -29,6 +29,7 @@ struct TestAllTypes {
   float32Field   @10 : Float32;
   float64Field   @11 : Float64;
   textField      @12 : Text;
+  dataField      @13 : Data;
 # ...
 }
 

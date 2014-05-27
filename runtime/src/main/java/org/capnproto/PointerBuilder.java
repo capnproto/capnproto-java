@@ -29,4 +29,8 @@ public final class PointerBuilder {
         WireHelpers.setTextPointer(this.pointer, this.segment, value);
     }
 
+    public final void setData(Data.Reader value) {
+        throw new Error("unimplemented");
+    }
+
 }

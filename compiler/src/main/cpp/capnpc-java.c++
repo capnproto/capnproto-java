@@ -888,6 +888,8 @@ private:
 
     } else if (kind == FieldKind::BLOB) {
 
+      kj::String blobKind = typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
+
       return FieldText {
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDecl),
@@ -898,7 +900,7 @@ private:
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
           spaces(indent), "    return _reader.getPointerField(",
-          offset, ").getText();\n", // XXX
+          offset, ").get", blobKind, " ();\n", // XXX
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -911,7 +913,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _builder.getPointerField(", offset, ").setText(value);\n",
+          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "(value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
           spaces(indent), "    throw new Error();\n",

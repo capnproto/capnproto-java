@@ -46,4 +46,8 @@ public final class PointerReader {
         return WireHelpers.readTextPointer(this.segment,
                                            this.pointer);
     }
+
+    public Data.Reader getData() {
+        throw new Error("unimplemented");
+    }
 }
