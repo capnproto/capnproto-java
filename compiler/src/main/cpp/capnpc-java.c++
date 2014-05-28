@@ -174,9 +174,9 @@ kj::String safeIdentifier(kj::StringPtr identifier) {
 
 // =======================================================================================
 
-class CapnpcCppMain {
+class CapnpcJavaMain {
 public:
-  CapnpcCppMain(kj::ProcessContext& context): context(context) {}
+  CapnpcJavaMain(kj::ProcessContext& context): context(context) {}
 
   kj::MainFunc getMain() {
     return kj::MainBuilder(context, "Cap'n Proto loopback plugin version " VERSION,
@@ -270,9 +270,11 @@ private:
         return javaFullName(schemaLoader.get(type.getInterface().getTypeId()));
 
       case schema::Type::LIST:
+      {
+        auto elemenType = type.getList().getElementType();
         // XXX
         return kj::strTree(" org.capnproto.StructList");
-
+      }
       case schema::Type::ANY_POINTER:
         // Not used.
         return kj::strTree();
@@ -1019,8 +1021,7 @@ private:
 
             spaces(indent), "  public final ", type, ".Reader<", elementReaderType, ">",
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", type, ".Reader<",
-            elementReaderType, ">(\n",
+            spaces(indent), "    return new ", type, ".Reader<", elementReaderType, ">(\n",
             spaces(indent), "      ", elementReaderType, ".factory,\n",
             spaces(indent), "      _reader.getPointerField(", offset, ").getList(",
             // XXX what about lists of non-structs?
@@ -1196,45 +1197,44 @@ private:
     structNode.getPointerCount();
 
     return StructText {
+      kj::strTree("  struct ", name, ";\n"),
+
       kj::strTree(
-          "  struct ", name, ";\n"),
-
+        spaces(indent), "public static class ", name, " {\n",
         kj::strTree(
-          spaces(indent), "public static class ", name, " {\n",
-          kj::strTree(
-            spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
-            spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
-            ",(short)", structNode.getPointerCount(),
-            ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
+          spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
+          spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
+          ",(short)", structNode.getPointerCount(),
+          ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
 
-          kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
-                                    structNode.getDiscriminantOffset(),
-                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
-                                    indent + 1),
-                      makeBuilderDef(fullName, name, structNode,
-                                     KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
-                                     indent + 1)),
+        kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
+                                  structNode.getDiscriminantOffset(),
+                                  KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
+                                  indent + 1),
+                    makeBuilderDef(fullName, name, structNode,
+                                   KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
+                                   indent + 1)),
 
-          structNode.getDiscriminantCount() == 0 ?
-                    kj::strTree() :
-                    kj::strTree(
-                                spaces(indent), "  public enum Which {\n",
-                                KJ_MAP(f, structNode.getFields()) {
-                                  if (hasDiscriminantValue(f)) {
-                                    return kj::strTree(spaces(indent), "    ", toUpperCase(f.getName()), ",\n");
-                                  } else {
-                                    return kj::strTree();
-                                  }
-                                },
-                                spaces(indent), "  }\n"),
-                    KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-                    spaces(indent), "}\n"
-                    "\n",
-                    "\n"),
+        structNode.getDiscriminantCount() == 0 ?
+        kj::strTree() :
+        kj::strTree(
+          spaces(indent), "  public enum Which {\n",
+          KJ_MAP(f, structNode.getFields()) {
+            if (hasDiscriminantValue(f)) {
+              return kj::strTree(spaces(indent), "    ", toUpperCase(f.getName()), ",\n");
+            } else {
+              return kj::strTree();
+            }
+          },
+          spaces(indent), "  }\n"),
+        KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
+        spaces(indent), "}\n"
+        "\n",
+        "\n"),
 
-      kj::strTree(),
+        kj::strTree(),
         kj::strTree()
-    };
+        };
   }
 
 
@@ -1572,10 +1572,8 @@ private:
           kj::strTree(),
           kj::strTree(),
           kj::strTree(),
-
           kj::strTree(),
           kj::strTree(),
-
           kj::strTree(),
         };
       }
@@ -1718,4 +1716,4 @@ private:
 }  // namespace
 }  // namespace capnp
 
-KJ_MAIN(capnp::CapnpcCppMain);
+KJ_MAIN(capnp::CapnpcJavaMain);

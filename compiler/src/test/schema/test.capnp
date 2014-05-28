@@ -32,6 +32,10 @@ struct TestAllTypes {
   dataField      @13 : Data;
   structField    @14 : TestAllTypes;
   enumField      @15 : TestEnum;
+  interfaceField @16 : Void;  # TODO
+
+#  voidList      @17 : List(Void);
+#  boolList      @18 : List(Bool);
 # ...
 }
 
