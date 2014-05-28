@@ -2,7 +2,7 @@ package org.capnproto;
 
 public final class StructList {
     public static final class Reader<T> {
-        public ListReader reader;
+        public final ListReader reader;
         public final FromStructReader<T> factory;
 
         public Reader(FromStructReader<T> factory, ListReader reader) {
@@ -20,7 +20,7 @@ public final class StructList {
     }
 
     public static final class Builder<T> {
-        public ListBuilder builder;
+        public final ListBuilder builder;
         public final FromStructBuilder<T> factory;
 
         public Builder(FromStructBuilder<T> factory, ListBuilder builder) {

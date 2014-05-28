@@ -6,7 +6,7 @@ import org.capnproto.test.Test._;
 
 object TestUtil {
   def initTestMessage(builder : TestAllTypes.Builder) {
-    builder.setVoidField();
+    builder.setVoidField(org.capnproto.Void.VOID);
     builder.setBoolField(true);
     builder.setInt8Field(-123);
     builder.setInt16Field(-12345);
