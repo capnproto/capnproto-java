@@ -40,7 +40,7 @@ public class AddressbookMain {
         bobPhones.get(0).setType(Person.PhoneNumber.Type.HOME);
         bobPhones.get(1).setNumber(new Text.Reader("555-7654"));
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
-        bob.getEmployment().setUnemployed();
+        bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
         Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
                                message);

@@ -245,7 +245,7 @@ private:
 
   kj::StringTree typeName(schema::Type::Reader type) {
     switch (type.which()) {
-      case schema::Type::VOID: return kj::strTree("void");
+      case schema::Type::VOID: return kj::strTree("org.capnproto.Void");
 
       case schema::Type::BOOL: return kj::strTree("boolean");
       case schema::Type::INT8: return kj::strTree("byte");
@@ -802,7 +802,7 @@ private:
             (typeBody.which() == schema::Type::ENUM ?
              kj::strTree("    return ", type, ".values()[_reader.getShortField(", offset, ")];\n") :
              (typeBody.which() == schema::Type::VOID ?
-              kj::strTree("    // nothing to return\n") :
+              kj::strTree("    return org.capnproto.Void.VOID;\n") :
               kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
@@ -814,26 +814,19 @@ private:
             (typeBody.which() == schema::Type::ENUM ?
              kj::strTree("    return ", type, ".values()[_builder.getShortField(", offset, ")];\n") :
              (typeBody.which() == schema::Type::VOID ?
-              kj::strTree("    // nothing to return\n") :
+              kj::strTree("    return org.capnproto.Void.VOID;\n") :
               kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, ");\n"))),
             spaces(indent), "  }\n",
 
-            (typeBody.which() == schema::Type::VOID ?
-             kj::strTree(spaces(indent), "  public final void set", titleCase, "() {\n",
-                         unionDiscrim.set,
-                         spaces(indent), "  }\n") :
-             (typeBody.which() == schema::Type::ENUM ?
-              kj::strTree(
-                spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
-                unionDiscrim.set,
-                spaces(indent), "    _builder.setShortField(", offset, ", (short)value.ordinal());\n",
-                spaces(indent), "  }\n") :
-              kj::strTree(
-                spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
-                unionDiscrim.set,
-                spaces(indent), "    _builder.set", toTitleCase(type),
-                "Field(", offset, ", value);\n",
-                spaces(indent), "  }\n"))),
+            spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+            unionDiscrim.set,
+            (typeBody.which() == schema::Type::ENUM ?
+             kj::strTree(spaces(indent), "    _builder.setShortField(", offset, ", (short)value.ordinal());\n") :
+             (typeBody.which() == schema::Type::VOID ?
+              kj::strTree() :
+              kj::strTree(spaces(indent), "    _builder.set",
+                          toTitleCase(type), "Field(", offset, ", value);\n"))),
+            spaces(indent), "  }\n",
             "\n"),
 
         kj::strTree(),
