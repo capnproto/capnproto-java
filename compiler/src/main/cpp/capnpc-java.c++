@@ -271,9 +271,32 @@ private:
 
       case schema::Type::LIST:
       {
-        auto elemenType = type.getList().getElementType();
-        // XXX
-        return kj::strTree(" org.capnproto.StructList");
+        auto elementType = type.getList().getElementType();
+        switch (elementType.which()) {
+        case schema::Type::VOID:
+        case schema::Type::BOOL:
+        case schema::Type::INT8:
+        case schema::Type::INT16:
+        case schema::Type::INT32:
+        case schema::Type::INT64:
+        case schema::Type::UINT8:
+        case schema::Type::UINT16:
+        case schema::Type::UINT32:
+        case schema::Type::UINT64:
+        case schema::Type::FLOAT32:
+        case schema::Type::FLOAT64:
+          return kj::strTree(" org.capnproto.PrimitiveList");
+        case schema::Type::STRUCT:
+          return kj::strTree(" org.capnproto.StructList");
+        case schema::Type::TEXT:
+        case schema::Type::DATA:
+        case schema::Type::ENUM:
+        case schema::Type::INTERFACE:
+        case schema::Type::ANY_POINTER:
+        case schema::Type::LIST:
+          KJ_FAIL_REQUIRE("unimplemented");
+        }
+        KJ_UNREACHABLE;
       }
       case schema::Type::ANY_POINTER:
         // Not used.
