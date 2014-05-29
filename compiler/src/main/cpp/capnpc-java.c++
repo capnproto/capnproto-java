@@ -179,11 +179,10 @@ public:
   CapnpcJavaMain(kj::ProcessContext& context): context(context) {}
 
   kj::MainFunc getMain() {
-    return kj::MainBuilder(context, "Cap'n Proto loopback plugin version " VERSION,
-          "This is a Cap'n Proto compiler plugin which \"de-compiles\" the schema back into "
-          "Cap'n Proto schema language format, with comments showing the offsets chosen by the "
-          "compiler.  This is meant to be run using the Cap'n Proto compiler, e.g.:\n"
-          "    capnp compile -ocapnp foo.capnp")
+    return kj::MainBuilder(context, "Cap'n Proto Java plugin version " VERSION,
+          "This is a Cap'n Proto compiler plugin which generates Java code."
+          " This is meant to be run using the Cap'n Proto compiler, e.g.:\n"
+          "    capnp compile -ojava foo.capnp")
         .callAfterParsing(KJ_BIND_METHOD(*this, run))
         .build();
   }
@@ -1006,6 +1005,11 @@ private:
           case schema::Type::UINT64:
           case schema::Type::FLOAT32:
           case schema::Type::FLOAT64:
+            builderFactoryType = kj::str("ord.capnproto.PrimitiveElementFactory.",
+                                         toUpperCase(kj::str(typeName(typeBody.getList().getElementType()))));
+            readerFactoryType = kj::str(builderFactoryType);
+            primitiveElement = true;
+            break;
           case schema::Type::ENUM:
             primitiveElement = true;
             break;
