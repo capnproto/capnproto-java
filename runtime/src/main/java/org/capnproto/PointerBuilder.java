@@ -21,6 +21,10 @@ public final class PointerBuilder {
         return WireHelpers.initStructPointer(this.pointer, this.segment, size);
     }
 
+    public final ListBuilder initList(byte elementSize, int elementCount) {
+        throw new Error("unimplemented");
+    }
+
     public final ListBuilder initStructList(int elementCount, StructSize elementSize) {
         return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
     }

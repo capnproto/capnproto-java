@@ -34,7 +34,7 @@ struct TestAllTypes {
   enumField      @15 : TestEnum;
   interfaceField @16 : Void;  # TODO
 
-# voidList      @17 : List(Void);
+  voidList      @17 : List(Void);
 #  boolList      @18 : List(Bool);
 # ...
 }

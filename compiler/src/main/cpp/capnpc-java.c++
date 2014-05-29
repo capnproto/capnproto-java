@@ -980,12 +980,21 @@ private:
 
       kj::String elementReaderType;
       kj::String elementBuilderType;
+      kj::String builderFactoryType;
+      kj::String readerFactoryType;
+      kj::String fieldSize;
       bool isStructOrCapList = false;
+      bool isStructList = false;
       if (kind == FieldKind::LIST) {
         bool primitiveElement = false;
         bool interface = false;
         switch (typeBody.getList().getElementType().which()) {
           case schema::Type::VOID:
+            primitiveElement = true;
+            builderFactoryType = kj::str("org.capnproto.PrimitiveElementFactory.VOID");
+            readerFactoryType = kj::str(builderFactoryType);
+            fieldSize = kj::str("org.capnproto.FieldSize.VOID");
+            break;
           case schema::Type::BOOL:
           case schema::Type::INT8:
           case schema::Type::INT16:
@@ -1015,16 +1024,20 @@ private:
             break;
 
           case schema::Type::STRUCT:
+            isStructList = true;
             isStructOrCapList = true;
             primitiveElement = false;
+            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
+            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
+            readerFactoryType = kj::str(elementReaderType, ".factory"),
+            builderFactoryType = kj::str(elementBuilderType, ".factory"),
+            fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
             break;
         }
-        elementReaderType = kj::str(
-            typeName(typeBody.getList().getElementType()),
-            primitiveElement ? "" : interface ? "::Client" : ".Reader");
-        elementBuilderType = kj::str(
-            typeName(typeBody.getList().getElementType()),
-            primitiveElement ? "" : interface ? "::Client" : ".Builder");
+        if (primitiveElement) {
+          elementReaderType = kj::str(typeName(typeBody.getList().getElementType()));
+          elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()));
+        }
       }
 
 
@@ -1038,10 +1051,9 @@ private:
             spaces(indent), "  public final ", type, ".Reader<", elementReaderType, ">",
             " get", titleCase, "() {\n",
             spaces(indent), "    return new ", type, ".Reader<", elementReaderType, ">(\n",
-            spaces(indent), "      ", elementReaderType, ".factory,\n",
+            spaces(indent), "      ", readerFactoryType, ",\n",
             spaces(indent), "      _reader.getPointerField(", offset, ").getList(",
-            // XXX what about lists of non-structs?
-            typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding)",
+            fieldSize, ")",
             ");\n",
             spaces(indent), "  }\n",
             "\n"),
@@ -1061,10 +1073,11 @@ private:
             spaces(indent), "  public final ", type, ".Builder<", elementBuilderType,">",
             " init", titleCase, "(int size) {\n",
             spaces(indent), "    return new ", type, ".Builder<", elementBuilderType, ">(\n",
-            spaces(indent), "      ", elementBuilderType,".factory,\n",
-            // XXX what about non-struct lists?
-            spaces(indent), "      _builder.getPointerField(", offset, ").initStructList(",
-            "size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)",
+            spaces(indent), "      ", builderFactoryType, ",\n",
+            spaces(indent), "      _builder.getPointerField(", offset, ").init",
+            (isStructList ?
+             kj::strTree("StructList(size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
+             kj::strTree("List(", fieldSize, ", size)")),
             ");\n",
             spaces(indent), "  }\n"),
 
