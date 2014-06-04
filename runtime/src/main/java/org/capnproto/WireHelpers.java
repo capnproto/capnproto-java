@@ -34,6 +34,12 @@ final class WireHelpers {
                                  size.data * 64, size.pointers, (byte)0);
     }
 
+    public static StructBuilder getWritableStructPointer(int refOffset,
+                                                         SegmentBuilder segment,
+                                                         StructSize size) {
+        throw new Error("unimplemented");
+    }
+
     public static ListBuilder initListPointer(int refOffset,
                                               SegmentBuilder segment,
                                               int elementCount,

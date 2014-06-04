@@ -20,6 +20,22 @@ object TestUtil {
     builder.setFloat64Field(-123e45);
     builder.setTextField(new Text.Reader("foo"));
 //    builder.setDataField(data("bar"));
+    {
+      val subBuilder = builder.initStructField();
+      subBuilder.setVoidField(org.capnproto.Void.VOID);
+      subBuilder.setBoolField(true);
+      subBuilder.setInt8Field(-12);
+      subBuilder.setInt16Field(3456);
+      subBuilder.setInt32Field(-78901234);
+      subBuilder.setInt64Field(56789012345678L);
+      subBuilder.setUInt8Field(90);
+      subBuilder.setUInt16Field(1234);
+      subBuilder.setUInt32Field(56789012);
+      subBuilder.setUInt64Field(345678901234567890L);
+      subBuilder.setFloat32Field(-1.25e-10f);
+      subBuilder.setFloat64Field(345);
+      subBuilder.setTextField(new Text.Reader("baz"));
+    }
 
   }
 
@@ -38,6 +54,10 @@ object TestUtil {
     assert(builder.getFloat32Field() == 1234.5f);
     assert(builder.getFloat64Field() == -123e45);
     //assert(builder.getTextField().toString() == "foo");
+
+    {
+//      val subBuilder = builder.getStructField();
+    }
   }
 
 }

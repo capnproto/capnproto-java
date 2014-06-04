@@ -918,7 +918,8 @@ private:
 
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "    return ", type,
+          ".Reader.factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -927,14 +928,17 @@ private:
           spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "    return ", type,
+          ".Builder.factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct());\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
+          spaces(indent), "    return ",
+          type, ".Builder.factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
+          type, ".STRUCT_SIZE", "));\n",
           spaces(indent), "  }\n"),
 
         kj::strTree(),
