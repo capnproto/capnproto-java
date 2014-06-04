@@ -1,33 +1,231 @@
 package org.capnproto;
 
 public class PrimitiveList {
-    public static final class Reader<T> {
-        public final ListReader reader;
-        public final PrimitiveElementFactory<T> factory;
+    public static class Void {
+        public static final class Reader {
+            public final ListReader reader;
 
-        public Reader(PrimitiveElementFactory<T> factory, ListReader reader) {
-            this.factory = factory;
-            this.reader = reader;
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public org.capnproto.Void get(int index) {
+                return org.capnproto.Void.VOID;
+            }
         }
 
-        public int size() {
-            return this.reader.size();
-        }
+        public static final class Builder {
+            public final ListBuilder builder;
 
-        public T get(int index) {
-            return this.factory.get(this.reader, index);
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
         }
     }
 
-    public static final class Builder<T> {
-        public final ListBuilder builder;
-        public final PrimitiveElementFactory<T> factory;
+    public static class Boolean {
+        public static final class Reader {
+            public final ListReader reader;
 
-        public Builder(PrimitiveElementFactory<T> factory, ListBuilder builder) {
-            this.factory = factory;
-            this.builder = builder;
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public boolean get(int index) {
+                throw new Error();
+            }
         }
 
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
 
     }
+
+
+
+    public static class Byte {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public byte get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+    public static class Short {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public short get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+    public static class Int {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public int get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+    public static class Float {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public float get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+
+    public static class Long {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public long get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+    public static class Double {
+        public static final class Reader {
+            public final ListReader reader;
+
+            public Reader(ListReader reader) {
+                this.reader = reader;
+            }
+
+            public int size() {
+                return this.reader.size();
+            }
+
+            public double get(int index) {
+                throw new Error();
+            }
+        }
+
+        public static final class Builder {
+            public final ListBuilder builder;
+
+            public Builder(ListBuilder builder) {
+                this.builder = builder;
+            }
+
+        }
+
+    }
+
+
 }

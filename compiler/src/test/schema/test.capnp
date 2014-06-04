@@ -35,7 +35,17 @@ struct TestAllTypes {
   interfaceField @16 : Void;  # TODO
 
   voidList      @17 : List(Void);
-#  boolList      @18 : List(Bool);
+  boolList      @18 : List(Bool);
+  int8List      @19 : List(Int8);
+  int16List     @20 : List(Int16);
+  int32List     @21 : List(Int32);
+  int64List     @22 : List(Int64);
+  uInt8List     @23 : List(UInt8);
+  uInt16List    @24 : List(UInt16);
+  uInt32List    @25 : List(UInt32);
+  uInt64List    @26 : List(UInt64);
+  float32List   @27 : List(Float32);
+  float64List   @28 : List(Float64);
 # ...
 }
 

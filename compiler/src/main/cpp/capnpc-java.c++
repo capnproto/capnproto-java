@@ -273,18 +273,25 @@ private:
         auto elementType = type.getList().getElementType();
         switch (elementType.which()) {
         case schema::Type::VOID:
+          return kj::strTree(" org.capnproto.PrimitiveList.Void");
         case schema::Type::BOOL:
+          return kj::strTree(" org.capnproto.PrimitiveList.Boolean");
         case schema::Type::INT8:
-        case schema::Type::INT16:
-        case schema::Type::INT32:
-        case schema::Type::INT64:
         case schema::Type::UINT8:
+          return kj::strTree(" org.capnproto.PrimitiveList.Byte");
+        case schema::Type::INT16:
         case schema::Type::UINT16:
+          return kj::strTree(" org.capnproto.PrimitiveList.Short");
+        case schema::Type::INT32:
         case schema::Type::UINT32:
+          return kj::strTree(" org.capnproto.PrimitiveList.Int");
+        case schema::Type::INT64:
         case schema::Type::UINT64:
+          return kj::strTree(" org.capnproto.PrimitiveList.Long");
         case schema::Type::FLOAT32:
+          return kj::strTree(" org.capnproto.PrimitiveList.Float");
         case schema::Type::FLOAT64:
-          return kj::strTree(" org.capnproto.PrimitiveList");
+          return kj::strTree(" org.capnproto.PrimitiveList.Double");
         case schema::Type::STRUCT:
           return kj::strTree(" org.capnproto.StructList");
         case schema::Type::TEXT:
@@ -979,9 +986,11 @@ private:
 
       kj::String elementReaderType;
       kj::String elementBuilderType;
-      kj::String builderFactoryType;
-      kj::String readerFactoryType;
+      kj::String builderFactoryArg = kj::str("");
+      kj::String readerFactoryArg = kj::str("");
       kj::String fieldSize;
+      kj::String readerClass = kj::str("Reader");
+      kj::String builderClass = kj::str("Builder");
       bool isStructOrCapList = false;
       bool isStructList = false;
       if (kind == FieldKind::LIST) {
@@ -990,28 +999,43 @@ private:
         switch (typeBody.getList().getElementType().which()) {
           case schema::Type::VOID:
             primitiveElement = true;
-            builderFactoryType = kj::str("org.capnproto.PrimitiveElementFactory.VOID");
-            readerFactoryType = kj::str(builderFactoryType);
             fieldSize = kj::str("org.capnproto.FieldSize.VOID");
             break;
           case schema::Type::BOOL:
-          case schema::Type::INT8:
-          case schema::Type::INT16:
-          case schema::Type::INT32:
-          case schema::Type::INT64:
-          case schema::Type::UINT8:
-          case schema::Type::UINT16:
-          case schema::Type::UINT32:
-          case schema::Type::UINT64:
-          case schema::Type::FLOAT32:
-          case schema::Type::FLOAT64:
-            builderFactoryType = kj::str("ord.capnproto.PrimitiveElementFactory.",
-                                         toUpperCase(kj::str(typeName(typeBody.getList().getElementType()))));
-            readerFactoryType = kj::str(builderFactoryType);
             primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.BIT");
             break;
+
+          case schema::Type::INT8:
+          case schema::Type::UINT8:
+            primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.BYTE");
+            break;
+
+
+          case schema::Type::INT16:
+          case schema::Type::UINT16:
+            primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
+            break;
+
+          case schema::Type::INT32:
+          case schema::Type::UINT32:
+          case schema::Type::FLOAT32:
+            primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.FOUR_BYTES");
+            break;
+
+          case schema::Type::INT64:
+          case schema::Type::UINT64:
+          case schema::Type::FLOAT64:
+            primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.EIGHT_BYTES");
+            break;
+
           case schema::Type::ENUM:
             primitiveElement = true;
+            fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
             break;
 
           case schema::Type::TEXT:
@@ -1032,9 +1056,11 @@ private:
             isStructOrCapList = true;
             primitiveElement = false;
             elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
+            readerClass = kj::str("Reader<", elementReaderType, ">");
             elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
-            readerFactoryType = kj::str(elementReaderType, ".factory"),
-            builderFactoryType = kj::str(elementBuilderType, ".factory"),
+            builderClass = kj::str("Builder<", elementBuilderType, ">");
+            readerFactoryArg = kj::str(elementReaderType, ".factory,"),
+            builderFactoryArg = kj::str(elementBuilderType, ".factory,"),
             fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
             break;
         }
@@ -1052,11 +1078,10 @@ private:
             spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", type, ".Reader<", elementReaderType, ">",
+            spaces(indent), "  public final ", type, ".", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", type, ".Reader<", elementReaderType, ">(\n",
-            spaces(indent), "      ", readerFactoryType, ",\n",
-            spaces(indent), "      _reader.getPointerField(", offset, ").getList(",
+            spaces(indent), "    return new ", type, ".", readerClass, "(\n",
+            spaces(indent), "      ", readerFactoryArg, "_reader.getPointerField(", offset, ").getList(",
             fieldSize, ")",
             ");\n",
             spaces(indent), "  }\n",
@@ -1067,18 +1092,17 @@ private:
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
-            spaces(indent), "  public final ", type, ".Builder<",elementBuilderType, ">",
+            spaces(indent), "  public final ", type, ".", builderClass,
             " get", titleCase, "() {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
             spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
-            spaces(indent), "  public final ", type, ".Builder<", elementBuilderType,">",
+            spaces(indent), "  public final ", type, ".", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return new ", type, ".Builder<", elementBuilderType, ">(\n",
-            spaces(indent), "      ", builderFactoryType, ",\n",
-            spaces(indent), "      _builder.getPointerField(", offset, ").init",
+            spaces(indent), "    return new ", type, ".", builderClass, "(\n",
+            spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").init",
             (isStructList ?
              kj::strTree("StructList(size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
              kj::strTree("List(", fieldSize, ", size)")),
