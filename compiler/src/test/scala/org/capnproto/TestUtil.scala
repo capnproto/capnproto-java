@@ -56,7 +56,7 @@ object TestUtil {
     //assert(builder.getTextField().toString() == "foo");
 
     {
-//      val subBuilder = builder.getStructField();
+      val subBuilder = builder.getStructField();
     }
   }
 

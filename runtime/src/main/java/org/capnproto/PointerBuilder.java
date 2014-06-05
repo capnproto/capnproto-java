@@ -17,9 +17,8 @@ public final class PointerBuilder {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
-    public final StructBuilder getStruct() {
-        throw new Error();
-//        return WireHelpers.getWritableStructPointer();
+    public final StructBuilder getStruct(StructSize size) {
+        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size);
     }
 
     public final StructBuilder initStruct(StructSize size) {

@@ -37,7 +37,28 @@ final class WireHelpers {
     public static StructBuilder getWritableStructPointer(int refOffset,
                                                          SegmentBuilder segment,
                                                          StructSize size) {
-        throw new Error("unimplemented");
+        long ref = WirePointer.get(segment.buffer, refOffset);
+        int target = WirePointer.target(refOffset, ref);
+        if (WirePointer.isNull(ref)) {
+            return initStructPointer(refOffset, segment, size);
+        }
+        long oldRef = ref;
+        SegmentBuilder oldSegment = segment;
+        // TODO follow fars.
+        int oldPtrOffset = target;
+
+        short oldDataSize = StructPointer.dataSize(WirePointer.structPointer(oldRef));
+        short oldPointerCount = StructPointer.ptrCount(WirePointer.structPointer(oldRef));
+        int oldPointerSectionOffset = oldPtrOffset + oldDataSize;
+
+        if (oldDataSize < size.data || oldPointerCount < size.pointers) {
+            throw new Error("unimplemented");
+        } else {
+            return new StructBuilder(oldSegment, oldPtrOffset * 8,
+                                     oldPointerSectionOffset, oldDataSize * 64,
+                                     oldPointerCount, (byte)0);
+        }
+
     }
 
     public static ListBuilder initListPointer(int refOffset,
