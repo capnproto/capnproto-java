@@ -57,6 +57,18 @@ object TestUtil {
 
     {
       val subBuilder = builder.getStructField();
+      subBuilder.getVoidField();
+      assert(subBuilder.getBoolField() == true);
+      assert(subBuilder.getInt8Field() == -12);
+      assert(subBuilder.getInt16Field() == 3456);
+      assert(subBuilder.getInt32Field() == -78901234);
+      assert(subBuilder.getInt64Field() == 56789012345678L);
+      assert(subBuilder.getUInt8Field() == 90);
+      assert(subBuilder.getUInt16Field() == 1234);
+      assert(subBuilder.getUInt32Field() == 56789012);
+      assert(subBuilder.getUInt64Field() == 345678901234567890L);
+      assert(subBuilder.getFloat32Field() == -1.25e-10f);
+      assert(subBuilder.getFloat64Field() == 345);
     }
   }
 
