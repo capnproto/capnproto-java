@@ -53,7 +53,7 @@ object TestUtil {
     assert(builder.getUInt64Field() == 0x1234567890123456L);
     assert(builder.getFloat32Field() == 1234.5f);
     assert(builder.getFloat64Field() == -123e45);
-    //assert(builder.getTextField().toString() == "foo");
+    assert(builder.getTextField().toString() == "foo");
 
     {
       val subBuilder = builder.getStructField();

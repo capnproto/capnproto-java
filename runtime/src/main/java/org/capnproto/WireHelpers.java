@@ -124,6 +124,33 @@ final class WireHelpers {
         return builder;
     }
 
+    public static Text.Builder getWritableTextPointer(int refOffset,
+                                                      SegmentBuilder segment) {
+        long ref = WirePointer.get(segment.buffer, refOffset);
+
+        if (WirePointer.isNull(ref)) {
+            // TODO default values
+            return new Text.Builder(null, 0, 0);
+        }
+
+        int refTarget = WirePointer.target(refOffset, ref);
+        int ptr = refTarget;
+
+        if (WirePointer.kind(ref) != WirePointer.LIST) {
+            throw new DecodeException("Called getText{Field,Element} but existing pointer is not a list.");
+        }
+        if (ListPointer.elementSize(WirePointer.listPointer(ref)) != FieldSize.BYTE) {
+            throw new DecodeException(
+                "Called getText{Field,Element} but existing list pointer is not byte-sized.");
+        }
+
+
+        //# Subtract 1 from the size for the NUL terminator.
+        return new Text.Builder(segment.buffer, ptr * 8,
+                                ListPointer.elementCount(WirePointer.listPointer(ref)) - 1);
+
+    }
+
     public static StructReader readStructPointer(SegmentReader segment,
                                                  int refOffset,
                                                  int nestingLimit) {

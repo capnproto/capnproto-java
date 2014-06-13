@@ -21,6 +21,15 @@ public final class PointerBuilder {
         return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size);
     }
 
+    public final Text.Builder getText() {
+        return WireHelpers.getWritableTextPointer(
+            this.pointer, this.segment);
+    }
+
+    public final Data.Builder getData() {
+        throw new Error("unimplemented");
+    }
+
     public final StructBuilder initStruct(StructSize size) {
         return WireHelpers.initStructPointer(this.pointer, this.segment, size);
     }

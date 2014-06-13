@@ -969,7 +969,8 @@ private:
           spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "    return _builder.getPointerField(",
+          offset, ").get", blobKind, " ();\n", // XXX
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,

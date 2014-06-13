@@ -1,6 +1,7 @@
 package org.capnproto;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public final class Text {
 
@@ -17,7 +18,7 @@ public final class Text {
 
         public Reader(String value) {
             try {
-                byte[] bytes = value.getBytes("UTF-8");
+                byte[] bytes = value.getBytes(StandardCharsets.UTF_8.name());
                 this.buffer = ByteBuffer.wrap(bytes);
                 this.offset = 0;
                 this.size = bytes.length;
@@ -34,7 +35,7 @@ public final class Text {
             this.buffer.get(bytes, 0, this.size);
 
             try {
-                return new String(bytes, "UTF-8");
+                return new String(bytes, StandardCharsets.UTF_8.name());
             } catch (java.io.UnsupportedEncodingException e) {
                 return "unsupported encoding"; // XXX
             }
@@ -54,6 +55,21 @@ public final class Text {
             this.offset = offset;
             this.size = size;
         }
+
+        @Override
+        public final String toString() {
+            byte[] bytes = new byte[this.size];
+
+            this.buffer.position(this.offset);
+            this.buffer.get(bytes, 0, this.size);
+
+            try {
+                return new String(bytes, StandardCharsets.UTF_8.name());
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "unsupported encoding"; // XXX
+            }
+        }
+
     }
 
 }
