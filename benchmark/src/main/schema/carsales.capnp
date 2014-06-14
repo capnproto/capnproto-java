@@ -28,7 +28,7 @@ $Cxx.namespace("capnp::benchmark::capnp");
 
 using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.benchmark");
-$Java.outerClassname("Carsales");
+$Java.outerClassname("CarSalesSchema");
 
 struct ParkingLot {
   cars@0: List(Car);
