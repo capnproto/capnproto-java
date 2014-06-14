@@ -45,7 +45,7 @@ object TestUtil {
 
     builder.setEnumField(TestEnum.CORGE);
 
-    //builder.initVoidList(6);
+    builder.initVoidList(6);
 
   }
 
@@ -85,6 +85,8 @@ object TestUtil {
         assert(subSubBuilder.getTextField().toString() == "nested")
       }
     }
+
+    assert(builder.getVoidList().size() == 6);
   }
 
 }

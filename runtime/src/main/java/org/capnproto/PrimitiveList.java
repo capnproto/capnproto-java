@@ -25,6 +25,11 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
+
+            public int size() {
+                return this.builder.size();
+            }
+
         }
     }
 
@@ -50,6 +55,10 @@ public class PrimitiveList {
 
             public Builder(ListBuilder builder) {
                 this.builder = builder;
+            }
+
+            public int size() {
+                return this.builder.size();
             }
 
         }

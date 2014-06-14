@@ -71,7 +71,7 @@ final class WireHelpers {
                                               int elementCount,
                                               byte elementSize) {
         if (elementSize == FieldSize.INLINE_COMPOSITE) {
-            throw new DecodeException("Should have called initStructListPointer instead");
+            throw new InternalError("Should have called initStructListPointer instead");
         }
 
         int dataSize = FieldSize.dataBitsPerElement(elementSize);
@@ -113,6 +113,65 @@ final class WireHelpers {
 
         return new ListBuilder(segment, ptrOffset * 8, elementCount, wordsPerElement * 64,
                                elementSize.data * 64, elementSize.pointers);
+    }
+
+    public static ListBuilder getWritableListPointer(int origRefOffset,
+                                                     SegmentBuilder origSegment,
+                                                     byte elementSize) {
+        if (elementSize == FieldSize.INLINE_COMPOSITE) {
+            throw new InternalError("Use getStructList{Element,Field} for structs");
+        }
+
+        long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
+        int origRefTarget = WirePointer.target(origRefOffset, origRef);
+
+        if (WirePointer.isNull(origRef)) {
+            throw new Error("unimplemented");
+        }
+
+        //# We must verify that the pointer has the right size. Unlike
+        //# in getWritableStructListReference(), we never need to
+        //# "upgrade" the data, because this method is called only for
+        //# non-struct lists, and there is no allowed upgrade path *to*
+        //# a non-struct list, only *from* them.
+
+        long ref = origRef;
+        SegmentBuilder segment = origSegment;
+        int ptr = origRefTarget; // TODO follow fars.
+
+        if (WirePointer.kind(ref) != WirePointer.LIST) {
+            throw new DecodeException("Called getList{Field,Element}() but existing pointer is not a list");
+        }
+
+        byte oldSize = ListPointer.elementSize(WirePointer.listPointer(ref));
+
+        if (oldSize == FieldSize.INLINE_COMPOSITE) {
+            //# The existing element size is InlineComposite, which
+            //# means that it is at least two words, which makes it
+            //# bigger than the expected element size. Since fields can
+            //# only grow when upgraded, the existing data must have
+            //# been written with a newer version of the protocol. We
+            //# therefore never need to upgrade the data in this case,
+            //# but we do need to validate that it is a valid upgrade
+            //# from what we expected.
+            throw new Error("unimplemented");
+        } else {
+            int dataSize = FieldSize.dataBitsPerElement(oldSize);
+            int pointerCount = FieldSize.pointersPerElement(oldSize);
+
+            if (dataSize < FieldSize.dataBitsPerElement(elementSize)) {
+                throw new DecodeException("Existing list value is incompatible with expected type.");
+            }
+            if (pointerCount < FieldSize.pointersPerElement(elementSize)) {
+                throw new DecodeException("Existing list value is incompatible with expected type.");
+            }
+
+            int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
+
+            return new ListBuilder(segment, ptr * Constants.BYTES_PER_WORD,
+                                   ListPointer.elementCount(WirePointer.listPointer(ref)),
+                                   step, dataSize, (short) pointerCount);
+        }
     }
 
     // size is in bytes

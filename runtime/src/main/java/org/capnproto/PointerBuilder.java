@@ -21,6 +21,14 @@ public final class PointerBuilder {
         return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size);
     }
 
+    public final ListBuilder getList(byte elementSize) {
+        return WireHelpers.getWritableListPointer(this.pointer, this.segment, elementSize);
+    }
+
+    public final ListBuilder getStructList(StructSize elementSize) {
+        throw new Error("unimplemented");
+    }
+
     public final Text.Builder getText() {
         return WireHelpers.getWritableTextPointer(
             this.pointer, this.segment);
@@ -35,7 +43,7 @@ public final class PointerBuilder {
     }
 
     public final ListBuilder initList(byte elementSize, int elementCount) {
-        throw new Error("unimplemented");
+        return WireHelpers.initListPointer(this.pointer, this.segment, elementCount, elementSize);
     }
 
     public final ListBuilder initStructList(int elementCount, StructSize elementSize) {

@@ -1098,13 +1098,21 @@ private:
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
+
             spaces(indent), "  public final ", type, ".", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "    return new ", type, ".", builderClass, " (\n",
+            spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").get",
+            (isStructList ?
+             kj::strTree("StructList(", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
+             kj::strTree("List(", fieldSize, ")")),
+            ");\n",
             spaces(indent), "  }\n",
+
             spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
+
             spaces(indent), "  public final ", type, ".", builderClass,
             " init", titleCase, "(int size) {\n",
             spaces(indent), "    return new ", type, ".", builderClass, "(\n",
