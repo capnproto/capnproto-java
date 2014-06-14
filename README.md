@@ -6,6 +6,6 @@
 [Cap'n Proto](http://capnproto.org) is an extremely efficient protocol for sharing data
 and capabilities.
 
-capnproto-java is an early-stage pure Java implmentation.
+capnproto-java is an early-stage pure Java implementation.
 
 [Read more here.](https://dwrensha.github.io/capnproto-java/index.html)
