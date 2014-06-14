@@ -35,7 +35,17 @@ object TestUtil {
       subBuilder.setFloat32Field(-1.25e-10f);
       subBuilder.setFloat64Field(345);
       subBuilder.setTextField(new Text.Reader("baz"));
+
+      {
+        val subSubBuilder = subBuilder.initStructField();
+        subSubBuilder.setTextField(new Text.Reader("nested"));
+        subSubBuilder.initStructField().setTextField(new Text.Reader("really nested"));
+      }
     }
+
+    builder.setEnumField(TestEnum.CORGE);
+
+    //builder.initVoidList(6);
 
   }
 
@@ -69,6 +79,11 @@ object TestUtil {
       assert(subBuilder.getUInt64Field() == 345678901234567890L);
       assert(subBuilder.getFloat32Field() == -1.25e-10f);
       assert(subBuilder.getFloat64Field() == 345);
+
+      {
+        val subSubBuilder = subBuilder.getStructField();
+        assert(subSubBuilder.getTextField().toString() == "nested")
+      }
     }
   }
 

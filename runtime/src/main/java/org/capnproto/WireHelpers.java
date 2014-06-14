@@ -6,9 +6,14 @@ final class WireHelpers {
         return (bytes + 7) / 8;
     }
 
+    public static int roundBitsUpToWords(long bits) {
+        //# This code assumes 64-bit words.
+        return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
+    }
+
     public static int allocate(int refOffset,
                                SegmentBuilder segment,
-                               int amount,
+                               int amount, // in words
                                byte kind) {
 
         // TODO check for nullness, amount == 0 case.
@@ -65,7 +70,20 @@ final class WireHelpers {
                                               SegmentBuilder segment,
                                               int elementCount,
                                               byte elementSize) {
-        throw new Error("unimplemented");
+        if (elementSize == FieldSize.INLINE_COMPOSITE) {
+            throw new DecodeException("Should have called initStructListPointer instead");
+        }
+
+        int dataSize = FieldSize.dataBitsPerElement(elementSize);
+        int pointerCount = FieldSize.pointersPerElement(elementSize);
+        int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
+        int wordCount = roundBitsUpToWords((long)elementCount * (long)step);
+        int ptr = allocate(refOffset, segment, wordCount, WirePointer.LIST);
+
+        ListPointer.set(segment.buffer, refOffset, elementSize, elementCount);
+
+        return new ListBuilder(segment, ptr * Constants.BYTES_PER_WORD,
+                               elementCount, step, dataSize, (short)pointerCount);
     }
 
     public static ListBuilder initStructListPointer(int refOffset,
@@ -82,7 +100,8 @@ final class WireHelpers {
 
         //# Allocate the list, prefixed by a single WirePointer.
         int wordCount = elementCount * wordsPerElement;
-        int ptrOffset = allocate(refOffset, segment, 1 + wordCount, WirePointer.LIST);
+        int ptrOffset = allocate(refOffset, segment, Constants.POINTER_SIZE_IN_WORDS + wordCount,
+                                 WirePointer.LIST);
 
         //# Initialize the pointer.
         ListPointer.setInlineComposite(segment.buffer, refOffset, wordCount);
