@@ -39,6 +39,16 @@ object Build extends sbt.Build {
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
       .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
 
+  lazy val benchmark =
+    project(
+      id = "benchmark",
+      base = file("benchmark")
+    ).dependsOn(runtime, compiler)
+     .settings(compileBenchmarkSchemaTask)
+     .settings(compile <<= compile in Compile dependsOn compileBenchmarkSchema)
+      .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
+      .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
+
   def project(id: String, base: File) =
     Project(
       id = id,
@@ -68,6 +78,14 @@ object Build extends sbt.Build {
     val makeResult = "make addressbook".!!
     println(s"**** CodeGen for Addressbook Started\n$makeResult\n**** CodeGen for Addressbook Complete")
   }
+
+  val compileBenchmarkSchema = taskKey[Unit]("Run capnpc-java on benchmark schema")
+  val compileBenchmarkSchemaTask = compileBenchmarkSchema := {
+    val result0 = "mkdir -p benchmark/src/main/generated".!!
+    val result = "capnp compile -I compiler/src/main/cpp/  --src-prefix=benchmark/src/main/schema/ -o./capnpc-java:benchmark/src/main/generated benchmark/src/main/schema/eval.capnp benchmark/src/main/schema/carsales.capnp benchmark/src/main/schema/catrank.capnp".!!
+    println(s"**** CodeGen for benchmark started\n$result\n**** CodeGen complete.");
+  }
+
 }
 
 object Shared {
