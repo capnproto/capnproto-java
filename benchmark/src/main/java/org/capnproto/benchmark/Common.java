@@ -10,9 +10,19 @@ public class Common {
             this.state = 1013904223;
         }
 
-        public int next_int() {
+        public int nextInt() {
             this.state = this.a * this.state + c;
             return this.state;
+        }
+
+        public int nextLessThan(int range) {
+            // sign?
+            return this.nextInt() % range;
+        }
+
+        public double nextDouble(double range) {
+            // XXX sign?
+            return (double) this.nextInt() * range / (double)(0xffffffffL);
         }
     }
 

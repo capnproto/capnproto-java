@@ -34,6 +34,10 @@ public final class StructList {
             this.factory = factory;
         }
 
+        public int size() {
+            return this.builder.size();
+        }
+
         public final T get(int index) {
             return this.factory.fromStructBuilder(this.builder.getStructElement(index));
         }
