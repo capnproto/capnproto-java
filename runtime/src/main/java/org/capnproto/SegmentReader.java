@@ -7,7 +7,10 @@ public class SegmentReader {
     // invariant: buffer's mark is at its beginning.
     final ByteBuffer buffer;
 
-    public SegmentReader(ByteBuffer buffer) {
+    final Arena arena;
+
+    public SegmentReader(ByteBuffer buffer, Arena arena) {
         this.buffer = buffer;
+        this.arena = arena;
     }
 }

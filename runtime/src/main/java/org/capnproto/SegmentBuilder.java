@@ -3,12 +3,13 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 
 public final class SegmentBuilder extends SegmentReader {
+
     public static final int FAILED_ALLOCATION = -1;
 
     public int pos = 0; // in words
 
-    public SegmentBuilder(ByteBuffer buf) {
-        super(buf);
+    public SegmentBuilder(ByteBuffer buf, Arena arena) {
+        super(buf, arena);
     }
 
     // the total number of words the buffer can hold
@@ -22,10 +23,14 @@ public final class SegmentBuilder extends SegmentReader {
         return this.pos;
     }
 
-    /**
+    /*
        Allocate `amount` words.
      */
     public final int allocate(int amount) {
+        if (amount < 0) {
+            throw new InternalError("tried to allocate a negative number of words");
+        }
+
         if (amount > this.capacity() - this.currentSize()) {
             return FAILED_ALLOCATION; // no space left;
         } else {
@@ -33,5 +38,9 @@ public final class SegmentBuilder extends SegmentReader {
             this.pos += amount;
             return result;
         }
+    }
+
+    public final BuilderArena getArena() {
+        return (BuilderArena)this.arena;
     }
 }

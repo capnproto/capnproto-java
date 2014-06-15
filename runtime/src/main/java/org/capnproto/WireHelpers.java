@@ -18,15 +18,19 @@ final class WireHelpers {
 
         // TODO check for nullness, amount == 0 case.
 
-        int allocation = segment.allocate(amount);
-        if (allocation == SegmentBuilder.FAILED_ALLOCATION) {
+        int ptr = segment.allocate(amount);
+        if (ptr == SegmentBuilder.FAILED_ALLOCATION) {
             //# Need to allocate in a new segment. We'll need to
             //# allocate an extra pointer worth of space to act as
             //# the landing pad for a far pointer.
+
+            int amountPlusRef = amount + Constants.POINTER_SIZE_IN_WORDS;
+            BuilderArena.AllocateResult allocation = segment.getArena().allocate(amountPlusRef);
+
             throw new Error("unimplemented");
         } else {
-            WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, allocation);
-            return allocation;
+            WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, ptr);
+            return ptr;
         }
     }
 

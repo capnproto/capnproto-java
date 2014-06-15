@@ -13,7 +13,7 @@ class LayoutSuite extends FunSuite {
     val buffer = java.nio.ByteBuffer.wrap(data);
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-    val pointerReader = new PointerReader(new SegmentReader(buffer), 0, 0x7fffffff);
+    val pointerReader = new PointerReader(new SegmentReader(buffer, new ReaderArena()), 0, 0x7fffffff);
     val reader = pointerReader.getStruct();
 
     assert(reader.getLongField(0) === 0xefcdab8967452301L);
@@ -91,7 +91,10 @@ class LayoutSuite extends FunSuite {
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
     buffer.mark();
 
-    val pointerBuilder = PointerBuilder.getRoot(new SegmentBuilder(buffer), 0);
+    val pointerBuilder = PointerBuilder.getRoot(
+      new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
+                                                  BuilderArena.SUGGESTED_ALLOCATION_STRATEGY)),
+      0);
     val builder = pointerBuilder.initStruct(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE));
     setupStruct(builder);
 

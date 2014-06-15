@@ -2,7 +2,7 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public final class BuilderArena implements Arena {
 
@@ -15,19 +15,18 @@ public final class BuilderArena implements Arena {
     public static final AllocationStrategy SUGGESTED_ALLOCATION_STRATEGY =
         AllocationStrategy.GROW_HEURISTICALLY;
 
-    // Maybe this should be ArrayList?
-    public final Vector<SegmentBuilder> segments;
+    public final ArrayList<SegmentBuilder> segments;
 
     public int nextSize;
     public final AllocationStrategy allocationStrategy;
 
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
-        this.segments = new Vector<SegmentBuilder>();
+        this.segments = new ArrayList<SegmentBuilder>();
         this.nextSize = firstSegmentSizeWords;
         this.allocationStrategy = allocationStrategy;
         SegmentBuilder segment0 = new SegmentBuilder(
-            ByteBuffer.allocate(firstSegmentSizeWords * Constants.BYTES_PER_WORD));
+            ByteBuffer.allocate(firstSegmentSizeWords * Constants.BYTES_PER_WORD), this);
         segment0.buffer.mark();
         segment0.buffer.order(ByteOrder.LITTLE_ENDIAN);
         this.segments.add(segment0);
@@ -42,7 +41,10 @@ public final class BuilderArena implements Arena {
 
     public static class AllocateResult {
         public final SegmentBuilder segment;
+
+        // offset to the beginning the of allocated memory
         public final int offset;
+
         public AllocateResult(SegmentBuilder segment, int offset) {
             this.segment = segment;
             this.offset = offset;
@@ -50,7 +52,23 @@ public final class BuilderArena implements Arena {
     }
 
     public AllocateResult allocate(int amount) {
-        throw new Error("unimplemented");
+
+        int len = this.segments.size();
+        // we allocate the first segment in the constructor.
+
+        int result = this.segments.get(len - 1).allocate(amount);
+        if (result != SegmentBuilder.FAILED_ALLOCATION) {
+            return new AllocateResult(this.segments.get(len - 1), result);
+        }
+
+        SegmentBuilder newSegment = new SegmentBuilder(
+            ByteBuffer.allocate(amount * Constants.BYTES_PER_WORD),
+            this);
+        newSegment.buffer.mark();
+        newSegment.buffer.order(ByteOrder.LITTLE_ENDIAN);
+        this.segments.add(newSegment);
+
+        return new AllocateResult(newSegment, newSegment.allocate(amount));
     }
 
     public final ByteBuffer[] getSegmentsForOutput() {
