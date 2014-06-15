@@ -6,12 +6,28 @@ import java.util.Vector;
 
 public final class BuilderArena implements Arena {
 
+    public enum AllocationStrategy {
+        FIXED_SIZE,
+        GROW_HEURISTICALLY
+    }
+
+    public static final int SUGGESTED_FIRST_SEGMENT_WORDS = 1024;
+    public static final AllocationStrategy SUGGESTED_ALLOCATION_STRATEGY =
+        AllocationStrategy.GROW_HEURISTICALLY;
+
     // Maybe this should be ArrayList?
     public final Vector<SegmentBuilder> segments;
 
-    public BuilderArena() {
+    public int nextSize;
+    public final AllocationStrategy allocationStrategy;
+
+
+    public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
         this.segments = new Vector<SegmentBuilder>();
-        SegmentBuilder segment0 = new SegmentBuilder(ByteBuffer.allocate(1024 * 8));
+        this.nextSize = firstSegmentSizeWords;
+        this.allocationStrategy = allocationStrategy;
+        SegmentBuilder segment0 = new SegmentBuilder(
+            ByteBuffer.allocate(firstSegmentSizeWords * Constants.BYTES_PER_WORD));
         segment0.buffer.mark();
         segment0.buffer.order(ByteOrder.LITTLE_ENDIAN);
         this.segments.add(segment0);

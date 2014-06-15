@@ -5,7 +5,18 @@ public final class MessageBuilder {
     private final BuilderArena arena;
 
     public MessageBuilder() {
-        this.arena = new BuilderArena();
+        this.arena = new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
+                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+    }
+
+    public MessageBuilder(int firstSegmentWords) {
+        this.arena = new BuilderArena(firstSegmentWords,
+                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+    }
+
+    public MessageBuilder(int firstSegmentWords, BuilderArena.AllocationStrategy allocationStrategy) {
+        this.arena = new BuilderArena(firstSegmentWords,
+                                      allocationStrategy);
     }
 
     public <T> T getRoot(FromStructBuilder<T> factory) {
