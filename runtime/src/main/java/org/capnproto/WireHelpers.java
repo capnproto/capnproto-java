@@ -11,10 +11,19 @@ final class WireHelpers {
         return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
     }
 
-    public static int allocate(int refOffset,
-                               SegmentBuilder segment,
-                               int amount, // in words
-                               byte kind) {
+    static class AllocateResult {
+        public final int ptr;
+        public final int refOffset;
+        public final SegmentBuilder segment;
+        AllocateResult(int ptr, int refOffset, SegmentBuilder segment) {
+            this.ptr = ptr; this.refOffset = refOffset; this.segment = segment;
+        }
+    }
+
+    public static AllocateResult allocate(int refOffset,
+                                          SegmentBuilder segment,
+                                          int amount, // in words
+                                          byte kind) {
 
         // TODO check for nullness, amount == 0 case.
 
@@ -30,16 +39,17 @@ final class WireHelpers {
             throw new Error("unimplemented");
         } else {
             WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, ptr);
-            return ptr;
+            return new AllocateResult(ptr, refOffset, segment);
         }
     }
 
     public static StructBuilder initStructPointer(int refOffset,
                                                   SegmentBuilder segment,
                                                   StructSize size) {
-        int ptrOffset = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
-        StructPointer.setFromStructSize(segment.buffer, refOffset, size);
-        return new StructBuilder(segment, ptrOffset * 8, ptrOffset + size.data,
+        AllocateResult allocation = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
+        StructPointer.setFromStructSize(allocation.segment.buffer, allocation.refOffset, size);
+        return new StructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
+                                 allocation.ptr + size.data,
                                  size.data * 64, size.pointers, (byte)0);
     }
 
@@ -82,11 +92,12 @@ final class WireHelpers {
         int pointerCount = FieldSize.pointersPerElement(elementSize);
         int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
         int wordCount = roundBitsUpToWords((long)elementCount * (long)step);
-        int ptr = allocate(refOffset, segment, wordCount, WirePointer.LIST);
+        AllocateResult allocation = allocate(refOffset, segment, wordCount, WirePointer.LIST);
 
-        ListPointer.set(segment.buffer, refOffset, elementSize, elementCount);
+        ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, elementCount);
 
-        return new ListBuilder(segment, ptr * Constants.BYTES_PER_WORD,
+        return new ListBuilder(allocation.segment,
+                               allocation.ptr * Constants.BYTES_PER_WORD,
                                elementCount, step, dataSize, (short)pointerCount);
     }
 
@@ -104,19 +115,19 @@ final class WireHelpers {
 
         //# Allocate the list, prefixed by a single WirePointer.
         int wordCount = elementCount * wordsPerElement;
-        int ptrOffset = allocate(refOffset, segment, Constants.POINTER_SIZE_IN_WORDS + wordCount,
-                                 WirePointer.LIST);
+        AllocateResult allocation = allocate(refOffset, segment, Constants.POINTER_SIZE_IN_WORDS + wordCount,
+                                             WirePointer.LIST);
 
         //# Initialize the pointer.
-        ListPointer.setInlineComposite(segment.buffer, refOffset, wordCount);
-        WirePointer.setKindAndInlineCompositeListElementCount(segment.buffer, ptrOffset,
+        ListPointer.setInlineComposite(allocation.segment.buffer, allocation.refOffset, wordCount);
+        WirePointer.setKindAndInlineCompositeListElementCount(allocation.segment.buffer, allocation.ptr,
                                                               WirePointer.STRUCT, elementCount);
-        StructPointer.setFromStructSize(segment.buffer, ptrOffset, elementSize);
+        StructPointer.setFromStructSize(allocation.segment.buffer, allocation.ptr, elementSize);
 
-        ptrOffset += 1;
-
-        return new ListBuilder(segment, ptrOffset * 8, elementCount, wordsPerElement * 64,
-                               elementSize.data * 64, elementSize.pointers);
+        return new ListBuilder(allocation.segment,
+                               (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
+                               elementCount, wordsPerElement * Constants.BITS_PER_WORD,
+                               elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
     public static ListBuilder getWritableListPointer(int origRefOffset,
@@ -186,12 +197,13 @@ final class WireHelpers {
         int byteSize = size + 1;
 
         //# Allocate the space.
-        int ptrOffset = allocate(refOffset, segment, roundBytesUpToWords(byteSize), WirePointer.LIST);
+        AllocateResult allocation = allocate(refOffset, segment, roundBytesUpToWords(byteSize),
+                                             WirePointer.LIST);
 
         //# Initialize the pointer.
-        ListPointer.set(segment.buffer, refOffset, FieldSize.BYTE, byteSize);
+        ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.BYTE, byteSize);
 
-        return new Text.Builder(segment.buffer, ptrOffset * 8, size);
+        return new Text.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
     }
 
     public static Text.Builder setTextPointer(int refOffset,
