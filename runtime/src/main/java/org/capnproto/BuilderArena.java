@@ -36,7 +36,7 @@ public final class BuilderArena implements Arena {
         throw new Error("unimplemented");
     }
     public SegmentBuilder getSegment(int id) {
-        throw new Error("unimplemented");
+        return this.segments.get(id);
     }
 
     public static class AllocateResult {

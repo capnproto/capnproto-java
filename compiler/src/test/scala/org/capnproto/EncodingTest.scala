@@ -14,4 +14,11 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(allTypes);
   }
 
+  test("AllTypesMultiSegment") {
+    val message = new MessageBuilder(5, BuilderArena.AllocationStrategy.FIXED_SIZE);
+    val allTypes = message.initRoot(TestAllTypes.Builder.factory);
+    TestUtil.initTestMessage(allTypes);
+    //TestUtil.checkTestMessage(allTypes);
+  }
+
 }

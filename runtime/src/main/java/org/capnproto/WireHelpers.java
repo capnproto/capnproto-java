@@ -39,7 +39,7 @@ final class WireHelpers {
             //# Set up the original pointer to be a far pointer to
             //# the new segment.
             WirePointer.setKindAndTarget(segment.buffer, refOffset, WirePointer.FAR, allocation.offset);
-            FarPointer.set(segment.buffer, refOffset, allocation.segment.id);
+            FarPointer.setSegmentId(segment.buffer, refOffset, allocation.segment.id);
 
             //# Initialize the landing pad to indicate that the
             //# data immediately follows the pad.
@@ -53,6 +53,46 @@ final class WireHelpers {
         } else {
             WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, ptr);
             return new AllocateResult(ptr, refOffset, segment);
+        }
+    }
+
+    static class FollowBuilderFarsResult {
+        public final int ptr;
+        public final long ref;
+        public final SegmentBuilder segment;
+        FollowBuilderFarsResult(int ptr, long ref, SegmentBuilder segment) {
+            this.ptr = ptr; this.ref = ref; this.segment = segment;
+        }
+    }
+
+    public static FollowBuilderFarsResult followBuilderFars(long ref, int refTarget,
+                                                            SegmentBuilder segment) {
+        //# If `ref` is a far pointer, follow it. On return, `ref` will
+        //# have been updated to point at a WirePointer that contains
+        //# the type information about the target object, and a pointer
+        //# to the object contents is returned. The caller must NOT use
+        //# `ref->target()` as this may or may not actually return a
+        //# valid pointer. `segment` is also updated to point at the
+        //# segment which actually contains the object.
+        //#
+        //# If `ref` is not a far pointer, this simply returns
+        //# `refTarget`. Usually, `refTarget` should be the same as
+        //# `ref->target()`, but may not be in cases where `ref` is
+        //# only a tag.
+
+        if (WirePointer.kind(ref) == WirePointer.FAR) {
+            SegmentBuilder resultSegment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
+
+            int padOffset = FarPointer.positionInSegment(ref);
+            long pad = WirePointer.get(resultSegment.buffer, padOffset);
+            if (! FarPointer.isDoubleFar(ref)) {
+                return new FollowBuilderFarsResult(WirePointer.target(padOffset, pad), pad, resultSegment);
+            }
+
+            throw new Error("unimplemented");
+
+        } else {
+            return new FollowBuilderFarsResult(refTarget, ref, segment);
         }
     }
 
@@ -74,20 +114,17 @@ final class WireHelpers {
         if (WirePointer.isNull(ref)) {
             return initStructPointer(refOffset, segment, size);
         }
-        long oldRef = ref;
-        SegmentBuilder oldSegment = segment;
-        // TODO follow fars.
-        int oldPtrOffset = target;
+        FollowBuilderFarsResult resolved = followBuilderFars(ref, target, segment);
 
-        short oldDataSize = StructPointer.dataSize(WirePointer.structPointer(oldRef));
-        short oldPointerCount = StructPointer.ptrCount(WirePointer.structPointer(oldRef));
-        int oldPointerSectionOffset = oldPtrOffset + oldDataSize;
+        short oldDataSize = StructPointer.dataSize(WirePointer.structPointer(resolved.ref));
+        short oldPointerCount = StructPointer.ptrCount(WirePointer.structPointer(resolved.ref));
+        int oldPointerSectionOffset = resolved.ptr + oldDataSize;
 
         if (oldDataSize < size.data || oldPointerCount < size.pointers) {
             throw new Error("unimplemented");
         } else {
-            return new StructBuilder(oldSegment, oldPtrOffset * 8,
-                                     oldPointerSectionOffset, oldDataSize * 64,
+            return new StructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                     oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
                                      oldPointerCount, (byte)0);
         }
 
@@ -163,15 +200,13 @@ final class WireHelpers {
         //# non-struct lists, and there is no allowed upgrade path *to*
         //# a non-struct list, only *from* them.
 
-        long ref = origRef;
-        SegmentBuilder segment = origSegment;
-        int ptr = origRefTarget; // TODO follow fars.
+        FollowBuilderFarsResult resolved = followBuilderFars(origRef, origRefTarget, origSegment);
 
-        if (WirePointer.kind(ref) != WirePointer.LIST) {
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
             throw new DecodeException("Called getList{Field,Element}() but existing pointer is not a list");
         }
 
-        byte oldSize = ListPointer.elementSize(WirePointer.listPointer(ref));
+        byte oldSize = ListPointer.elementSize(WirePointer.listPointer(resolved.ref));
 
         if (oldSize == FieldSize.INLINE_COMPOSITE) {
             //# The existing element size is InlineComposite, which
@@ -196,8 +231,8 @@ final class WireHelpers {
 
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            return new ListBuilder(segment, ptr * Constants.BYTES_PER_WORD,
-                                   ListPointer.elementCount(WirePointer.listPointer(ref)),
+            return new ListBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                   ListPointer.elementCount(WirePointer.listPointer(resolved.ref)),
                                    step, dataSize, (short) pointerCount);
         }
     }
@@ -241,20 +276,20 @@ final class WireHelpers {
         }
 
         int refTarget = WirePointer.target(refOffset, ref);
-        int ptr = refTarget;
+        FollowBuilderFarsResult resolved = followBuilderFars(ref, refTarget, segment);
 
-        if (WirePointer.kind(ref) != WirePointer.LIST) {
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
             throw new DecodeException("Called getText{Field,Element} but existing pointer is not a list.");
         }
-        if (ListPointer.elementSize(WirePointer.listPointer(ref)) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(WirePointer.listPointer(resolved.ref)) != FieldSize.BYTE) {
             throw new DecodeException(
                 "Called getText{Field,Element} but existing list pointer is not byte-sized.");
         }
 
 
         //# Subtract 1 from the size for the NUL terminator.
-        return new Text.Builder(segment.buffer, ptr * 8,
-                                ListPointer.elementCount(WirePointer.listPointer(ref)) - 1);
+        return new Text.Builder(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
+                                ListPointer.elementCount(WirePointer.listPointer(resolved.ref)) - 1);
 
     }
 
