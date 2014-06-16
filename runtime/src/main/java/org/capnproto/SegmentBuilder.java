@@ -7,6 +7,7 @@ public final class SegmentBuilder extends SegmentReader {
     public static final int FAILED_ALLOCATION = -1;
 
     public int pos = 0; // in words
+    public int id = 0;
 
     public SegmentBuilder(ByteBuffer buf, Arena arena) {
         super(buf, arena);

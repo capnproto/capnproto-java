@@ -61,11 +61,26 @@ public final class BuilderArena implements Arena {
             return new AllocateResult(this.segments.get(len - 1), result);
         }
 
+        // allocate_owned_memory
+
+        int size = Math.max(amount, this.nextSize);
         SegmentBuilder newSegment = new SegmentBuilder(
-            ByteBuffer.allocate(amount * Constants.BYTES_PER_WORD),
+            ByteBuffer.allocate(size * Constants.BYTES_PER_WORD),
             this);
+
+        switch (this.allocationStrategy) {
+        case GROW_HEURISTICALLY:
+            this.nextSize += size;
+            break;
+        default:
+            break;
+        }
+
+        // --------
+
         newSegment.buffer.mark();
         newSegment.buffer.order(ByteOrder.LITTLE_ENDIAN);
+        newSegment.id = len;
         this.segments.add(newSegment);
 
         return new AllocateResult(newSegment, newSegment.allocate(amount));

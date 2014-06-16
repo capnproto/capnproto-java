@@ -36,7 +36,20 @@ final class WireHelpers {
             int amountPlusRef = amount + Constants.POINTER_SIZE_IN_WORDS;
             BuilderArena.AllocateResult allocation = segment.getArena().allocate(amountPlusRef);
 
-            throw new Error("unimplemented");
+            //# Set up the original pointer to be a far pointer to
+            //# the new segment.
+            WirePointer.setKindAndTarget(segment.buffer, refOffset, WirePointer.FAR, allocation.offset);
+            FarPointer.set(segment.buffer, refOffset, allocation.segment.id);
+
+            //# Initialize the landing pad to indicate that the
+            //# data immediately follows the pad.
+            int resultRefOffset = allocation.offset;
+            int ptr1 = allocation.offset + Constants.POINTER_SIZE_IN_WORDS;
+
+            WirePointer.setKindAndTarget(allocation.segment.buffer, resultRefOffset, kind,
+                                         ptr1);
+
+            return new AllocateResult(ptr1, resultRefOffset, allocation.segment);
         } else {
             WirePointer.setKindAndTarget(segment.buffer, refOffset, kind, ptr);
             return new AllocateResult(ptr, refOffset, segment);
