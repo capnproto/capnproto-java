@@ -38,7 +38,7 @@ final class WireHelpers {
 
             //# Set up the original pointer to be a far pointer to
             //# the new segment.
-            WirePointer.setKindAndTarget(segment.buffer, refOffset, WirePointer.FAR, allocation.offset);
+            FarPointer.set(segment.buffer, refOffset, false, allocation.offset);
             FarPointer.setSegmentId(segment.buffer, refOffset, allocation.segment.id);
 
             //# Initialize the landing pad to indicate that the

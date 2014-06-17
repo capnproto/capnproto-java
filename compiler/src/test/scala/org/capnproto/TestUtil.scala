@@ -21,6 +21,7 @@ object TestUtil {
     builder.setTextField(new Text.Reader("foo"));
 //    builder.setDataField(data("bar"));
     {
+
       val subBuilder = builder.initStructField();
       subBuilder.setVoidField(org.capnproto.Void.VOID);
       subBuilder.setBoolField(true);
@@ -44,7 +45,6 @@ object TestUtil {
     }
 
     builder.setEnumField(TestEnum.CORGE);
-
     builder.initVoidList(6);
 
   }

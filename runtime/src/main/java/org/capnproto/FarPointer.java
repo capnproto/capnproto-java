@@ -18,4 +18,9 @@ final class FarPointer {
     public static void setSegmentId(ByteBuffer buffer, int offset, int segmentId) {
         buffer.putInt(8 * offset + 4, segmentId);
     }
+
+    public static void set(ByteBuffer buffer, int offset, boolean isDoubleFar, int pos) {
+        int idf = isDoubleFar ? 1 : 0;
+        WirePointer.setOffsetAndKind(buffer, offset, (pos << 3) | (idf << 2) | WirePointer.FAR);
+    }
 }
