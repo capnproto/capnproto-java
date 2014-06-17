@@ -44,14 +44,6 @@ final class WirePointer {
         return (int)(wirePointer >>> 32);
     }
 
-    public static int listPointer(long wirePointer) {
-        return upper32Bits(wirePointer);
-    }
-
-    public static int structPointer(long wirePointer) {
-        return upper32Bits(wirePointer);
-    }
-
     public static long get(ByteBuffer buffer, int offset) {
         return buffer.getLong(offset * 8);
     }

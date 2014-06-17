@@ -3,16 +3,16 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 
 final class ListPointer {
-    public static byte elementSize(int elementSizeAndCount) {
-        return (byte) (elementSizeAndCount & 7);
+    public static byte elementSize(long ref) {
+        return (byte) (WirePointer.upper32Bits(ref) & 7);
     }
 
-    public static int elementCount(int elementSizeAndCount) {
-        return elementSizeAndCount >>> 3;
+    public static int elementCount(long ref) {
+        return WirePointer.upper32Bits(ref) >>> 3;
     }
 
-    public static int inlineCompositeWordCount(int elementSizeAndCount) {
-        return elementCount(elementSizeAndCount);
+    public static int inlineCompositeWordCount(long ref) {
+        return elementCount(ref);
     }
 
     public static void set(ByteBuffer buffer, int offset, byte elementSize, int elementCount) {
