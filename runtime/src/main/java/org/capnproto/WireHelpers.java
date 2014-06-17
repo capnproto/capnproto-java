@@ -89,10 +89,33 @@ final class WireHelpers {
                 return new FollowBuilderFarsResult(WirePointer.target(padOffset, pad), pad, resultSegment);
             }
 
+            //# Landing pad is another far pointer. It is followed by a
+            //# tag describing the pointed-to object.
             throw new Error("unimplemented");
 
         } else {
             return new FollowBuilderFarsResult(refTarget, ref, segment);
+        }
+    }
+
+    static class FollowFarsResult {
+        public final int ptr;
+        public final long ref;
+        public final SegmentReader segment;
+        FollowFarsResult(int ptr, long ref, SegmentReader segment) {
+            this.ptr = ptr; this.ref = ref; this.segment = segment;
+        }
+    }
+
+    public static FollowFarsResult followFars(long ref, int refTarget, SegmentReader segment) {
+        //# If the segment is null, this is an unchecked message,
+        //# so there are no FAR pointers.
+        if (segment != null && WirePointer.kind(ref) == WirePointer.FAR) {
+
+            throw new Error("unimplemented");
+
+        } else {
+            return new FollowFarsResult(refTarget, ref, segment);
         }
     }
 
@@ -297,21 +320,29 @@ final class WireHelpers {
                                                  int refOffset,
                                                  int nestingLimit) {
 
-        // TODO error handling
+        // TODO error handling. is_null
 
-        if (nestingLimit < 0) {
+        if (nestingLimit <= 0) {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
 
         long ref = WirePointer.get(segment.buffer, refOffset);
-        int ptrOffset = WirePointer.target(refOffset, ref);
-        int dataSizeWords = StructPointer.dataSize(ref);
+        int refTarget = WirePointer.target(refOffset, ref);
+        FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
-        return new StructReader(segment,
-                                ptrOffset * 8,
-                                (ptrOffset + dataSizeWords),
-                                dataSizeWords * 64,
-                                StructPointer.ptrCount(ref),
+        int dataSizeWords = StructPointer.dataSize(resolved.ref);
+
+        if (WirePointer.kind(resolved.ref) != WirePointer.STRUCT) {
+            throw new DecodeException("Message contains non-struct pointer where struct pointer was expected.");
+        }
+
+        // TODO "bounds_check" (read limiting)
+
+        return new StructReader(resolved.segment,
+                                resolved.ptr * Constants.BYTES_PER_WORD,
+                                (resolved.ptr + dataSizeWords),
+                                dataSizeWords * Constants.BITS_PER_WORD,
+                                StructPointer.ptrCount(resolved.ref),
                                 (byte)0,
                                 nestingLimit - 1);
 
@@ -325,21 +356,24 @@ final class WireHelpers {
 
         long ref = WirePointer.get(segment.buffer, refOffset);
 
-        // TODO check for null, follow fars, nestingLimit
         if (WirePointer.isNull(ref)) {
             return new ListReader();
         }
 
+        if (nestingLimit <= 0) {
+            throw new Error("nesting limit exceeded");
+        }
 
-        int ptrOffset = WirePointer.target(refOffset, ref);
-        long ptr = WirePointer.get(segment.buffer, ptrOffset);
+        int refTarget = WirePointer.target(refOffset, ref);
 
-        switch (ListPointer.elementSize(ref)) {
+        FollowFarsResult resolved = followFars(ref, refTarget, segment);
+
+        switch (ListPointer.elementSize(resolved.ref)) {
         case FieldSize.INLINE_COMPOSITE : {
-            int wordCount = ListPointer.inlineCompositeWordCount(ref);
+            int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
 
-            long tag = ptr;
-            ptrOffset += 1;
+            long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
+            int ptr = resolved.ptr + 1;
 
             // TODO bounds check
 
@@ -351,11 +385,11 @@ final class WireHelpers {
 
             // TODO check whether the size is compatible
 
-            return new ListReader(segment,    // TODO follow fars
-                                  ptrOffset * 8, //
+            return new ListReader(resolved.segment,
+                                  ptr * Constants.BYTES_PER_WORD,
                                   size,
-                                  wordsPerElement * 64,
-                                  StructPointer.dataSize(tag) * 64,
+                                  wordsPerElement * Constants.BITS_PER_WORD,
+                                  StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
                                   StructPointer.ptrCount(tag),
                                   nestingLimit - 1);
         }
@@ -376,23 +410,26 @@ final class WireHelpers {
             return new Text.Reader(java.nio.ByteBuffer.wrap(new byte[0]), 0, 0);
         }
 
-        int ptrOffset = WirePointer.target(refOffset, ref);
-        int size = ListPointer.elementCount(ref);
+        int refTarget = WirePointer.target(refOffset, ref);
 
-        if (WirePointer.kind(ref) != WirePointer.LIST) {
+        FollowFarsResult resolved = followFars(ref, refTarget, segment);
+
+        int size = ListPointer.elementCount(resolved.ref);
+
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
             throw new DecodeException("Message contains non-list pointer where text was expected.");
         }
 
-        if (ListPointer.elementSize(ref) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
             throw new DecodeException("Message contains list pointer of non-bytes where text was expected.");
         }
 
         // TODO bounds check?
 
-        if (size == 0 || segment.buffer.get(8 * ptrOffset + size - 1) != 0) {
+        if (size == 0 || resolved.segment.buffer.get(8 * resolved.ptr + size - 1) != 0) {
             throw new DecodeException("Message contains text that is not NUL-terminated.");
         }
 
-        return new Text.Reader(segment.buffer, ptrOffset, size - 1);
+        return new Text.Reader(resolved.segment.buffer, resolved.ptr, size - 1);
     }
 }

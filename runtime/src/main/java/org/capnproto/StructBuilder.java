@@ -19,6 +19,13 @@ public final class StructBuilder {
         this.bit0Offset = bit0Offset;
     }
 
+    public final StructReader asReader() {
+        return new StructReader(this.segment,
+                                this.data, this.pointers, this.dataSize,
+                                this.pointerCount, this.bit0Offset,
+                                0x7fffffff);
+    }
+
     public final boolean getBooleanField(int offset) {
         int bitOffset = (offset == 0 ? this.bit0Offset : offset);
         int position = this.data + (bitOffset / 8);
