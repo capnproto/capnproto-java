@@ -412,12 +412,46 @@ final class WireHelpers {
                                   StructPointer.ptrCount(tag),
                                   nestingLimit - 1);
         }
-        case FieldSize.VOID : break;
-        default :
-            throw new Error("unrecognized element size");
-        }
+        default : {
+            //# This is a primitive or pointer list, but all such
+            //# lists can also be interpreted as struct lists. We
+            //# need to compute the data size and pointer count for
+            //# such structs.
 
-        throw new Error();
+            int dataSize = FieldSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
+            int pointerCount = FieldSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
+            int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
+
+            // TODO "bounds_check"
+
+            //# Verify that the elements are at least as large as
+            //# the expected type. Note that if we expected
+            //# InlineComposite, the expected sizes here will be
+            //# zero, because bounds checking will be performed at
+            //# field access time. So this check here is for the
+            //# case where we expected a list of some primitive or
+            //# pointer type.
+
+            int expectedDataBitsPerElement = FieldSize.dataBitsPerElement(expectedElementSize);
+            int expectedPointersPerElement = FieldSize.pointersPerElement(expectedElementSize);
+
+            if (expectedDataBitsPerElement > dataSize) {
+                throw new DecodeException("Message contains list with incompatible element type.");
+            }
+
+            if (expectedPointersPerElement > pointerCount) {
+                throw new DecodeException("Message contains list with incompatible element type.");
+            }
+
+            return new ListReader(resolved.segment,
+                                  resolved.ptr * Constants.BYTES_PER_WORD,
+                                  ListPointer.elementCount(resolved.ref),
+                                  step,
+                                  dataSize,
+                                  (short)pointerCount,
+                                  nestingLimit - 1);
+        }
+        }
     }
 
     public static Text.Reader readTextPointer(SegmentReader segment,
