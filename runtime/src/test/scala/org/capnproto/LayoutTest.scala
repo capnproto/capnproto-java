@@ -13,7 +13,8 @@ class LayoutSuite extends FunSuite {
     val buffer = java.nio.ByteBuffer.wrap(data);
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-    val pointerReader = new PointerReader(new SegmentReader(buffer, new ReaderArena()), 0, 0x7fffffff);
+    val arena = new ReaderArena(Array(buffer));
+    val pointerReader = new PointerReader(arena.tryGetSegment(0), 0, 0x7fffffff);
     val reader = pointerReader.getStruct();
 
     assert(reader.getLongField(0) === 0xefcdab8967452301L);

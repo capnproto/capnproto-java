@@ -33,7 +33,7 @@ public final class BuilderArena implements Arena {
     }
 
     public SegmentReader tryGetSegment(int id) {
-        throw new Error("unimplemented");
+        return this.segments.get(id);
     }
     public SegmentBuilder getSegment(int id) {
         return this.segments.get(id);

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public final class InputStreamMessageReader {
 
@@ -47,7 +47,7 @@ public final class InputStreamMessageReader {
         }
 
         // in words
-        Vector<Integer> moreSizes = new Vector<Integer>();
+        ArrayList<Integer> moreSizes = new ArrayList<Integer>();
 
         if (segmentCount > 1) {
             ByteBuffer moreSizesRaw = makeByteBuffer(readExact(is, 4 * (segmentCount & ~1)));

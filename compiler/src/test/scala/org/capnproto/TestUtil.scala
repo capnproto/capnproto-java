@@ -89,4 +89,44 @@ object TestUtil {
     assert(builder.getVoidList().size() == 6);
   }
 
+  def checkTestMessage(reader : TestAllTypes.Reader) {
+    reader.getVoidField();
+    assert(reader.getBoolField() == true);
+    assert(reader.getInt8Field() == -123);
+    assert(reader.getInt16Field() == -12345);
+    assert(reader.getInt32Field() == -12345678);
+    assert(reader.getInt64Field() == -123456789012345L);
+    assert(reader.getUInt8Field() == 0xef.toByte);
+    assert(reader.getUInt16Field() == 0x4567);
+    assert(reader.getUInt32Field() == 0x34567890);
+    assert(reader.getUInt64Field() == 0x1234567890123456L);
+    assert(reader.getFloat32Field() == 1234.5f);
+    assert(reader.getFloat64Field() == -123e45);
+    assert(reader.getTextField().toString() == "foo");
+
+    {
+      val subReader = reader.getStructField();
+      subReader.getVoidField();
+      assert(subReader.getBoolField() == true);
+      assert(subReader.getInt8Field() == -12);
+      assert(subReader.getInt16Field() == 3456);
+      assert(subReader.getInt32Field() == -78901234);
+      assert(subReader.getInt64Field() == 56789012345678L);
+      assert(subReader.getUInt8Field() == 90);
+      assert(subReader.getUInt16Field() == 1234);
+      assert(subReader.getUInt32Field() == 56789012);
+      assert(subReader.getUInt64Field() == 345678901234567890L);
+      assert(subReader.getFloat32Field() == -1.25e-10f);
+      assert(subReader.getFloat64Field() == 345);
+
+      {
+        val subSubReader = subReader.getStructField();
+        assert(subSubReader.getTextField().toString() == "nested")
+      }
+    }
+
+    assert(reader.getVoidList().size() == 6);
+  }
+
+
 }
