@@ -21,7 +21,7 @@ class EncodingSuite extends FunSuite {
     TestUtil.initTestMessage(allTypes);
 
     TestUtil.checkTestMessage(allTypes);
-    //TestUtil.checkTestMessage(allTypes.asReader());
+    TestUtil.checkTestMessage(allTypes.asReader());
   }
 
   // to debug, do this:

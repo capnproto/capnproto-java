@@ -111,20 +111,17 @@ final class WireHelpers {
         //# If the segment is null, this is an unchecked message,
         //# so there are no FAR pointers.
         if (segment != null && WirePointer.kind(ref) == WirePointer.FAR) {
-
             SegmentReader resultSegment = segment.arena.tryGetSegment(FarPointer.getSegmentId(ref));
 
-            int ptr = FarPointer.positionInSegment(ref);
+            int padOffset = FarPointer.positionInSegment(ref);
+            long pad = WirePointer.get(resultSegment.buffer, padOffset);
 
             int padWords = FarPointer.isDoubleFar(ref) ? 2 : 1;
             // TODO read limiting
 
-            int pad = ptr;
-
             if (!FarPointer.isDoubleFar(ref)) {
 
-                return new FollowFarsResult(WirePointer.target(pad,
-                                                               WirePointer.get(resultSegment.buffer, pad)),
+                return new FollowFarsResult(WirePointer.target(padOffset, pad),
                                             pad, resultSegment);
             } else {
                 //# Landing pad is another far pointer. It is
