@@ -1251,6 +1251,9 @@ private:
                    structNode.getDiscriminantOffset(), ")];\n",
                    spaces(indent), "  }\n")
        : kj::strTree()),
+      spaces(indent), "  public final Reader asReader() {\n",
+      spaces(indent), "    return new Reader(this._builder.asReader());\n",
+      spaces(indent), "  }\n",
       kj::mv(methodDecls),
       spaces(indent), "}\n",
       "\n");

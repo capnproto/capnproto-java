@@ -112,7 +112,26 @@ final class WireHelpers {
         //# so there are no FAR pointers.
         if (segment != null && WirePointer.kind(ref) == WirePointer.FAR) {
 
-            throw new Error("unimplemented");
+            SegmentReader resultSegment = segment.arena.tryGetSegment(FarPointer.getSegmentId(ref));
+
+            int ptr = FarPointer.positionInSegment(ref);
+
+            int padWords = FarPointer.isDoubleFar(ref) ? 2 : 1;
+            // TODO read limiting
+
+            int pad = ptr;
+
+            if (!FarPointer.isDoubleFar(ref)) {
+
+                return new FollowFarsResult(WirePointer.target(pad,
+                                                               WirePointer.get(resultSegment.buffer, pad)),
+                                            pad, resultSegment);
+            } else {
+                //# Landing pad is another far pointer. It is
+                //# followed by a tag describing the pointed-to
+                //# object.
+                throw new Error("unimplemented");
+            }
 
         } else {
             return new FollowFarsResult(refTarget, ref, segment);
