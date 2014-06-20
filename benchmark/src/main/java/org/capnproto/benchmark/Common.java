@@ -26,4 +26,20 @@ public class Common {
         }
     }
 
+    public static int div(int a, int b){
+        if (b == 0) return 0x7fffffff;
+        if (a == 0x80000000 && b == -1) {
+            return 0x7fffffff;
+        }
+        return a / b;
+    }
+
+    public static int modulus(int a, int b) {
+        if (b == 0) return 0x7fffffff;
+        if (a == 0x80000000 && b == -1) {
+            return 0x7fffffff;
+        }
+        return a % b;
+    }
+
 }

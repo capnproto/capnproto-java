@@ -28,7 +28,7 @@ $Cxx.namespace("capnp::benchmark::capnp");
 
 using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.benchmark");
-$Java.outerClassname("Eval");
+$Java.outerClassname("EvalSchema");
 
 enum Operation {
   add @0;
