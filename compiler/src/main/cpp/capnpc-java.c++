@@ -1275,6 +1275,10 @@ private:
         spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
         spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
         spaces(indent), "    }\n",
+        spaces(indent), "    public final Reader asReader(Builder builder) {\n",
+        spaces(indent), "      return new Reader(builder._builder.asReader());\n",
+        spaces(indent), "    }\n",
+
         spaces(indent), "  }\n",
         spaces(indent), "  public static final Factory factory = new Factory();\n",
 

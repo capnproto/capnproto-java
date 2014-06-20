@@ -42,4 +42,6 @@ public class Common {
         return a % b;
     }
 
+
+
 }

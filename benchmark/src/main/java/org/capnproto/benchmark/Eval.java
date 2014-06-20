@@ -5,7 +5,10 @@ import org.capnproto.StructList;
 import org.capnproto.Text;
 import org.capnproto.benchmark.EvalSchema.*;
 
-public class Eval {
+public class Eval
+    extends TestCase<Expression.Factory, Expression.Builder, Expression.Reader,
+    EvaluationResult.Factory, EvaluationResult.Builder, EvaluationResult.Reader, Integer> {
+
     public static int makeExpression(Common.FastRand rng, Expression.Builder exp, int depth) {
         exp.setOp(Operation.values()[rng.nextLessThan(Operation.values().length)]);
 
@@ -66,5 +69,17 @@ public class Eval {
         default:
             throw new Error("impossible");
         }
+    }
+
+    public final Integer setupRequest(Common.FastRand rng, Expression.Builder request) {
+        return makeExpression(rng, request, 0);
+    }
+
+    public final void handleRequest(Expression.Reader request, EvaluationResult.Builder response) {
+        response.setValue(evaluateExpression(request));
+    }
+
+    public final boolean checkResponse(EvaluationResult.Reader response, Integer expected) {
+        return response.getValue() == expected;
     }
 }
