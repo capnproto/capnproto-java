@@ -9,7 +9,7 @@ class EncodingSuite extends FunSuite {
 
   test("AllTypes") {
     val message = new MessageBuilder();
-    val allTypes = message.initRoot(TestAllTypes.Builder.factory);
+    val allTypes = message.initRoot(TestAllTypes.factory);
     TestUtil.initTestMessage(allTypes);
     TestUtil.checkTestMessage(allTypes);
     TestUtil.checkTestMessage(allTypes.asReader());
@@ -17,7 +17,7 @@ class EncodingSuite extends FunSuite {
 
   test("AllTypesMultiSegment") {
     val message = new MessageBuilder(5, BuilderArena.AllocationStrategy.FIXED_SIZE);
-    val allTypes = message.initRoot(TestAllTypes.Builder.factory);
+    val allTypes = message.initRoot(TestAllTypes.factory);
     TestUtil.initTestMessage(allTypes);
 
     TestUtil.checkTestMessage(allTypes);

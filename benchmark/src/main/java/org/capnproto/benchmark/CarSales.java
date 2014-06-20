@@ -124,9 +124,9 @@ public class CarSales
         for (int i = 0; i < 50000; ++i) {
             MessageBuilder requestMessage = new MessageBuilder();
             MessageBuilder responseMessage = new MessageBuilder();
-            ParkingLot.Builder request = requestMessage.initRoot(ParkingLot.Builder.factory);
+            ParkingLot.Builder request = requestMessage.initRoot(ParkingLot.factory);
             long expected = testCase.setupRequest(rng, request);
-            TotalValue.Builder response = responseMessage.initRoot(TotalValue.Builder.factory);
+            TotalValue.Builder response = responseMessage.initRoot(TotalValue.factory);
             testCase.handleRequest(request.asReader(), response);
             if (!testCase.checkResponse(response.asReader(), expected)) {
                 System.out.println("mismatch!");

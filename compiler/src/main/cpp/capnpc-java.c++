@@ -919,7 +919,7 @@ private:
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
           spaces(indent), "    return ", type,
-          ".Reader.factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
+          ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -929,7 +929,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           spaces(indent), "    return ", type,
-          ".Builder.factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
+          ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
           type, ".STRUCT_SIZE", "));\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
@@ -938,7 +938,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           spaces(indent), "    return ",
-          type, ".Builder.factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
+          type, ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
           type, ".STRUCT_SIZE", "));\n",
           spaces(indent), "  }\n"),
 
@@ -1065,8 +1065,8 @@ private:
             readerClass = kj::str("Reader<", elementReaderType, ">");
             elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
             builderClass = kj::str("Builder<", elementBuilderType, ">");
-            readerFactoryArg = kj::str(elementReaderType, ".factory,"),
-            builderFactoryArg = kj::str(elementBuilderType, ".factory,"),
+            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
+            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
             fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
             break;
         }
@@ -1205,14 +1205,6 @@ private:
                                int indent) {
     return kj::strTree(
       spaces(indent), "public static final class Reader {\n",
-      spaces(indent),
-      "  public static class Factory implements org.capnproto.FromStructReader<Reader> {\n",
-      spaces(indent),
-      "    public final Reader fromStructReader(org.capnproto.StructReader reader) {\n",
-      spaces(indent), "      return new Reader(reader);\n",
-      spaces(indent), "    }\n",
-      spaces(indent), "  }\n",
-      spaces(indent), "  public static final Factory factory = new Factory();\n",
       spaces(indent), "  public Reader(org.capnproto.StructReader base){ this._reader = base; }\n",
       "\n",
       (isUnion ?
@@ -1234,15 +1226,6 @@ private:
     bool isUnion = structNode.getDiscriminantCount() != 0;
     return kj::strTree(
       spaces(indent), "public static final class Builder {\n",
-      spaces(indent), "  public static class Factory implements org.capnproto.FromStructBuilder<Builder> {\n",
-      spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.StructBuilder builder) {\n",
-      spaces(indent), "      return new Builder(builder);\n",
-      spaces(indent), "    }\n",
-      spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
-      spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
-      spaces(indent), "    }\n",
-      spaces(indent), "  }\n",
-      spaces(indent), "  public static final Factory factory = new Factory();\n",
       spaces(indent), "  public Builder(org.capnproto.StructBuilder base){ this._builder = base; }\n",
       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
       (isUnion ?
@@ -1280,6 +1263,21 @@ private:
           spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(),
           ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
+
+        spaces(indent), "  public static class Factory implements org.capnproto.StructFactory<Builder, Reader> {\n",
+        spaces(indent),
+        "    public final Reader fromStructReader(org.capnproto.StructReader reader) {\n",
+        spaces(indent), "      return new Reader(reader);\n",
+        spaces(indent), "    }\n",
+        spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.StructBuilder builder) {\n",
+        spaces(indent), "      return new Builder(builder);\n",
+        spaces(indent), "    }\n",
+        spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
+        spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
+        spaces(indent), "    }\n",
+        spaces(indent), "  }\n",
+        spaces(indent), "  public static final Factory factory = new Factory();\n",
+
 
         kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
                                   structNode.getDiscriminantOffset(),

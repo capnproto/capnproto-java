@@ -16,7 +16,7 @@ public class AddressbookMain {
 
     public static void writeAddressBook() throws java.io.IOException {
         MessageBuilder message = new MessageBuilder();
-        AddressBook.Builder addressbook = message.initRoot(AddressBook.Builder.factory);
+        AddressBook.Builder addressbook = message.initRoot(AddressBook.factory);
         StructList.Builder<Person.Builder> people = addressbook.initPeople(2);
 
         Person.Builder alice = people.get(0);
@@ -48,7 +48,7 @@ public class AddressbookMain {
 
     public static void printAddressBook() throws java.io.IOException {
         MessageReader message = InputStreamMessageReader.create(System.in);
-        AddressBook.Reader addressbook = message.getRoot(AddressBook.Reader.factory);
+        AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
         StructList.Reader<Person.Reader> people = addressbook.getPeople();
         int size = people.size();
         for(int ii = 0; ii < size; ++ii) {
