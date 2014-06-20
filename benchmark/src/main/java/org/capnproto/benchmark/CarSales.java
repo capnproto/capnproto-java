@@ -1,5 +1,6 @@
 package org.capnproto.benchmark;
 
+import org.capnproto.MessageBuilder;
 import org.capnproto.StructList;
 import org.capnproto.Text;
 import org.capnproto.benchmark.CarSalesSchema.*;
@@ -84,6 +85,49 @@ public class CarSales {
         car.setHasCruiseControl(rng.nextLessThan(2) == 1);
         car.setCupHolders((byte)rng.nextLessThan(12));
         car.setHasNavSystem(rng.nextLessThan(2) == 1);
+    }
+
+
+    public static long setupRequest(Common.FastRand rng, ParkingLot.Builder request) {
+        long result = 0;
+        StructList.Builder<Car.Builder> cars = request.initCars(rng.nextLessThan(200));
+        for (int i = 0; i < cars.size(); ++i) {
+            Car.Builder car = cars.get(i);
+            randomCar(rng, car);
+            result += carValue(car.asReader());
+        }
+        return result;
+    }
+
+
+    public static void handleRequest(ParkingLot.Reader request, TotalValue.Builder response) {
+        long result = 0;
+        StructList.Reader<Car.Reader> cars = request.getCars();
+        for (int i =0; i < cars.size(); ++i) {
+            result += carValue(cars.get(i));
+        }
+        response.setAmount(result);
+    }
+
+    public static boolean checkResponse(TotalValue.Reader response, long expected) {
+        return response.getAmount() == expected;
+    }
+
+
+    public static void main(String[] args) {
+        Common.FastRand rng = new Common.FastRand();
+
+        for (int i = 0; i < 50000; ++i) {
+            MessageBuilder requestMessage = new MessageBuilder();
+            MessageBuilder responseMessage = new MessageBuilder();
+            ParkingLot.Builder request = requestMessage.initRoot(ParkingLot.Builder.factory);
+            long expected = setupRequest(rng, request);
+            TotalValue.Builder response = responseMessage.initRoot(TotalValue.Builder.factory);
+            handleRequest(request.asReader(), response);
+            if (!checkResponse(response.asReader(), expected)) {
+                System.out.println("mismatch!");
+            }
+        }
     }
 
 }

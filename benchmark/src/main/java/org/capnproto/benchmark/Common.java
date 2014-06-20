@@ -16,13 +16,13 @@ public class Common {
         }
 
         public int nextLessThan(int range) {
-            // sign?
-            return this.nextInt() % range;
+            // just chop off the sign bit.
+            return (0x7fffffff & this.nextInt()) % range;
         }
 
         public double nextDouble(double range) {
-            // XXX sign?
-            return (double) this.nextInt() * range / (double)(0xffffffffL);
+            // just chop off the sign bit.
+            return (double) (0x7fffffff & this.nextInt()) * range / (double)(0x7fffffff);
         }
     }
 
