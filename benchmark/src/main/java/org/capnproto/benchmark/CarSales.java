@@ -5,7 +5,8 @@ import org.capnproto.StructList;
 import org.capnproto.Text;
 import org.capnproto.benchmark.CarSalesSchema.*;
 
-public class CarSales {
+public class CarSales
+    implements TestCase<ParkingLot.Builder, ParkingLot.Reader, TotalValue.Builder, TotalValue.Reader, Long> {
 
     static final long carValue(Car.Reader car) {
         long result = 0;
@@ -88,7 +89,7 @@ public class CarSales {
     }
 
 
-    public static long setupRequest(Common.FastRand rng, ParkingLot.Builder request) {
+    public Long setupRequest(Common.FastRand rng, ParkingLot.Builder request) {
         long result = 0;
         StructList.Builder<Car.Builder> cars = request.initCars(rng.nextLessThan(200));
         for (int i = 0; i < cars.size(); ++i) {
@@ -100,7 +101,7 @@ public class CarSales {
     }
 
 
-    public static void handleRequest(ParkingLot.Reader request, TotalValue.Builder response) {
+    public void handleRequest(ParkingLot.Reader request, TotalValue.Builder response) {
         long result = 0;
         StructList.Reader<Car.Reader> cars = request.getCars();
         for (int i =0; i < cars.size(); ++i) {
@@ -109,7 +110,7 @@ public class CarSales {
         response.setAmount(result);
     }
 
-    public static boolean checkResponse(TotalValue.Reader response, long expected) {
+    public boolean checkResponse(TotalValue.Reader response, Long expected) {
         return response.getAmount() == expected;
     }
 
@@ -117,14 +118,17 @@ public class CarSales {
     public static void main(String[] args) {
         Common.FastRand rng = new Common.FastRand();
 
+        TestCase<ParkingLot.Builder, ParkingLot.Reader,
+            TotalValue.Builder, TotalValue.Reader, Long> testCase = new CarSales();
+
         for (int i = 0; i < 50000; ++i) {
             MessageBuilder requestMessage = new MessageBuilder();
             MessageBuilder responseMessage = new MessageBuilder();
             ParkingLot.Builder request = requestMessage.initRoot(ParkingLot.Builder.factory);
-            long expected = setupRequest(rng, request);
+            long expected = testCase.setupRequest(rng, request);
             TotalValue.Builder response = responseMessage.initRoot(TotalValue.Builder.factory);
-            handleRequest(request.asReader(), response);
-            if (!checkResponse(response.asReader(), expected)) {
+            testCase.handleRequest(request.asReader(), response);
+            if (!testCase.checkResponse(response.asReader(), expected)) {
                 System.out.println("mismatch!");
             }
         }
