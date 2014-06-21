@@ -937,6 +937,7 @@ private:
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
+          unionDiscrim.set,
           spaces(indent), "    return ",
           type, ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
           type, ".STRUCT_SIZE", "));\n",
