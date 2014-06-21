@@ -24,6 +24,15 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(allTypes.asReader());
   }
 
+  test("Groups") {
+    val builder = new MessageBuilder();
+    val root = builder.initRoot(TestGroups.factory);
+
+    //val foo = root.getGroups().initFoo();
+
+  }
+
+
   // to debug, do this:
   //Serialize.writeMessage((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                       message);
