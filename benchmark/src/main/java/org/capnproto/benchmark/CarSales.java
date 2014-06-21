@@ -1,6 +1,5 @@
 package org.capnproto.benchmark;
 
-import org.capnproto.MessageBuilder;
 import org.capnproto.StructList;
 import org.capnproto.Text;
 import org.capnproto.benchmark.CarSalesSchema.*;
@@ -115,13 +114,8 @@ public class CarSales
 
 
     public static void main(String[] args) {
-        Common.FastRand rng = new Common.FastRand();
-
-        TestCase<ParkingLot.Factory, ParkingLot.Builder, ParkingLot.Reader,
-            TotalValue.Factory, TotalValue.Builder, TotalValue.Reader, Long> testCase = new CarSales();
-
-        testCase.execute(ParkingLot.factory, TotalValue.factory);
-
+        CarSales testCase = new CarSales();
+        testCase.execute(args, ParkingLot.factory, TotalValue.factory);
     }
 
 }

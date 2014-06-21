@@ -82,4 +82,9 @@ public class Eval
     public final boolean checkResponse(EvaluationResult.Reader response, Integer expected) {
         return response.getValue() == expected;
     }
+
+    public static void main(String[] args) {
+        Eval testCase = new Eval();
+        testCase.execute(args, Expression.factory, EvaluationResult.factory);
+    }
 }

@@ -13,10 +13,18 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
     public abstract void handleRequest(RequestReader request, ResponseBuilder response);
     public abstract boolean checkResponse(ResponseReader response, Expectation expected);
 
-    public void execute(RequestFactory requestFactory, ResponseFactory responseFactory) {
+    public void execute(String[] args, RequestFactory requestFactory, ResponseFactory responseFactory) {
+
+        if (args.length != 4) {
+            System.out.println("USAGE: TestCase MODE REUSE COMPRESSION ITERATION_COUNT");
+            return;
+        }
+
+        long iters = Long.parseLong(args[3]);
+
         Common.FastRand rng = new Common.FastRand();
 
-        for (int i = 0; i < 50000; ++i) {
+        for (int i = 0; i < iters; ++i) {
             MessageBuilder requestMessage = new MessageBuilder();
             MessageBuilder responseMessage = new MessageBuilder();
             RequestBuilder request = requestMessage.initRoot(requestFactory);
