@@ -49,15 +49,10 @@ public class AddressbookMain {
     public static void printAddressBook() throws java.io.IOException {
         MessageReader message = InputStreamMessageReader.create(System.in);
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
-        StructList.Reader<Person.Reader> people = addressbook.getPeople();
-        int size = people.size();
-        for(int ii = 0; ii < size; ++ii) {
-            Person.Reader person = people.get(ii);
+        for(Person.Reader person : addressbook.getPeople()) {
             System.out.println(person.getName() + ": " + person.getEmail());
 
-            StructList.Reader<Person.PhoneNumber.Reader> phones = person.getPhones();
-            for (int jj = 0; jj < phones.size(); ++jj) {
-                Person.PhoneNumber.Reader phone = phones.get(jj);
+            for (Person.PhoneNumber.Reader phone : person.getPhones()) {
                 String typeName = "UNKNOWN";
                 switch (phone.getType()) {
                 case MOBILE :

@@ -1,7 +1,7 @@
 package org.capnproto;
 
 public final class StructList {
-    public static final class Reader<T> {
+    public static final class Reader<T> implements Iterable<T> {
         public final ListReader reader;
         public final FromStructReader<T> factory;
 
@@ -16,6 +16,26 @@ public final class StructList {
 
         public T get(int index) {
             return this.factory.fromStructReader(this.reader.getStructElement(index));
+        }
+
+
+        public final class Iterator implements java.util.Iterator<T> {
+            public Reader<T> list;
+            public int idx = 0;
+            public Iterator(Reader<T> list) {
+                this.list = list;
+            }
+
+            public T next() {
+                return list.factory.fromStructReader(list.reader.getStructElement(idx++));
+            }
+            public boolean hasNext() {
+                return idx < list.size();
+            }
+        }
+
+        public java.util.Iterator<T> iterator() {
+            return new Iterator(this);
         }
     }
 

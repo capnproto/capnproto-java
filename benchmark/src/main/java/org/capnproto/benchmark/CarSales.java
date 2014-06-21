@@ -14,9 +14,7 @@ public class CarSales
         result += car.getSeats() * 200;
         result += car.getDoors() * 350;
 
-        StructList.Reader<Wheel.Reader> wheels = car.getWheels();
-        for (int i = 0; i < wheels.size(); ++i) {
-            Wheel.Reader wheel = wheels.get(i);
+        for (Wheel.Reader wheel : car.getWheels()) {
             result += ((long)wheel.getDiameter() * (long)wheel.getDiameter());
             result += wheel.getSnowTires() ? 100 : 0;
         }
