@@ -32,6 +32,9 @@ public final class StructList {
             public boolean hasNext() {
                 return idx < list.size();
             }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
         }
 
         public java.util.Iterator<T> iterator() {
