@@ -17,11 +17,12 @@ public class CatRank
             this.score = score; this.result = result;
         }
 
+        // decreasing order
         public int compareTo(ScoredResult other) {
             if (this.score < other.score) {
-                return -1;
-            } else {
                 return 1;
+            } else {
+                return -1;
             }
         }
     }
