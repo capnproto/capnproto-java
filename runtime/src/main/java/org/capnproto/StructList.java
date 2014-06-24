@@ -42,7 +42,7 @@ public final class StructList {
         }
     }
 
-    public static final class Builder<T> {
+    public static final class Builder<T> implements Iterable<T> {
         public final ListBuilder builder;
         public final FromStructBuilder<T> factory;
 
@@ -64,6 +64,30 @@ public final class StructList {
         public final T get(int index) {
             return this.factory.fromStructBuilder(this.builder.getStructElement(index));
         }
+
+
+        public final class Iterator implements java.util.Iterator<T> {
+            public Builder<T> list;
+            public int idx = 0;
+            public Iterator(Builder<T> list) {
+                this.list = list;
+            }
+
+            public T next() {
+                return list.factory.fromStructBuilder(list.builder.getStructElement(idx++));
+            }
+            public boolean hasNext() {
+                return idx < list.size();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        public java.util.Iterator<T> iterator() {
+            return new Iterator(this);
+        }
+
 
     }
 
