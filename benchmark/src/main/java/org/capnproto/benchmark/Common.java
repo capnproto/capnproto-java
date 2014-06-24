@@ -43,5 +43,10 @@ public class Common {
     }
 
 
+    public static String[] WORDS = {
+        "foo ", "bar ", "baz ", "qux ", "quux ", "corge ", "grault ", "garply ", "waldo ", "fred ",
+        "plugh ", "xyzzy ", "thud "
+    };
+
 
 }

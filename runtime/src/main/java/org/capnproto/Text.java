@@ -26,6 +26,10 @@ public final class Text {
             }
         }
 
+        public final int size() {
+            return this.size;
+        }
+
         @Override
         public final String toString() {
             byte[] bytes = new byte[this.size];
