@@ -2,17 +2,18 @@ package org.capnproto.benchmark;
 
 public class Common {
     public static class FastRand {
-        public static final int a = 1664525;
-        public static final int c = 1013904223;
-        public int state;
-
-        public FastRand() {
-            this.state = 1013904223;
-        }
+        public int x = 0x1d2acd47;
+        public int y = 0x58ca3e14;
+        public int z = 0xf563f232;
+        public int w = 0x0bc76199;
 
         public int nextInt() {
-            this.state = this.a * this.state + c;
-            return this.state;
+            int tmp = this.x ^ (this.x << 11);
+            this.x = this.y;
+            this.y = this.z;
+            this.z = this.w;
+            this.w = this.w ^ (this.w >> 19) ^ tmp ^ (tmp >> 8);
+            return this.w;
         }
 
         public int nextLessThan(int range) {
