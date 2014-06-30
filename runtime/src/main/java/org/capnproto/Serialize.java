@@ -6,6 +6,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public final class Serialize {
+
+    static boolean hasRemaining(ByteBuffer[] buffers) {
+        for (ByteBuffer buffer : buffers) {
+            if (buffer.hasRemaining()) { return true; }
+        }
+        return false;
+    }
+
     public static void writeMessage(GatheringByteChannel outputChannel,
                                     MessageBuilder message) throws IOException {
         ByteBuffer[] segments = message.getSegmentsForOutput();
@@ -21,9 +29,13 @@ public final class Serialize {
         }
 
         // Any padding is already zeroed.
+        while (table.hasRemaining()) {
+            outputChannel.write(table);
+        }
 
-        outputChannel.write(table);
-
-        outputChannel.write(segments);
+        while (hasRemaining(segments)) {
+            outputChannel.write(segments);
+            // TODO check for results of 0 or -1.
+        }
     }
 }

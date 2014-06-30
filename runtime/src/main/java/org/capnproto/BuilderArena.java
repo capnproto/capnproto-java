@@ -92,7 +92,7 @@ public final class BuilderArena implements Arena {
             SegmentBuilder segment = segments.get(ii);
             segment.buffer.reset();
             ByteBuffer slice = segment.buffer.slice();
-            slice.limit(segment.currentSize() * 8);
+            slice.limit(segment.currentSize() * Constants.BYTES_PER_WORD);
             result[ii] = slice;
         }
         return result;
