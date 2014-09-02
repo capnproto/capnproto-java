@@ -39,10 +39,18 @@ class EncodingSuite extends FunSuite {
     assert(-12345678 == TestConstants.INT32_CONST);
     assert(-123456789012345L == TestConstants.INT64_CONST);
 
+    assert(-22 == TestConstants.UINT8_CONST);
+    assert(-19858 == TestConstants.UINT16_CONST);
+    assert(-838178284 == TestConstants.UINT32_CONST);
+    assert(-6101065172474983726L == TestConstants.UINT64_CONST);
+
     assert(1234.5f == TestConstants.FLOAT32_CONST);
     assert(-123e45 == TestConstants.FLOAT64_CONST);
   }
 
+  test("GlobalConstants") {
+    assert(12345 == GLOBAL_INT);
+  }
 
   // to debug, do this:
   //Serialize.writeMessage((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),

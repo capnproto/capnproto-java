@@ -319,10 +319,10 @@ private:
       case schema::Value::INT16: return kj::strTree(value.getInt16());
       case schema::Value::INT32: return kj::strTree(value.getInt32());
       case schema::Value::INT64: return kj::strTree(value.getInt64(), "L");
-      case schema::Value::UINT8: return kj::strTree(value.getUint8());
-      case schema::Value::UINT16: return kj::strTree(value.getUint16());
-      case schema::Value::UINT32: return kj::strTree(value.getUint32());
-      case schema::Value::UINT64: return kj::strTree(value.getUint64(), "L");
+      case schema::Value::UINT8: return kj::strTree(static_cast<int8_t>(value.getUint8()));
+      case schema::Value::UINT16: return kj::strTree(static_cast<int16_t>(value.getUint16()));
+      case schema::Value::UINT32: return kj::strTree(static_cast<int32_t>(value.getUint32()));
+      case schema::Value::UINT64: return kj::strTree(static_cast<int64_t>(value.getUint64()), "L");
       case schema::Value::FLOAT32: return kj::strTree(value.getFloat32(), "f");
       case schema::Value::FLOAT64: return kj::strTree(value.getFloat64());
       case schema::Value::ENUM: {
@@ -1627,7 +1627,7 @@ private:
         auto constText = makeConstText(scope, name, schema.asConst());
 
         return NodeTextNoSchema {
-          kj::mv(constText.decl),
+          kj::strTree("  ", kj::mv(constText.decl)),
           kj::strTree(),
           kj::strTree(),
 
