@@ -1422,7 +1422,6 @@ private:
   };
 
   struct NodeTextNoSchema {
-    kj::StringTree outerTypeDecl;
     kj::StringTree outerTypeDef;
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
@@ -1531,10 +1530,8 @@ private:
         scope, name, schema,
         KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }, indent);
 
-    KJ_LOG(ERROR, top.outerTypeDecl);
-
     return NodeText {
-      kj::mv(top.outerTypeDecl),
+      kj::strTree(),
 
       kj::strTree(
           kj::mv(top.outerTypeDef),
@@ -1588,7 +1585,6 @@ private:
         auto structNode = proto.getStruct();
 
         return NodeTextNoSchema {
-          kj::mv(structText.outerTypeDecl),
           kj::mv(structText.outerTypeDef),
           kj::mv(structText.readerBuilderDefs),
           kj::mv(structText.inlineMethodDefs),
@@ -1604,8 +1600,6 @@ private:
         auto enumerants = schema.asEnum().getEnumerants();
 
         return NodeTextNoSchema {
-          kj::strTree(),
-
           kj::strTree(
                       spaces(indent), "public enum ", name, " {\n",
                       KJ_MAP(e, enumerants) {
@@ -1633,7 +1627,6 @@ private:
         auto constText = makeConstText(scope, name, schema.asConst());
 
         return NodeTextNoSchema {
-          kj::strTree(),
           kj::mv(constText.decl),
           kj::strTree(),
           kj::strTree(),
@@ -1647,7 +1640,6 @@ private:
 
       case schema::Node::ANNOTATION: {
         return NodeTextNoSchema {
-          kj::strTree(),
           kj::strTree(),
           kj::strTree(),
           kj::strTree(),
