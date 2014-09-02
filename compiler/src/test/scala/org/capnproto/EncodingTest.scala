@@ -32,6 +32,10 @@ class EncodingSuite extends FunSuite {
 
   }
 
+  test("Constants") {
+    assert(true == TestConstants.BOOL_CONST);
+  }
+
 
   // to debug, do this:
   //Serialize.writeMessage((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
