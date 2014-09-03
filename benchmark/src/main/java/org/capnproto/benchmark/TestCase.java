@@ -1,5 +1,7 @@
 package org.capnproto.benchmark;
 
+import java.nio.ByteBuffer;
+
 import org.capnproto.FromStructReader;
 import org.capnproto.FromStructBuilder;
 import org.capnproto.StructFactory;
@@ -32,14 +34,26 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
         }
     }
 
+    static final int SCRATCH_SIZE = 128 * 1024;
+
     public void passByBytes(RequestFactory requestFactory, ResponseFactory responseFactory,
                             long iters) {
 
+        ByteBuffer requestBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
+        ByteBuffer responseBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
         Common.FastRand rng = new Common.FastRand();
 
         for (int i = 0; i < iters; ++i) {
             MessageBuilder requestMessage = new MessageBuilder();
             MessageBuilder responseMessage = new MessageBuilder();
+            RequestBuilder request = requestMessage.initRoot(requestFactory);
+            Expectation expected = this.setupRequest(rng, request);
+            ResponseBuilder response = responseMessage.initRoot(responseFactory);
+
+            {
+                org.capnproto.ByteBufferWritableByteChannel writer = new org.capnproto.ByteBufferWritableByteChannel(requestBytes);
+                //org.capnproto.writeMessage
+            }
             // TODO
             throw new Error("unimplemented");
         }
