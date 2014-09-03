@@ -295,6 +295,7 @@ private:
         case schema::Type::STRUCT:
           return kj::strTree(" org.capnproto.StructList");
         case schema::Type::TEXT:
+          return kj::strTree( "org.capnproto.TextList");
         case schema::Type::DATA:
         case schema::Type::ENUM:
         case schema::Type::INTERFACE:
@@ -1046,6 +1047,9 @@ private:
             break;
 
           case schema::Type::TEXT:
+            primitiveElement = false;
+            fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
+
           case schema::Type::DATA:
           case schema::Type::LIST:
           case schema::Type::ANY_POINTER:

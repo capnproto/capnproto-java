@@ -47,6 +47,11 @@ object TestUtil {
     builder.setEnumField(TestEnum.CORGE);
     builder.initVoidList(6);
 
+    val textList = builder.initTextList(3);
+    textList.set(0, new Text.Reader("plugh"));
+    textList.set(1, new Text.Reader("xyzzy"));
+    textList.set(2, new Text.Reader("thud"));
+
   }
 
 
@@ -87,6 +92,12 @@ object TestUtil {
     }
 
     assert(builder.getVoidList().size() == 6);
+
+    val textList = builder.getTextList();
+    assert(textList.size() == 3);
+    assert(textList.get(0).toString() == "plugh");
+    assert(textList.get(1).toString() == "xyzzy");
+    assert(textList.get(2).toString() == "thud");
   }
 
   def checkTestMessage(reader : TestAllTypes.Reader) {
@@ -126,6 +137,13 @@ object TestUtil {
     }
 
     assert(reader.getVoidList().size() == 6);
+
+    val textList = reader.getTextList();
+    assert(textList.size() == 3);
+    assert(textList.get(0).toString() == "plugh");
+    assert(textList.get(1).toString() == "xyzzy");
+    assert(textList.get(2).toString() == "thud");
+
   }
 
 

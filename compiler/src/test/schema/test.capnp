@@ -46,7 +46,11 @@ struct TestAllTypes {
   uInt64List    @26 : List(UInt64);
   float32List   @27 : List(Float32);
   float64List   @28 : List(Float64);
-# ...
+  textList      @29 : List(Text);
+#  dataList      @30 : List(Data);
+#  structList    @31 : List(TestAllTypes);
+#  enumList      @32 : List(TestEnum);
+#  interfaceList @33 : List(Void);
 }
 
 struct TestOutOfOrder {

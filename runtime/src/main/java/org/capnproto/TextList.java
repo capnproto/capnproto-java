@@ -62,6 +62,10 @@ public final class TextList {
         }
 
 
+        public final void set(int index, Text.Reader value) {
+            this.builder.getPointerElement(index).setText(value);
+        }
+
         public final class Iterator implements java.util.Iterator<Text.Builder> {
             public Builder list;
             public int idx = 0;
