@@ -14,21 +14,43 @@ public final class BufferedWritableByteChannelWrapper implements BufferedWritabl
         this.buf = ByteBuffer.allocate(8192);
     }
 
-    public final int write(ByteBuffer buf) throws IOException {
+    public final int write(ByteBuffer src) throws IOException {
         int available = this.buf.remaining();
-        int size = buf.remaining();
+        int size = src.remaining();
         if (size <= available) {
-            this.buf.put(buf);
+            this.buf.put(src);
         } else if (size <= this.buf.capacity()) {
             //# Too much for this buffer, but not a full buffer's worth,
             //# so we'll go ahead and copy.
-            //this.buf.put(buf); // XXX
-            //this.inner.write();
+            ByteBuffer slice = src.slice();
+            slice.limit(available);
+            this.buf.put(slice);
+
+            // XXX This needs to be tested. Probably wrong.
+
+            this.buf.rewind();
+            int n = this.inner.write(this.buf);
+            if (n != this.buf.capacity()) {
+                throw new IOException("failed to write all of the bytes");
+            }
+
+            src.position(available);
+            this.buf.put(src);
         } else {
             //# Writing so much data that we might as well write
             //# directly to avoid a copy.
+
+            int pos = this.buf.position();
+            this.buf.rewind();
+            ByteBuffer slice = this.buf;
+            slice.limit(pos);
+            int n = this.inner.write(slice);
+            int m = this.inner.write(src);
+            if (n + m != size) {
+                throw new IOException("failed to write all of the bytes");
+            }
         }
-        throw new Error("unimplemented");
+        return size;
     }
 
     public final ByteBuffer getWriteBuffer() {
