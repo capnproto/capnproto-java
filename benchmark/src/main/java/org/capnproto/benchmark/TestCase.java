@@ -52,9 +52,11 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
             ResponseBuilder response = responseMessage.initRoot(responseFactory);
 
             {
-                org.capnproto.ByteBufferWritableByteChannel writer = new org.capnproto.ByteBufferWritableByteChannel(requestBytes);
+                org.capnproto.ArrayOutputStream writer = new org.capnproto.ArrayOutputStream(requestBytes);
                 org.capnproto.Serialize.writeMessage(writer, requestMessage);
             }
+
+            new org.capnproto.ArrayInputStream(requestBytes);
 
             // TODO
             throw new Error("unimplemented");

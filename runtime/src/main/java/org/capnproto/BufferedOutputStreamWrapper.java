@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-public final class BufferedWritableByteChannelWrapper implements BufferedWritableByteChannel {
+public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
 
     public final WritableByteChannel inner;
     public final ByteBuffer buf;
 
-    public BufferedWritableByteChannelWrapper(WritableByteChannel w) {
+    public BufferedOutputStreamWrapper(WritableByteChannel w) {
         this.inner = w;
         this.buf = ByteBuffer.allocate(8192);
     }
@@ -34,7 +34,7 @@ public final class BufferedWritableByteChannelWrapper implements BufferedWritabl
                 throw new IOException("failed to write all of the bytes");
             }
 
-            src.position(available);
+            src.position(src.position() + available);
             this.buf.put(src);
         } else {
             //# Writing so much data that we might as well write
