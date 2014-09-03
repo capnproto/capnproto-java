@@ -164,7 +164,7 @@ struct TestGroups {
 }
 
 struct TestConstants {
-#  const voidConst      :Void    = void;
+  const voidConst      :Void    = void;
   const boolConst      :Bool    = true;
   const int8Const      :Int8    = -123;
   const int16Const     :Int16   = -12345;

@@ -313,7 +313,7 @@ private:
 
   kj::StringTree literalValue(schema::Type::Reader type, schema::Value::Reader value) {
     switch (value.which()) {
-      case schema::Value::VOID: return kj::strTree(" ::capnp::VOID");
+      case schema::Value::VOID: return kj::strTree("org.capnproto.Void.VOID");
       case schema::Value::BOOL: return kj::strTree(value.getBool() ? "true" : "false");
       case schema::Value::INT8: return kj::strTree(value.getInt8());
       case schema::Value::INT16: return kj::strTree(value.getInt16());

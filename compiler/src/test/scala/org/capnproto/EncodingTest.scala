@@ -33,6 +33,7 @@ class EncodingSuite extends FunSuite {
   }
 
   test("Constants") {
+    assert(Void.VOID == TestConstants.VOID_CONST);
     assert(true == TestConstants.BOOL_CONST);
     assert(-123 == TestConstants.INT8_CONST);
     assert(-12345 == TestConstants.INT16_CONST);
