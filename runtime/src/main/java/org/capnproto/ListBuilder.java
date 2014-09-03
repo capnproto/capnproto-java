@@ -37,4 +37,10 @@ public final class ListBuilder {
     }
 
 
+    public final PointerBuilder getPointerElement(int index) {
+        return new PointerBuilder(
+            this.segment,
+            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
+    }
+
 }
