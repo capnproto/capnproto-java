@@ -1,5 +1,6 @@
 package org.capnproto.benchmark;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.capnproto.FromStructReader;
@@ -37,7 +38,7 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
     static final int SCRATCH_SIZE = 128 * 1024;
 
     public void passByBytes(RequestFactory requestFactory, ResponseFactory responseFactory,
-                            long iters) {
+                            long iters) throws IOException {
 
         ByteBuffer requestBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
         ByteBuffer responseBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
@@ -52,8 +53,9 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
 
             {
                 org.capnproto.ByteBufferWritableByteChannel writer = new org.capnproto.ByteBufferWritableByteChannel(requestBytes);
-                //org.capnproto.writeMessage
+                org.capnproto.Serialize.writeMessage(writer, requestMessage);
             }
+
             // TODO
             throw new Error("unimplemented");
         }
@@ -72,12 +74,16 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
         String compression = args[2];
         long iters = Long.parseLong(args[3]);
 
-        if (mode.equals("object")) {
-            passByObject(requestFactory, responseFactory, iters);
-        } else if (mode.equals("bytes")) {
-            passByBytes(requestFactory, responseFactory, iters);
-        } else {
-            System.out.println("unknown mode: " + mode);
+        try {
+            if (mode.equals("object")) {
+                passByObject(requestFactory, responseFactory, iters);
+            } else if (mode.equals("bytes")) {
+                passByBytes(requestFactory, responseFactory, iters);
+            } else {
+                System.out.println("unknown mode: " + mode);
+            }
+        } catch (IOException e) {
+            System.err.println("IOException: " + e);
         }
     }
 }
