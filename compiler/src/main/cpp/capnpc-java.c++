@@ -1195,7 +1195,6 @@ private:
   // -----------------------------------------------------------------
 
   struct StructText {
-    kj::StringTree outerTypeDecl;
     kj::StringTree outerTypeDef;
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
@@ -1255,8 +1254,6 @@ private:
     structNode.getPointerCount();
 
     return StructText {
-      kj::strTree("  struct ", name, ";\n"),
-
       kj::strTree(
         spaces(indent), "public static class ", name, " {\n",
         kj::strTree(
@@ -1410,7 +1407,6 @@ private:
   // -----------------------------------------------------------------
 
   struct NodeText {
-    kj::StringTree outerTypeDecl;
     kj::StringTree outerTypeDef;
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
@@ -1531,8 +1527,6 @@ private:
         KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }, indent);
 
     return NodeText {
-      kj::strTree(),
-
       kj::strTree(
           kj::mv(top.outerTypeDef),
           KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }),
