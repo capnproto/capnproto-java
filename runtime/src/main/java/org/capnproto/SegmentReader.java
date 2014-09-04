@@ -13,4 +13,6 @@ public class SegmentReader {
         this.buffer = buffer;
         this.arena = arena;
     }
+
+    public static final SegmentReader EMPTY = new SegmentReader(ByteBuffer.allocate(8), null);
 }
