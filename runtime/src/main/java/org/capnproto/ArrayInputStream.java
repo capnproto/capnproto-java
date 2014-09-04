@@ -9,7 +9,7 @@ public final class ArrayInputStream implements BufferedInputStream {
     public final ByteBuffer buf;
 
     public ArrayInputStream(ByteBuffer buf) {
-        this.buf = buf;
+        this.buf = buf.asReadOnlyBuffer();
     }
 
     public final int read(ByteBuffer dst) throws IOException {

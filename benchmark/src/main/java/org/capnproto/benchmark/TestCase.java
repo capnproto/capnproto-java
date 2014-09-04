@@ -56,10 +56,24 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
                 org.capnproto.Serialize.writeMessage(writer, requestMessage);
             }
 
-            new org.capnproto.ArrayInputStream(requestBytes);
+            {
+                org.capnproto.MessageReader messageReader =
+                    org.capnproto.ByteChannelMessageReader.create(new org.capnproto.ArrayInputStream(requestBytes));
+                this.handleRequest(messageReader.getRoot(requestFactory), response);
+            }
 
-            // TODO
-            throw new Error("unimplemented");
+            {
+                org.capnproto.ArrayOutputStream writer = new org.capnproto.ArrayOutputStream(responseBytes);
+                org.capnproto.Serialize.writeMessage(writer, responseMessage);
+            }
+
+            {
+                org.capnproto.MessageReader messageReader =
+                    org.capnproto.ByteChannelMessageReader.create(new org.capnproto.ArrayInputStream(responseBytes));
+                if (!this.checkResponse(messageReader.getRoot(responseFactory), expected)) {
+                    throw new Error("incorrect response");
+                }
+            }
         }
     }
 

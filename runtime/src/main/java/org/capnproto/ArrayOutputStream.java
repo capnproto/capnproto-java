@@ -9,7 +9,7 @@ public final class ArrayOutputStream implements BufferedOutputStream {
     public final ByteBuffer buf;
 
     public ArrayOutputStream(ByteBuffer buf) {
-        this.buf = buf;
+        this.buf = buf.duplicate();
     }
 
     public final int write(ByteBuffer src) throws IOException {
