@@ -369,7 +369,6 @@ final class WireHelpers {
                                              int refOffset,
                                              byte expectedElementSize,
                                              int nestingLimit) {
-
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {

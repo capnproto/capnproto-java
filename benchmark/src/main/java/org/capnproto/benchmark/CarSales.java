@@ -101,9 +101,8 @@ public class CarSales
 
     public final void handleRequest(ParkingLot.Reader request, TotalValue.Builder response) {
         long result = 0;
-        StructList.Reader<Car.Reader> cars = request.getCars();
-        for (int i =0; i < cars.size(); ++i) {
-            result += carValue(cars.get(i));
+        for (Car.Reader car : request.getCars()) {
+            result += carValue(car);
         }
         response.setAmount(result);
     }

@@ -90,7 +90,7 @@ public final class BuilderArena implements Arena {
         ByteBuffer[] result = new ByteBuffer[this.segments.size()];
         for (int ii = 0; ii < this.segments.size(); ++ii) {
             SegmentBuilder segment = segments.get(ii);
-            segment.buffer.reset();
+            segment.buffer.rewind();
             ByteBuffer slice = segment.buffer.slice();
             slice.limit(segment.currentSize() * Constants.BYTES_PER_WORD);
             result[ii] = slice;
