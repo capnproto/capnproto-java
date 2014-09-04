@@ -47,8 +47,8 @@ struct TestAllTypes {
   float32List   @27 : List(Float32);
   float64List   @28 : List(Float64);
   textList      @29 : List(Text);
-#  dataList      @30 : List(Data);
-#  structList    @31 : List(TestAllTypes);
+  dataList      @30 : List(Data);
+  structList    @31 : List(TestAllTypes);
 #  enumList      @32 : List(TestEnum);
 #  interfaceList @33 : List(Void);
 }

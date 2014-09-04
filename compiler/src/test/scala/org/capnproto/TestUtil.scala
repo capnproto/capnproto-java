@@ -52,6 +52,11 @@ object TestUtil {
     textList.set(1, new Text.Reader("xyzzy"));
     textList.set(2, new Text.Reader("thud"));
 
+    val structList = builder.initStructList(3);
+    structList.get(0).setTextField(new Text.Reader("structlist 1"));
+    structList.get(1).setTextField(new Text.Reader("structlist 2"));
+    structList.get(2).setTextField(new Text.Reader("structlist 3"));
+
   }
 
 
@@ -98,6 +103,15 @@ object TestUtil {
     assert(textList.get(0).toString() == "plugh");
     assert(textList.get(1).toString() == "xyzzy");
     assert(textList.get(2).toString() == "thud");
+
+    /*
+    val structList = builder.getStructList();
+    assert(3 == structList.size());
+    assert(structList.get(0).getTextField().toString() == "structlist 1")
+    assert(structList.get(1).getTextField().toString() == "structlist 2")
+    assert(structList.get(2).getTextField().toString() == "structlist 3")
+    */
+
   }
 
   def checkTestMessage(reader : TestAllTypes.Reader) {
@@ -143,6 +157,13 @@ object TestUtil {
     assert(textList.get(0).toString() == "plugh");
     assert(textList.get(1).toString() == "xyzzy");
     assert(textList.get(2).toString() == "thud");
+
+
+    val structList = reader.getStructList();
+    assert(3 == structList.size());
+    assert(structList.get(0).getTextField().toString() == "structlist 1")
+    assert(structList.get(1).getTextField().toString() == "structlist 2")
+    assert(structList.get(2).getTextField().toString() == "structlist 3")
 
   }
 

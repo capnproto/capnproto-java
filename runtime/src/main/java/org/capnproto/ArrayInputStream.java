@@ -16,7 +16,7 @@ public final class ArrayInputStream implements BufferedInputStream {
         int available = this.buf.remaining();
         int size = dst.remaining();
 
-        ByteBuffer slice = buf.slice();
+        ByteBuffer slice = this.buf.slice();
         slice.limit(size);
         dst.put(slice);
 
