@@ -3,10 +3,14 @@ package org.capnproto.benchmark;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import java.io.FileInputStream;
+import java.io.FileDescriptor;
+
 import org.capnproto.FromStructReader;
 import org.capnproto.FromStructBuilder;
 import org.capnproto.StructFactory;
 import org.capnproto.MessageBuilder;
+import org.capnproto.MessageReader;
 
 public abstract class TestCase<RequestFactory extends StructFactory<RequestBuilder, RequestReader>,
                           RequestBuilder, RequestReader,
@@ -77,6 +81,28 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
         }
     }
 
+    public void syncClient(RequestFactory requestFactory, ResponseFactory responseFactory,
+                           long iters) throws IOException {
+        throw new Error("unimplemented");
+    }
+
+    public void syncServer(RequestFactory requestFactory, ResponseFactory responseFactory,
+                           long iters) throws IOException {
+        for (int ii = 0; ii < iters; ++ii) {
+            MessageBuilder responseMessage = new MessageBuilder();
+            {
+                ResponseBuilder response = responseMessage.initRoot(responseFactory);
+
+                MessageReader messageReader = org.capnproto.ByteChannelMessageReader.create(
+                    (new FileInputStream(FileDescriptor.in)).getChannel());
+
+                RequestReader request = messageReader.getRoot(requestFactory);
+                this.handleRequest(request, response);
+            }
+
+            throw new Error("unimplemented");
+        }
+    }
 
     public void execute(String[] args, RequestFactory requestFactory, ResponseFactory responseFactory) {
 
@@ -95,6 +121,10 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
                 passByObject(requestFactory, responseFactory, iters);
             } else if (mode.equals("bytes")) {
                 passByBytes(requestFactory, responseFactory, iters);
+            } else if (mode.equals("client")) {
+                syncClient(requestFactory, responseFactory, iters);
+            } else if (mode.equals("server")) {
+                syncServer(requestFactory, responseFactory, iters);
             } else {
                 System.out.println("unknown mode: " + mode);
             }
