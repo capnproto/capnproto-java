@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileDescriptor;
 
 import org.capnproto.FromStructReader;
@@ -81,11 +82,6 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
         }
     }
 
-    public void syncClient(RequestFactory requestFactory, ResponseFactory responseFactory,
-                           long iters) throws IOException {
-        throw new Error("unimplemented");
-    }
-
     public void syncServer(RequestFactory requestFactory, ResponseFactory responseFactory,
                            long iters) throws IOException {
         for (int ii = 0; ii < iters; ++ii) {
@@ -100,7 +96,29 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
                 this.handleRequest(request, response);
             }
 
-            throw new Error("unimplemented");
+            org.capnproto.Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
+                                                 responseMessage);
+        }
+    }
+
+    public void syncClient(RequestFactory requestFactory, ResponseFactory responseFactory,
+                           long iters) throws IOException {
+        Common.FastRand rng = new Common.FastRand();
+        for (int ii = 0; ii < iters; ++ii) {
+            MessageBuilder requestMessage = new MessageBuilder();
+            RequestBuilder request = requestMessage.initRoot(requestFactory);
+            Expectation expected = this.setupRequest(rng, request);
+
+            org.capnproto.Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
+                                                 requestMessage);
+
+            MessageReader messageReader = org.capnproto.ByteChannelMessageReader.create(
+                (new FileInputStream(FileDescriptor.in)).getChannel());
+
+            ResponseReader response = messageReader.getRoot(responseFactory);
+            if (!this.checkResponse(response, expected)) {
+                throw new Error("incorrect response");
+            }
         }
     }
 
