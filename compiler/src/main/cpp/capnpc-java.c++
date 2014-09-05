@@ -321,10 +321,10 @@ private:
       case schema::Value::INT16: return kj::strTree(value.getInt16());
       case schema::Value::INT32: return kj::strTree(value.getInt32());
       case schema::Value::INT64: return kj::strTree(value.getInt64(), "L");
-      case schema::Value::UINT8: return kj::strTree(static_cast<int8_t>(value.getUint8()));
-      case schema::Value::UINT16: return kj::strTree(static_cast<int16_t>(value.getUint16()));
-      case schema::Value::UINT32: return kj::strTree(static_cast<int32_t>(value.getUint32()));
-      case schema::Value::UINT64: return kj::strTree(static_cast<int64_t>(value.getUint64()), "L");
+      case schema::Value::UINT8: return kj::strTree(kj::implicitCast<int8_t>(value.getUint8()));
+      case schema::Value::UINT16: return kj::strTree(kj::implicitCast<int16_t>(value.getUint16()));
+      case schema::Value::UINT32: return kj::strTree(kj::implicitCast<int32_t>(value.getUint32()));
+      case schema::Value::UINT64: return kj::strTree(kj::implicitCast<int64_t>(value.getUint64()), "L");
       case schema::Value::FLOAT32: return kj::strTree(value.getFloat32(), "f");
       case schema::Value::FLOAT64: return kj::strTree(value.getFloat64());
       case schema::Value::ENUM: {
@@ -1418,7 +1418,6 @@ private:
     kj::StringTree outerTypeDef;
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
-    kj::StringTree capnpSchemaDecls;
     kj::StringTree capnpSchemaDefs;
     kj::StringTree capnpPrivateDecls;
     kj::StringTree capnpPrivateDefs;
@@ -1466,13 +1465,10 @@ private:
       const byte* bytes = reinterpret_cast<const byte*>(&w);
 
       return kj::strTree(KJ_MAP(i, kj::range<uint>(0, sizeof(word))) {
-        auto text = kj::toCharSequence(kj::implicitCast<uint>(bytes[i]));
+        auto text = kj::toCharSequence(kj::implicitCast<int8_t>(bytes[i]));
         return kj::strTree(kj::repeat(' ', 4 - text.size()), text, ",");
       });
     }, "\n   ");
-
-    auto schemaDecl = kj::strTree(
-        "extern const ::capnp::_::RawSchema s_", hexId, ";\n");
 
     std::set<uint64_t> deps;
     enumerateDeps(proto, deps);
@@ -1503,10 +1499,13 @@ private:
         break;
     }
 
+    // Java limits method code size to 64KB. Maybe we should use class.getResource()?
     auto schemaDef = kj::strTree(
-        "static const ::capnp::_::AlignedData<", rawSchema.size(), "> b_", hexId, " = {\n"
-        "  {", kj::mv(schemaLiteral), " }\n"
-        "};\n",
+      "public static final class b_", hexId, " {\n",
+      "  public static final byte[] bytes =\n",
+      "  {", kj::mv(schemaLiteral), " };\n",
+      "}\n");
+/*
         deps.size() == 0 ? kj::strTree() : kj::strTree(
             "static const ::capnp::_::RawSchema* const d_", hexId, "[] = {\n",
             KJ_MAP(depId, deps) {
@@ -1528,7 +1527,7 @@ private:
         "  ", deps.size(), ", ", membersByName.size(), ", ",
         membersByDiscrim.size() == 0 ? kj::strTree("nullptr") : kj::strTree("i_", hexId),
         ", nullptr, nullptr\n"
-        "};\n");
+        "};\n");*/
 
     NodeTextNoSchema top = makeNodeTextWithoutNested(
         scope, name, schema,
@@ -1546,10 +1545,6 @@ private:
       kj::strTree(
           kj::mv(top.inlineMethodDefs),
           KJ_MAP(n, nestedTexts) { return kj::mv(n.inlineMethodDefs); }),
-
-      kj::strTree(
-          kj::mv(schemaDecl),
-          KJ_MAP(n, nestedTexts) { return kj::mv(n.capnpSchemaDecls); }),
 
       kj::strTree(
           kj::mv(schemaDef),
@@ -1710,8 +1705,12 @@ private:
           "// source: ", baseName(displayName), "\n\n",
           "package ", packageName, ";\n\n",
           //"import org.capnproto;\n",
-          "public class ", outerClassname, " {\n",
+          "public final class ", outerClassname, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
+          "\n",
+          //"public static final class Schemas {\n",
+          //KJ_MAP(n, nodeTexts) { return kj::mv(n.capnpSchemaDefs); },
+          //"}\n",
           "}\n",
           "\n")
     };
