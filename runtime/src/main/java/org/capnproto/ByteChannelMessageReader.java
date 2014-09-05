@@ -62,20 +62,18 @@ public final class ByteChannelMessageReader {
 
         ByteBuffer[] segmentSlices = new ByteBuffer[segmentCount];
 
-        segmentSlices[0] = ByteBuffer.wrap(allSegments.array(),
-                                           0,
-                                           segment0Size * Constants.BYTES_PER_WORD);
+        allSegments.rewind();
+        segmentSlices[0] = allSegments.slice();
+        segmentSlices[0].limit(segment0Size * Constants.BYTES_PER_WORD);
         segmentSlices[0].order(ByteOrder.LITTLE_ENDIAN);
-        segmentSlices[0].mark();
 
         int offset = segment0Size;
 
         for (int ii = 1; ii < segmentCount; ++ii) {
-            segmentSlices[ii] = ByteBuffer.wrap(allSegments.array(),
-                                                offset * Constants.BYTES_PER_WORD,
-                                                moreSizes.get(ii - 1) * Constants.BYTES_PER_WORD);
+            allSegments.position(offset * Constants.BYTES_PER_WORD);
+            segmentSlices[ii] = allSegments.slice();
+            segmentSlices[ii].limit(moreSizes.get(ii - 1) * Constants.BYTES_PER_WORD);
             segmentSlices[ii].order(ByteOrder.LITTLE_ENDIAN);
-            segmentSlices[ii].mark();
             offset += moreSizes.get(ii - 1);
         }
 

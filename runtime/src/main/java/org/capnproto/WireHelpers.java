@@ -337,7 +337,6 @@ final class WireHelpers {
                                                  int nestingLimit) {
 
         // TODO error handling. is_null
-
         if (nestingLimit <= 0) {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
@@ -369,6 +368,7 @@ final class WireHelpers {
                                              int refOffset,
                                              byte expectedElementSize,
                                              int nestingLimit) {
+
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
@@ -413,7 +413,6 @@ final class WireHelpers {
             //# lists can also be interpreted as struct lists. We
             //# need to compute the data size and pointer count for
             //# such structs.
-
             int dataSize = FieldSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
             int pointerCount = FieldSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
