@@ -6,8 +6,8 @@ import java.nio.channels.WritableByteChannel;
 
 public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
 
-    public final WritableByteChannel inner;
-    public final ByteBuffer buf;
+    private final WritableByteChannel inner;
+    private final ByteBuffer buf;
 
     public BufferedOutputStreamWrapper(WritableByteChannel w) {
         this.inner = w;

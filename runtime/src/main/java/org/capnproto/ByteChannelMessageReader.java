@@ -15,7 +15,7 @@ public final class ByteChannelMessageReader {
         return result;
     }
 
-    static void fillBuffer(ByteBuffer buffer, ReadableByteChannel bc) throws IOException {
+    public static void fillBuffer(ByteBuffer buffer, ReadableByteChannel bc) throws IOException {
         while(buffer.hasRemaining()) {
             int r = bc.read(buffer);
             if (r < 0) {
