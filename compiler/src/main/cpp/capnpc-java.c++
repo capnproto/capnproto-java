@@ -1464,10 +1464,24 @@ private:
     auto schemaLiteral = kj::StringTree(KJ_MAP(w, rawSchema) {
       const byte* bytes = reinterpret_cast<const byte*>(&w);
 
-      return kj::strTree(KJ_MAP(i, kj::range<uint>(0, sizeof(word))) {
-        auto text = kj::toCharSequence(kj::implicitCast<int8_t>(bytes[i]));
-        return kj::strTree(kj::repeat(' ', 4 - text.size()), text, ",");
-      });
+      return kj::strTree(
+        "\"",
+        KJ_MAP(i, kj::range<uint>(0, sizeof(word))) {
+          switch(bytes[i]) {
+          case 0x0a:
+            return kj::strTree("\\n");
+          case 0x0d:
+            return kj::strTree("\\r");
+          case 0x22:
+            return kj::strTree("\\\"");
+          case 0x5c:
+            return kj::strTree("\\\\");
+          default:
+            auto text = kj::hex(bytes[i]);
+            return kj::strTree("\\u", kj::repeat('0', 4 - text.size()), text);
+          }
+        },
+        "\" +");
     }, "\n   ");
 
     std::set<uint64_t> deps;
@@ -1501,10 +1515,9 @@ private:
 
     // Java limits method code size to 64KB. Maybe we should use class.getResource()?
     auto schemaDef = kj::strTree(
-      "public static final class b_", hexId, " {\n",
-      "  public static final byte[] bytes =\n",
-      "  {", kj::mv(schemaLiteral), " };\n",
-      "}\n");
+      "public static final byte[] b_", hexId, " = org.capnproto.GeneratedClassSupport.decodeRawBytes(\n",
+      "   ", kj::mv(schemaLiteral), " \"\"",
+      ");\n");
 /*
         deps.size() == 0 ? kj::strTree() : kj::strTree(
             "static const ::capnp::_::RawSchema* const d_", hexId, "[] = {\n",
@@ -1708,9 +1721,9 @@ private:
           "public final class ", outerClassname, " {\n",
           KJ_MAP(n, nodeTexts) { return kj::mv(n.outerTypeDef); },
           "\n",
-          //"public static final class Schemas {\n",
-          //KJ_MAP(n, nodeTexts) { return kj::mv(n.capnpSchemaDefs); },
-          //"}\n",
+          "public static final class Schemas {\n",
+          KJ_MAP(n, nodeTexts) { return kj::mv(n.capnpSchemaDefs); },
+          "}\n",
           "}\n",
           "\n")
     };
