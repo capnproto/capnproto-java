@@ -708,23 +708,23 @@ private:
         setterDefault = " = ::capnp::VOID";
         break;
 
-#define HANDLE_PRIMITIVE(discrim, typeName, defaultName, suffix) \
+#define HANDLE_PRIMITIVE(discrim, typeName, javaTypeName, defaultName, suffix) \
       case schema::Type::discrim: \
         kind = FieldKind::PRIMITIVE; \
         if (defaultBody.get##defaultName() != 0) { \
-          defaultMask = kj::str(defaultBody.get##defaultName(), #suffix); \
+          defaultMask = kj::str("(", #javaTypeName, ")", kj::implicitCast< typeName>(defaultBody.get##defaultName()), #suffix); \
         } \
         break;
 
-      HANDLE_PRIMITIVE(BOOL, bool, Bool, );
-      HANDLE_PRIMITIVE(INT8 , ::int8_t , Int8 , );
-      HANDLE_PRIMITIVE(INT16, ::int16_t, Int16, );
-      HANDLE_PRIMITIVE(INT32, ::int32_t, Int32, );
-      HANDLE_PRIMITIVE(INT64, ::int64_t, Int64, ll);
-      HANDLE_PRIMITIVE(UINT8 , ::uint8_t , Uint8 , u);
-      HANDLE_PRIMITIVE(UINT16, ::uint16_t, Uint16, u);
-      HANDLE_PRIMITIVE(UINT32, ::uint32_t, Uint32, u);
-      HANDLE_PRIMITIVE(UINT64, ::uint64_t, Uint64, ull);
+        HANDLE_PRIMITIVE(BOOL, bool, boolean, Bool, );
+        HANDLE_PRIMITIVE(INT8 , ::int8_t , byte, Int8 , );
+        HANDLE_PRIMITIVE(INT16, ::int16_t, short, Int16, );
+        HANDLE_PRIMITIVE(INT32, ::int32_t, int, Int32, );
+        HANDLE_PRIMITIVE(INT64, ::int64_t, long, Int64, L);
+        HANDLE_PRIMITIVE(UINT8 , ::int8_t , byte, Uint8 , );
+        HANDLE_PRIMITIVE(UINT16, ::int16_t, short, Uint16, );
+        HANDLE_PRIMITIVE(UINT32, ::int32_t, int, Uint32, );
+        HANDLE_PRIMITIVE(UINT64, ::int64_t, long, Uint64, L);
 #undef HANDLE_PRIMITIVE
 
       case schema::Type::FLOAT32:
@@ -811,7 +811,7 @@ private:
              kj::strTree("    return ", type, ".values()[_reader.getShortField(", offset, ")];\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree("    return org.capnproto.Void.VOID;\n") :
-              kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, ");\n"))),
+              kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 
@@ -823,7 +823,7 @@ private:
              kj::strTree("    return ", type, ".values()[_builder.getShortField(", offset, ")];\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree("    return org.capnproto.Void.VOID;\n") :
-              kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, ");\n"))),
+              kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
@@ -833,7 +833,7 @@ private:
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree() :
               kj::strTree(spaces(indent), "    _builder.set",
-                          toTitleCase(type), "Field(", offset, ", value);\n"))),
+                          toTitleCase(type), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 

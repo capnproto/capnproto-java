@@ -35,12 +35,20 @@ public final class StructReader {
         }
     }
 
+    public final boolean getBooleanField(int offset, boolean mask) {
+        return this.getBooleanField(offset) ^ mask;
+    }
+
     public final byte getByteField(int offset) {
         if ((offset + 1) * 8 <= this.dataSize) {
             return this.segment.buffer.get(this.data + offset);
         } else {
             return 0;
         }
+    }
+
+    public final byte getByteField(int offset, byte mask) {
+        return (byte)(this.getByteField(offset) ^ mask);
     }
 
     public final short getShortField(int offset) {
@@ -51,6 +59,10 @@ public final class StructReader {
         }
     }
 
+    public final short getShortField(int offset, short mask) {
+        return (short)(this.getShortField(offset) ^ mask);
+    }
+
     public final int getIntField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
             return this.segment.buffer.getInt(this.data + offset * 4);
@@ -59,12 +71,20 @@ public final class StructReader {
         }
     }
 
+    public final int getIntField(int offset, int mask) {
+        return this.getIntField(offset) ^ mask;
+    }
+
     public final long getLongField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
             return this.segment.buffer.getLong(this.data + offset * 8);
         } else {
             return 0;
         }
+    }
+
+    public final long getLongField(int offset, long mask) {
+        return this.getLongField(offset) ^ mask;
     }
 
     public final float getFloatField(int offset) {

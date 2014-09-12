@@ -12,7 +12,7 @@ object TestUtil {
     builder.setInt16Field(-12345);
     builder.setInt32Field(-12345678);
     builder.setInt64Field(-123456789012345L);
-    builder.setUInt8Field(0xef.toByte);
+    builder.setUInt8Field(0xea.toByte);
     builder.setUInt16Field(0x4567);
     builder.setUInt32Field(0x34567890);
     builder.setUInt64Field(0x1234567890123456L);
@@ -67,7 +67,7 @@ object TestUtil {
     assert(builder.getInt16Field() == -12345);
     assert(builder.getInt32Field() == -12345678);
     assert(builder.getInt64Field() == -123456789012345L);
-    assert(builder.getUInt8Field() == 0xef.toByte);
+    assert(builder.getUInt8Field() == 0xea.toByte);
     assert(builder.getUInt16Field() == 0x4567);
     assert(builder.getUInt32Field() == 0x34567890);
     assert(builder.getUInt64Field() == 0x1234567890123456L);
@@ -121,7 +121,7 @@ object TestUtil {
     assert(reader.getInt16Field() == -12345);
     assert(reader.getInt32Field() == -12345678);
     assert(reader.getInt64Field() == -123456789012345L);
-    assert(reader.getUInt8Field() == 0xef.toByte);
+    assert(reader.getUInt8Field() == 0xea.toByte);
     assert(reader.getUInt16Field() == 0x4567);
     assert(reader.getUInt32Field() == 0x34567890);
     assert(reader.getUInt64Field() == 0x1234567890123456L);
@@ -165,6 +165,32 @@ object TestUtil {
     assert(structList.get(1).getTextField().toString() == "structlist 2")
     assert(structList.get(2).getTextField().toString() == "structlist 3")
 
+  }
+
+  def checkDefaultMessage(reader : TestDefaults.Builder) {
+    reader.getVoidField();
+    assert(reader.getBoolField() == true);
+    assert(reader.getInt8Field() == -123);
+    assert(reader.getInt16Field() == -12345);
+    assert(reader.getInt32Field() == -12345678);
+    assert(reader.getInt64Field() == -123456789012345L);
+    assert(reader.getUInt8Field() == 0xea.toByte);
+    assert(reader.getUInt16Field() == 45678.toShort);
+    assert(reader.getUInt32Field() == 0xce0a6a14);
+    assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad2L);
+  }
+
+  def checkDefaultMessage(reader : TestDefaults.Reader) {
+    reader.getVoidField();
+    assert(reader.getBoolField() == true);
+    assert(reader.getInt8Field() == -123);
+    assert(reader.getInt16Field() == -12345);
+    assert(reader.getInt32Field() == -12345678);
+    assert(reader.getInt64Field() == -123456789012345L);
+    assert(reader.getUInt8Field() == 0xea.toByte);
+    assert(reader.getUInt16Field() == 45678.toShort);
+    assert(reader.getUInt32Field() == 0xce0a6a14);
+    assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad2L);
   }
 
 

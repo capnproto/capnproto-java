@@ -24,6 +24,13 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(allTypes.asReader());
   }
 
+  test("Defaults") {
+    val message = new MessageBuilder();
+    val defaults = message.initRoot(TestDefaults.factory);
+    TestUtil.checkDefaultMessage(defaults);
+    TestUtil.checkDefaultMessage(defaults.asReader());
+  }
+
   test("Groups") {
     val builder = new MessageBuilder();
     val root = builder.initRoot(TestGroups.factory);

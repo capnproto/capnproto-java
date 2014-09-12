@@ -32,6 +32,10 @@ public final class StructBuilder {
         return (this.segment.buffer.get(position) & (1 << (bitOffset % 8))) != 0;
     }
 
+    public final boolean getBooleanField(int offset, boolean mask) {
+        return this.getBooleanField(offset) ^ mask;
+    }
+
     public final void setBooleanField(int offset, boolean value) {
         int bitOffset = offset;
         if (offset == 0) { bitOffset = this.bit0Offset; }
@@ -42,36 +46,72 @@ public final class StructBuilder {
                                 (byte)((oldValue & (~(1 << bitnum))) | (( value ? 1 : 0) << bitnum)));
     }
 
+    public final void setBooleanField(int offset, boolean value, boolean mask) {
+        this.setBooleanField(offset, value ^ mask);
+    }
+
     public final byte getByteField(int offset) {
         return this.segment.buffer.get(this.data + offset);
+    }
+
+    public final byte getByteField(int offset, byte mask) {
+        return (byte)(this.getByteField(offset) ^ mask);
     }
 
     public final void setByteField(int offset, byte value) {
         this.segment.buffer.put(this.data + offset, value);
     }
 
+    public final void setByteField(int offset, byte value, byte mask) {
+        this.setByteField(offset, (byte) (value ^ mask));
+    }
+
     public final short getShortField(int offset) {
         return this.segment.buffer.getShort(this.data + offset * 2);
+    }
+
+    public final short getShortField(int offset, short mask) {
+        return (short)(this.getShortField(offset) ^ mask);
     }
 
     public final void setShortField(int offset, short value) {
         this.segment.buffer.putShort(this.data + offset * 2, value);
     }
 
+    public final void setShortField(int offset, short value, short mask) {
+        this.setShortField(offset, (short)(value ^ mask));
+    }
+
     public final int getIntField(int offset) {
         return this.segment.buffer.getInt(this.data + offset * 4);
+    }
+
+    public final int getIntField(int offset, int mask) {
+        return this.getIntField(offset) ^ mask;
     }
 
     public final void setIntField(int offset, int value) {
         this.segment.buffer.putInt(this.data + offset * 4, value);
     }
 
+    public final void setIntField(int offset, int value, int mask) {
+        this.setIntField(offset, value ^ mask);
+    }
+
     public final long getLongField(int offset) {
         return this.segment.buffer.getLong(this.data + offset * 8);
     }
 
+    public final long getLongField(int offset, long mask) {
+        return this.getLongField(offset) ^ mask;
+    }
+
     public final void setLongField(int offset, long value) {
         this.segment.buffer.putLong(this.data + offset * 8, value);
+    }
+
+    public final void setLongField(int offset, long value, long mask) {
+        this.setLongField(offset, value ^ mask);
     }
 
     public final float getFloatField(int offset) {

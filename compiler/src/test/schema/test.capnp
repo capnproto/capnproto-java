@@ -53,6 +53,21 @@ struct TestAllTypes {
 #  interfaceList @33 : List(Void);
 }
 
+struct TestDefaults {
+  voidField      @0  : Void    = void;
+  boolField      @1  : Bool    = true;
+  int8Field      @2  : Int8    = -123;
+  int16Field     @3  : Int16   = -12345;
+  int32Field     @4  : Int32   = -12345678;
+  int64Field     @5  : Int64   = -123456789012345;
+  uInt8Field     @6  : UInt8   = 234;
+  uInt16Field    @7  : UInt16  = 45678;
+  uInt32Field    @8  : UInt32  = 3456789012;
+  uInt64Field    @9  : UInt64  = 12345678901234567890;
+#  float32Field   @10 : Float32 = 1234.5;
+#  float64Field   @11 : Float64 = -123e45;
+}
+
 struct TestOutOfOrder {
   foo @3 :Text;
   bar @2 :Text;
