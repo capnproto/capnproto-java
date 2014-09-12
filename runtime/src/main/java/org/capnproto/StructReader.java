@@ -95,11 +95,27 @@ public final class StructReader {
         }
     }
 
+    public final float getFloatField(int offset, int mask) {
+        if ((offset + 1) * 32 <= this.dataSize) {
+            return Float.intBitsToFloat(this.segment.buffer.getInt(this.data + offset * 4) ^ mask);
+        } else {
+            return Float.intBitsToFloat(mask);
+        }
+    }
+
     public final double getDoubleField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
             return this.segment.buffer.getDouble(this.data + offset * 8);
         } else {
             return 0;
+        }
+    }
+
+    public final double getDoubleField(int offset, long mask) {
+        if ((offset + 1) * 64 <= this.dataSize) {
+            return Double.longBitsToDouble(this.segment.buffer.getLong(this.data + offset * 8) ^ mask);
+        } else {
+            return Double.longBitsToDouble(mask);
         }
     }
 

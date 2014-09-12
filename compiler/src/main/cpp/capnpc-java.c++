@@ -730,22 +730,22 @@ private:
       case schema::Type::FLOAT32:
         kind = FieldKind::PRIMITIVE;
         if (defaultBody.getFloat32() != 0) {
-          uint32_t mask;
+          int32_t mask;
           float value = defaultBody.getFloat32();
           static_assert(sizeof(mask) == sizeof(value), "bug");
           memcpy(&mask, &value, sizeof(mask));
-          defaultMask = kj::str(mask, "u");
+          defaultMask = kj::str(mask);
         }
         break;
 
       case schema::Type::FLOAT64:
         kind = FieldKind::PRIMITIVE;
         if (defaultBody.getFloat64() != 0) {
-          uint64_t mask;
+          int64_t mask;
           double value = defaultBody.getFloat64();
           static_assert(sizeof(mask) == sizeof(value), "bug");
           memcpy(&mask, &value, sizeof(mask));
-          defaultMask = kj::str(mask, "ull");
+          defaultMask = kj::str(mask, "L");
         }
         break;
 

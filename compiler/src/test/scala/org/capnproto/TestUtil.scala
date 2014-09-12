@@ -167,17 +167,19 @@ object TestUtil {
 
   }
 
-  def checkDefaultMessage(reader : TestDefaults.Builder) {
-    reader.getVoidField();
-    assert(reader.getBoolField() == true);
-    assert(reader.getInt8Field() == -123);
-    assert(reader.getInt16Field() == -12345);
-    assert(reader.getInt32Field() == -12345678);
-    assert(reader.getInt64Field() == -123456789012345L);
-    assert(reader.getUInt8Field() == 0xea.toByte);
-    assert(reader.getUInt16Field() == 45678.toShort);
-    assert(reader.getUInt32Field() == 0xce0a6a14);
-    assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad2L);
+  def checkDefaultMessage(builder : TestDefaults.Builder) {
+    builder.getVoidField();
+    assert(builder.getBoolField() == true);
+    assert(builder.getInt8Field() == -123);
+    assert(builder.getInt16Field() == -12345);
+    assert(builder.getInt32Field() == -12345678);
+    assert(builder.getInt64Field() == -123456789012345L);
+    assert(builder.getUInt8Field() == 0xea.toByte);
+    assert(builder.getUInt16Field() == 45678.toShort);
+    assert(builder.getUInt32Field() == 0xce0a6a14);
+    assert(builder.getUInt64Field() == 0xab54a98ceb1f0ad2L);
+    assert(builder.getFloat32Field() == 1234.5f);
+    assert(builder.getFloat64Field() == -123e45);
   }
 
   def checkDefaultMessage(reader : TestDefaults.Reader) {
@@ -191,6 +193,8 @@ object TestUtil {
     assert(reader.getUInt16Field() == 45678.toShort);
     assert(reader.getUInt32Field() == 0xce0a6a14);
     assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad2L);
+    assert(reader.getFloat32Field() == 1234.5f);
+    assert(reader.getFloat64Field() == -123e45);
   }
 
 

@@ -64,8 +64,8 @@ struct TestDefaults {
   uInt16Field    @7  : UInt16  = 45678;
   uInt32Field    @8  : UInt32  = 3456789012;
   uInt64Field    @9  : UInt64  = 12345678901234567890;
-#  float32Field   @10 : Float32 = 1234.5;
-#  float64Field   @11 : Float64 = -123e45;
+  float32Field   @10 : Float32 = 1234.5;
+  float64Field   @11 : Float64 = -123e45;
 }
 
 struct TestOutOfOrder {

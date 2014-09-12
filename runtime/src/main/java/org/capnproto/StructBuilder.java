@@ -118,18 +118,37 @@ public final class StructBuilder {
         return this.segment.buffer.getFloat(this.data + offset * 4);
     }
 
+    public final float getFloatField(int offset, int mask) {
+        return Float.intBitsToFloat(
+            this.segment.buffer.getInt(this.data + offset * 4) ^ mask);
+    }
+
     public final void setFloatField(int offset, float value) {
         this.segment.buffer.putFloat(this.data + offset * 4, value);
+    }
+
+    public final void setFloatField(int offset, float value, int mask) {
+        this.segment.buffer.putInt(this.data + offset * 4,
+                                   Float.floatToIntBits(value) ^ mask);
     }
 
     public final double getDoubleField(int offset) {
         return this.segment.buffer.getDouble(this.data + offset * 8);
     }
 
+    public final double getDoubleField(int offset, long mask) {
+        return Double.longBitsToDouble(
+            this.segment.buffer.getLong(this.data + offset * 8) ^ mask);
+    }
+
     public final void setDoubleField(int offset, double value) {
         this.segment.buffer.putDouble(this.data + offset * 8, value);
     }
 
+    public final void setDoubleField(int offset, double value, long mask) {
+        this.segment.buffer.putLong(this.data + offset * 8,
+                                    Double.doubleToLongBits(value) ^ mask);
+    }
 
     public final PointerBuilder getPointerField(int index) {
         return new PointerBuilder(this.segment, this.pointers + index);
