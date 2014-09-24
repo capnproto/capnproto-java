@@ -135,6 +135,14 @@ final class WireHelpers {
         }
     }
 
+    public static void zeroObject(SegmentBuilder segment, int refOffset) {
+        //# Zero out the pointed-to object. Use when the pointer is
+        //# about to be overwritten making the target object no longer
+        //# reachable.
+
+        // TODO
+    }
+
     public static StructBuilder initStructPointer(int refOffset,
                                                   SegmentBuilder segment,
                                                   StructSize size) {

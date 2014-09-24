@@ -168,6 +168,7 @@ struct TestGroups {
       corge @0 :Int32;
       grault @2 :Int64;
       garply @8 :Text;
+      quux @9 : Void;
     }
     bar :group {
       corge @3 :Int32;

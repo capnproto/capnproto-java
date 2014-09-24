@@ -58,4 +58,8 @@ public final class PointerBuilder {
         throw new Error("unimplemented");
     }
 
+    public final void clear() {
+        WireHelpers.zeroObject(this.segment, this.pointer);
+        this.segment.buffer.putLong(this.pointer * 8, 0L);
+    }
 }

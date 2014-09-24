@@ -415,18 +415,18 @@ private:
 
   static kj::StringPtr maskType(schema::Type::Which whichType) {
     switch (whichType) {
-      case schema::Type::BOOL: return "bool";
-      case schema::Type::INT8: return " ::uint8_t";
-      case schema::Type::INT16: return " ::uint16_t";
-      case schema::Type::INT32: return " ::uint32_t";
-      case schema::Type::INT64: return " ::uint64_t";
-      case schema::Type::UINT8: return " ::uint8_t";
-      case schema::Type::UINT16: return " ::uint16_t";
-      case schema::Type::UINT32: return " ::uint32_t";
-      case schema::Type::UINT64: return " ::uint64_t";
-      case schema::Type::FLOAT32: return " ::uint32_t";
-      case schema::Type::FLOAT64: return " ::uint64_t";
-      case schema::Type::ENUM: return " ::uint16_t";
+      case schema::Type::BOOL: return "boolean";
+      case schema::Type::INT8: return "byte";
+      case schema::Type::INT16: return "short";
+      case schema::Type::INT32: return "int";
+      case schema::Type::INT64: return "long";
+      case schema::Type::UINT8: return "byte";
+      case schema::Type::UINT16: return "short";
+      case schema::Type::UINT32: return "int";
+      case schema::Type::UINT64: return "long";
+      case schema::Type::FLOAT32: return "int";
+      case schema::Type::FLOAT64: return "long";
+      case schema::Type::ENUM: return "short";
 
       case schema::Type::VOID:
       case schema::Type::TEXT:
@@ -439,6 +439,34 @@ private:
     }
     KJ_UNREACHABLE;
   }
+
+  static kj::StringPtr maskZeroLiteral(schema::Type::Which whichType) {
+    switch (whichType) {
+      case schema::Type::BOOL: return "false";
+      case schema::Type::INT8: return "(byte)0";
+      case schema::Type::INT16: return "(short)0";
+      case schema::Type::INT32: return "0";
+      case schema::Type::INT64: return "0L";
+      case schema::Type::UINT8: return "(byte)0";
+      case schema::Type::UINT16: return "(short)0";
+      case schema::Type::UINT32: return "0";
+      case schema::Type::UINT64: return "0L";
+      case schema::Type::FLOAT32: return "0";
+      case schema::Type::FLOAT64: return "0L";
+      case schema::Type::ENUM: return "(short)0";
+
+      case schema::Type::VOID:
+      case schema::Type::TEXT:
+      case schema::Type::DATA:
+      case schema::Type::LIST:
+      case schema::Type::STRUCT:
+      case schema::Type::INTERFACE:
+      case schema::Type::ANY_POINTER:
+        KJ_FAIL_REQUIRE("Should only be called for data types.");
+    }
+    KJ_UNREACHABLE;
+  }
+
 
   struct Slot {
     schema::Type::Which whichType;
@@ -647,7 +675,24 @@ private:
               spaces(indent), "    return new ", scope, titleCase, ".Builder(_builder);\n",
               spaces(indent), "  }\n",
               spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
-              spaces(indent), "    throw new Error();\n",
+              unionDiscrim.set,
+              KJ_MAP(slot, slots) {
+                switch (sectionFor(slot.whichType)) {
+                case Section::NONE:
+                  return kj::strTree();
+                case Section::DATA:
+                  return kj::strTree(
+                    spaces(indent),
+                    "    _builder.set", toTitleCase(maskType(slot.whichType)),
+                    "Field(", slot.offset, ",", maskZeroLiteral(slot.whichType),
+                    ");\n");
+                case Section::POINTERS:
+                  return kj::strTree(
+                    spaces(indent), "    _builder.getPointerField(", slot.offset, ").clear();\n");
+                }
+                KJ_UNREACHABLE;
+              },
+              "  return new ", scope, titleCase, ".Builder(_builder);\n",
               spaces(indent), "  }\n",
               "\n"),
 
@@ -669,21 +714,6 @@ private:
                   "}\n"),
                 "inline ", scope, titleCase, "::Builder ", scope, "Builder::init", titleCase, "() {\n",
                 unionDiscrim.set,
-                KJ_MAP(slot, slots) {
-                  switch (sectionFor(slot.whichType)) {
-                    case Section::NONE:
-                      return kj::strTree();
-                    case Section::DATA:
-                      return kj::strTree(
-                          "  _builder.setDataField<", maskType(slot.whichType), ">(",
-                              slot.offset, " * ::capnp::ELEMENTS, 0);\n");
-                    case Section::POINTERS:
-                      return kj::strTree(
-                          "  _builder.getPointerField(", slot.offset,
-                              " * ::capnp::POINTERS).clear();\n");
-                  }
-                  KJ_UNREACHABLE;
-                },
                 "  return ", scope, titleCase, "::Builder(_builder);\n"
                 "}\n")
           };

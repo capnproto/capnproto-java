@@ -35,7 +35,7 @@ class EncodingSuite extends FunSuite {
     val builder = new MessageBuilder();
     val root = builder.initRoot(TestGroups.factory);
 
-    //val foo = root.getGroups().initFoo();
+    val foo = root.getGroups().initFoo();
 
   }
 
