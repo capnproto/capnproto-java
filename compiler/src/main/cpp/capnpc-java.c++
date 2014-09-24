@@ -697,25 +697,7 @@ private:
               "\n"),
 
             kj::strTree(),
-
-            kj::strTree(
-                kj::mv(unionDiscrim.isDefs),
-                "inline ", scope, titleCase, "::Reader ", scope, "Reader::get", titleCase, "() const {\n",
-                unionDiscrim.check,
-                "  return ", scope, titleCase, "::Reader(_reader);\n"
-                "}\n"
-                "inline ", scope, titleCase, "::Builder ", scope, "Builder::get", titleCase, "() {\n",
-                unionDiscrim.check,
-                "  return ", scope, titleCase, "::Builder(_builder);\n"
-                "}\n",
-                hasDiscriminantValue(proto) ? kj::strTree() : kj::strTree(
-                  "inline ", scope, titleCase, "::Pipeline ", scope, "Pipeline::get", titleCase, "() {\n",
-                  "  return ", scope, titleCase, "::Pipeline(_typeless.noop());\n"
-                  "}\n"),
-                "inline ", scope, titleCase, "::Builder ", scope, "Builder::init", titleCase, "() {\n",
-                unionDiscrim.set,
-                "  return ", scope, titleCase, "::Builder(_builder);\n"
-                "}\n")
+            kj::strTree()
           };
       }
     }
