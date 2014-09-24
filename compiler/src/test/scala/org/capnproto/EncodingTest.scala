@@ -35,8 +35,38 @@ class EncodingSuite extends FunSuite {
     val builder = new MessageBuilder();
     val root = builder.initRoot(TestGroups.factory);
 
-    val foo = root.getGroups().initFoo();
+    {
+      val foo = root.getGroups().initFoo();
+      foo.setCorge(12345678);
+      foo.setGrault(123456789012345L);
+      foo.setGarply(new Text.Reader("foobar"));
 
+      assert(12345678 == foo.getCorge());
+      assert(123456789012345L == foo.getGrault());
+      assert("foobar" == foo.getGarply().toString());
+    }
+
+    {
+      val bar = root.getGroups.initBar();
+      bar.setCorge(23456789);
+      bar.setGrault(new Text.Reader("barbaz"));
+      bar.setGarply(234567890123456L);
+
+      assert(23456789 == bar.getCorge());
+      assert("barbaz" == bar.getGrault().toString());
+      assert(234567890123456L == bar.getGarply());
+    }
+
+    {
+      val baz = root.getGroups().initBaz();
+      baz.setCorge(34567890);
+      baz.setGrault(new Text.Reader("bazqux"));
+      baz.setGarply(new Text.Reader("quxquux"));
+
+      assert(34567890 == baz.getCorge());
+      assert("bazqux" == baz.getGrault().toString());
+      assert("quxquux" == baz.getGarply().toString());
+    }
   }
 
   test("Constants") {
