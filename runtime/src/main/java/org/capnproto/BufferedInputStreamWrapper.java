@@ -26,10 +26,12 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
             return numBytes;
         } else {
             //# Copy current available into destination.
-            ByteBuffer slice = this.buf.slice();
             int fromFirstBuffer = cap - this.buf.position();
-            slice.limit(fromFirstBuffer);
-            dst.put(slice);
+            {
+                ByteBuffer slice = this.buf.slice();
+                slice.limit(fromFirstBuffer);
+                dst.put(slice);
+            }
 
             numBytes -= fromFirstBuffer;
             if (numBytes <= this.buf.capacity()) {
@@ -37,18 +39,22 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
                 this.buf.rewind();
                 int n = readAtLeast(this.inner, this.buf, numBytes);
 
-                // ...
-                //ByteBuffer slice =
-                //dst.put(
+                this.buf.rewind();
+                ByteBuffer slice = this.buf.slice();
+                slice.limit(numBytes);
+                dst.put(slice);
 
                 this.cap = n;
                 this.buf.position(numBytes);
                 return fromFirstBuffer + numBytes;
             } else {
                 //# Forward large read to the underlying stream.
+
+                this.cap = 0;
+                this.buf.rewind();
+                return fromFirstBuffer + readAtLeast(this.inner, dst, numBytes);
             }
         }
-        throw new Error("unimplemented");
     }
 
     public final ByteBuffer getReadBuffer() {

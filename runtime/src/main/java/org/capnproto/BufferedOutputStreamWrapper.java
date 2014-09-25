@@ -26,13 +26,11 @@ public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
             slice.limit(available);
             this.buf.put(slice);
 
-            // XXX This needs to be tested. Probably wrong.
-
             this.buf.rewind();
-            int n = this.inner.write(this.buf);
-            if (n != this.buf.capacity()) {
-                throw new IOException("failed to write all of the bytes");
+            while(this.buf.hasRemaining()) {
+                this.inner.write(this.buf);
             }
+            this.buf.rewind();
 
             src.position(src.position() + available);
             this.buf.put(src);
@@ -42,12 +40,13 @@ public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
 
             int pos = this.buf.position();
             this.buf.rewind();
-            ByteBuffer slice = this.buf;
+            ByteBuffer slice = this.buf.slice();
             slice.limit(pos);
-            int n = this.inner.write(slice);
-            int m = this.inner.write(src);
-            if (n + m != size) {
-                throw new IOException("failed to write all of the bytes");
+            while (slice.hasRemaining()) {
+                this.inner.write(slice);
+            }
+            while (src.hasRemaining()) {
+                this.inner.write(src);
             }
         }
         return size;
