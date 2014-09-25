@@ -46,7 +46,7 @@ public class PrimitiveList {
             }
 
             public boolean get(int index) {
-                throw new Error();
+                return this.reader.getBooleanElement(index);
             }
         }
 
@@ -61,11 +61,15 @@ public class PrimitiveList {
                 return this.builder.size();
             }
 
+            public boolean get(int index) {
+                return this.builder.getBooleanElement(index);
+            }
+
+            public void set(int index, boolean value) {
+                this.builder.setBooleanElement(index, value);
+            }
         }
-
     }
-
-
 
     public static class Byte {
         public static final class Reader {
@@ -80,7 +84,7 @@ public class PrimitiveList {
             }
 
             public byte get(int index) {
-                throw new Error();
+                return this.reader.getByteElement(index);
             }
         }
 
@@ -91,6 +95,17 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
+            public int size() {
+                return this.builder.size();
+            }
+
+            public byte get(int index) {
+                return this.builder.getByteElement(index);
+            }
+
+            public void set(int index, byte value) {
+                this.builder.setByteElement(index, value);
+            }
         }
 
     }
@@ -108,7 +123,7 @@ public class PrimitiveList {
             }
 
             public short get(int index) {
-                throw new Error();
+                return this.reader.getShortElement(index);
             }
         }
 
@@ -119,6 +134,17 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
+            public int size() {
+                return this.builder.size();
+            }
+
+            public short get(int index) {
+                return this.builder.getShortElement(index);
+            }
+
+            public void set(int index, short value) {
+                this.builder.setShortElement(index, value);
+            }
         }
 
     }
@@ -136,7 +162,7 @@ public class PrimitiveList {
             }
 
             public int get(int index) {
-                throw new Error();
+                return this.reader.getIntElement(index);
             }
         }
 
@@ -147,8 +173,18 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
-        }
+            public int size() {
+                return this.builder.size();
+            }
 
+            public int get(int index) {
+                return this.builder.getIntElement(index);
+            }
+
+            public void set(int index, int value) {
+                this.builder.setIntElement(index, value);
+            }
+        }
     }
 
     public static class Float {
@@ -164,7 +200,7 @@ public class PrimitiveList {
             }
 
             public float get(int index) {
-                throw new Error();
+                return this.reader.getFloatElement(index);
             }
         }
 
@@ -175,8 +211,18 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
-        }
+            public int size() {
+                return this.builder.size();
+            }
 
+            public float get(int index) {
+                return this.builder.getFloatElement(index);
+            }
+
+            public void set(int index, float value) {
+                this.builder.setFloatElement(index, value);
+            }
+        }
     }
 
 
@@ -193,7 +239,7 @@ public class PrimitiveList {
             }
 
             public long get(int index) {
-                throw new Error();
+                return this.reader.getLongElement(index);
             }
         }
 
@@ -204,8 +250,18 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
-        }
+            public int size() {
+                return this.builder.size();
+            }
 
+            public long get(int index) {
+                return this.builder.getLongElement(index);
+            }
+
+            public void set(int index, long value) {
+                this.builder.setLongElement(index, value);
+            }
+        }
     }
 
     public static class Double {
@@ -221,7 +277,7 @@ public class PrimitiveList {
             }
 
             public double get(int index) {
-                throw new Error();
+                return this.reader.getDoubleElement(index);
             }
         }
 
@@ -232,9 +288,17 @@ public class PrimitiveList {
                 this.builder = builder;
             }
 
+            public int size() {
+                return this.builder.size();
+            }
+
+            public double get(int index) {
+                return this.builder.getDoubleElement(index);
+            }
+
+            public void set(int index, double value) {
+                this.builder.setDoubleElement(index, value);
+            }
         }
-
     }
-
-
 }

@@ -37,6 +37,35 @@ public final class ListReader {
         return this.elementCount;
     }
 
+    public boolean getBooleanElement(int index) {
+        byte b = this.segment.buffer.get(this.ptr + index / 8);
+        return (b & (1 << (index % 8))) != 0;
+    }
+
+    public byte getByteElement(int index) {
+        return this.segment.buffer.get(this.ptr + index);
+    }
+
+    public short getShortElement(int index) {
+        return this.segment.buffer.getShort(this.ptr + index * 2);
+    }
+
+    public int getIntElement(int index) {
+        return this.segment.buffer.getInt(this.ptr + index * 4);
+    }
+
+    public long getLongElement(int index) {
+        return this.segment.buffer.getLong(this.ptr + index * 8);
+    }
+
+    public float getFloatElement(int index) {
+        return this.segment.buffer.getFloat(this.ptr + index * 4);
+    }
+
+    public double getDoubleElement(int index) {
+        return this.segment.buffer.getDouble(this.ptr + index * 8);
+    }
+
     public StructReader getStructElement(int index) {
         // TODO check nesting limit
 

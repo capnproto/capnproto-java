@@ -47,6 +47,18 @@ object TestUtil {
     builder.setEnumField(TestEnum.CORGE);
     builder.initVoidList(6);
 
+    val boolList = builder.initBoolList(4);
+    boolList.set(0, true);
+    boolList.set(1, false);
+    boolList.set(2, false);
+    boolList.set(3, true);
+
+    val float64List = builder.initFloat64List(4);
+    float64List.set(0, 7777.75);
+    float64List.set(1, Double.PositiveInfinity);
+    float64List.set(2, Double.NegativeInfinity);
+    float64List.set(3, Double.NaN);
+
     val textList = builder.initTextList(3);
     textList.set(0, new Text.Reader("plugh"));
     textList.set(1, new Text.Reader("xyzzy"));
@@ -97,6 +109,18 @@ object TestUtil {
     }
 
     assert(builder.getVoidList().size() == 6);
+
+    val boolList = builder.getBoolList();
+    assert(boolList.get(0) == true);
+    assert(boolList.get(1) == false);
+    assert(boolList.get(2) == false);
+    assert(boolList.get(3) == true);
+
+    val float64List = builder.getFloat64List();
+    assert(float64List.get(0) == 7777.75);
+    assert(float64List.get(1) == Double.PositiveInfinity);
+    assert(float64List.get(2) == Double.NegativeInfinity);
+    assert(float64List.get(3) != float64List.get(3)); // NaN
 
     val textList = builder.getTextList();
     assert(textList.size() == 3);
@@ -151,6 +175,18 @@ object TestUtil {
     }
 
     assert(reader.getVoidList().size() == 6);
+
+    val boolList = reader.getBoolList();
+    assert(boolList.get(0) == true);
+    assert(boolList.get(1) == false);
+    assert(boolList.get(2) == false);
+    assert(boolList.get(3) == true);
+
+    val float64List = reader.getFloat64List();
+    assert(float64List.get(0) == 7777.75);
+    assert(float64List.get(1) == Double.PositiveInfinity);
+    assert(float64List.get(2) == Double.NegativeInfinity);
+    assert(float64List.get(3) != float64List.get(3)); // NaN
 
     val textList = reader.getTextList();
     assert(textList.size() == 3);
