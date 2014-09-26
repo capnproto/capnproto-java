@@ -39,49 +39,49 @@ public final class PackedOutputStream implements WritableByteChannel {
             curByte = inBuf.get(inPtr);
             byte bit0 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit0);
+            out.position(out.position() + bit0 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit1 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit1);
+            out.position(out.position() + bit1 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit2 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit2);
+            out.position(out.position() + bit2 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit3 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit3);
+            out.position(out.position() + bit3 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit4 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit4);
+            out.position(out.position() + bit4 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit5 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit5);
+            out.position(out.position() + bit5 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit6 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit6);
+            out.position(out.position() + bit6 - 1);
             inPtr += 1;
 
             curByte = inBuf.get(inPtr);
             byte bit7 = (curByte != 0) ? (byte)1 : (byte)0;
             out.put(curByte);
-            out.position(out.position() - bit7);
+            out.position(out.position() + bit7 - 1);
             inPtr += 1;
 
             byte tag = (byte)((bit0 << 0) | (bit1 << 1) | (bit2 << 2) | (bit3 << 3) |
@@ -121,8 +121,14 @@ public final class PackedOutputStream implements WritableByteChannel {
                 // TODO
             }
 
-
         }
+
+        if (out == slowBuffer) {
+            out.limit(out.position());
+            out.rewind();
+            this.inner.write(out);
+        }
+
         return length;
     }
 
