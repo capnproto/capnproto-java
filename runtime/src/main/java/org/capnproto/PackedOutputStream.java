@@ -27,9 +27,11 @@ public final class PackedOutputStream implements WritableByteChannel {
                 //# bounds-check on every byte.
 
                 if (out == slowBuffer) {
+                    int oldLimit = out.limit();
                     out.limit(out.position());
                     out.rewind();
                     this.inner.write(out);
+                    out.limit(oldLimit);
                 }
 
                 out = slowBuffer;
@@ -103,8 +105,8 @@ public final class PackedOutputStream implements WritableByteChannel {
 
                 long inWord = inBuf.getLong();
                 int limit = inEnd;
-                if (limit - inPtr > 255) {
-                    limit = inPtr + 255;
+                if (limit - inPtr > 255 * 8) {
+                    limit = inPtr + 255 * 8;
                 }
                 while(inBuf.position() < limit && inWord == 0) {
                     inWord = inBuf.getLong();
@@ -112,7 +114,7 @@ public final class PackedOutputStream implements WritableByteChannel {
                 out.put((byte)((inBuf.position() - inPtr)/8 - 1));
                 inPtr = inBuf.position() - 8;
 
-            } else if (tag == 0xff) {
+            } else if (tag == (byte)0xff) {
                 //# An all-nonzero word is followed by a count of
                 //# consecutive uncompressed words, followed by the
                 //# uncompressed words themselves.
@@ -122,10 +124,42 @@ public final class PackedOutputStream implements WritableByteChannel {
                 //# for at least two zeros because that's the point
                 //# where our compression scheme becomes a net win.
 
+                int runStart = inPtr;
+                int limit = inEnd;
+                if (limit - inPtr > 255 * 8) {
+                    limit = inPtr + 255 * 8;
+                }
 
-                // TODO
+                while (inPtr < limit) {
+                    byte c = 0;
+                    for (int ii = 0; ii < 8; ++ii) {
+                        c += (inBuf.get(inPtr) == 0 ? 1 : 0);
+                        inPtr += 1;
+                    }
+                    if (c >= 2) {
+                        //# Un-read the word with multiple zeros, since
+                        //# we'll want to compress that one.
+                        inPtr -= 8;
+                        break;
+                    }
+                }
+
+                int count = inPtr - runStart;
+                out.put((byte)(count / 8));
+
+                if (count <= out.remaining()) {
+                    //# There's enough space to memcpy.
+                    inBuf.position(runStart);
+                    ByteBuffer slice = inBuf.slice();
+                    slice.limit(count);
+                    out.put(slice);
+                } else {
+                    //# Input overruns the output buffer. We'll give it
+                    //# to the output stream in one chunk and let it
+                    //# decide what to do.
+
+                }
             }
-
         }
 
         if (out == slowBuffer) {
