@@ -21,11 +21,16 @@ public final class PackedOutputStream implements WritableByteChannel {
         int inEnd = inPtr + length;
         while (inPtr < inEnd) {
 
-
             if (out.remaining() < 10) {
                 //# Oops, we're out of space. We need at least 10
                 //# bytes for the fast path, since we don't
                 //# bounds-check on every byte.
+
+                if (out == slowBuffer) {
+                    out.limit(out.position());
+                    out.rewind();
+                    this.inner.write(out);
+                }
 
                 out = slowBuffer;
                 out.rewind();
@@ -104,9 +109,9 @@ public final class PackedOutputStream implements WritableByteChannel {
                 while(inBuf.position() < limit && inWord == 0) {
                     inWord = inBuf.getLong();
                 }
+                out.put((byte)((inBuf.position() - inPtr)/8 - 1));
+                inPtr = inBuf.position() - 8;
 
-                out.put((byte)(inPtr - inBuf.position()));
-                inPtr = inBuf.position();
             } else if (tag == 0xff) {
                 //# An all-nonzero word is followed by a count of
                 //# consecutive uncompressed words, followed by the
