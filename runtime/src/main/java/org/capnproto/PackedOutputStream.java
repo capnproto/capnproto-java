@@ -158,6 +158,22 @@ public final class PackedOutputStream implements WritableByteChannel {
                     //# to the output stream in one chunk and let it
                     //# decide what to do.
 
+                    if (out == slowBuffer) {
+                        int oldLimit = out.limit();
+                        out.limit(out.position());
+                        out.rewind();
+                        this.inner.write(out);
+                        out.limit(oldLimit);
+                    }
+
+                    inBuf.position(runStart);
+                    ByteBuffer slice = inBuf.slice();
+                    slice.limit(count);
+                    while(slice.hasRemaining()) {
+                        this.inner.write(slice);
+                    }
+
+                    out = this.inner.getWriteBuffer();
                 }
             }
         }
