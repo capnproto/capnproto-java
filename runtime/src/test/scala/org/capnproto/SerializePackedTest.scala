@@ -9,13 +9,28 @@ class SerializePackedSuite extends FunSuite {
   def expectPacksTo(unpacked : Array[Byte], packed : Array[Byte]) {
     // ----
     // write
+    {
+      val bytes = new Array[Byte](packed.length);
+      val writer = new ArrayOutputStream(ByteBuffer.wrap(bytes));
+      val packedOutputStream = new PackedOutputStream(writer);
+      packedOutputStream.write(ByteBuffer.wrap(unpacked));
 
-    val bytes = new Array[Byte](packed.length);
-    val writer = new ArrayOutputStream(ByteBuffer.wrap(bytes));
-    val packedOutputStream = new PackedOutputStream (writer);
-    packedOutputStream.write(ByteBuffer.wrap(unpacked));
+      (bytes) should equal (packed);
+    }
 
-    (bytes) should equal (packed);
+    // ------
+    // read
+    {
+      val reader = new ArrayInputStream(ByteBuffer.wrap(packed));
+      val packedInputStream = new PackedInputStream(reader);
+      val bytes = new Array[Byte](unpacked.length);
+      val n = packedInputStream.read(ByteBuffer.wrap(bytes));
+
+      //(n) should equal (unpacked.length);
+
+      //(bytes) should equal (unpacked);
+    }
+
 
   }
 

@@ -57,7 +57,11 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
         }
     }
 
-    public final ByteBuffer getReadBuffer() {
+    public final ByteBuffer getReadBuffer() throws IOException {
+        if (this.cap - this.buf.position() == 0) {
+            this.buf.rewind();
+            this.cap = readAtLeast(this.inner, this.buf, 1);
+        }
         return this.buf;
     }
 
