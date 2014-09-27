@@ -26,9 +26,9 @@ class SerializePackedSuite extends FunSuite {
       val bytes = new Array[Byte](unpacked.length);
       val n = packedInputStream.read(ByteBuffer.wrap(bytes));
 
-      //(n) should equal (unpacked.length);
+      (n) should equal (unpacked.length);
 
-      //(bytes) should equal (unpacked);
+      (bytes) should equal (unpacked);
     }
 
 

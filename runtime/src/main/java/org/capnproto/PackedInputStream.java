@@ -25,12 +25,9 @@ public final class PackedInputStream implements ReadableByteChannel {
 
         ByteBuffer inBuf = this.inner.getReadBuffer();
 
-
         while (true) {
 
             byte tag = 0;
-
-            //if (outBuf
 
             if (inBuf.remaining() < 10) {
                 if (outBuf.remaining() == 0) {
@@ -91,11 +88,29 @@ public final class PackedInputStream implements ReadableByteChannel {
 
 
                 if (inBuf.remaining() >= runLength) {
-
+                    //# Fast path.
+                    ByteBuffer slice = inBuf.slice();
+                    slice.limit(runLength);
+                    outBuf.put(slice);
+                    inBuf.position(inBuf.position() + runLength);
                 } else {
+                    //# Copy over the first buffer, then do one big read for the rest.
+                    runLength -= inBuf.remaining();
+                    outBuf.put(inBuf);
 
+                    ByteBuffer slice = outBuf.slice();
+                    slice.limit(runLength);
+
+                    this.inner.read(slice);
+                    outBuf.position(outBuf.position() + runLength);
+
+                    if (outBuf.remaining() == 0) {
+                        return len;
+                    } else {
+                        inBuf = this.inner.getReadBuffer();
+                        continue;
+                    }
                 }
-
             }
 
             if (outBuf.remaining() == 0) {
