@@ -56,5 +56,8 @@ class SerializePackedSuite extends FunSuite {
 
     expectPacksTo(Array(8,0,100,6,0,1,1,2, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,1,0,2,0,3,1),
                   Array(0xed.toByte,8,100,6,1,1,2, 0,2, 0xd4.toByte,1,2,3,1));
+
+    expectPacksTo(Array(0,0,0,0,2,0,0,0, 0,0,0,0,0,0,1,0, 0,0,0,0,0,0,0,0),
+                  Array(0x10,2, 0x40,1, 0,0));
   }
 }

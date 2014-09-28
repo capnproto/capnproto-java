@@ -8,16 +8,16 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
 
     private final ReadableByteChannel inner;
     private final ByteBuffer buf;
-    private int cap = 0;
 
     public BufferedInputStreamWrapper(ReadableByteChannel chan) {
         this.inner = chan;
         this.buf = ByteBuffer.allocate(8192);
+        this.buf.limit(0);
     }
 
     public final int read(ByteBuffer dst) throws IOException {
         int numBytes = dst.remaining();
-        if (numBytes < cap - this.buf.position()) {
+        if (numBytes < this.buf.remaining()) {
             //# Serve from the current buffer.
             ByteBuffer slice = this.buf.slice();
             slice.limit(numBytes);
@@ -26,7 +26,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
             return numBytes;
         } else {
             //# Copy current available into destination.
-            int fromFirstBuffer = cap - this.buf.position();
+            int fromFirstBuffer = this.buf.remaining();
             {
                 ByteBuffer slice = this.buf.slice();
                 slice.limit(fromFirstBuffer);
@@ -36,7 +36,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
             numBytes -= fromFirstBuffer;
             if (numBytes <= this.buf.capacity()) {
                 //# Read the next buffer-full.
-                this.buf.rewind();
+                this.buf.clear();
                 int n = readAtLeast(this.inner, this.buf, numBytes);
 
                 this.buf.rewind();
@@ -44,23 +44,24 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
                 slice.limit(numBytes);
                 dst.put(slice);
 
-                this.cap = n;
+                this.buf.limit(n);
                 this.buf.position(numBytes);
                 return fromFirstBuffer + numBytes;
             } else {
                 //# Forward large read to the underlying stream.
 
-                this.cap = 0;
-                this.buf.rewind();
+                this.buf.clear();
                 return fromFirstBuffer + readAtLeast(this.inner, dst, numBytes);
             }
         }
     }
 
     public final ByteBuffer getReadBuffer() throws IOException {
-        if (this.cap - this.buf.position() == 0) {
+        if (this.buf.remaining() == 0) {
+            this.buf.clear();
+            int n = readAtLeast(this.inner, this.buf, 1);
             this.buf.rewind();
-            this.cap = readAtLeast(this.inner, this.buf, 1);
+            this.buf.limit(n);
         }
         return this.buf;
     }

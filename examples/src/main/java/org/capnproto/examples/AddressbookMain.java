@@ -6,8 +6,6 @@ import java.io.FileDescriptor;
 
 import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;
-import org.capnproto.ByteChannelMessageReader;
-import org.capnproto.Serialize;
 import org.capnproto.SerializePacked;
 import org.capnproto.StructList;
 import org.capnproto.Text;
@@ -49,7 +47,7 @@ public class AddressbookMain {
     }
 
     public static void printAddressBook() throws java.io.IOException {
-        MessageReader message = ByteChannelMessageReader.create(
+        MessageReader message = SerializePacked.newReaderUnbuffered(
             (new FileInputStream(FileDescriptor.in)).getChannel());
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
         for(Person.Reader person : addressbook.getPeople()) {
