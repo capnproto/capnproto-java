@@ -8,6 +8,7 @@ import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;
 import org.capnproto.ByteChannelMessageReader;
 import org.capnproto.Serialize;
+import org.capnproto.SerializePacked;
 import org.capnproto.StructList;
 import org.capnproto.Text;
 
@@ -43,8 +44,8 @@ public class AddressbookMain {
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
-        Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
-                               message);
+        SerializePacked.writeMessageUnbuffered((new FileOutputStream(FileDescriptor.out)).getChannel(),
+                                               message);
     }
 
     public static void printAddressBook() throws java.io.IOException {

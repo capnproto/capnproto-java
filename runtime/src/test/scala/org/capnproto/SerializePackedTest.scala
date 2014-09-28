@@ -36,6 +36,7 @@ class SerializePackedSuite extends FunSuite {
 
   test("SimplePacking") {
     expectPacksTo(Array(), Array());
+    expectPacksTo(Array(0,0,0,0,0,0,0,0), Array(0,0));
     expectPacksTo(Array(0,0,12,0,0,34,0,0), Array(0x24,12,34));
     expectPacksTo(Array(1,3,2,4,5,7,6,8), Array(0xff.toByte,1,3,2,4,5,7,6,8,0));
     expectPacksTo(Array(0,0,0,0,0,0,0,0, 1,3,2,4,5,7,6,8),

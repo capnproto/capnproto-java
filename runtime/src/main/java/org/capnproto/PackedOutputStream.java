@@ -20,7 +20,6 @@ public final class PackedOutputStream implements WritableByteChannel {
         int inPtr = inBuf.position();
         int inEnd = inPtr + length;
         while (inPtr < inEnd) {
-
             if (out.remaining() < 10) {
                 //# Oops, we're out of space. We need at least 10
                 //# bytes for the fast path, since we don't
@@ -100,19 +99,15 @@ public final class PackedOutputStream implements WritableByteChannel {
                 //# An all-zero word is followed by a count of
                 //# consecutive zero words (not including the first
                 //# one).
-
-                inBuf.position(inPtr);
-
-                long inWord = inBuf.getLong();
+                int runStart = inPtr;
                 int limit = inEnd;
                 if (limit - inPtr > 255 * 8) {
                     limit = inPtr + 255 * 8;
                 }
-                while(inBuf.position() < limit && inWord == 0) {
-                    inWord = inBuf.getLong();
+                while(inPtr < limit && inBuf.getLong(inPtr) == 0){
+                    inPtr += 8;
                 }
-                out.put((byte)((inBuf.position() - inPtr)/8 - 1));
-                inPtr = inBuf.position() - 8;
+                out.put((byte)((inPtr - runStart)/8));
 
             } else if (tag == (byte)0xff) {
                 //# An all-nonzero word is followed by a count of
@@ -184,6 +179,7 @@ public final class PackedOutputStream implements WritableByteChannel {
             this.inner.write(out);
         }
 
+        inBuf.position(inPtr);
         return length;
     }
 
