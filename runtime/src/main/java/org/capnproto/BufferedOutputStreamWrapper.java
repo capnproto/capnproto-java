@@ -63,4 +63,12 @@ public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
     public final boolean isOpen() {
         return this.inner.isOpen();
     }
+
+    public final void flush() throws IOException {
+        int pos = this.buf.position();
+        this.buf.rewind();
+        this.buf.limit(pos);
+        this.inner.write(this.buf);
+        this.buf.clear();
+    }
 }

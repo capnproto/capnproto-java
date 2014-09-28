@@ -33,4 +33,6 @@ public final class ArrayOutputStream implements BufferedOutputStream {
     public final boolean isOpen() {
         return true;
     }
+
+    public final void flush() { }
 }
