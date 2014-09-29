@@ -23,7 +23,7 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
 
 
     public void passByObject(RequestFactory requestFactory, ResponseFactory responseFactory,
-                             long iters) {
+                             Compression compression, long iters) {
 
         Common.FastRand rng = new Common.FastRand();
 
@@ -43,7 +43,7 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
     static final int SCRATCH_SIZE = 128 * 1024;
 
     public void passByBytes(RequestFactory requestFactory, ResponseFactory responseFactory,
-                            long iters) throws IOException {
+                            Compression compression, long iters) throws IOException {
 
         ByteBuffer requestBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
         ByteBuffer responseBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
@@ -58,23 +58,23 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
 
             {
                 org.capnproto.ArrayOutputStream writer = new org.capnproto.ArrayOutputStream(requestBytes);
-                org.capnproto.Serialize.writeMessage(writer, requestMessage);
+                compression.writeBuffered(writer, requestMessage);
             }
 
             {
                 org.capnproto.MessageReader messageReader =
-                    org.capnproto.ByteChannelMessageReader.create(new org.capnproto.ArrayInputStream(requestBytes));
+                    compression.newBufferedReader(new org.capnproto.ArrayInputStream(requestBytes));
                 this.handleRequest(messageReader.getRoot(requestFactory), response);
             }
 
             {
                 org.capnproto.ArrayOutputStream writer = new org.capnproto.ArrayOutputStream(responseBytes);
-                org.capnproto.Serialize.writeMessage(writer, responseMessage);
+                compression.writeBuffered(writer, responseMessage);
             }
 
             {
                 org.capnproto.MessageReader messageReader =
-                    org.capnproto.ByteChannelMessageReader.create(new org.capnproto.ArrayInputStream(responseBytes));
+                    compression.newBufferedReader(new org.capnproto.ArrayInputStream(responseBytes));
                 if (!this.checkResponse(messageReader.getRoot(responseFactory), expected)) {
                     throw new Error("incorrect response");
                 }
@@ -83,38 +83,39 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
     }
 
     public void syncServer(RequestFactory requestFactory, ResponseFactory responseFactory,
-                           long iters) throws IOException {
+                           Compression compression, long iters) throws IOException {
+        org.capnproto.BufferedOutputStreamWrapper outBuffered =
+            new org.capnproto.BufferedOutputStreamWrapper((new FileOutputStream(FileDescriptor.out)).getChannel());
+        org.capnproto.BufferedInputStreamWrapper inBuffered =
+            new org.capnproto.BufferedInputStreamWrapper((new FileInputStream(FileDescriptor.in)).getChannel());
+
         for (int ii = 0; ii < iters; ++ii) {
             MessageBuilder responseMessage = new MessageBuilder();
             {
                 ResponseBuilder response = responseMessage.initRoot(responseFactory);
-
-                MessageReader messageReader = org.capnproto.ByteChannelMessageReader.create(
-                    (new FileInputStream(FileDescriptor.in)).getChannel());
-
+                MessageReader messageReader = compression.newBufferedReader(inBuffered);
                 RequestReader request = messageReader.getRoot(requestFactory);
                 this.handleRequest(request, response);
             }
-
-            org.capnproto.Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
-                                                 responseMessage);
+            compression.writeBuffered(outBuffered, responseMessage);
         }
     }
 
     public void syncClient(RequestFactory requestFactory, ResponseFactory responseFactory,
-                           long iters) throws IOException {
+                           Compression compression, long iters) throws IOException {
         Common.FastRand rng = new Common.FastRand();
+        org.capnproto.BufferedOutputStreamWrapper outBuffered =
+            new org.capnproto.BufferedOutputStreamWrapper((new FileOutputStream(FileDescriptor.out)).getChannel());
+        org.capnproto.BufferedInputStreamWrapper inBuffered =
+            new org.capnproto.BufferedInputStreamWrapper((new FileInputStream(FileDescriptor.in)).getChannel());
+
         for (int ii = 0; ii < iters; ++ii) {
             MessageBuilder requestMessage = new MessageBuilder();
             RequestBuilder request = requestMessage.initRoot(requestFactory);
             Expectation expected = this.setupRequest(rng, request);
 
-            org.capnproto.Serialize.writeMessage((new FileOutputStream(FileDescriptor.out)).getChannel(),
-                                                 requestMessage);
-
-            MessageReader messageReader = org.capnproto.ByteChannelMessageReader.create(
-                (new FileInputStream(FileDescriptor.in)).getChannel());
-
+            compression.writeBuffered(outBuffered, requestMessage);
+            MessageReader messageReader = compression.newBufferedReader(inBuffered);
             ResponseReader response = messageReader.getRoot(responseFactory);
             if (!this.checkResponse(response, expected)) {
                 throw new Error("incorrect response");
@@ -131,20 +132,27 @@ public abstract class TestCase<RequestFactory extends StructFactory<RequestBuild
 
         String mode = args[0];
         String reuse = args[1];
-        String compression = args[2];
+        Compression compression = null;
+        if (args[2].equals("packed")) {
+            compression = Compression.PACKED;
+        } else if (args[2].equals("none")) {
+            compression = Compression.UNCOMPRESSED;
+        } else {
+            throw new Error("unrecognized compression: " + args[2]);
+        }
         long iters = Long.parseLong(args[3]);
 
         try {
             if (mode.equals("object")) {
-                passByObject(requestFactory, responseFactory, iters);
+                passByObject(requestFactory, responseFactory, compression, iters);
             } else if (mode.equals("bytes")) {
-                passByBytes(requestFactory, responseFactory, iters);
+                passByBytes(requestFactory, responseFactory, compression, iters);
             } else if (mode.equals("client")) {
-                syncClient(requestFactory, responseFactory, iters);
+                syncClient(requestFactory, responseFactory, compression, iters);
             } else if (mode.equals("server")) {
-                syncServer(requestFactory, responseFactory, iters);
+                syncServer(requestFactory, responseFactory, compression, iters);
             } else {
-                System.out.println("unknown mode: " + mode);
+                System.out.println("unrecognized mode: " + mode);
             }
         } catch (IOException e) {
             System.err.println("IOException: " + e);

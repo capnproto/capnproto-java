@@ -68,7 +68,6 @@ public final class ByteChannelMessageReader {
         segmentSlices[0].order(ByteOrder.LITTLE_ENDIAN);
 
         int offset = segment0Size;
-
         for (int ii = 1; ii < segmentCount; ++ii) {
             allSegments.position(offset * Constants.BYTES_PER_WORD);
             segmentSlices[ii] = allSegments.slice();
