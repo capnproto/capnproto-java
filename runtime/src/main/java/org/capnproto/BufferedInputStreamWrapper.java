@@ -50,6 +50,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
             } else {
                 //# Forward large read to the underlying stream.
                 this.buf.clear();
+                this.buf.limit(0);
                 return fromFirstBuffer + readAtLeast(this.inner, dst, numBytes);
             }
         }
