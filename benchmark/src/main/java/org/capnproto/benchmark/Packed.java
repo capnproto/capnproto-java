@@ -6,6 +6,7 @@ public final class Packed implements Compression {
     public void writeBuffered(org.capnproto.BufferedOutputStream writer,
                               org.capnproto.MessageBuilder message) throws IOException {
         org.capnproto.SerializePacked.writeMessage(writer, message);
+        writer.flush();
     }
 
     public org.capnproto.MessageReader newBufferedReader(
