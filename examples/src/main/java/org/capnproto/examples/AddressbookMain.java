@@ -42,12 +42,12 @@ public class AddressbookMain {
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
-        SerializePacked.writeMessageUnbuffered((new FileOutputStream(FileDescriptor.out)).getChannel(),
-                                               message);
+        SerializePacked.writeUnbuffered((new FileOutputStream(FileDescriptor.out)).getChannel(),
+                                        message);
     }
 
     public static void printAddressBook() throws java.io.IOException {
-        MessageReader message = SerializePacked.newReaderUnbuffered(
+        MessageReader message = SerializePacked.readUnbuffered(
             (new FileInputStream(FileDescriptor.in)).getChannel());
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
         for(Person.Reader person : addressbook.getPeople()) {
