@@ -53,7 +53,7 @@ public class CarSales
         car.setMake(MAKES[rng.nextLessThan(MAKES.length)]);
         car.setModel(MODELS[rng.nextLessThan(MODELS.length)]);
 
-        car.setColor(Color.values()[rng.nextLessThan(Color.values().length)]);
+        car.setColor(Color.values()[rng.nextLessThan(Color.SILVER.ordinal() + 1)]);
         car.setSeats((byte)(2 + rng.nextLessThan(6)));
         car.setDoors((byte)(2 + rng.nextLessThan(3)));
 

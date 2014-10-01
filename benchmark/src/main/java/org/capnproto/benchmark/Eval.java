@@ -10,7 +10,7 @@ public class Eval
     EvaluationResult.Factory, EvaluationResult.Builder, EvaluationResult.Reader, Integer> {
 
     public static int makeExpression(Common.FastRand rng, Expression.Builder exp, int depth) {
-        exp.setOp(Operation.values()[rng.nextLessThan(Operation.values().length)]);
+        exp.setOp(Operation.values()[rng.nextLessThan(Operation.MODULUS.ordinal() + 1)]);
 
         int left = 0;
         if (rng.nextLessThan(8) < depth) {

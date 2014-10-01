@@ -820,7 +820,8 @@ private:
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree("    return ", type, ".values()[_reader.getShortField(", offset, ")];\n") :
+             kj::strTree("    return org.capnproto.GeneratedClassSupport.clampOrdinal(", type, ".values(),",
+                         "_reader.getShortField(", offset, "));\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree("    return org.capnproto.Void.VOID;\n") :
               kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
@@ -832,7 +833,8 @@ private:
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree("    return ", type, ".values()[_builder.getShortField(", offset, ")];\n") :
+             kj::strTree("    return org.capnproto.GeneratedClassSupport.clampOrdinal(", type, ".values(),",
+                         "_builder.getShortField(", offset, "));\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree("    return org.capnproto.Void.VOID;\n") :
               kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
@@ -1229,8 +1231,8 @@ private:
       "\n",
       (isUnion ?
        kj::strTree(spaces(indent), "  public Which which() {\n",
-                   spaces(indent), "    return Which.values()[_reader.getShortField(",
-                   discriminantOffset, ")];\n",
+                   spaces(indent), "    return org.capnproto.GeneratedClassSupport.clampOrdinal(Which.values(),",
+                   "_reader.getShortField(", discriminantOffset, "));\n",
                    spaces(indent), "  }\n")
        : kj::strTree()),
       kj::mv(methodDecls),
@@ -1250,8 +1252,8 @@ private:
       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
       (isUnion ?
        kj::strTree(spaces(indent), "  public Which which() {\n",
-                   spaces(indent), "   return Which.values()[_builder.getShortField(",
-                   structNode.getDiscriminantOffset(), ")];\n",
+                   spaces(indent), "   return org.capnproto.GeneratedClassSupport.clampOrdinal(Which.values(),",
+                   "_builder.getShortField(", structNode.getDiscriminantOffset(), "));\n",
                    spaces(indent), "  }\n")
        : kj::strTree()),
       spaces(indent), "  public final Reader asReader() {\n",
@@ -1320,6 +1322,7 @@ private:
               return kj::strTree();
             }
           },
+          spaces(indent), "    _UNKNOWN,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
         spaces(indent), "}\n"
@@ -1627,6 +1630,7 @@ private:
                       KJ_MAP(e, enumerants) {
                         return kj::strTree(spaces(indent), "  ", toUpperCase(e.getProto().getName()), ",\n");
                       },
+                      spaces(indent), "  _UNKNOWN,\n",
                       spaces(indent), "}\n"
               "\n"),
 
