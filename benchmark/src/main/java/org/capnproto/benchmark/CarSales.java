@@ -49,11 +49,13 @@ public class CarSales
                                    new Text.Reader("Volt"), new Text.Reader("Accord"),
                                    new Text.Reader("Leaf"), new Text.Reader("Model S")};
 
+    static final Color colors[] = Color.values();
+
     static final void randomCar(Common.FastRand rng, Car.Builder car) {
         car.setMake(MAKES[rng.nextLessThan(MAKES.length)]);
         car.setModel(MODELS[rng.nextLessThan(MODELS.length)]);
 
-        car.setColor(Color.values()[rng.nextLessThan(Color.SILVER.ordinal() + 1)]);
+        car.setColor(colors[rng.nextLessThan(Color.SILVER.ordinal() + 1)]);
         car.setSeats((byte)(2 + rng.nextLessThan(6)));
         car.setDoors((byte)(2 + rng.nextLessThan(3)));
 

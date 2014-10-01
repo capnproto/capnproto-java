@@ -9,8 +9,10 @@ public class Eval
     extends TestCase<Expression.Factory, Expression.Builder, Expression.Reader,
     EvaluationResult.Factory, EvaluationResult.Builder, EvaluationResult.Reader, Integer> {
 
+    static final Operation operations[] = Operation.values();
+
     public static int makeExpression(Common.FastRand rng, Expression.Builder exp, int depth) {
-        exp.setOp(Operation.values()[rng.nextLessThan(Operation.MODULUS.ordinal() + 1)]);
+        exp.setOp(operations[rng.nextLessThan(Operation.MODULUS.ordinal() + 1)]);
 
         int left = 0;
         if (rng.nextLessThan(8) < depth) {
