@@ -1,9 +1,8 @@
 package org.capnproto;
 
 import org.capnproto.test.Test._;
-
 import org.scalatest.FunSuite
-
+import org.scalatest.Matchers._;
 
 class EncodingSuite extends FunSuite {
 
@@ -83,7 +82,10 @@ class EncodingSuite extends FunSuite {
     assert(-6101065172474983726L == TestConstants.UINT64_CONST);
 
     assert(1234.5f == TestConstants.FLOAT32_CONST);
-    assert(-123e45 == TestConstants.FLOAT64_CONST);
+    (-123e45) should equal (TestConstants.FLOAT64_CONST);
+
+    (TestConstants.ENUM_CONST) should equal (TestEnum.CORGE);
+
   }
 
   test("GlobalConstants") {

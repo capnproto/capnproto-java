@@ -197,6 +197,7 @@ struct TestConstants {
   const float32Const   :Float32 = 1234.5;
   const float64Const   :Float64 = -123e45;
 # ...
+  const enumConst      :TestEnum = corge;
 }
 
 const globalInt :UInt32 = 12345;

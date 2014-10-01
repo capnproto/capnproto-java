@@ -331,7 +331,7 @@ private:
         EnumSchema schema = schemaLoader.get(type.getEnum().getTypeId()).asEnum();
         if (value.getEnum() < schema.getEnumerants().size()) {
           return kj::strTree(
-              javaFullName(schema), "::",
+              javaFullName(schema), ".",
               toUpperCase(schema.getEnumerants()[value.getEnum()].getProto().getName()));
         } else {
           return kj::strTree("static_cast<", javaFullName(schema), ">(", value.getEnum(), ")");
