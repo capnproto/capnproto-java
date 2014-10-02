@@ -68,6 +68,13 @@ struct TestDefaults {
   float64Field   @11 : Float64 = -123e45;
 }
 
+struct TestAnyPointer {
+  anyPointerField @0 :AnyPointer;
+
+  # Do not add any other fields here!  Some tests rely on anyPointerField being the last pointer
+  # in the struct.
+}
+
 struct TestOutOfOrder {
   foo @3 :Text;
   bar @2 :Text;

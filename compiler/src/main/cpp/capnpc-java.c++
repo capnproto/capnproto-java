@@ -602,11 +602,12 @@ private:
     kj::String upperCase = toUpperCase(memberName);
 
     return DiscriminantChecks {
-        kj::str(
-            "  if (which() != ", scope, upperCase, ") return false;\n"),
-        kj::str(
-          "  KJ_IREQUIRE(which() == ", scope, upperCase, ",\n"
-          "              \"Must check which() before get()ing a union member.\");\n"),
+      kj::str(spaces(indent),
+              "  if (which() != ", scope, "Which.", upperCase, ") return false;\n"),
+        kj::str(), // XXX
+        //kj::str(
+        //  "  KJ_IREQUIRE(which() == ", scope, upperCase, ",\n"
+        //  "              \"Must check which() before get()ing a union member.\");\n"),
         kj::str(
           spaces(indent), "  _builder.setShortField(", discrimOffset, ", (short)",
           scope, "Which.", upperCase, ".ordinal());\n"),
@@ -875,39 +876,34 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
-            "  inline boolean has", titleCase, "() const;\n"
-            "  inline ::capnp::AnyPointer::Reader get", titleCase, "() const;\n"
-            "\n"),
+            spaces(indent), "  public boolean has", titleCase, "() {\n",
+            unionDiscrim.has,
+            spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public org.capnproto.AnyPointer.Reader get", titleCase, "() {\n",
+            unionDiscrim.check,
+            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(_reader.getPointerField(",
+            offset,"));\n",
+            spaces(indent), "  }\n"),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
-            "  inline boolean has", titleCase, "();\n"
-            "  inline ::capnp::AnyPointer::Builder get", titleCase, "();\n"
-            "  inline ::capnp::AnyPointer::Builder init", titleCase, "();\n"
+            spaces(indent), "  public final boolean has", titleCase, "() {\n",
+            spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public org.capnproto.AnyPointer.Builder get", titleCase, "() {\n",
+            unionDiscrim.check,
+            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(_builder.getPointerField(",
+            offset, "));\n",
+            spaces(indent), "  }\n",
+            //"  inline ::capnp::AnyPointer::Builder init", titleCase, "();\n"
             "\n"),
 
         kj::strTree(),
 
         kj::strTree(
-            kj::mv(unionDiscrim.isDefs),
-            "inline boolean ", scope, "Reader::has", titleCase, "() const {\n",
-            unionDiscrim.has,
-            "  return !_reader.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
-            "}\n"
-            "inline boolean ", scope, "Builder::has", titleCase, "() {\n",
-            unionDiscrim.has,
-            "  return !_builder.getPointerField(", offset, " * ::capnp::POINTERS).isNull();\n"
-            "}\n"
-            "inline ::capnp::AnyPointer::Reader ", scope, "Reader::get", titleCase, "() const {\n",
-            unionDiscrim.check,
-            "  return ::capnp::AnyPointer::Reader(\n"
-            "      _reader.getPointerField(", offset, " * ::capnp::POINTERS));\n"
-            "}\n"
-            "inline ::capnp::AnyPointer::Builder ", scope, "Builder::get", titleCase, "() {\n",
-            unionDiscrim.check,
-            "  return ::capnp::AnyPointer::Builder(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS));\n"
-            "}\n"
             "inline ::capnp::AnyPointer::Builder ", scope, "Builder::init", titleCase, "() {\n",
             unionDiscrim.set,
             "  auto result = ::capnp::AnyPointer::Builder(\n"
@@ -927,17 +923,13 @@ private:
           spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
 
-          spaces(indent), "  public ", type, ".Reader",
-          " get", titleCase, "() {\n",
+          spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
           spaces(indent), "    return ", type,
           ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
-          spaces(indent), "  public final boolean has", titleCase, "() {\n",
-          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
-          spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           spaces(indent), "    return ", type,
           ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
@@ -966,6 +958,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
+          unionDiscrim.has,
           spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
 
@@ -978,6 +971,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
+          unionDiscrim.has,
           spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
@@ -1009,6 +1003,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
+          unionDiscrim.has,
           spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
 
@@ -1021,6 +1016,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
+          unionDiscrim.has,
           spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
