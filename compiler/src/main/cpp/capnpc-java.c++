@@ -644,6 +644,20 @@ private:
     ANY_POINTER
   };
 
+  kj::StringTree makeEnumGetter(EnumSchema schema, kj::String member, uint offset, int indent) {
+    auto enumerants = schema.getEnumerants();
+    return kj::strTree(
+      spaces(indent), "switch(", member, ".getShortField(", offset, ")) {\n",
+      KJ_MAP(e, enumerants) {
+        return kj::strTree(spaces(indent+1), "case ", e.getOrdinal(), " : return ",
+                           javaFullName(schema), ".",
+                           toUpperCase(e.getProto().getName()), ";\n");
+      },
+      spaces(indent+1), "default: return ", javaFullName(schema), "._UNKNOWN;\n",
+      spaces(indent), "}\n"
+      );
+  }
+
   FieldText makeFieldText(kj::StringPtr scope, StructSchema::Field field, int indent) {
     auto proto = field.getProto();
     kj::String titleCase = toTitleCase(proto.getName());
@@ -813,31 +827,31 @@ private:
 
     uint offset = slot.getOffset();
 
+    auto structSchema = field.getContainingStruct();
+
     if (kind == FieldKind::PRIMITIVE) {
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
-            spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree("    return org.capnproto.GeneratedClassSupport.clampOrdinal(", type, ".values(),",
-                         "_reader.getShortField(", offset, "));\n") :
+             makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
+                            kj::str("_reader"), offset, indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
-              kj::strTree("    return org.capnproto.Void.VOID;\n") :
-              kj::strTree("    return _reader.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
+              kj::strTree(spaces(indent), "    return _reader.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 
           kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
-            spaces(indent),
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree("    return org.capnproto.GeneratedClassSupport.clampOrdinal(", type, ".values(),",
-                         "_builder.getShortField(", offset, "));\n") :
+             makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
+                            kj::str("_builder"), offset, indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
-              kj::strTree("    return org.capnproto.Void.VOID;\n") :
-              kj::strTree("    return _builder.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
+              kj::strTree(spaces(indent), "    return _builder.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
