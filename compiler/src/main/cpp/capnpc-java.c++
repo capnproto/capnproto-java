@@ -1363,7 +1363,6 @@ private:
   struct ConstText {
     bool needsSchema;
     kj::StringTree decl;
-    kj::StringTree def;
   };
 
   ConstText makeConstText(kj::StringPtr scope, kj::StringPtr name, ConstSchema schema) {
@@ -1393,19 +1392,16 @@ private:
         return ConstText {
           false,
           kj::strTree("public static final ", typeName_, ' ', upperCase, " = ",
-              literalValue(constProto.getType(), constProto.getValue()), ";\n"),
-          scope.size() == 0 ? kj::strTree() : kj::strTree(
-              "final ", typeName_, ' ', scope, upperCase, ";\n")
+                      literalValue(constProto.getType(), constProto.getValue()), ";\n")
         };
 
       case schema::Value::TEXT: {
-        kj::String constType = kj::strTree(
-            "::capnp::_::ConstText<", schema.as<Text>().size(), ">").flatten();
         return ConstText {
           true,
-          kj::strTree(linkage, "const ", constType, ' ', upperCase, ";\n"),
-          kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
-                      kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
+          kj::strTree("public static final org.capnproto.Text.Reader ", upperCase,
+                      " = new org.capnproto.Text.Reader(Schemas.b_",
+                      kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
+                      ", ", constProto.getValue().getText().size(), ");\n")
         };
       }
 
@@ -1414,7 +1410,6 @@ private:
             "::capnp::_::ConstData<", schema.as<Data>().size(), ">").flatten();
         return ConstText {
           true,
-          kj::strTree(linkage, "const ", constType, ' ', upperCase, ";\n"),
           kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
                       kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
         };
@@ -1425,7 +1420,6 @@ private:
             "::capnp::_::ConstStruct<", typeName_, ">").flatten();
         return ConstText {
           true,
-          kj::strTree(linkage, "const ", constType, ' ', upperCase, ";\n"),
           kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
                       kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
         };
@@ -1436,7 +1430,6 @@ private:
             "::capnp::_::ConstList<", typeName(type.getList().getElementType()), ">").flatten();
         return ConstText {
           true,
-          kj::strTree(linkage, "const ", constType, ' ', upperCase, ";\n"),
           kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
                       kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
         };
@@ -1444,7 +1437,7 @@ private:
 
       case schema::Value::ANY_POINTER:
       case schema::Value::INTERFACE:
-        return ConstText { false, kj::strTree(), kj::strTree() };
+        return ConstText { false, kj::strTree() };
     }
 
     KJ_UNREACHABLE;
@@ -1683,8 +1676,7 @@ private:
 
           kj::strTree(),
           kj::strTree(),
-
-          kj::mv(constText.def),
+          kj::strTree(),
         };
       }
 
