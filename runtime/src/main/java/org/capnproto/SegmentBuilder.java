@@ -28,9 +28,7 @@ public final class SegmentBuilder extends SegmentReader {
        Allocate `amount` words.
      */
     public final int allocate(int amount) {
-        if (amount < 0) {
-            throw new InternalError("tried to allocate a negative number of words");
-        }
+        assert amount >= 0 : "tried to allocate a negative number of words";
 
         if (amount > this.capacity() - this.currentSize()) {
             return FAILED_ALLOCATION; // no space left;
