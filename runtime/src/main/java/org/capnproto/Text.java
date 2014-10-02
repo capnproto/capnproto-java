@@ -40,7 +40,7 @@ public final class Text {
             try {
                 return new String(bytes, "UTF-8");
             } catch (java.io.UnsupportedEncodingException e) {
-                return "unsupported encoding"; // XXX
+                throw new Error("UTF-8 is unsupported");
             }
         }
 
@@ -48,10 +48,8 @@ public final class Text {
 
     public static final class Builder {
         public final ByteBuffer buffer;
-        public final int offset;
-
-        // size not including the NUL terminator
-        public final int size;
+        public final int offset; // in bytes
+        public final int size; // in bytes
 
         public Builder(ByteBuffer buffer, int offset, int size) {
             this.buffer = buffer;
@@ -69,7 +67,7 @@ public final class Text {
             try {
                 return new String(bytes, "UTF-8");
             } catch (java.io.UnsupportedEncodingException e) {
-                return "unsupported encoding"; // XXX
+                throw new Error("UTF-8 is unsupported");
             }
         }
 

@@ -85,6 +85,7 @@ class EncodingSuite extends FunSuite {
     (-123e45) should equal (TestConstants.FLOAT64_CONST);
 
     (TestConstants.TEXT_CONST.toString()) should equal ("foo");
+    (TestConstants.DATA_CONST.asArray()) should equal (TestUtil.data("bar"));
 
     (TestConstants.ENUM_CONST) should equal (TestEnum.CORGE);
 

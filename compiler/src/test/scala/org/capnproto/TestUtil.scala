@@ -2,9 +2,16 @@ package org.capnproto;
 
 import org.capnproto.test.Test._;
 
-
-
 object TestUtil {
+
+  def data(str : String) : Array[Byte] = {
+    try {
+      return str.getBytes("ISO_8859-1");
+    } catch {
+      case e: Exception => throw new Error("could not decode");
+    }
+  }
+
   def initTestMessage(builder : TestAllTypes.Builder) {
     builder.setVoidField(org.capnproto.Void.VOID);
     builder.setBoolField(true);
@@ -18,7 +25,7 @@ object TestUtil {
     builder.setUInt64Field(0x1234567890123456L);
     builder.setFloat32Field(1234.5f);
     builder.setFloat64Field(-123e45);
-    builder.setTextField(new Text.Reader("foo"));
+    builder.setTextField("foo");
 //    builder.setDataField(data("bar"));
     {
 

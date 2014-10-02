@@ -204,6 +204,7 @@ struct TestConstants {
   const float32Const   :Float32 = 1234.5;
   const float64Const   :Float64 = -123e45;
   const textConst      :Text    = "foo";
+  const dataConst      :Data    = "bar";
 # ...
   const enumConst      :TestEnum = corge;
 }

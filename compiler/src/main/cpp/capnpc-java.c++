@@ -1420,12 +1420,12 @@ private:
       }
 
       case schema::Value::DATA: {
-        kj::String constType = kj::strTree(
-            "::capnp::_::ConstData<", schema.as<Data>().size(), ">").flatten();
         return ConstText {
           true,
-          kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
-                      kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
+          kj::strTree("public static final org.capnproto.Data.Reader ", upperCase,
+                      " = new org.capnproto.Data.Reader(Schemas.b_",
+                      kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
+                      ", ", constProto.getValue().getData().size(), ");\n")
         };
       }
 
