@@ -1553,7 +1553,8 @@ private:
 
     // Java limits method code size to 64KB. Maybe we should use class.getResource()?
     auto schemaDef = kj::strTree(
-      "public static final byte[] b_", hexId, " = org.capnproto.GeneratedClassSupport.decodeRawBytes(\n",
+      "public static final java.nio.ByteBuffer b_", hexId, " =\n",
+      "   org.capnproto.GeneratedClassSupport.decodeRawBytes(\n",
       "   ", kj::mv(schemaLiteral), " \"\"",
       ");\n");
 /*
