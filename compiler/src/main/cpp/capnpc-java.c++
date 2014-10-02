@@ -866,26 +866,7 @@ private:
             "\n"),
 
         kj::strTree(),
-
-        kj::strTree(
-            kj::mv(unionDiscrim.isDefs),
-            "inline ", type, " ", scope, "Reader::get", titleCase, "() const {\n",
-            unionDiscrim.check,
-            "  return _reader.getDataField<", type, ">(\n"
-            "      ", offset, " * ::capnp::ELEMENTS", defaultMaskParam, ");\n",
-            "}\n"
-            "\n"
-            "inline ", type, " ", scope, "Builder::get", titleCase, "() {\n",
-            unionDiscrim.check,
-            "  return _builder.getDataField<", type, ">(\n"
-            "      ", offset, " * ::capnp::ELEMENTS", defaultMaskParam, ");\n",
-            "}\n"
-            "inline void ", scope, "Builder::set", titleCase, "(", type, " value) {\n",
-            unionDiscrim.set,
-            "  _builder.setDataField<", type, ">(\n"
-            "      ", offset, " * ::capnp::ELEMENTS, value", defaultMaskParam, ");\n",
-            "}\n"
-            "\n")
+        kj::strTree(),
       };
 
     } else if (kind == FieldKind::INTERFACE) {
