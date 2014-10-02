@@ -604,10 +604,10 @@ private:
     return DiscriminantChecks {
       kj::str(spaces(indent),
               "  if (which() != ", scope, "Which.", upperCase, ") return false;\n"),
-        kj::str(), // XXX
-        //kj::str(
-        //  "  KJ_IREQUIRE(which() == ", scope, upperCase, ",\n"
-        //  "              \"Must check which() before get()ing a union member.\");\n"),
+        kj::str(
+          spaces(indent),
+          "  assert which() == ", scope, "Which.", upperCase, ":\n",
+          spaces(indent), "              \"Must check which() before get()ing a union member.\";\n"),
         kj::str(
           spaces(indent), "  _builder.setShortField(", discrimOffset, ", (short)",
           scope, "Which.", upperCase, ".ordinal());\n"),
@@ -835,6 +835,7 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
+            unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
              makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
                             kj::str("_reader"), offset, indent + 2) :
@@ -847,6 +848,7 @@ private:
           kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
+            unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
              makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
                             kj::str("_builder"), offset, indent + 2) :
@@ -923,6 +925,7 @@ private:
           spaces(indent), "  }\n",
 
           spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
+          unionDiscrim.check,
           spaces(indent), "    return ", type,
           ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
           spaces(indent), "  }\n", "\n"),
@@ -930,6 +933,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+          unionDiscrim.check,
           spaces(indent), "    return ", type,
           ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
           type, ".STRUCT_SIZE", "));\n",

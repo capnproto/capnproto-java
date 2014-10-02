@@ -181,9 +181,7 @@ final class WireHelpers {
                                               SegmentBuilder segment,
                                               int elementCount,
                                               byte elementSize) {
-        if (elementSize == FieldSize.INLINE_COMPOSITE) {
-            throw new InternalError("Should have called initStructListPointer instead");
-        }
+        assert elementSize == FieldSize.INLINE_COMPOSITE : "Should have called initStructListPointer instead";
 
         int dataSize = FieldSize.dataBitsPerElement(elementSize);
         int pointerCount = FieldSize.pointersPerElement(elementSize);
@@ -230,9 +228,7 @@ final class WireHelpers {
     public static ListBuilder getWritableListPointer(int origRefOffset,
                                                      SegmentBuilder origSegment,
                                                      byte elementSize) {
-        if (elementSize == FieldSize.INLINE_COMPOSITE) {
-            throw new InternalError("Use getStructList{Element,Field} for structs");
-        }
+        assert elementSize == FieldSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
 
         long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
