@@ -898,20 +898,19 @@ private:
             spaces(indent), "    return new org.capnproto.AnyPointer.Builder(_builder.getPointerField(",
             offset, "));\n",
             spaces(indent), "  }\n",
-            //"  inline ::capnp::AnyPointer::Builder init", titleCase, "();\n"
+
+            spaces(indent), "  public org.capnproto.AnyPointer.Builder init", titleCase, "() {\n",
+            unionDiscrim.set,
+            spaces(indent), "    org.capnproto.AnyPointer.Builder result =\n",
+            spaces(indent), "      new org.capnproto.AnyPointer.Builder(_builder.getPointerField(",
+            offset, "));\n",
+            spaces(indent), "    result.clear();\n",
+            spaces(indent), "    return result;\n",
+            spaces(indent), "  }\n",
             "\n"),
 
         kj::strTree(),
-
-        kj::strTree(
-            "inline ::capnp::AnyPointer::Builder ", scope, "Builder::init", titleCase, "() {\n",
-            unionDiscrim.set,
-            "  auto result = ::capnp::AnyPointer::Builder(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS));\n"
-            "  result.clear();\n"
-            "  return result;\n"
-            "}\n"
-            "\n")
+        kj::strTree()
       };
 
     } else if (kind == FieldKind::STRUCT) {
@@ -1189,16 +1188,6 @@ private:
 
         kj::strTree(
             kj::mv(unionDiscrim.isDefs),
-            "inline ", type, "::Reader ", scope, "Reader::get", titleCase, "() const {\n",
-            unionDiscrim.check,
-            "  return ::capnp::_::PointerHelpers<", type, ">::get(\n"
-            "      _reader.getPointerField(", offset, " * ::capnp::POINTERS)", defaultParam, ");\n"
-            "}\n"
-            "inline ", type, "::Builder ", scope, "Builder::get", titleCase, "() {\n",
-            unionDiscrim.check,
-            "  return ::capnp::_::PointerHelpers<", type, ">::get(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS)", defaultParam, ");\n"
-            "}\n",
             kind == FieldKind::STRUCT && !hasDiscriminantValue(proto)
             ? kj::strTree(
               "inline ", type, "::Pipeline ", scope, "Pipeline::get", titleCase, "() {\n",

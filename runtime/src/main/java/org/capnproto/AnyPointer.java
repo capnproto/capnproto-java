@@ -24,6 +24,10 @@ public final class AnyPointer {
         public final <T> T initAsStruct(FromStructBuilder<T> factory) {
             return factory.fromStructBuilder(this.builder.initStruct(factory.structSize()));
         }
+
+        public final void clear() {
+            this.builder.clear();
+        }
     }
 
 }
