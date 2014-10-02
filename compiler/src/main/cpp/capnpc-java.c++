@@ -610,9 +610,9 @@ private:
         kj::str(
           spaces(indent), "  _builder.setShortField(", discrimOffset, ", (short)",
           scope, "Which.", upperCase, ".ordinal());\n"),
-          kj::strTree(spaces(indent), "  public final boolean is", titleCase, "() {\n",
-                      spaces(indent), "    return which() == ", scope, "Which.", upperCase,";\n",
-                      spaces(indent), "  }\n"),
+          kj::strTree(spaces(indent), "public final boolean is", titleCase, "() {\n",
+                      spaces(indent), "  return which() == ", scope, "Which.", upperCase,";\n",
+                      spaces(indent), "}\n"),
           kj::strTree(spaces(indent), "public final boolean is", titleCase, "() {\n",
                       spaces(indent), "  return which() == ", scope, "Which.", upperCase, ";\n",
                       spaces(indent), "}\n"),
@@ -1236,19 +1236,36 @@ private:
     kj::StringTree inlineMethodDefs;
   };
 
+  kj::StringTree makeWhich(StructSchema schema, kj::String member, int indent) {
+    if (schema.getProto().getStruct().getDiscriminantCount() == 0) {
+      return kj::strTree();
+    } else {
+      auto fields = schema.getUnionFields();
+      return kj::strTree(
+        spaces(indent), "public Which which() {\n",
+        spaces(indent+1), "switch(", member, ".getShortField(",
+        schema.getProto().getStruct().getDiscriminantOffset(), ")) {\n",
+        KJ_MAP(f, fields) {
+          return kj::strTree(spaces(indent+2), "case ", f.getProto().getDiscriminantValue(), " : return ",
+                             "Which.",
+                             toUpperCase(f.getProto().getName()), ";\n");
+        },
+        spaces(indent+2), "default: return Which._UNKNOWN;\n",
+        spaces(indent+1), "}\n",
+        spaces(indent), "}\n"
+        );
+    }
+  }
+
+
   kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                               bool isUnion, uint discriminantOffset, kj::Array<kj::StringTree>&& methodDecls,
+                               StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(
       spaces(indent), "public static final class Reader {\n",
       spaces(indent), "  public Reader(org.capnproto.StructReader base){ this._reader = base; }\n",
       "\n",
-      (isUnion ?
-       kj::strTree(spaces(indent), "  public Which which() {\n",
-                   spaces(indent), "    return org.capnproto.GeneratedClassSupport.clampOrdinal(Which.values(),",
-                   "_reader.getShortField(", discriminantOffset, "));\n",
-                   spaces(indent), "  }\n")
-       : kj::strTree()),
+      makeWhich(schema, kj::str("_reader"), indent+1),
       kj::mv(methodDecls),
       spaces(indent), "  public org.capnproto.StructReader _reader;\n",
       spaces(indent), "}\n"
@@ -1256,20 +1273,13 @@ private:
   }
 
   kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                                schema::Node::Struct::Reader structNode,
-                                kj::Array<kj::StringTree>&& methodDecls,
+                                StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
-    bool isUnion = structNode.getDiscriminantCount() != 0;
     return kj::strTree(
       spaces(indent), "public static final class Builder {\n",
       spaces(indent), "  public Builder(org.capnproto.StructBuilder base){ this._builder = base; }\n",
       spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
-      (isUnion ?
-       kj::strTree(spaces(indent), "  public Which which() {\n",
-                   spaces(indent), "   return org.capnproto.GeneratedClassSupport.clampOrdinal(Which.values(),",
-                   "_builder.getShortField(", structNode.getDiscriminantOffset(), "));\n",
-                   spaces(indent), "  }\n")
-       : kj::strTree()),
+      makeWhich(schema, kj::str("_builder"), indent+1),
       spaces(indent), "  public final Reader asReader() {\n",
       spaces(indent), "    return new Reader(this._builder.asReader());\n",
       spaces(indent), "  }\n",
@@ -1317,11 +1327,10 @@ private:
         spaces(indent), "  public static final Factory factory = new Factory();\n",
 
 
-        kj::strTree(makeReaderDef(fullName, name, structNode.getDiscriminantCount() != 0,
-                                  structNode.getDiscriminantOffset(),
+        kj::strTree(makeReaderDef(fullName, name, schema,
                                   KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                   indent + 1),
-                    makeBuilderDef(fullName, name, structNode,
+                    makeBuilderDef(fullName, name, schema,
                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
                                    indent + 1)),
 
