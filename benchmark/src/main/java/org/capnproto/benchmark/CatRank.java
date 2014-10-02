@@ -48,7 +48,7 @@ public class CatRank
                 url.append('a' + rng.nextLessThan(26));
             }
 
-            result.setUrl(new Text.Reader(url.toString()));
+            result.setUrl(url.toString());
 
             boolean isCat = rng.nextLessThan(8) == 0;
             boolean isDog = rng.nextLessThan(8) == 0;
@@ -70,7 +70,7 @@ public class CatRank
                 snippet.append(Common.WORDS[rng.nextLessThan(Common.WORDS.length)]);
             }
 
-            result.setSnippet(new Text.Reader(snippet.toString()));
+            result.setSnippet(snippet.toString());
         }
 
         return goodCount;

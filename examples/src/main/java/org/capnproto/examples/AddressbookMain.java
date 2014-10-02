@@ -8,7 +8,6 @@ import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;
 import org.capnproto.SerializePacked;
 import org.capnproto.StructList;
-import org.capnproto.Text;
 
 import org.capnproto.examples.Addressbook.*;
 
@@ -21,24 +20,22 @@ public class AddressbookMain {
 
         Person.Builder alice = people.get(0);
         alice.setId(123);
-
-        alice.setName(new Text.Reader("Alice"));
-
-        alice.setEmail(new Text.Reader("alice@example.com"));
+        alice.setName("Alice");
+        alice.setEmail("alice@example.com");
 
         StructList.Builder<Person.PhoneNumber.Builder> alicePhones = alice.initPhones(1);
-        alicePhones.get(0).setNumber(new Text.Reader("555-1212"));
+        alicePhones.get(0).setNumber("555-1212");
         alicePhones.get(0).setType(Person.PhoneNumber.Type.MOBILE);
-        alice.getEmployment().setSchool(new Text.Reader("MIT"));
+        alice.getEmployment().setSchool("MIT");
 
         Person.Builder bob = people.get(1);
         bob.setId(456);
-        bob.setName(new Text.Reader("Bob"));
-        bob.setEmail(new Text.Reader("bob@example.com"));
+        bob.setName("Bob");
+        bob.setEmail("bob@example.com");
         StructList.Builder<Person.PhoneNumber.Builder> bobPhones = bob.initPhones(2);
-        bobPhones.get(0).setNumber(new Text.Reader("555-4567"));
+        bobPhones.get(0).setNumber("555-4567");
         bobPhones.get(0).setType(Person.PhoneNumber.Type.HOME);
-        bobPhones.get(1).setNumber(new Text.Reader("555-7654"));
+        bobPhones.get(1).setNumber("555-7654");
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 

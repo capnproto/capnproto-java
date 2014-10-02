@@ -958,9 +958,52 @@ private:
         kj::strTree()
       };
 
-    } else if (kind == FieldKind::BLOB) {
+    } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::TEXT ) {
 
-      kj::String blobKind = typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
+      kj::String blobKind =  kj::str("Text");
+
+      return FieldText {
+        kj::strTree(
+          kj::mv(unionDiscrim.readerIsDecl),
+          spaces(indent), "  public boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+
+          spaces(indent), "  public ", type, ".Reader",
+          " get", titleCase, "() {\n",
+          spaces(indent), "    return _reader.getPointerField(",
+          offset, ").get", blobKind, " ();\n", // XXX
+          spaces(indent), "  }\n", "\n"),
+
+        kj::strTree(
+          kj::mv(unionDiscrim.builderIsDecl),
+          spaces(indent), "  public final boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+          spaces(indent), "    return _builder.getPointerField(",
+          offset, ").get", blobKind, " ();\n", // XXX
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+          unionDiscrim.set,
+          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "(value);\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public final void set", titleCase, "(String value) {\n",
+          unionDiscrim.set,
+          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "( new",
+          type, ".Reader(value));\n",
+          spaces(indent), "  }\n",
+
+          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
+          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "  }\n"),
+
+        kj::strTree(),
+        kj::strTree()
+      };
+    } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::DATA ) {
+
+      kj::String blobKind =  kj::str("Data");
 
       return FieldText {
         kj::strTree(
@@ -995,6 +1038,7 @@ private:
         kj::strTree(),
         kj::strTree()
       };
+
     } else if (kind == FieldKind::LIST) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
