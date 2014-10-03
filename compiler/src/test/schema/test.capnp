@@ -192,6 +192,25 @@ struct TestGroups {
   }
 }
 
+
+struct TestOldVersion {
+  # A subset of TestNewVersion.
+  old1 @0 :Int64;
+  old2 @1 :Text;
+  old3 @2 :TestOldVersion;
+}
+
+struct TestNewVersion {
+  # A superset of TestOldVersion.
+  old1 @0 :Int64;
+  old2 @1 :Text;
+  old3 @2 :TestNewVersion;
+  new1 @3 :Int64 = 987;
+  new2 @4 :Text = "baz";
+}
+
+struct TestEmptyStruct {}
+
 struct TestConstants {
   const voidConst      :Void    = void;
   const boolConst      :Bool    = true;

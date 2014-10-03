@@ -68,6 +68,28 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("UpgradeStructInBuilder") {
+    val builder = new MessageBuilder();
+    val root = builder.initRoot(TestAnyPointer.factory);
+
+
+    val oldReader = {
+      val oldVersion = root.getAnyPointerField().initAsStruct(TestOldVersion.factory);
+      oldVersion.setOld1(123);
+      oldVersion.setOld2("foo");
+      val sub = oldVersion.initOld3();
+      sub.setOld1(456);
+      sub.setOld2("bar");
+      oldVersion
+    }
+
+    {
+      //val newVersion = root.getAnyPointerField().getAsStruct(TestNewVersion.factory);
+    }
+
+    //...
+  }
+
   test("Constants") {
     assert(Void.VOID == TestConstants.VOID_CONST);
     assert(true == TestConstants.BOOL_CONST);
