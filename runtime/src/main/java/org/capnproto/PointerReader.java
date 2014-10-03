@@ -53,8 +53,11 @@ public final class PointerReader {
     }
 
     public Text.Reader getText() {
-        return WireHelpers.readTextPointer(this.segment,
-                                           this.pointer);
+        return WireHelpers.readTextPointer(this.segment, this.pointer, null, 0, 0);
+    }
+
+    public Text.Reader getText(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return WireHelpers.readTextPointer(this.segment, this.pointer, defaultBuffer, defaultOffset, defaultSize);
     }
 
     public Data.Reader getData() {

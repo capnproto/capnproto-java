@@ -942,6 +942,10 @@ private:
 
     } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::TEXT ) {
 
+      uint64_t typeId = field.getContainingStruct().getProto().getId();
+      kj::String defaultParams = defaultOffset == 0 ? kj::str() : kj::str(
+        "Schemas.b_", kj::hex(typeId), ", ", defaultOffset * 8, ", ", defaultSize);
+
       kj::String blobKind =  kj::str("Text");
 
       return FieldText {
@@ -955,7 +959,7 @@ private:
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
           spaces(indent), "    return _reader.getPointerField(",
-          offset, ").get", blobKind, " ();\n", // XXX
+          offset, ").getText(", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -966,7 +970,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           spaces(indent), "    return _builder.getPointerField(",
-          offset, ").get", blobKind, " ();\n", // XXX
+          offset, ").get", blobKind, "(", defaultParams, ");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,

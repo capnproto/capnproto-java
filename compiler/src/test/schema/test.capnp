@@ -66,6 +66,7 @@ struct TestDefaults {
   uInt64Field    @9  : UInt64  = 12345678901234567890;
   float32Field   @10 : Float32 = 1234.5;
   float64Field   @11 : Float64 = -123e45;
+  textField      @12 : Text    = "foo";
 }
 
 struct TestAnyPointer {

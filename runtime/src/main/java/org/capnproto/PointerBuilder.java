@@ -31,7 +31,15 @@ public final class PointerBuilder {
 
     public final Text.Builder getText() {
         return WireHelpers.getWritableTextPointer(
-            this.pointer, this.segment);
+            this.pointer, this.segment, null, 0, 0);
+    }
+
+    public Text.Builder getText(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return WireHelpers.getWritableTextPointer(this.pointer,
+                                                  this.segment,
+                                                  defaultBuffer,
+                                                  defaultOffset,
+                                                  defaultSize);
     }
 
     public final Data.Builder getData() {

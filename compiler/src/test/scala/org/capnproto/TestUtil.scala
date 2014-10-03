@@ -237,6 +237,7 @@ object TestUtil {
     assert(builder.getUInt64Field() == 0xab54a98ceb1f0ad2L);
     assert(builder.getFloat32Field() == 1234.5f);
     assert(builder.getFloat64Field() == -123e45);
+    (builder.getTextField().toString()) should equal ("foo");
   }
 
   def checkDefaultMessage(reader : TestDefaults.Reader) {
@@ -252,6 +253,7 @@ object TestUtil {
     assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad2L);
     assert(reader.getFloat32Field() == 1234.5f);
     assert(reader.getFloat64Field() == -123e45);
+    (reader.getTextField().toString()) should equal ("foo");
   }
 
 

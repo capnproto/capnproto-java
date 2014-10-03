@@ -1,5 +1,7 @@
 package org.capnproto;
 
+import java.nio.ByteBuffer;
+
 final class WireHelpers {
 
     public static int roundBytesUpToWords(int bytes) {
@@ -310,12 +312,23 @@ final class WireHelpers {
     }
 
     public static Text.Builder getWritableTextPointer(int refOffset,
-                                                      SegmentBuilder segment) {
+                                                      SegmentBuilder segment,
+                                                      ByteBuffer defaultBuffer,
+                                                      int defaultOffset,
+                                                      int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
-            // TODO default values
-            return new Text.Builder(null, 0, 0);
+            if (defaultBuffer == null) {
+                return new Text.Builder(null, 0, 0);
+            } else {
+                Text.Builder builder = initTextPointer(refOffset, segment, defaultSize);
+                // TODO is there a way to do this with bulk methods?
+                for (int i = 0; i < builder.size; ++i) {
+                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset + i));
+                }
+                return builder;
+            }
         }
 
         int refTarget = WirePointer.target(refOffset, ref);
@@ -454,12 +467,19 @@ final class WireHelpers {
     }
 
     public static Text.Reader readTextPointer(SegmentReader segment,
-                                              int refOffset) {
+                                              int refOffset,
+                                              ByteBuffer defaultBuffer,
+                                              int defaultOffset,
+                                              int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
-            // XXX should use the default value
-            return new Text.Reader(java.nio.ByteBuffer.wrap(new byte[0]), 0, 0);
+            if (defaultBuffer == null) {
+                // XXX -- what about null terminator?
+                return new Text.Reader(ByteBuffer.wrap(new byte[0]), 0, 0);
+            } else {
+                return new Text.Reader(defaultBuffer, defaultOffset, defaultSize);
+            }
         }
 
         int refTarget = WirePointer.target(refOffset, ref);
