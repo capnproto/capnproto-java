@@ -34,8 +34,9 @@ public final class Text {
         public final String toString() {
             byte[] bytes = new byte[this.size];
 
-            this.buffer.position(this.offset);
-            this.buffer.get(bytes, 0, this.size);
+            ByteBuffer dup = this.buffer.duplicate();
+            dup.position(this.offset);
+            dup.get(bytes, 0, this.size);
 
             try {
                 return new String(bytes, "UTF-8");
@@ -61,8 +62,9 @@ public final class Text {
         public final String toString() {
             byte[] bytes = new byte[this.size];
 
-            this.buffer.position(this.offset);
-            this.buffer.get(bytes, 0, this.size);
+            ByteBuffer dup = this.buffer.duplicate();
+            dup.position(this.offset);
+            dup.get(bytes, 0, this.size);
 
             try {
                 return new String(bytes, "UTF-8");

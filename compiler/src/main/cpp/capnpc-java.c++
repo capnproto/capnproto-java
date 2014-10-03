@@ -1313,7 +1313,7 @@ private:
     kj::StringTree decl;
   };
 
-  ConstText makeConstText(kj::StringPtr scope, kj::StringPtr name, ConstSchema schema) {
+  ConstText makeConstText(kj::StringPtr scope, kj::StringPtr name, ConstSchema schema, int indent) {
     auto proto = schema.getProto();
     auto constProto = proto.getConst();
     auto type = constProto.getType();
@@ -1339,14 +1339,15 @@ private:
       case schema::Value::ENUM:
         return ConstText {
           false,
-          kj::strTree("public static final ", typeName_, ' ', upperCase, " = ",
-                      literalValue(constProto.getType(), constProto.getValue()), ";\n")
+            kj::strTree(spaces(indent), "public static final ", typeName_, ' ', upperCase, " = ",
+                        literalValue(constProto.getType(), constProto.getValue()), ";\n")
         };
 
       case schema::Value::TEXT: {
         return ConstText {
           true,
-          kj::strTree("public static final org.capnproto.Text.Reader ", upperCase,
+          kj::strTree(spaces(indent),
+                      "public static final org.capnproto.Text.Reader ", upperCase,
                       " = new org.capnproto.Text.Reader(Schemas.b_",
                       kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getText().size(), ");\n")
@@ -1356,7 +1357,8 @@ private:
       case schema::Value::DATA: {
         return ConstText {
           true,
-          kj::strTree("public static final org.capnproto.Data.Reader ", upperCase,
+          kj::strTree(spaces(indent),
+                      "public static final org.capnproto.Data.Reader ", upperCase,
                       " = new org.capnproto.Data.Reader(Schemas.b_",
                       kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getData().size(), ");\n")
@@ -1591,20 +1593,18 @@ private:
 
         return NodeTextNoSchema {
           kj::strTree(
-                      spaces(indent), "public enum ", name, " {\n",
-                      KJ_MAP(e, enumerants) {
-                        return kj::strTree(spaces(indent), "  ", toUpperCase(e.getProto().getName()), ",\n");
-                      },
-                      spaces(indent), "  _UNKNOWN,\n",
-                      spaces(indent), "}\n"
-              "\n"),
+            spaces(indent), "public enum ", name, " {\n",
+            KJ_MAP(e, enumerants) {
+              return kj::strTree(spaces(indent), "  ", toUpperCase(e.getProto().getName()), ",\n");
+            },
+            spaces(indent), "  _UNKNOWN,\n",
+            spaces(indent), "}\n"
+            "\n"),
 
           kj::strTree(),
           kj::strTree(),
-
-           kj::strTree(),
-           kj::strTree(),
-
+          kj::strTree(),
+          kj::strTree(),
           kj::strTree(),
         };
       }
@@ -1615,10 +1615,10 @@ private:
       }
 
       case schema::Node::CONST: {
-        auto constText = makeConstText(scope, name, schema.asConst());
+        auto constText = makeConstText(scope, name, schema.asConst(), indent);
 
         return NodeTextNoSchema {
-          kj::strTree("  ", kj::mv(constText.decl)),
+          kj::strTree(kj::mv(constText.decl)),
           kj::strTree(),
           kj::strTree(),
 

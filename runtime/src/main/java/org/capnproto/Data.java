@@ -20,18 +20,18 @@ public final class Data {
         }
 
         public ByteBuffer asByteBuffer() {
-            // not thread safe
-            this.buffer.position(this.offset);
-            ByteBuffer result = this.buffer.slice();
+            ByteBuffer dup = this.buffer.duplicate();
+            dup.position(this.offset);
+            ByteBuffer result = dup.slice();
             result.limit(this.size);
             return result;
         }
 
         public byte[] asArray() {
-            // not thread safe
+            ByteBuffer dup = this.buffer.duplicate();
             byte result[] = new byte[this.size];
-            this.buffer.position(this.offset);
-            this.buffer.get(result, 0, this.size);
+            dup.position(this.offset);
+            dup.get(result, 0, this.size);
             return result;
         }
     }
