@@ -43,7 +43,17 @@ public final class PointerBuilder {
     }
 
     public final Data.Builder getData() {
-        throw new Error("unimplemented");
+        return WireHelpers.getWritableDataPointer(this.pointer,
+                                                  this.segment,
+                                                  null, 0, 0);
+    }
+
+    public Data.Builder getData(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return WireHelpers.getWritableDataPointer(this.pointer,
+                                                  this.segment,
+                                                  defaultBuffer,
+                                                  defaultOffset,
+                                                  defaultSize);
     }
 
     public final StructBuilder initStruct(StructSize size) {
@@ -63,7 +73,7 @@ public final class PointerBuilder {
     }
 
     public final void setData(Data.Reader value) {
-        throw new Error("unimplemented");
+        WireHelpers.setDataPointer(this.pointer, this.segment, value);
     }
 
     public final void clear() {

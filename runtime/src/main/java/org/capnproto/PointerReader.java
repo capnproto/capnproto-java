@@ -61,6 +61,10 @@ public final class PointerReader {
     }
 
     public Data.Reader getData() {
-        throw new Error("unimplemented");
+        return WireHelpers.readDataPointer(this.segment, this.pointer, null, 0, 0);
+    }
+
+    public Data.Reader getData(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return WireHelpers.readDataPointer(this.segment, this.pointer, defaultBuffer, defaultOffset, defaultSize);
     }
 }

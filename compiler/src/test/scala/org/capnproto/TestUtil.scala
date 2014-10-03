@@ -28,7 +28,7 @@ object TestUtil {
     builder.setFloat32Field(1234.5f);
     builder.setFloat64Field(-123e45);
     builder.setTextField("foo");
-    //builder.setDataField(data("bar"));
+    builder.setDataField(data("bar"));
     {
 
       val subBuilder = builder.initStructField();
@@ -238,6 +238,7 @@ object TestUtil {
     assert(builder.getFloat32Field() == 1234.5f);
     assert(builder.getFloat64Field() == -123e45);
     (builder.getTextField().toString()) should equal ("foo");
+    (builder.getDataField().toArray()) should equal (Array(0x62,0x61,0x72));
   }
 
   def checkDefaultMessage(reader : TestDefaults.Reader) {

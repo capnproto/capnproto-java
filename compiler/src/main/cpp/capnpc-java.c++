@@ -940,13 +940,14 @@ private:
           spaces(indent), "  }\n"),
       };
 
-    } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::TEXT ) {
+    } else if (kind == FieldKind::BLOB) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
       kj::String defaultParams = defaultOffset == 0 ? kj::str() : kj::str(
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset * 8, ", ", defaultSize);
 
-      kj::String blobKind =  kj::str("Text");
+      kj::String blobKind =  typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
+      kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");
 
       return FieldText {
         kj::strTree(
@@ -959,7 +960,7 @@ private:
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
           spaces(indent), "    return _reader.getPointerField(",
-          offset, ").getText(", defaultParams, ");\n",
+          offset, ").get", blobKind, "(", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -976,7 +977,7 @@ private:
           unionDiscrim.set,
           spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "(value);\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(String value) {\n",
+          spaces(indent), "  public final void set", titleCase, "(", setterInputType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "( new",
           type, ".Reader(value));\n",
@@ -986,43 +987,6 @@ private:
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n"),
       };
-    } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::DATA ) {
-
-      kj::String blobKind =  kj::str("Data");
-
-      return FieldText {
-        kj::strTree(
-          kj::mv(unionDiscrim.readerIsDecl),
-          spaces(indent), "  public boolean has", titleCase, "() {\n",
-          unionDiscrim.has,
-          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
-          spaces(indent), "  }\n",
-
-          spaces(indent), "  public ", type, ".Reader",
-          " get", titleCase, "() {\n",
-          spaces(indent), "    return _reader.getPointerField(",
-          offset, ").get", blobKind, " ();\n", // XXX
-          spaces(indent), "  }\n", "\n"),
-
-        kj::strTree(
-          kj::mv(unionDiscrim.builderIsDecl),
-          spaces(indent), "  public final boolean has", titleCase, "() {\n",
-          unionDiscrim.has,
-          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
-          spaces(indent), "  }\n",
-          spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
-          spaces(indent), "    return _builder.getPointerField(",
-          offset, ").get", blobKind, " ();\n", // XXX
-          spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
-          unionDiscrim.set,
-          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "(value);\n",
-          spaces(indent), "  }\n",
-          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    throw new Error();\n",
-          spaces(indent), "  }\n"),
-      };
-
     } else if (kind == FieldKind::LIST) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();

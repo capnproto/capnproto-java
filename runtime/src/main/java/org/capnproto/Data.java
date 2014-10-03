@@ -15,6 +15,12 @@ public final class Data {
             this.size = size;
         }
 
+        public Reader(byte[] bytes) {
+            this.buffer = ByteBuffer.wrap(bytes);
+            this.offset = 0;
+            this.size = bytes.length;
+        }
+
         public final int size() {
             return this.size;
         }
@@ -27,7 +33,7 @@ public final class Data {
             return result;
         }
 
-        public byte[] asArray() {
+        public byte[] toArray() {
             ByteBuffer dup = this.buffer.duplicate();
             byte result[] = new byte[this.size];
             dup.position(this.offset);
@@ -45,6 +51,14 @@ public final class Data {
             this.buffer = buffer;
             this.offset = offset;
             this.size = size;
+        }
+
+        public byte[] toArray() {
+            ByteBuffer dup = this.buffer.duplicate();
+            byte result[] = new byte[this.size];
+            dup.position(this.offset);
+            dup.get(result, 0, this.size);
+            return result;
         }
     }
 }

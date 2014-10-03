@@ -349,6 +349,68 @@ final class WireHelpers {
 
     }
 
+    // size is in bytes
+    public static Data.Builder initDataPointer(int refOffset,
+                                               SegmentBuilder segment,
+                                               int size) {
+        //# Allocate the space.
+        AllocateResult allocation = allocate(refOffset, segment, roundBytesUpToWords(size),
+                                             WirePointer.LIST);
+
+        //# Initialize the pointer.
+        ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.BYTE, size);
+
+        return new Data.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
+    }
+
+    public static Data.Builder setDataPointer(int refOffset,
+                                              SegmentBuilder segment,
+                                              Data.Reader value) {
+        Data.Builder builder = initDataPointer(refOffset, segment, value.size);
+
+        // TODO is there a way to do this with bulk methods?
+        for (int i = 0; i < builder.size; ++i) {
+            builder.buffer.put(builder.offset + i, value.buffer.get(value.offset + i));
+        }
+        return builder;
+    }
+
+    public static Data.Builder getWritableDataPointer(int refOffset,
+                                                      SegmentBuilder segment,
+                                                      ByteBuffer defaultBuffer,
+                                                      int defaultOffset,
+                                                      int defaultSize) {
+        long ref = WirePointer.get(segment.buffer, refOffset);
+
+        if (WirePointer.isNull(ref)) {
+            if (defaultBuffer == null) {
+                return new Data.Builder(ByteBuffer.allocate(0), 0, 0);
+            } else {
+                Data.Builder builder = initDataPointer(refOffset, segment, defaultSize);
+                // TODO is there a way to do this with bulk methods?
+                for (int i = 0; i < builder.size; ++i) {
+                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset + i));
+                }
+                return builder;
+            }
+        }
+
+        int refTarget = WirePointer.target(refOffset, ref);
+        FollowBuilderFarsResult resolved = followBuilderFars(ref, refTarget, segment);
+
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
+            throw new DecodeException("Called getData{Field,Element} but existing pointer is not a list.");
+        }
+        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+            throw new DecodeException(
+                "Called getData{Field,Element} but existing list pointer is not byte-sized.");
+        }
+
+        return new Data.Builder(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
+                                ListPointer.elementCount(resolved.ref));
+
+    }
+
     public static StructReader readStructPointer(SegmentReader segment,
                                                  int refOffset,
                                                  int nestingLimit) {
@@ -504,4 +566,39 @@ final class WireHelpers {
 
         return new Text.Reader(resolved.segment.buffer, resolved.ptr, size - 1);
     }
+
+    public static Data.Reader readDataPointer(SegmentReader segment,
+                                              int refOffset,
+                                              ByteBuffer defaultBuffer,
+                                              int defaultOffset,
+                                              int defaultSize) {
+        long ref = WirePointer.get(segment.buffer, refOffset);
+
+        if (WirePointer.isNull(ref)) {
+            if (defaultBuffer == null) {
+                return new Data.Reader(ByteBuffer.wrap(new byte[0]), 0, 0);
+            } else {
+                return new Data.Reader(defaultBuffer, defaultOffset, defaultSize);
+            }
+        }
+
+        int refTarget = WirePointer.target(refOffset, ref);
+
+        FollowFarsResult resolved = followFars(ref, refTarget, segment);
+
+        int size = ListPointer.elementCount(resolved.ref);
+
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
+            throw new DecodeException("Message contains non-list pointer where data was expected.");
+        }
+
+        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+            throw new DecodeException("Message contains list pointer of non-bytes where data was expected.");
+        }
+
+        // TODO bounds check?
+
+        return new Data.Reader(resolved.segment.buffer, resolved.ptr, size);
+    }
+
 }
