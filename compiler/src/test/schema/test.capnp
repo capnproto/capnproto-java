@@ -49,7 +49,7 @@ struct TestAllTypes {
   textList      @29 : List(Text);
   dataList      @30 : List(Data);
   structList    @31 : List(TestAllTypes);
-#  enumList      @32 : List(TestEnum);
+  enumList      @32 : List(TestEnum);
 #  interfaceList @33 : List(Void);
 }
 

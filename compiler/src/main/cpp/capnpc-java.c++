@@ -299,6 +299,7 @@ private:
         case schema::Type::DATA:
           return kj::strTree( "org.capnproto.DataList");
         case schema::Type::ENUM:
+          return kj::strTree("org.capnproto.EnumList");
         case schema::Type::INTERFACE:
         case schema::Type::ANY_POINTER:
         case schema::Type::LIST:
@@ -632,8 +633,6 @@ private:
   struct FieldText {
     kj::StringTree readerMethodDecls;
     kj::StringTree builderMethodDecls;
-    kj::StringTree pipelineMethodDecls;
-    kj::StringTree inlineMethodDefs;
   };
 
   enum class FieldKind {
@@ -709,10 +708,7 @@ private:
               },
               "  return new ", scope, titleCase, ".Builder(_builder);\n",
               spaces(indent), "  }\n",
-              "\n"),
-
-            kj::strTree(),
-            kj::strTree()
+              "\n")
           };
       }
     }
@@ -866,10 +862,7 @@ private:
               kj::strTree(spaces(indent), "    _builder.set",
                           toTitleCase(type), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            "\n"),
-
-        kj::strTree(),
-        kj::strTree(),
+            "\n")
       };
 
     } else if (kind == FieldKind::INTERFACE) {
@@ -910,9 +903,6 @@ private:
             spaces(indent), "    return result;\n",
             spaces(indent), "  }\n",
             "\n"),
-
-        kj::strTree(),
-        kj::strTree()
       };
 
     } else if (kind == FieldKind::STRUCT) {
@@ -948,9 +938,6 @@ private:
           type, ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
           type, ".STRUCT_SIZE", "));\n",
           spaces(indent), "  }\n"),
-
-        kj::strTree(),
-        kj::strTree()
       };
 
     } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::TEXT ) {
@@ -994,9 +981,6 @@ private:
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n"),
-
-        kj::strTree(),
-        kj::strTree()
       };
     } else if (kind == FieldKind::BLOB && typeBody.which() == schema::Type::DATA ) {
 
@@ -1033,9 +1017,6 @@ private:
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
           spaces(indent), "    throw new Error();\n",
           spaces(indent), "  }\n"),
-
-        kj::strTree(),
-        kj::strTree()
       };
 
     } else if (kind == FieldKind::LIST) {
@@ -1097,6 +1078,12 @@ private:
           case schema::Type::ENUM:
             primitiveElement = true;
             fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
+            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()));
+            readerClass = kj::str("Reader<", elementReaderType, ">");
+            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()));
+            builderClass = kj::str("Builder<", elementBuilderType, ">");
+            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".values(), ");
+            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".values(), ");
             break;
 
           case schema::Type::TEXT:
@@ -1183,59 +1170,6 @@ private:
              kj::strTree("List(", fieldSize, ", size)")),
             ");\n",
             spaces(indent), "  }\n"),
-
-        kj::strTree(
-            kind == FieldKind::STRUCT && !hasDiscriminantValue(proto)
-            ? kj::strTree(
-              "  inline ", type, "::Pipeline get", titleCase, "();\n")
-            : kj::strTree()),
-
-        kj::strTree(
-            kj::mv(unionDiscrim.isDefs),
-            kind == FieldKind::STRUCT && !hasDiscriminantValue(proto)
-            ? kj::strTree(
-              "inline ", type, "::Pipeline ", scope, "Pipeline::get", titleCase, "() {\n",
-              "  return ", type, "::Pipeline(_typeless.getPointerField(", offset, "));\n"
-              "}\n")
-            : kj::strTree(),
-            "inline void ", scope, "Builder::set", titleCase, "(", type, "::Reader value) {\n",
-            unionDiscrim.set,
-            "  ::capnp::_::PointerHelpers<", type, ">::set(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS), value);\n"
-            "}\n",
-            kind == FieldKind::LIST && !isStructOrCapList
-            ? kj::strTree(
-              "inline void ", scope, "Builder::set", titleCase, "(::kj::ArrayPtr<const ", elementReaderType, "> value) {\n",
-              unionDiscrim.set,
-              "  ::capnp::_::PointerHelpers<", type, ">::set(\n"
-              "      _builder.getPointerField(", offset, " * ::capnp::POINTERS), value);\n"
-              "}\n")
-            : kj::strTree(),
-            kind == FieldKind::STRUCT
-            ? kj::strTree(
-                "inline ", type, "::Builder ", scope, "Builder::init", titleCase, "() {\n",
-                unionDiscrim.set,
-                "  return ::capnp::_::PointerHelpers<", type, ">::init(\n"
-                "      _builder.getPointerField(", offset, " * ::capnp::POINTERS));\n"
-                "}\n")
-            : kj::strTree(
-              "inline ", type, "::Builder ", scope, "Builder::init", titleCase, "(unsigned int size) {\n",
-              unionDiscrim.set,
-              "  return ::capnp::_::PointerHelpers<", type, ">::init(\n"
-              "      _builder.getPointerField(", offset, " * ::capnp::POINTERS), size);\n"
-              "}\n"),
-            "inline void ", scope, "Builder::adopt", titleCase, "(\n"
-            "    ::capnp::Orphan<", type, ">&& value) {\n",
-            unionDiscrim.set,
-            "  ::capnp::_::PointerHelpers<", type, ">::adopt(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS), kj::mv(value));\n"
-            "}\n"
-            "inline ::capnp::Orphan<", type, "> ", scope, "Builder::disown", titleCase, "() {\n",
-            unionDiscrim.check,
-            "  return ::capnp::_::PointerHelpers<", type, ">::disown(\n"
-            "      _builder.getPointerField(", offset, " * ::capnp::POINTERS));\n"
-            "}\n"
-            "\n")
       };
     } else {
       KJ_UNREACHABLE;

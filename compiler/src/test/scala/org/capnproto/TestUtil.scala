@@ -1,6 +1,8 @@
 package org.capnproto;
 
+import org.scalatest.Matchers._;
 import org.capnproto.test.Test._;
+
 
 object TestUtil {
 
@@ -26,7 +28,7 @@ object TestUtil {
     builder.setFloat32Field(1234.5f);
     builder.setFloat64Field(-123e45);
     builder.setTextField("foo");
-//    builder.setDataField(data("bar"));
+    //builder.setDataField(data("bar"));
     {
 
       val subBuilder = builder.initStructField();
@@ -75,6 +77,11 @@ object TestUtil {
     structList.get(0).setTextField(new Text.Reader("structlist 1"));
     structList.get(1).setTextField(new Text.Reader("structlist 2"));
     structList.get(2).setTextField(new Text.Reader("structlist 3"));
+
+
+    val enumList = builder.initEnumList(2);
+    enumList.set(0, TestEnum.FOO);
+    enumList.set(1, TestEnum.GARPLY);
 
   }
 
@@ -143,6 +150,9 @@ object TestUtil {
     assert(structList.get(2).getTextField().toString() == "structlist 3")
     */
 
+    val enumList = builder.getEnumList();
+    (enumList.get(0)) should equal (TestEnum.FOO);
+    (enumList.get(1)) should equal (TestEnum.GARPLY);
   }
 
   def checkTestMessage(reader : TestAllTypes.Reader) {
@@ -207,6 +217,10 @@ object TestUtil {
     assert(structList.get(0).getTextField().toString() == "structlist 1")
     assert(structList.get(1).getTextField().toString() == "structlist 2")
     assert(structList.get(2).getTextField().toString() == "structlist 3")
+
+    val enumList = reader.getEnumList();
+    (enumList.get(0)) should equal (TestEnum.FOO);
+    (enumList.get(1)) should equal (TestEnum.GARPLY);
 
   }
 

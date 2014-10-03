@@ -9,11 +9,11 @@ public class EnumList {
         return values[index];
     }
 
-    public static final class Reader<T> {
+    public static final class Reader<T extends java.lang.Enum> {
         public final ListReader reader;
         public final T values[];
 
-        public Reader(ListReader reader, T values[]) {
+        public Reader(T values[], ListReader reader) {
             this.reader = reader;
             this.values = values;
         }
@@ -25,10 +25,27 @@ public class EnumList {
         public T get(int index) {
             return clampOrdinal(this.values, this.reader.getShortElement(index));
         }
-
     }
 
-    public static final class Builder {
+    public static final class Builder<T extends java.lang.Enum> {
+        public final ListBuilder builder;
+        public final T values[];
 
+        public Builder(T values[], ListBuilder builder) {
+            this.builder = builder;
+            this.values = values;
+        }
+
+        public int size() {
+            return this.builder.size();
+        }
+
+        public T get(int index) {
+            return clampOrdinal(this.values, this.builder.getShortElement(index));
+        }
+
+        public void set(int index, T value) {
+            this.builder.setShortElement(index, (short)value.ordinal());
+        }
     }
 }
