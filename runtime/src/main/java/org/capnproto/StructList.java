@@ -1,6 +1,28 @@
 package org.capnproto;
 
 public final class StructList {
+    public static final class Factory<ElementBuilder, ElementReader>
+        implements ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
+
+        public final StructFactory<ElementBuilder, ElementReader> factory;
+
+        public Factory(StructFactory<ElementBuilder, ElementReader> factory) {
+            this.factory = factory;
+        }
+
+        public final Reader<ElementReader> fromPointerReader(PointerReader reader) {
+            return new Reader<ElementReader>(factory, reader.getList(FieldSize.INLINE_COMPOSITE));
+        }
+
+        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {
+            return new Builder<ElementBuilder>(factory, builder.getList(FieldSize.INLINE_COMPOSITE));
+        }
+
+        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {
+            return new Builder<ElementBuilder>(factory, builder.initList(FieldSize.INLINE_COMPOSITE, size));
+        }
+    }
+
     public static final class Reader<T> implements Iterable<T> {
         public final ListReader reader;
         public final FromStructReader<T> factory;

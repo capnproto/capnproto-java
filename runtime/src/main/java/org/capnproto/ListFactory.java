@@ -1,5 +1,5 @@
 package org.capnproto;
 
-public interface ListFactory<Reader, Builder> extends FromPointerBuilder<Builder>, FromPointerReader<Reader> {
+public interface ListFactory<Builder, Reader> extends FromPointerBuilder<Builder>, FromPointerReader<Reader> {
 
 }

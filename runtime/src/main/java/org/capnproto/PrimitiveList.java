@@ -2,7 +2,7 @@ package org.capnproto;
 
 public class PrimitiveList {
     public static class Void {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.VOID));
             }
@@ -49,7 +49,7 @@ public class PrimitiveList {
     }
 
     public static class Boolean {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.BIT));
             }
@@ -102,7 +102,7 @@ public class PrimitiveList {
     }
 
     public static class Byte {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.BYTE));
             }
@@ -156,7 +156,7 @@ public class PrimitiveList {
     }
 
     public static class Short {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.TWO_BYTES));
             }
@@ -210,7 +210,7 @@ public class PrimitiveList {
     }
 
     public static class Int {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.FOUR_BYTES));
             }
@@ -263,7 +263,7 @@ public class PrimitiveList {
     }
 
     public static class Float {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.FOUR_BYTES));
             }
@@ -317,7 +317,7 @@ public class PrimitiveList {
 
 
     public static class Long {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
             }
@@ -370,7 +370,7 @@ public class PrimitiveList {
     }
 
     public static class Double {
-        public static final class Factory {
+        public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader) {
                 return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
             }

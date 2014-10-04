@@ -53,6 +53,8 @@ struct TestAllTypes {
 #  interfaceList @33 : List(Void);
 }
 
+
+
 struct TestDefaults {
   voidField      @0  : Void    = void;
   boolField      @1  : Bool    = true;
@@ -191,6 +193,48 @@ struct TestGroups {
     }
   }
 }
+
+struct TestLists {
+  # Small structs, when encoded as list, will be encoded as primitive lists rather than struct
+  # lists, to save space.
+  struct Struct0  { f @0 :Void; }
+  struct Struct1  { f @0 :Bool; }
+  struct Struct8  { f @0 :UInt8; }
+  struct Struct16 { f @0 :UInt16; }
+  struct Struct32 { f @0 :UInt32; }
+  struct Struct64 { f @0 :UInt64; }
+  struct StructP  { f @0 :Text; }
+
+  # Versions of the above which cannot be encoded as primitive lists.
+  struct Struct0c  { f @0 :Void; pad @1 :Text; }
+  struct Struct1c  { f @0 :Bool; pad @1 :Text; }
+  struct Struct8c  { f @0 :UInt8; pad @1 :Text; }
+  struct Struct16c { f @0 :UInt16; pad @1 :Text; }
+  struct Struct32c { f @0 :UInt32; pad @1 :Text; }
+  struct Struct64c { f @0 :UInt64; pad @1 :Text; }
+  struct StructPc  { f @0 :Text; pad @1 :UInt64; }
+
+  list0  @0 :List(Struct0);
+  list1  @1 :List(Struct1);
+  list8  @2 :List(Struct8);
+  list16 @3 :List(Struct16);
+  list32 @4 :List(Struct32);
+  list64 @5 :List(Struct64);
+  listP  @6 :List(StructP);
+
+  int32ListList @7 :List(List(Int32));
+  #textListList @8 :List(List(Text));
+  #structListList @9 :List(List(TestAllTypes));
+  #boolListListList @10 :List(List(List(Bool)));
+  #enumListList @11 :List(List(TestEnum));
+}
+
+struct TestFieldZeroIsBit {
+  bit @0 :Bool;
+  secondBit @1 :Bool = true;
+  thirdField @2 :UInt8 = 123;
+}
+
 
 
 struct TestOldVersion {

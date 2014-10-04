@@ -1,6 +1,21 @@
 package org.capnproto;
 
 public final class DataList {
+    public static final class Factory implements ListFactory<Builder, Reader> {
+        public final Reader fromPointerReader(PointerReader reader) {
+            return new Reader(reader.getList(FieldSize.POINTER));
+        }
+
+        public final Builder fromPointerBuilder(PointerBuilder builder) {
+            return new Builder(builder.getList(FieldSize.POINTER));
+        }
+
+        public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+            return new Builder(builder.initList(FieldSize.POINTER, size));
+        }
+    }
+    public static final Factory factory = new Factory();
+
     public static final class Reader implements Iterable<Data.Reader> {
         public final ListReader reader;
 

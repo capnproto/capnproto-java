@@ -9,7 +9,7 @@ public class EnumList {
         return values[index];
     }
 
-    public static final class Factory<T extends java.lang.Enum> {
+    public static final class Factory<T extends java.lang.Enum> implements ListFactory<Builder<T>, Reader<T>>{
         public final T values[];
 
         public Factory(T values[]) {

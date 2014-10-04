@@ -300,9 +300,10 @@ private:
           return kj::strTree( "org.capnproto.DataList");
         case schema::Type::ENUM:
           return kj::strTree("org.capnproto.EnumList");
+        case schema::Type::LIST:
+          return kj::strTree("org.capnproto.ListList");
         case schema::Type::INTERFACE:
         case schema::Type::ANY_POINTER:
-        case schema::Type::LIST:
           KJ_FAIL_REQUIRE("unimplemented");
         }
         KJ_UNREACHABLE;
@@ -1063,6 +1064,15 @@ private:
             fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
             break;
           case schema::Type::LIST:
+            primitiveElement = false;
+            fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
+            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
+            readerClass = kj::str("Reader<", elementReaderType, ">");
+            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
+            builderClass = kj::str("Builder<", elementBuilderType, ">");
+            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
+            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
+            break;
           case schema::Type::ANY_POINTER:
             primitiveElement = false;
             break;

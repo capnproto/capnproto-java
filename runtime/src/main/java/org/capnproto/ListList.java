@@ -1,11 +1,12 @@
 package org.capnproto;
 
 public final class ListList {
-    public static final class Factory<ElementReader, ElementBuilder> implements ListFactory<Reader<ElementReader>,
-                                                               Builder<ElementBuilder>> {
-        public final ListFactory<ElementReader, ElementBuilder> factory;
+    public static final class Factory<ElementBuilder, ElementReader>
+        implements ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
 
-        public Factory(ListFactory<ElementReader, ElementBuilder> factory) {
+        public final ListFactory<ElementBuilder, ElementReader> factory;
+
+        public Factory(ListFactory<ElementBuilder, ElementReader> factory) {
             this.factory = factory;
         }
 
