@@ -1028,8 +1028,6 @@ private:
           ",\n        ::capnp::schemas::s_", kj::hex(typeId), ".encodedNode + ", defaultOffset,
           defaultSize == 0 ? kj::strTree() : kj::strTree(", ", defaultSize));
 
-      kj::String elementReaderType;
-      kj::String elementBuilderType;
       kj::String builderFactoryArg = kj::str("");
       kj::String readerFactoryArg = kj::str("");
       kj::String fieldSize;
@@ -1096,8 +1094,6 @@ private:
           case schema::Type::LIST:
             primitiveElement = false;
             fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
-            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
-            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
             readerFactoryArg = kj::str(makeListListFactoryArg(typeBody.getList().getElementType()), ", ");
             builderFactoryArg = kj::str(readerFactoryArg);
             break;

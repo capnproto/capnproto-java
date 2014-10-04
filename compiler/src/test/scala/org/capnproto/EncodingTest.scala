@@ -68,6 +68,36 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+
+  test("NestedLists") {
+    val builder = new MessageBuilder();
+    val root = builder.initRoot(TestLists.factory);
+    {
+      val intListList = root.initInt32ListList(2);
+      val intList0 = intListList.init(0, 4);
+      intList0.set(0, 1);
+      intList0.set(1, 2);
+      intList0.set(2, 3);
+      intList0.set(3, 4);
+      val intList1 = intListList.init(1, 1);
+      intList1.set(0, 100);
+    }
+    {
+      val reader = root.asReader();
+      val intListList = root.getInt32ListList();
+      intListList.size() should equal (2);
+      val intList0 = intListList.get(0);
+      intList0.size() should equal (4);
+      intList0.get(0) should equal (1);
+      intList0.get(1) should equal (2);
+      intList0.get(2) should equal (3);
+      intList0.get(3) should equal (4);
+      val intList1 = intListList.get(1);
+      intList1.size() should equal (1);
+      intList1.get(0) should equal(100);
+    }
+  }
+
   test("UpgradeStructInBuilder") {
     val builder = new MessageBuilder();
     val root = builder.initRoot(TestAnyPointer.factory);
