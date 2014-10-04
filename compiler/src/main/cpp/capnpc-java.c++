@@ -242,7 +242,7 @@ private:
     return kj::mv(result);
   }
 
-  kj::StringTree typeName(schema::Type::Reader type) {
+  kj::StringTree typeName(schema::Type::Reader type, kj::String suffix = nullptr) {
     switch (type.which()) {
       case schema::Type::VOID: return kj::strTree("org.capnproto.Void");
 
@@ -258,13 +258,13 @@ private:
       case schema::Type::FLOAT32: return kj::strTree("float");
       case schema::Type::FLOAT64: return kj::strTree("double");
 
-      case schema::Type::TEXT: return kj::strTree(" org.capnproto.Text");
-      case schema::Type::DATA: return kj::strTree(" org.capnproto.Data");
+    case schema::Type::TEXT: return kj::strTree(" org.capnproto.Text", suffix);
+    case schema::Type::DATA: return kj::strTree(" org.capnproto.Data", suffix);
 
       case schema::Type::ENUM:
         return javaFullName(schemaLoader.get(type.getEnum().getTypeId()));
       case schema::Type::STRUCT:
-        return javaFullName(schemaLoader.get(type.getStruct().getTypeId()));
+        return kj::strTree(javaFullName(schemaLoader.get(type.getStruct().getTypeId())), suffix);
       case schema::Type::INTERFACE:
         return javaFullName(schemaLoader.get(type.getInterface().getTypeId()));
 
@@ -273,35 +273,44 @@ private:
         auto elementType = type.getList().getElementType();
         switch (elementType.which()) {
         case schema::Type::VOID:
-          return kj::strTree(" org.capnproto.PrimitiveList.Void");
+          return kj::strTree(" org.capnproto.PrimitiveList.Void", suffix);
         case schema::Type::BOOL:
-          return kj::strTree(" org.capnproto.PrimitiveList.Boolean");
+          return kj::strTree(" org.capnproto.PrimitiveList.Boolean", suffix);
         case schema::Type::INT8:
         case schema::Type::UINT8:
-          return kj::strTree(" org.capnproto.PrimitiveList.Byte");
+          return kj::strTree(" org.capnproto.PrimitiveList.Byte", suffix);
         case schema::Type::INT16:
         case schema::Type::UINT16:
-          return kj::strTree(" org.capnproto.PrimitiveList.Short");
+          return kj::strTree(" org.capnproto.PrimitiveList.Short", suffix);
         case schema::Type::INT32:
         case schema::Type::UINT32:
-          return kj::strTree(" org.capnproto.PrimitiveList.Int");
+          return kj::strTree(" org.capnproto.PrimitiveList.Int", suffix);
         case schema::Type::INT64:
         case schema::Type::UINT64:
-          return kj::strTree(" org.capnproto.PrimitiveList.Long");
+          return kj::strTree(" org.capnproto.PrimitiveList.Long", suffix);
         case schema::Type::FLOAT32:
-          return kj::strTree(" org.capnproto.PrimitiveList.Float");
+          return kj::strTree(" org.capnproto.PrimitiveList.Float", suffix);
         case schema::Type::FLOAT64:
-          return kj::strTree(" org.capnproto.PrimitiveList.Double");
+          return kj::strTree(" org.capnproto.PrimitiveList.Double", suffix);
         case schema::Type::STRUCT:
-          return kj::strTree(" org.capnproto.StructList");
+        {
+          auto inner = typeName(elementType, kj::str(suffix));
+          return kj::strTree(" org.capnproto.StructList", suffix, "<", kj::mv(inner), ">");
+        }
         case schema::Type::TEXT:
-          return kj::strTree( "org.capnproto.TextList");
+          return kj::strTree( "org.capnproto.TextList", suffix);
         case schema::Type::DATA:
-          return kj::strTree( "org.capnproto.DataList");
+          return kj::strTree( "org.capnproto.DataList", suffix);
         case schema::Type::ENUM:
-          return kj::strTree("org.capnproto.EnumList");
+        {
+          auto inner = typeName(elementType, kj::str(suffix));
+          return kj::strTree("org.capnproto.EnumList", suffix, "<", kj::mv(inner), ">");
+        }
         case schema::Type::LIST:
-          return kj::strTree("org.capnproto.ListList");
+        {
+          auto inner = typeName(elementType, kj::str(suffix));
+          return kj::strTree("org.capnproto.ListList", suffix, "<", kj::mv(inner), ">");
+        }
         case schema::Type::INTERFACE:
         case schema::Type::ANY_POINTER:
           KJ_FAIL_REQUIRE("unimplemented");
@@ -663,18 +672,23 @@ private:
     auto elementType = type.getList().getElementType();
     switch (elementType.which()) {
     case schema::Type::STRUCT:
-      return kj::str("new org.capnproto.StructList.Factory(",
-                     typeName(elementType), ".factory), ");
+      return kj::str("new org.capnproto.StructList.Factory<",
+                     typeName(elementType, kj::str(".Builder")),", ",
+                     typeName(elementType, kj::str(".Reader")), ">(",
+                     typeName(elementType, kj::str("")), ".factory)");
     case schema::Type::LIST:
-      return kj::str("new org.capnproto.ListList.Factory(",
+      return kj::str("new org.capnproto.ListList.Factory<",
+                     typeName(elementType, kj::str(".Builder")),", ",
+                     typeName(elementType, kj::str(".Reader")), ">(",
                      makeListListFactoryArg(elementType),
-                     "), ");
+                     ")");
     case schema::Type::ENUM:
-      return kj::str("new org.capnproto.EnumList.Factory(",
-                     typeName(elementType),
-                     ".values()), ");
+      return kj::str("new org.capnproto.EnumList.Factory<",
+                     typeName(elementType), ">(",
+                     typeName(elementType, kj::str("")),
+                     ".values())");
     default:
-      return kj::str(typeName(type), ".factory, ");
+      return kj::str(typeName(type, kj::str("")), ".factory");
     }
   }
 
@@ -737,7 +751,7 @@ private:
 
     FieldKind kind = FieldKind::PRIMITIVE;
     kj::String ownedType;
-    kj::String type = typeName(slot.getType()).flatten();
+    kj::String type = typeName(slot.getType(), kj::str("")).flatten();
     kj::StringPtr setterDefault;  // only for void
     kj::String defaultMask;    // primitives only
     size_t defaultOffset = 0;    // pointers only: offset of the default value within the schema.
@@ -1019,8 +1033,9 @@ private:
       kj::String builderFactoryArg = kj::str("");
       kj::String readerFactoryArg = kj::str("");
       kj::String fieldSize;
-      kj::String readerClass = kj::str("Reader");
-      kj::String builderClass = kj::str("Builder");
+      kj::String readerClass = kj::str(typeName(typeBody, kj::str(".Reader")));
+      kj::String builderClass = kj::str(typeName(typeBody, kj::str(".Builder")));
+
       bool isStructOrCapList = false;
       bool isStructList = false;
       if (kind == FieldKind::LIST) {
@@ -1066,12 +1081,8 @@ private:
           case schema::Type::ENUM:
             primitiveElement = true;
             fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
-            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()));
-            readerClass = kj::str("Reader<", elementReaderType, ">");
-            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()));
-            builderClass = kj::str("Builder<", elementBuilderType, ">");
-            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".values(), ");
-            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".values(), ");
+            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType(), kj::str("")), ".values(), ");
+            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType(), nullptr), ".values(), ");
             break;
 
           case schema::Type::TEXT:
@@ -1086,10 +1097,8 @@ private:
             primitiveElement = false;
             fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
             elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
-            readerClass = kj::str("Reader<", elementReaderType, ">");
             elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
-            builderClass = kj::str("Builder<", elementBuilderType, ">");
-            readerFactoryArg = makeListListFactoryArg(typeBody.getList().getElementType());
+            readerFactoryArg = kj::str(makeListListFactoryArg(typeBody.getList().getElementType()), ", ");
             builderFactoryArg = kj::str(readerFactoryArg);
             break;
           case schema::Type::ANY_POINTER:
@@ -1106,10 +1115,6 @@ private:
             isStructList = true;
             isStructOrCapList = true;
             primitiveElement = false;
-            elementReaderType = kj::str(typeName(typeBody.getList().getElementType()), ".Reader");
-            readerClass = kj::str("Reader<", elementReaderType, ">");
-            elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
-            builderClass = kj::str("Builder<", elementBuilderType, ">");
             readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
             builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
             fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
@@ -1125,9 +1130,9 @@ private:
             spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", type, ".", readerClass,
+            spaces(indent), "  public final ", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", type, ".", readerClass, "(\n",
+            spaces(indent), "    return new ", readerClass, "(\n",
             spaces(indent), "      ", readerFactoryArg, "_reader.getPointerField(", offset, ").getList(",
             fieldSize, ")",
             ");\n",
@@ -1140,9 +1145,9 @@ private:
             spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", type, ".", builderClass,
+            spaces(indent), "  public final ", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", type, ".", builderClass, " (\n",
+            spaces(indent), "    return new ", builderClass, " (\n",
             spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").get",
             (isStructList ?
              kj::strTree("StructList(", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
@@ -1150,13 +1155,13 @@ private:
             ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+            spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
             spaces(indent), "    throw new Error();\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", type, ".", builderClass,
+            spaces(indent), "  public final ", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return new ", type, ".", builderClass, "(\n",
+            spaces(indent), "    return new ", builderClass, "(\n",
             spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").init",
             (isStructList ?
              kj::strTree("StructList(size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :

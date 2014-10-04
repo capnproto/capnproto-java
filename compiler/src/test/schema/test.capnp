@@ -225,8 +225,8 @@ struct TestLists {
   int32ListList @7 :List(List(Int32));
   textListList @8 :List(List(Text));
   structListList @9 :List(List(TestAllTypes));
-  #boolListListList @10 :List(List(List(Bool)));
-  #enumListList @11 :List(List(TestEnum));
+  boolListListList @10 :List(List(List(Bool)));
+  enumListList @11 :List(List(TestEnum));
 }
 
 struct TestFieldZeroIsBit {
