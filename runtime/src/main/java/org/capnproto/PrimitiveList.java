@@ -2,6 +2,21 @@ package org.capnproto;
 
 public class PrimitiveList {
     public static class Void {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.VOID));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.VOID));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.VOID, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -34,6 +49,21 @@ public class PrimitiveList {
     }
 
     public static class Boolean {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.BIT));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.BIT));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.BIT, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -72,6 +102,21 @@ public class PrimitiveList {
     }
 
     public static class Byte {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.BYTE));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.BYTE));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.BYTE, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -111,6 +156,21 @@ public class PrimitiveList {
     }
 
     public static class Short {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.TWO_BYTES));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.TWO_BYTES));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.TWO_BYTES, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -150,6 +210,21 @@ public class PrimitiveList {
     }
 
     public static class Int {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.FOUR_BYTES));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.FOUR_BYTES));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.FOUR_BYTES, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -188,6 +263,21 @@ public class PrimitiveList {
     }
 
     public static class Float {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.FOUR_BYTES));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.FOUR_BYTES));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.FOUR_BYTES, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -227,6 +317,21 @@ public class PrimitiveList {
 
 
     public static class Long {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.EIGHT_BYTES));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.EIGHT_BYTES, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 
@@ -265,6 +370,21 @@ public class PrimitiveList {
     }
 
     public static class Double {
+        public static final class Factory {
+            public final Reader fromPointerReader(PointerReader reader) {
+                return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
+            }
+
+            public final Builder fromPointerBuilder(PointerBuilder builder) {
+                return new Builder(builder.getList(FieldSize.EIGHT_BYTES));
+            }
+
+            public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
+                return new Builder(builder.initList(FieldSize.EIGHT_BYTES, size));
+            }
+        }
+        public static final Factory factory = new Factory();
+
         public static final class Reader {
             public final ListReader reader;
 

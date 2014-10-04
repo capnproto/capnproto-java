@@ -9,6 +9,26 @@ public class EnumList {
         return values[index];
     }
 
+    public static final class Factory<T extends java.lang.Enum> {
+        public final T values[];
+
+        public Factory(T values[]) {
+            this.values = values;
+        }
+
+        public final Reader<T> fromPointerReader(PointerReader reader) {
+            return new Reader<T>(values, reader.getList(FieldSize.TWO_BYTES));
+        }
+
+        public final Builder<T> fromPointerBuilder(PointerBuilder builder) {
+            return new Builder<T>(values, builder.getList(FieldSize.TWO_BYTES));
+        }
+
+        public final Builder<T> initFromPointerBuilder(PointerBuilder builder, int size) {
+            return new Builder<T>(values, builder.initList(FieldSize.TWO_BYTES, size));
+        }
+    }
+
     public static final class Reader<T extends java.lang.Enum> {
         public final ListReader reader;
         public final T values[];
