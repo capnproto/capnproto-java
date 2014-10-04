@@ -659,6 +659,25 @@ private:
       );
   }
 
+  kj::String makeListListFactoryArg(schema::Type::Reader type) {
+    auto elementType = type.getList().getElementType();
+    switch (elementType.which()) {
+    case schema::Type::STRUCT:
+      return kj::str("new org.capnproto.StructList.Factory(",
+                     typeName(elementType), ".factory), ");
+    case schema::Type::LIST:
+      return kj::str("new org.capnproto.ListList.Factory(",
+                     makeListListFactoryArg(elementType),
+                     "), ");
+    case schema::Type::ENUM:
+      return kj::str("new org.capnproto.EnumList.Factory(",
+                     typeName(elementType),
+                     ".values()), ");
+    default:
+      return kj::str(typeName(type), ".factory, ");
+    }
+  }
+
   FieldText makeFieldText(kj::StringPtr scope, StructSchema::Field field, int indent) {
     auto proto = field.getProto();
     kj::String titleCase = toTitleCase(proto.getName());
@@ -1070,8 +1089,8 @@ private:
             readerClass = kj::str("Reader<", elementReaderType, ">");
             elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()), ".Builder");
             builderClass = kj::str("Builder<", elementBuilderType, ">");
-            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
-            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
+            readerFactoryArg = makeListListFactoryArg(typeBody.getList().getElementType());
+            builderFactoryArg = kj::str(readerFactoryArg);
             break;
           case schema::Type::ANY_POINTER:
             primitiveElement = false;
@@ -1095,10 +1114,6 @@ private:
             builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
             fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
             break;
-        }
-        if (primitiveElement) {
-          elementReaderType = kj::str(typeName(typeBody.getList().getElementType()));
-          elementBuilderType = kj::str(typeName(typeBody.getList().getElementType()));
         }
       }
 
