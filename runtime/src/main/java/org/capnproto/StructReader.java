@@ -1,13 +1,13 @@
 package org.capnproto;
 
 public final class StructReader {
-    public final SegmentReader segment;
-    public final int data; //byte offset to data section
-    public final int pointers; // word offset of pointer section
-    public final int dataSize; // in bits
-    public final short pointerCount;
-    public final byte bit0Offset;
-    public final int nestingLimit;
+    final SegmentReader segment;
+    final int data; //byte offset to data section
+    final int pointers; // word offset of pointer section
+    final int dataSize; // in bits
+    final short pointerCount;
+    final byte bit0Offset;
+    final int nestingLimit;
 
     public StructReader(SegmentReader segment, int data,
                         int pointers, int dataSize, short pointerCount,

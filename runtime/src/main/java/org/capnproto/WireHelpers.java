@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 
 final class WireHelpers {
 
-    public static int roundBytesUpToWords(int bytes) {
+    static int roundBytesUpToWords(int bytes) {
         return (bytes + 7) / 8;
     }
 
-    public static int roundBitsUpToWords(long bits) {
+    static int roundBitsUpToWords(long bits) {
         //# This code assumes 64-bit words.
         return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
     }
@@ -22,10 +22,10 @@ final class WireHelpers {
         }
     }
 
-    public static AllocateResult allocate(int refOffset,
-                                          SegmentBuilder segment,
-                                          int amount, // in words
-                                          byte kind) {
+    static AllocateResult allocate(int refOffset,
+                                   SegmentBuilder segment,
+                                   int amount, // in words
+                                   byte kind) {
 
         // TODO check for nullness, amount == 0 case.
 
@@ -67,8 +67,8 @@ final class WireHelpers {
         }
     }
 
-    public static FollowBuilderFarsResult followBuilderFars(long ref, int refTarget,
-                                                            SegmentBuilder segment) {
+    static FollowBuilderFarsResult followBuilderFars(long ref, int refTarget,
+                                                     SegmentBuilder segment) {
         //# If `ref` is a far pointer, follow it. On return, `ref` will
         //# have been updated to point at a WirePointer that contains
         //# the type information about the target object, and a pointer
@@ -109,7 +109,7 @@ final class WireHelpers {
         }
     }
 
-    public static FollowFarsResult followFars(long ref, int refTarget, SegmentReader segment) {
+    static FollowFarsResult followFars(long ref, int refTarget, SegmentReader segment) {
         //# If the segment is null, this is an unchecked message,
         //# so there are no FAR pointers.
         if (segment != null && WirePointer.kind(ref) == WirePointer.FAR) {
@@ -137,7 +137,7 @@ final class WireHelpers {
         }
     }
 
-    public static void zeroObject(SegmentBuilder segment, int refOffset) {
+    static void zeroObject(SegmentBuilder segment, int refOffset) {
         //# Zero out the pointed-to object. Use when the pointer is
         //# about to be overwritten making the target object no longer
         //# reachable.
@@ -145,9 +145,9 @@ final class WireHelpers {
         // TODO
     }
 
-    public static StructBuilder initStructPointer(int refOffset,
-                                                  SegmentBuilder segment,
-                                                  StructSize size) {
+    static StructBuilder initStructPointer(int refOffset,
+                                           SegmentBuilder segment,
+                                           StructSize size) {
         AllocateResult allocation = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.refOffset, size);
         return new StructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
@@ -155,9 +155,9 @@ final class WireHelpers {
                                  size.data * 64, size.pointers, (byte)0);
     }
 
-    public static StructBuilder getWritableStructPointer(int refOffset,
-                                                         SegmentBuilder segment,
-                                                         StructSize size) {
+    static StructBuilder getWritableStructPointer(int refOffset,
+                                                  SegmentBuilder segment,
+                                                  StructSize size) {
         long ref = WirePointer.get(segment.buffer, refOffset);
         int target = WirePointer.target(refOffset, ref);
         if (WirePointer.isNull(ref)) {
@@ -179,10 +179,10 @@ final class WireHelpers {
 
     }
 
-    public static ListBuilder initListPointer(int refOffset,
-                                              SegmentBuilder segment,
-                                              int elementCount,
-                                              byte elementSize) {
+    static ListBuilder initListPointer(int refOffset,
+                                       SegmentBuilder segment,
+                                       int elementCount,
+                                       byte elementSize) {
         assert elementSize != FieldSize.INLINE_COMPOSITE : "Should have called initStructListPointer instead";
 
         int dataSize = FieldSize.dataBitsPerElement(elementSize);
@@ -198,10 +198,10 @@ final class WireHelpers {
                                elementCount, step, dataSize, (short)pointerCount);
     }
 
-    public static ListBuilder initStructListPointer(int refOffset,
-                                                    SegmentBuilder segment,
-                                                    int elementCount,
-                                                    StructSize elementSize) {
+    static ListBuilder initStructListPointer(int refOffset,
+                                             SegmentBuilder segment,
+                                             int elementCount,
+                                             StructSize elementSize) {
         if (elementSize.preferredListEncoding != FieldSize.INLINE_COMPOSITE) {
             //# Small data-only struct. Allocate a list of primitives instead.
             return initListPointer(refOffset, segment, elementCount,
@@ -227,9 +227,9 @@ final class WireHelpers {
                                elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
-    public static ListBuilder getWritableListPointer(int origRefOffset,
-                                                     SegmentBuilder origSegment,
-                                                     byte elementSize) {
+    static ListBuilder getWritableListPointer(int origRefOffset,
+                                              SegmentBuilder origSegment,
+                                              byte elementSize) {
         assert elementSize != FieldSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
 
         long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
@@ -283,9 +283,9 @@ final class WireHelpers {
     }
 
     // size is in bytes
-    public static Text.Builder initTextPointer(int refOffset,
-                                               SegmentBuilder segment,
-                                               int size) {
+    static Text.Builder initTextPointer(int refOffset,
+                                        SegmentBuilder segment,
+                                        int size) {
         //# The byte list must include a NUL terminator.
         int byteSize = size + 1;
 
@@ -299,9 +299,9 @@ final class WireHelpers {
         return new Text.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
     }
 
-    public static Text.Builder setTextPointer(int refOffset,
-                                              SegmentBuilder segment,
-                                              Text.Reader value) {
+    static Text.Builder setTextPointer(int refOffset,
+                                       SegmentBuilder segment,
+                                       Text.Reader value) {
         Text.Builder builder = initTextPointer(refOffset, segment, value.size);
 
         // TODO is there a way to do this with bulk methods?
@@ -311,11 +311,11 @@ final class WireHelpers {
         return builder;
     }
 
-    public static Text.Builder getWritableTextPointer(int refOffset,
-                                                      SegmentBuilder segment,
-                                                      ByteBuffer defaultBuffer,
-                                                      int defaultOffset,
-                                                      int defaultSize) {
+    static Text.Builder getWritableTextPointer(int refOffset,
+                                               SegmentBuilder segment,
+                                               ByteBuffer defaultBuffer,
+                                               int defaultOffset,
+                                               int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
@@ -350,9 +350,9 @@ final class WireHelpers {
     }
 
     // size is in bytes
-    public static Data.Builder initDataPointer(int refOffset,
-                                               SegmentBuilder segment,
-                                               int size) {
+    static Data.Builder initDataPointer(int refOffset,
+                                        SegmentBuilder segment,
+                                        int size) {
         //# Allocate the space.
         AllocateResult allocation = allocate(refOffset, segment, roundBytesUpToWords(size),
                                              WirePointer.LIST);
@@ -363,9 +363,9 @@ final class WireHelpers {
         return new Data.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
     }
 
-    public static Data.Builder setDataPointer(int refOffset,
-                                              SegmentBuilder segment,
-                                              Data.Reader value) {
+    static Data.Builder setDataPointer(int refOffset,
+                                       SegmentBuilder segment,
+                                       Data.Reader value) {
         Data.Builder builder = initDataPointer(refOffset, segment, value.size);
 
         // TODO is there a way to do this with bulk methods?
@@ -375,11 +375,11 @@ final class WireHelpers {
         return builder;
     }
 
-    public static Data.Builder getWritableDataPointer(int refOffset,
-                                                      SegmentBuilder segment,
-                                                      ByteBuffer defaultBuffer,
-                                                      int defaultOffset,
-                                                      int defaultSize) {
+    static Data.Builder getWritableDataPointer(int refOffset,
+                                               SegmentBuilder segment,
+                                               ByteBuffer defaultBuffer,
+                                               int defaultOffset,
+                                               int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
@@ -411,9 +411,9 @@ final class WireHelpers {
 
     }
 
-    public static StructReader readStructPointer(SegmentReader segment,
-                                                 int refOffset,
-                                                 int nestingLimit) {
+    static StructReader readStructPointer(SegmentReader segment,
+                                          int refOffset,
+                                          int nestingLimit) {
 
         // TODO error handling. is_null
         if (nestingLimit <= 0) {
@@ -442,11 +442,14 @@ final class WireHelpers {
 
     }
 
+    static SegmentBuilder setStructPointer(SegmentBuilder segment, int refOffset, StructReader value) {
+        throw new Error("setStructPointer is unimplemented");
+    };
 
-    public static ListReader readListPointer(SegmentReader segment,
-                                             int refOffset,
-                                             byte expectedElementSize,
-                                             int nestingLimit) {
+    static ListReader readListPointer(SegmentReader segment,
+                                      int refOffset,
+                                      byte expectedElementSize,
+                                      int nestingLimit) {
 
         long ref = WirePointer.get(segment.buffer, refOffset);
 
@@ -528,11 +531,11 @@ final class WireHelpers {
         }
     }
 
-    public static Text.Reader readTextPointer(SegmentReader segment,
-                                              int refOffset,
-                                              ByteBuffer defaultBuffer,
-                                              int defaultOffset,
-                                              int defaultSize) {
+    static Text.Reader readTextPointer(SegmentReader segment,
+                                       int refOffset,
+                                       ByteBuffer defaultBuffer,
+                                       int defaultOffset,
+                                       int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
@@ -567,11 +570,11 @@ final class WireHelpers {
         return new Text.Reader(resolved.segment.buffer, resolved.ptr, size - 1);
     }
 
-    public static Data.Reader readDataPointer(SegmentReader segment,
-                                              int refOffset,
-                                              ByteBuffer defaultBuffer,
-                                              int defaultOffset,
-                                              int defaultSize) {
+    static Data.Reader readDataPointer(SegmentReader segment,
+                                       int refOffset,
+                                       ByteBuffer defaultBuffer,
+                                       int defaultOffset,
+                                       int defaultSize) {
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {

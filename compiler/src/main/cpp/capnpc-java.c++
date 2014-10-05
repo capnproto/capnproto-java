@@ -964,7 +964,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "    _builder.getPointerField(", offset, ").setStruct(value._reader);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           unionDiscrim.set,
