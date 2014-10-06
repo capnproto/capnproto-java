@@ -10,8 +10,8 @@ public final class StructList {
             this.factory = factory;
         }
 
-        public final Reader<ElementReader> fromPointerReader(PointerReader reader) {
-            return new Reader<ElementReader>(factory, reader.getList(FieldSize.INLINE_COMPOSITE));
+        public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+            return new Reader<ElementReader>(factory, reader.getList(FieldSize.INLINE_COMPOSITE, defaultSegment, defaultOffset));
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {

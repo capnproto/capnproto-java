@@ -2,8 +2,8 @@ package org.capnproto;
 
 public final class TextList {
     public static final class Factory implements ListFactory<Builder, Reader> {
-        public final Reader fromPointerReader(PointerReader reader) {
-            return new Reader(reader.getList(FieldSize.POINTER));
+        public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+            return new Reader(reader.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
         public final Builder fromPointerBuilder(PointerBuilder builder) {

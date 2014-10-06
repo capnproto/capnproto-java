@@ -272,6 +272,24 @@ object TestUtil {
       }
 
     }
+
+    reader.getVoidList().size() should equal (6);
+    {
+      val listReader = reader.getBoolList();
+      listReader.size() should equal (4);
+      listReader.get(0) should equal (true);
+      listReader.get(1) should equal (false);
+      listReader.get(2) should equal (false);
+      listReader.get(3) should equal (true);
+    }
+
+    {
+      val listReader = reader.getInt8List();
+      listReader.size() should equal (2);
+      listReader.get(0) should equal (111);
+      listReader.get(1) should equal (-111);
+    }
+
   }
 
 }

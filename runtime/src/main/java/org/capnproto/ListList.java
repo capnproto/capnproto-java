@@ -10,8 +10,8 @@ public final class ListList {
             this.factory = factory;
         }
 
-        public final Reader<ElementReader> fromPointerReader(PointerReader reader) {
-            return new Reader<ElementReader>(factory, reader.getList(FieldSize.POINTER));
+        public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+            return new Reader<ElementReader>(factory, reader.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {
@@ -38,7 +38,7 @@ public final class ListList {
         }
 
         public T get(int index) {
-            return this.factory.fromPointerReader(this.reader.getPointerElement(index));
+            return this.factory.fromPointerReader(this.reader.getPointerElement(index), null, 0);
         }
 
     }

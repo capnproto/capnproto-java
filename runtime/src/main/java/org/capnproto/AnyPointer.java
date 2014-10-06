@@ -14,7 +14,7 @@ public final class AnyPointer {
         }
 
         public final <T> T getAsList(FromPointerReader<T> factory) {
-            return factory.fromPointerReader(this.reader);
+            return factory.fromPointerReader(this.reader, null, 0);
         }
     }
 

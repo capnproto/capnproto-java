@@ -114,6 +114,31 @@ struct TestDefaults {
       # interfaceList can't have a default
       );
 
+  enumField      @15 : TestEnum = corge;
+  interfaceField @16 : Void;  # TODO
+
+  voidList      @17 : List(Void)    = [void, void, void, void, void, void];
+  boolList      @18 : List(Bool)    = [true, false, false, true];
+  int8List      @19 : List(Int8)    = [111, -111];
+  int16List     @20 : List(Int16)   = [11111, -11111];
+  int32List     @21 : List(Int32)   = [111111111, -111111111];
+  int64List     @22 : List(Int64)   = [1111111111111111111, -1111111111111111111];
+  uInt8List     @23 : List(UInt8)   = [111, 222] ;
+  uInt16List    @24 : List(UInt16)  = [33333, 44444];
+  uInt32List    @25 : List(UInt32)  = [3333333333];
+  uInt64List    @26 : List(UInt64)  = [11111111111111111111];
+  float32List   @27 : List(Float32) = [5555.5, inf, -inf, nan];
+  float64List   @28 : List(Float64) = [7777.75, inf, -inf, nan];
+  textList      @29 : List(Text)    = ["plugh", "xyzzy", "thud"];
+  dataList      @30 : List(Data)    = ["oops", "exhausted", "rfc3092"];
+  structList    @31 : List(TestAllTypes) = [
+      (textField = "structlist 1"),
+      (textField = "structlist 2"),
+      (textField = "structlist 3")];
+  enumList      @32 : List(TestEnum) = [foo, garply];
+  interfaceList @33 : List(Void);  # TODO
+
+
 }
 
 struct TestAnyPointer {

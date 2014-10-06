@@ -464,13 +464,21 @@ final class WireHelpers {
 
     static ListReader readListPointer(SegmentReader segment,
                                       int refOffset,
+                                      SegmentReader defaultSegment,
+                                      int defaultOffset,
                                       byte expectedElementSize,
                                       int nestingLimit) {
 
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
-            return new ListReader();
+            if (defaultSegment == null) {
+                return new ListReader();
+            } else {
+                segment = defaultSegment;
+                refOffset = defaultOffset;
+                ref = WirePointer.get(segment.buffer, refOffset);
+            }
         }
 
         if (nestingLimit <= 0) {

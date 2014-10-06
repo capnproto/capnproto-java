@@ -1052,93 +1052,12 @@ private:
     } else if (kind == FieldKind::LIST) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
-      kj::String defaultParam = defaultOffset == 0 ? kj::str() : kj::str(
-          ",\n        ::capnp::schemas::s_", kj::hex(typeId), ".encodedNode + ", defaultOffset,
-          defaultSize == 0 ? kj::strTree() : kj::strTree(", ", defaultSize));
+      kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
+        "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
       kj::String listFactory = makeListFactoryArg(typeBody);
-      kj::String fieldSize;
       kj::String readerClass = kj::str(typeName(typeBody, kj::str(".Reader")));
       kj::String builderClass = kj::str(typeName(typeBody, kj::str(".Builder")));
-
-      bool isStructOrCapList = false;
-      bool isStructList = false;
-      if (kind == FieldKind::LIST) {
-        bool primitiveElement = false;
-        bool interface = false;
-        switch (typeBody.getList().getElementType().which()) {
-          case schema::Type::VOID:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.VOID");
-            break;
-          case schema::Type::BOOL:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.BIT");
-            break;
-
-          case schema::Type::INT8:
-          case schema::Type::UINT8:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.BYTE");
-            break;
-
-
-          case schema::Type::INT16:
-          case schema::Type::UINT16:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
-            break;
-
-          case schema::Type::INT32:
-          case schema::Type::UINT32:
-          case schema::Type::FLOAT32:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.FOUR_BYTES");
-            break;
-
-          case schema::Type::INT64:
-          case schema::Type::UINT64:
-          case schema::Type::FLOAT64:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.EIGHT_BYTES");
-            break;
-
-          case schema::Type::ENUM:
-            primitiveElement = true;
-            fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
-            break;
-
-          case schema::Type::TEXT:
-            primitiveElement = false;
-            fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
-            break;
-          case schema::Type::DATA:
-            primitiveElement = false;
-            fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
-            break;
-          case schema::Type::LIST:
-            primitiveElement = false;
-            fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
-            break;
-          case schema::Type::ANY_POINTER:
-            primitiveElement = false;
-            break;
-
-          case schema::Type::INTERFACE:
-            isStructOrCapList = true;
-            primitiveElement = false;
-            interface = true;
-            break;
-
-          case schema::Type::STRUCT:
-            isStructList = true;
-            isStructOrCapList = true;
-            primitiveElement = false;
-            fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
-            break;
-        }
-      }
-
 
       return FieldText {
         kj::strTree(
@@ -1149,7 +1068,8 @@ private:
 
             spaces(indent), "  public final ", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerReader(_reader.getPointerField(", offset, "));\n",
+            spaces(indent), "    return (", listFactory, ").fromPointerReader(_reader.getPointerField(", offset, "),",
+            defaultParams, ");\n",
             spaces(indent), "  }\n",
             "\n"),
 

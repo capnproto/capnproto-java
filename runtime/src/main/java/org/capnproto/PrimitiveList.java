@@ -3,8 +3,8 @@ package org.capnproto;
 public class PrimitiveList {
     public static class Void {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.VOID));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.VOID, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -50,8 +50,8 @@ public class PrimitiveList {
 
     public static class Boolean {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.BIT));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.BIT, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -103,8 +103,8 @@ public class PrimitiveList {
 
     public static class Byte {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.BYTE));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.BYTE, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -157,8 +157,8 @@ public class PrimitiveList {
 
     public static class Short {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.TWO_BYTES));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -211,8 +211,8 @@ public class PrimitiveList {
 
     public static class Int {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.FOUR_BYTES));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -264,8 +264,8 @@ public class PrimitiveList {
 
     public static class Float {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.FOUR_BYTES));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {
@@ -318,7 +318,7 @@ public class PrimitiveList {
 
     public static class Long {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
                 return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
             }
 
@@ -371,8 +371,8 @@ public class PrimitiveList {
 
     public static class Double {
         public static final class Factory implements ListFactory<Builder, Reader> {
-            public final Reader fromPointerReader(PointerReader reader) {
-                return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
+            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+                return new Reader(reader.getList(FieldSize.EIGHT_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder fromPointerBuilder(PointerBuilder builder) {

@@ -16,8 +16,8 @@ public class EnumList {
             this.values = values;
         }
 
-        public final Reader<T> fromPointerReader(PointerReader reader) {
-            return new Reader<T>(values, reader.getList(FieldSize.TWO_BYTES));
+        public final Reader<T> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+            return new Reader<T>(values, reader.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
         }
 
         public final Builder<T> fromPointerBuilder(PointerBuilder builder) {
