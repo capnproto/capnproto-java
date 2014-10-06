@@ -978,7 +978,7 @@ private:
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
       kj::String defaultParams = defaultOffset == 0 ? kj::str() : kj::str(
-        "Schemas.b_", kj::hex(typeId), ", ", defaultOffset * 8, ", ", defaultSize);
+        "Schemas.b_", kj::hex(typeId), ".buffer, ", defaultOffset * 8, ", ", defaultSize);
 
       kj::String blobKind =  typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
       kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");
@@ -1343,7 +1343,7 @@ private:
           kj::strTree(spaces(indent),
                       "public static final org.capnproto.Text.Reader ", upperCase,
                       " = new org.capnproto.Text.Reader(Schemas.b_",
-                      kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
+                      kj::hex(proto.getId()), ".buffer, ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getText().size(), ");\n")
         };
       }
@@ -1354,18 +1354,18 @@ private:
           kj::strTree(spaces(indent),
                       "public static final org.capnproto.Data.Reader ", upperCase,
                       " = new org.capnproto.Data.Reader(Schemas.b_",
-                      kj::hex(proto.getId()), ", ", schema.getValueSchemaOffset(),
+                      kj::hex(proto.getId()), ".buffer, ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getData().size(), ");\n")
         };
       }
 
       case schema::Value::STRUCT: {
-        kj::String constType = kj::strTree(
-            "::capnp::_::ConstStruct<", typeName_, ">").flatten();
         return ConstText {
           true,
-          kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
-                      kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
+            kj::strTree(spaces(indent),
+                        "public static final ", typeName_, ".Reader ", upperCase, "=\n",
+                        spaces(indent), "  new ", typeName_, ".Reader((new org.capnproto.PointerReader(Schemas.b_",
+                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getStruct());\n")
         };
       }
 
@@ -1490,7 +1490,7 @@ private:
 
     // Java limits method code size to 64KB. Maybe we should use class.getResource()?
     auto schemaDef = kj::strTree(
-      "public static final java.nio.ByteBuffer b_", hexId, " =\n",
+      "public static final org.capnproto.SegmentReader b_", hexId, " =\n",
       "   org.capnproto.GeneratedClassSupport.decodeRawBytes(\n",
       "   ", kj::mv(schemaLiteral), " \"\"",
       ");\n");

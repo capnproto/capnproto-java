@@ -6,8 +6,8 @@ public final class PointerReader {
     final int nestingLimit;
 
     public PointerReader() {
-        this.segment = null;
-        this.pointer = 0; // XXX ?
+        this.segment = SegmentReader.EMPTY;
+        this.pointer = 0;
         this.nestingLimit = 0x7fffffff;
     }
 

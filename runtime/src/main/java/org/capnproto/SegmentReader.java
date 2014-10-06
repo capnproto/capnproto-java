@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class SegmentReader {
 
-    final ByteBuffer buffer;
+    public final ByteBuffer buffer;
     final Arena arena;
 
     public SegmentReader(ByteBuffer buffer, Arena arena) {

@@ -140,6 +140,11 @@ class EncodingSuite extends FunSuite {
     (TestConstants.DATA_CONST.toArray()) should equal (TestUtil.data("bar"));
 
     (TestConstants.ENUM_CONST) should equal (TestEnum.CORGE);
+    {
+      val subReader = TestConstants.STRUCT_CONST;
+      //subReader.getBoolField() should equal (true);
+      //subReader.getInt8Field() should equal (-12);
+    }
 
   }
 
