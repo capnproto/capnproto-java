@@ -18,7 +18,11 @@ public final class PointerBuilder {
     }
 
     public final StructBuilder getStruct(StructSize size) {
-        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size);
+        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size, null, 0);
+    }
+
+    public final StructBuilder getStruct(StructSize size, SegmentReader defaultBuffer, int defaultOffset) {
+        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size, defaultBuffer, defaultOffset);
     }
 
     public final ListBuilder getList(byte elementSize) {

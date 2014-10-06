@@ -965,6 +965,9 @@ private:
       };
 
     } else if (kind == FieldKind::STRUCT) {
+      uint64_t typeId = field.getContainingStruct().getProto().getId();
+      kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
+        "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
       return FieldText {
         kj::strTree(
@@ -976,7 +979,7 @@ private:
           spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ", type,
-          ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct());\n",
+          ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct(", defaultParams, "));\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -985,7 +988,7 @@ private:
           unionDiscrim.check,
           spaces(indent), "    return ", type,
           ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
-          type, ".STRUCT_SIZE", "));\n",
+          type, ".STRUCT_SIZE,", defaultParams, "));\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
@@ -1003,7 +1006,7 @@ private:
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
       kj::String defaultParams = defaultOffset == 0 ? kj::str() : kj::str(
-        "Schemas.b_", kj::hex(typeId), ".buffer, ", defaultOffset * 8, ", ", defaultSize);
+        "Schemas.b_", kj::hex(typeId), ".buffer, ", defaultOffset, ", ", defaultSize);
 
       kj::String blobKind =  typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
       kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");

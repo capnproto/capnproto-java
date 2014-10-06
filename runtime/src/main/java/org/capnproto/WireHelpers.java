@@ -157,11 +157,17 @@ final class WireHelpers {
 
     static StructBuilder getWritableStructPointer(int refOffset,
                                                   SegmentBuilder segment,
-                                                  StructSize size) {
+                                                  StructSize size,
+                                                  SegmentReader defaultSegment,
+                                                  int defaultOffset) {
         long ref = WirePointer.get(segment.buffer, refOffset);
         int target = WirePointer.target(refOffset, ref);
         if (WirePointer.isNull(ref)) {
-            return initStructPointer(refOffset, segment, size);
+            if (defaultSegment == null) {
+                return initStructPointer(refOffset, segment, size);
+            } else {
+                throw new Error("unimplemented");
+            }
         }
         FollowBuilderFarsResult resolved = followBuilderFars(ref, target, segment);
 
@@ -325,7 +331,7 @@ final class WireHelpers {
                 Text.Builder builder = initTextPointer(refOffset, segment, defaultSize);
                 // TODO is there a way to do this with bulk methods?
                 for (int i = 0; i < builder.size; ++i) {
-                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset + i));
+                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset * 8 + i));
                 }
                 return builder;
             }
@@ -389,7 +395,7 @@ final class WireHelpers {
                 Data.Builder builder = initDataPointer(refOffset, segment, defaultSize);
                 // TODO is there a way to do this with bulk methods?
                 for (int i = 0; i < builder.size; ++i) {
-                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset + i));
+                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset * 8 + i));
                 }
                 return builder;
             }
@@ -413,13 +419,23 @@ final class WireHelpers {
 
     static StructReader readStructPointer(SegmentReader segment,
                                           int refOffset,
+                                          SegmentReader defaultSegment,
+                                          int defaultOffset,
                                           int nestingLimit) {
-        // TODO error handling. is_null
+        long ref = WirePointer.get(segment.buffer, refOffset);
+        if (WirePointer.isNull(ref)) {
+            if (defaultSegment == null) {
+                return new StructReader();
+            } else {
+                return (new PointerReader(defaultSegment, defaultOffset, 0x7fffffff)).getStruct();
+            }
+        }
+
         if (nestingLimit <= 0) {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
 
-        long ref = WirePointer.get(segment.buffer, refOffset);
+
 
         int refTarget = WirePointer.target(refOffset, ref);
         FollowFarsResult resolved = followFars(ref, refTarget, segment);

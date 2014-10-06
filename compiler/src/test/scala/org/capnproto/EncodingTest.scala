@@ -194,5 +194,4 @@ class EncodingSuite extends FunSuite {
   //Serialize.writeMessage((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                       message);
 
-
 }

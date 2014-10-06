@@ -255,7 +255,23 @@ object TestUtil {
     assert(reader.getFloat32Field() == 1234.5f);
     assert(reader.getFloat64Field() == -123e45);
     (reader.getTextField().toString()) should equal ("foo");
-  }
+    (reader.getDataField().toArray()) should equal (Array(0x62,0x61,0x72));
+    {
+      val subReader = reader.getStructField();
+      subReader.getVoidField();
+      subReader.getBoolField() should equal (true);
+      subReader.getInt8Field() should equal (-12);
+      subReader.getInt16Field() should equal (3456);
+      subReader.getInt32Field() should equal (-78901234);
+      // ...
+      subReader.getTextField().toString() should equal ("baz");
 
+      {
+        val subSubReader = subReader.getStructField();
+        subSubReader.getTextField().toString() should equal ("nested");
+      }
+
+    }
+  }
 
 }

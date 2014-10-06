@@ -29,27 +29,24 @@ public final class PointerReader {
     }
 
     public StructReader getStruct() {
-        if (this.segment == null) {
-            return WireHelpers.readStructPointer(SegmentReader.EMPTY, 0, this.nestingLimit);
-        } else {
-            return WireHelpers.readStructPointer(this.segment,
-                                                 this.pointer,
-                                                 this.nestingLimit);
-        }
+        return WireHelpers.readStructPointer(this.segment,
+                                             this.pointer,
+                                             null, 0,
+                                             this.nestingLimit);
+    }
+
+    public StructReader getStruct(SegmentReader defaultSegment, int defaultOffset) {
+        return WireHelpers.readStructPointer(this.segment,
+                                             this.pointer,
+                                             defaultSegment, defaultOffset,
+                                             this.nestingLimit);
     }
 
     public ListReader getList(byte expectedElementSize) {
-        if (this.segment == null) {
-            return WireHelpers.readListPointer(SegmentReader.EMPTY,
-                                               0,
-                                               expectedElementSize,
-                                               this.nestingLimit);
-        } else {
-            return WireHelpers.readListPointer(this.segment,
-                                               this.pointer,
-                                               expectedElementSize,
-                                               this.nestingLimit);
-        }
+        return WireHelpers.readListPointer(this.segment,
+                                           this.pointer,
+                                           expectedElementSize,
+                                           this.nestingLimit);
     }
 
     public Text.Reader getText() {

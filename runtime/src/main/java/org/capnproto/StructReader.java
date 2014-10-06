@@ -9,6 +9,16 @@ public final class StructReader {
     final byte bit0Offset;
     final int nestingLimit;
 
+    public StructReader() {
+        this.segment = SegmentReader.EMPTY;
+        this.data = 0;
+        this.pointers = 0;
+        this.dataSize = 0;
+        this.pointerCount = 0;
+        this.bit0Offset = 0;
+        this.nestingLimit = 0x7fffffff;
+    }
+
     public StructReader(SegmentReader segment, int data,
                         int pointers, int dataSize, short pointerCount,
                         byte bit0Offset, int nestingLimit) {
