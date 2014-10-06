@@ -25,11 +25,11 @@ public final class PointerBuilder {
         return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size, defaultBuffer, defaultOffset);
     }
 
-    public final ListBuilder getList(byte elementSize) {
+    public final ListBuilder getList(byte elementSize, SegmentReader defaultBuffer, int defaultOffset) {
         return WireHelpers.getWritableListPointer(this.pointer, this.segment, elementSize);
     }
 
-    public final ListBuilder getStructList(StructSize elementSize) {
+    public final ListBuilder getStructList(StructSize elementSize, SegmentReader defaultSegment, int defaultOffset) {
         throw new Error("unimplemented");
     }
 

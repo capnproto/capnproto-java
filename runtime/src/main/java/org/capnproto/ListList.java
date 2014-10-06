@@ -14,8 +14,8 @@ public final class ListList {
             return new Reader<ElementReader>(factory, reader.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
-        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {
-            return new Builder<ElementBuilder>(factory, builder.getList(FieldSize.POINTER));
+        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+            return new Builder<ElementBuilder>(factory, builder.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
         public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -61,7 +61,7 @@ public final class ListList {
         }
 
         public final T get(int index) {
-            return this.factory.fromPointerBuilder(this.builder.getPointerElement(index));
+            return this.factory.fromPointerBuilder(this.builder.getPointerElement(index), null, 0);
         }
     }
 }

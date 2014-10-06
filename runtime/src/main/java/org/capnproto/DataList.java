@@ -6,8 +6,8 @@ public final class DataList {
             return new Reader(reader.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
-        public final Builder fromPointerBuilder(PointerBuilder builder) {
-            return new Builder(builder.getList(FieldSize.POINTER));
+        public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+            return new Builder(builder.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
         }
 
         public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {

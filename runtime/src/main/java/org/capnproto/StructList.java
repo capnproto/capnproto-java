@@ -14,8 +14,8 @@ public final class StructList {
             return new Reader<ElementReader>(factory, reader.getList(FieldSize.INLINE_COMPOSITE, defaultSegment, defaultOffset));
         }
 
-        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {
-            return new Builder<ElementBuilder>(factory, builder.getStructList(this.factory.structSize()));
+        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+            return new Builder<ElementBuilder>(factory, builder.getStructList(this.factory.structSize(), defaultSegment, defaultOffset));
         }
 
         public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {

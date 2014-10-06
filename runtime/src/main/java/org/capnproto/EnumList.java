@@ -20,8 +20,8 @@ public class EnumList {
             return new Reader<T>(values, reader.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
         }
 
-        public final Builder<T> fromPointerBuilder(PointerBuilder builder) {
-            return new Builder<T>(values, builder.getList(FieldSize.TWO_BYTES));
+        public final Builder<T> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+            return new Builder<T>(values, builder.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
         }
 
         public final Builder<T> initFromPointerBuilder(PointerBuilder builder, int size) {

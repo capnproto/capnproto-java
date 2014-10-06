@@ -1081,7 +1081,8 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_builder.getPointerField(", offset, "));\n",
+            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_builder.getPointerField(", offset, "),",
+            defaultParams, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",

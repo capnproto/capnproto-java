@@ -7,8 +7,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.VOID, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.VOID));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.VOID, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -54,8 +54,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.BIT, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.BIT));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.BIT, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -107,8 +107,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.BYTE, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.BYTE));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.BYTE, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -161,8 +161,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.TWO_BYTES));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -215,8 +215,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.FOUR_BYTES));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -268,8 +268,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.FOUR_BYTES));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.FOUR_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -319,11 +319,11 @@ public class PrimitiveList {
     public static class Long {
         public static final class Factory implements ListFactory<Builder, Reader> {
             public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return new Reader(reader.getList(FieldSize.EIGHT_BYTES));
+                return new Reader(reader.getList(FieldSize.EIGHT_BYTES, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.EIGHT_BYTES));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.EIGHT_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
@@ -375,8 +375,8 @@ public class PrimitiveList {
                 return new Reader(reader.getList(FieldSize.EIGHT_BYTES, defaultSegment, defaultOffset));
             }
 
-            public final Builder fromPointerBuilder(PointerBuilder builder) {
-                return new Builder(builder.getList(FieldSize.EIGHT_BYTES));
+            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+                return new Builder(builder.getList(FieldSize.EIGHT_BYTES, defaultSegment, defaultOffset));
             }
 
             public final Builder initFromPointerBuilder(PointerBuilder builder, int size) {
