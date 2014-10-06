@@ -5,7 +5,6 @@ import org.scalatest.FunSuite
 import org.scalatest.Matchers._;
 
 class EncodingSuite extends FunSuite {
-
   test("AllTypes") {
     val message = new MessageBuilder();
     val allTypes = message.initRoot(TestAllTypes.factory);
@@ -142,8 +141,19 @@ class EncodingSuite extends FunSuite {
     (TestConstants.ENUM_CONST) should equal (TestEnum.CORGE);
     {
       val subReader = TestConstants.STRUCT_CONST;
-      //subReader.getBoolField() should equal (true);
-      //subReader.getInt8Field() should equal (-12);
+      subReader.getBoolField() should equal (true);
+      subReader.getInt8Field() should equal (-12);
+      subReader.getInt16Field() should equal(3456);
+      subReader.getInt32Field() should equal (-78901234);
+      subReader.getInt64Field() should equal (56789012345678L);
+      subReader.getUInt8Field() should equal (90);
+      subReader.getUInt16Field should equal (1234);
+      subReader.getUInt32Field() should equal (56789012);
+      subReader.getUInt64Field() should equal (345678901234567890L);
+      subReader.getFloat32Field() should equal (-1.25e-10f);
+      subReader.getFloat64Field() should equal (345);
+      subReader.getTextField().toString() should equal ("baz");
+      // ...
     }
 
   }

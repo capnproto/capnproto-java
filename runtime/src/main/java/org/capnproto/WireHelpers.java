@@ -414,13 +414,13 @@ final class WireHelpers {
     static StructReader readStructPointer(SegmentReader segment,
                                           int refOffset,
                                           int nestingLimit) {
-
         // TODO error handling. is_null
         if (nestingLimit <= 0) {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
 
         long ref = WirePointer.get(segment.buffer, refOffset);
+
         int refTarget = WirePointer.target(refOffset, ref);
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 

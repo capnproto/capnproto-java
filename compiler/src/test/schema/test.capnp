@@ -311,6 +311,7 @@ struct TestConstants {
           (textField = "x structlist 3")],
       enumList      = [qux, bar, grault]
       # interfaceList can't have a default
+
       );
 # ...
   const enumConst      :TestEnum = corge;
