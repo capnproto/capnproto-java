@@ -701,7 +701,11 @@ private:
                      typeName(elementType, kj::str(".Reader")), ">(",
                      typeName(elementType, kj::str("")), ".factory)");
     case schema::Type::LIST:
-      return makeListListFactoryArg(elementType);
+      return kj::str("new org.capnproto.ListList.Factory<",
+                     typeName(elementType, kj::str(".Builder")),", ",
+                     typeName(elementType, kj::str(".Reader")), ">(",
+                     makeListListFactoryArg(elementType),
+                     ")");
     case schema::Type::ENUM:
       return kj::str("new org.capnproto.EnumList.Factory<",
                      typeName(elementType), ">(",
@@ -1049,8 +1053,7 @@ private:
           ",\n        ::capnp::schemas::s_", kj::hex(typeId), ".encodedNode + ", defaultOffset,
           defaultSize == 0 ? kj::strTree() : kj::strTree(", ", defaultSize));
 
-      kj::String builderFactoryArg = kj::str("");
-      kj::String readerFactoryArg = kj::str("");
+      kj::String listFactory = makeListFactoryArg(typeBody);
       kj::String fieldSize;
       kj::String readerClass = kj::str(typeName(typeBody, kj::str(".Reader")));
       kj::String builderClass = kj::str(typeName(typeBody, kj::str(".Builder")));
@@ -1100,8 +1103,6 @@ private:
           case schema::Type::ENUM:
             primitiveElement = true;
             fieldSize = kj::str("org.capnproto.FieldSize.TWO_BYTES");
-            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType(), kj::str("")), ".values(), ");
-            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType(), nullptr), ".values(), ");
             break;
 
           case schema::Type::TEXT:
@@ -1115,8 +1116,6 @@ private:
           case schema::Type::LIST:
             primitiveElement = false;
             fieldSize = kj::str("org.capnproto.FieldSize.POINTER");
-            readerFactoryArg = kj::str(makeListListFactoryArg(typeBody.getList().getElementType()), ", ");
-            builderFactoryArg = kj::str(readerFactoryArg);
             break;
           case schema::Type::ANY_POINTER:
             primitiveElement = false;
@@ -1132,8 +1131,6 @@ private:
             isStructList = true;
             isStructOrCapList = true;
             primitiveElement = false;
-            readerFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
-            builderFactoryArg = kj::str(typeName(typeBody.getList().getElementType()), ".factory, ");
             fieldSize = kj::str(typeName(typeBody.getList().getElementType()),".STRUCT_SIZE.preferredListEncoding");
             break;
         }
@@ -1149,10 +1146,7 @@ private:
 
             spaces(indent), "  public final ", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", readerClass, "(\n",
-            spaces(indent), "      ", readerFactoryArg, "_reader.getPointerField(", offset, ").getList(",
-            fieldSize, ")",
-            ");\n",
+            spaces(indent), "    return (", listFactory, ").fromPointerReader(_reader.getPointerField(", offset, "));\n",
             spaces(indent), "  }\n",
             "\n"),
 
@@ -1164,12 +1158,7 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return new ", builderClass, " (\n",
-            spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").get",
-            (isStructList ?
-             kj::strTree("StructList(", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
-             kj::strTree("List(", fieldSize, ")")),
-            ");\n",
+            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_builder.getPointerField(", offset, "));\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
@@ -1178,12 +1167,7 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return new ", builderClass, "(\n",
-            spaces(indent), "      ", builderFactoryArg, "_builder.getPointerField(", offset, ").init",
-            (isStructList ?
-             kj::strTree("StructList(size,", typeName(typeBody.getList().getElementType()),".STRUCT_SIZE)") :
-             kj::strTree("List(", fieldSize, ", size)")),
-            ");\n",
+            spaces(indent), "    return (", listFactory, ").initFromPointerBuilder(_builder.getPointerField(", offset, "), size);\n",
             spaces(indent), "  }\n"),
       };
     } else {

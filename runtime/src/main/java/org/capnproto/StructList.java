@@ -15,11 +15,11 @@ public final class StructList {
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder) {
-            return new Builder<ElementBuilder>(factory, builder.getList(FieldSize.INLINE_COMPOSITE));
+            return new Builder<ElementBuilder>(factory, builder.getStructList(this.factory.structSize()));
         }
 
         public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {
-            return new Builder<ElementBuilder>(factory, builder.initList(FieldSize.INLINE_COMPOSITE, size));
+            return new Builder<ElementBuilder>(factory, builder.initStructList(size, this.factory.structSize()));
         }
     }
 
