@@ -313,8 +313,28 @@ struct TestConstants {
       # interfaceList can't have a default
 
       );
-# ...
   const enumConst      :TestEnum = corge;
+
+  const voidListConst      :List(Void)    = [void, void, void, void, void, void];
+  const boolListConst      :List(Bool)    = [true, false, false, true];
+  const int8ListConst      :List(Int8)    = [111, -111];
+  const int16ListConst     :List(Int16)   = [11111, -11111];
+  const int32ListConst     :List(Int32)   = [111111111, -111111111];
+  const int64ListConst     :List(Int64)   = [1111111111111111111, -1111111111111111111];
+  const uint8ListConst     :List(UInt8)   = [111, 222] ;
+  const uint16ListConst    :List(UInt16)  = [33333, 44444];
+  const uint32ListConst    :List(UInt32)  = [3333333333];
+  const uint64ListConst    :List(UInt64)  = [11111111111111111111];
+  const float32ListConst   :List(Float32) = [5555.5, inf, -inf, nan];
+  const float64ListConst   :List(Float64) = [7777.75, inf, -inf, nan];
+  const textListConst      :List(Text)    = ["plugh", "xyzzy", "thud"];
+  const dataListConst      :List(Data)    = ["oops", "exhausted", "rfc3092"];
+  const structListConst    :List(TestAllTypes) = [
+      (textField = "structlist 1"),
+      (textField = "structlist 2"),
+      (textField = "structlist 3")];
+  const enumListConst      :List(TestEnum) = [foo, garply];
+
 }
 
 const globalInt :UInt32 = 12345;

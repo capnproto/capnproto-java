@@ -692,6 +692,27 @@ private:
     }
   }
 
+  kj::String makeListFactoryArg(schema::Type::Reader type) {
+    auto elementType = type.getList().getElementType();
+    switch (elementType.which()) {
+    case schema::Type::STRUCT:
+      return kj::str("new org.capnproto.StructList.Factory<",
+                     typeName(elementType, kj::str(".Builder")),", ",
+                     typeName(elementType, kj::str(".Reader")), ">(",
+                     typeName(elementType, kj::str("")), ".factory)");
+    case schema::Type::LIST:
+      return makeListListFactoryArg(elementType);
+    case schema::Type::ENUM:
+      return kj::str("new org.capnproto.EnumList.Factory<",
+                     typeName(elementType), ">(",
+                     typeName(elementType, kj::str("")),
+                     ".values())");
+    default:
+      return kj::str(typeName(type, kj::str(".factory")));
+    }
+
+  }
+
   FieldText makeFieldText(kj::StringPtr scope, StructSchema::Field field, int indent) {
     auto proto = field.getProto();
     kj::String titleCase = toTitleCase(proto.getName());
@@ -1363,19 +1384,23 @@ private:
         return ConstText {
           true,
             kj::strTree(spaces(indent),
-                        "public static final ", typeName_, ".Reader ", upperCase, "=\n",
+                        "public static final ", typeName_, ".Reader ", upperCase, " =\n",
                         spaces(indent), "  new ", typeName_, ".Reader((new org.capnproto.PointerReader(Schemas.b_",
                         kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getStruct());\n")
         };
       }
 
       case schema::Value::LIST: {
-        kj::String constType = kj::strTree(
-            "::capnp::_::ConstList<", typeName(type.getList().getElementType()), ">").flatten();
+        kj::String constType = typeName(type, kj::str(".Reader")).flatten();;
         return ConstText {
           true,
-          kj::strTree("const ", constType, ' ', scope, upperCase, "(::capnp::schemas::b_",
-                      kj::hex(proto.getId()), ".words + ", schema.getValueSchemaOffset(), ");\n")
+          kj::strTree(
+            spaces(indent),
+            "public static final ", constType, ' ', upperCase, " =\n",
+            spaces(indent), " (",
+            "new org.capnproto.AnyPointer.Reader(new org.capnproto.PointerReader(Schemas.b_",
+            kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getAsList(",
+            makeListFactoryArg(type), "));\n")
         };
       }
 

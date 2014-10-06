@@ -12,6 +12,10 @@ public final class AnyPointer {
         public final <T> T getAsStruct(FromStructReader<T> factory) {
             return factory.fromStructReader(this.reader.getStruct());
         }
+
+        public final <T> T getAsList(FromPointerReader<T> factory) {
+            return factory.fromPointerReader(this.reader);
+        }
     }
 
     public static final class Builder {

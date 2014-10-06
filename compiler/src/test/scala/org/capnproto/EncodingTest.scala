@@ -156,6 +156,34 @@ class EncodingSuite extends FunSuite {
       // ...
     }
 
+    TestConstants.VOID_LIST_CONST.size() should equal (6);
+
+    {
+      val listReader = TestConstants.BOOL_LIST_CONST;
+      listReader.size() should equal (4);
+      listReader.get(0) should equal (true);
+      listReader.get(1) should equal (false);
+      listReader.get(2) should equal (false);
+      listReader.get(3) should equal (true);
+    }
+
+    // ...
+    {
+      val listReader = TestConstants.TEXT_LIST_CONST;
+      listReader.size() should equal(3);
+      listReader.get(0).toString() should equal ("plugh");
+      listReader.get(1).toString() should equal ("xyzzy");
+      listReader.get(2).toString() should equal ("thud");
+    }
+
+    {
+      val listReader = TestConstants.STRUCT_LIST_CONST;
+      listReader.size() should equal(3);
+      listReader.get(0).getTextField().toString() should equal ("structlist 1");
+      listReader.get(1).getTextField().toString() should equal ("structlist 2");
+      listReader.get(2).getTextField().toString() should equal ("structlist 3");
+    }
+
   }
 
   test("GlobalConstants") {
