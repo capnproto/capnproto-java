@@ -273,6 +273,8 @@ object TestUtil {
 
     }
 
+    reader.getEnumField() should equal (TestEnum.CORGE);
+
     reader.getVoidList().size() should equal (6);
     {
       val listReader = reader.getBoolList();
