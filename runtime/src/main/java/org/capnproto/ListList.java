@@ -10,58 +10,82 @@ public final class ListList {
             this.factory = factory;
         }
 
+        public final Reader<ElementReader> constructReader(SegmentReader segment,
+                                                             int ptr,
+                                                             int elementCount, int step,
+                                                             int structDataSize, short structPointerCount,
+                                                             int nestingLimit) {
+            return new Reader<ElementReader>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+
+        public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
+                                                              int ptr,
+                                                              int elementCount, int step,
+                                                              int structDataSize, short structPointerCount) {
+            return new Builder<ElementBuilder>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+        }
+
         public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return new Reader<ElementReader>(factory, reader.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
+            return WireHelpers.readListPointer(this,
+                                               reader.segment,
+                                               reader.pointer,
+                                               defaultSegment,
+                                               defaultOffset,
+                                               FieldSize.POINTER,
+                                               reader.nestingLimit);
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return new Builder<ElementBuilder>(factory, builder.getList(FieldSize.POINTER, defaultSegment, defaultOffset));
+            return WireHelpers.getWritableListPointer(this,
+                                                      builder.pointer,
+                                                      builder.segment,
+                                                      FieldSize.POINTER,
+                                                      defaultSegment,
+                                                      defaultOffset);
         }
 
-        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {
-            return new Builder<ElementBuilder>(factory, builder.initList(FieldSize.POINTER, size));
+        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder,
+                                                                    int elementCount) {
+            return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.POINTER);
         }
     }
 
-
-    public static final class Reader<T> {
-        public final ListReader reader;
+    public static final class Reader<T> extends ListReader {
         private final FromPointerReader<T> factory;
 
-        public Reader(FromPointerReader<T> factory, ListReader reader) {
+        public Reader(FromPointerReader<T> factory,
+                      SegmentReader segment,
+                      int ptr,
+                      int elementCount, int step,
+                      int structDataSize, short structPointerCount,
+                      int nestingLimit) {
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             this.factory = factory;
-            this.reader = reader;
-        }
-
-        public final int size() {
-            return this.reader.size();
         }
 
         public T get(int index) {
-            return this.factory.fromPointerReader(this.reader.getPointerElement(index), null, 0);
+            return this.factory.fromPointerReader(_getPointerElement(index), null, 0);
         }
 
     }
 
-    public static final class Builder<T> {
-        public final ListBuilder builder;
+    public static final class Builder<T> extends ListBuilder {
         private final FromPointerBuilder<T> factory;
 
-        public Builder(FromPointerBuilder<T> factory, ListBuilder builder) {
+        public Builder(FromPointerBuilder<T> factory,
+                       SegmentBuilder segment, int ptr,
+                       int elementCount, int step,
+                       int structDataSize, short structPointerCount){
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             this.factory = factory;
-            this.builder = builder;
-        }
-
-        public final int size() {
-            return this.builder.size();
         }
 
         public final T init(int index, int size) {
-            return this.factory.initFromPointerBuilder(this.builder.getPointerElement(index), size);
+            return this.factory.initFromPointerBuilder(_getPointerElement(index), size);
         }
 
         public final T get(int index) {
-            return this.factory.fromPointerBuilder(this.builder.getPointerElement(index), null, 0);
+            return this.factory.fromPointerBuilder(_getPointerElement(index), null, 0);
         }
     }
 }

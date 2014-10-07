@@ -10,34 +10,65 @@ public final class StructList {
             this.factory = factory;
         }
 
+        public final Reader<ElementReader> constructReader(SegmentReader segment,
+                                                           int ptr,
+                                                           int elementCount, int step,
+                                                           int structDataSize, short structPointerCount,
+                                                           int nestingLimit) {
+            return new Reader<ElementReader>(factory,
+                                             segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+
+        public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
+                                                              int ptr,
+                                                              int elementCount, int step,
+                                                              int structDataSize, short structPointerCount) {
+            return new Builder<ElementBuilder> (factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+        }
+
         public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return new Reader<ElementReader>(factory, reader.getList(FieldSize.INLINE_COMPOSITE, defaultSegment, defaultOffset));
+            return WireHelpers.readListPointer(this,
+                                               reader.segment,
+                                               reader.pointer,
+                                               defaultSegment,
+                                               defaultOffset,
+                                               FieldSize.INLINE_COMPOSITE,
+                                               reader.nestingLimit);
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return new Builder<ElementBuilder>(factory, builder.getStructList(this.factory.structSize(), defaultSegment, defaultOffset));
+            throw new Error();
+            /*         return WireHelpers.getWritableStructListPointer(this,
+                                                            builder.pointer,
+                                                            builder.segment,
+                                                            FieldSize.POINTER,
+                                                            defaultSegment,
+                                                            defaultOffset,0); */
         }
 
-        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder, int size) {
-            return new Builder<ElementBuilder>(factory, builder.initStructList(size, this.factory.structSize()));
+        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder,
+                                                                    int elementCount) {
+            return WireHelpers.initStructListPointer(this, builder.pointer, builder.segment, elementCount, factory.structSize());
         }
+
+
     }
 
-    public static final class Reader<T> implements Iterable<T> {
-        public final ListReader reader;
+    public static final class Reader<T> extends ListReader implements Iterable<T> {
         public final FromStructReader<T> factory;
 
-        public Reader(FromStructReader<T> factory, ListReader reader) {
-            this.reader = reader;
+        public Reader(FromStructReader<T> factory,
+                      SegmentReader segment,
+                      int ptr,
+                      int elementCount, int step,
+                      int structDataSize, short structPointerCount,
+                      int nestingLimit) {
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             this.factory = factory;
         }
 
-        public int size() {
-            return this.reader.size();
-        }
-
         public T get(int index) {
-            return this.reader.getStructElement(factory, index);
+            return _getStructElement(factory, index);
         }
 
 
@@ -49,7 +80,7 @@ public final class StructList {
             }
 
             public T next() {
-                return list.reader.getStructElement(factory, idx++);
+                return list._getStructElement(factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();
@@ -64,29 +95,20 @@ public final class StructList {
         }
     }
 
-    public static final class Builder<T> implements Iterable<T> {
-        public final ListBuilder builder;
+    public static final class Builder<T> extends ListBuilder implements Iterable<T> {
         public final FromStructBuilder<T> factory;
 
-        public Builder(FromStructBuilder<T> factory, ListBuilder builder) {
-            this.builder = builder;
+        public Builder(FromStructBuilder<T> factory,
+                       SegmentBuilder segment, int ptr,
+                       int elementCount, int step,
+                       int structDataSize, short structPointerCount){
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             this.factory = factory;
-        }
-
-        // init
-        Builder(FromStructBuilder<T> factory, PointerBuilder builder, int size) {
-            this.builder = builder.initStructList(size, factory.structSize());
-            this.factory = factory;
-        }
-
-        public int size() {
-            return this.builder.size();
         }
 
         public final T get(int index) {
-            return this.builder.getStructElement(factory, index);
+            return _getStructElement(factory, index);
         }
-
 
         public final class Iterator implements java.util.Iterator<T> {
             public Builder<T> list;
@@ -96,7 +118,7 @@ public final class StructList {
             }
 
             public T next() {
-                return list.builder.getStructElement(factory, idx++);
+                return list._getStructElement(factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();
@@ -109,8 +131,5 @@ public final class StructList {
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
         }
-
-
     }
-
 }

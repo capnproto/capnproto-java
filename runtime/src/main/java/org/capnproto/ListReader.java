@@ -1,6 +1,6 @@
 package org.capnproto;
 
-public final class ListReader {
+public class ListReader {
     final SegmentReader segment;
     final int ptr; // byte offset to front of list
     final int elementCount;
@@ -37,36 +37,36 @@ public final class ListReader {
         return this.elementCount;
     }
 
-    public boolean getBooleanElement(int index) {
+    protected boolean _getBooleanElement(int index) {
         byte b = this.segment.buffer.get(this.ptr + index / 8);
         return (b & (1 << (index % 8))) != 0;
     }
 
-    public byte getByteElement(int index) {
+    protected byte _getByteElement(int index) {
         return this.segment.buffer.get(this.ptr + index);
     }
 
-    public short getShortElement(int index) {
+    protected short _getShortElement(int index) {
         return this.segment.buffer.getShort(this.ptr + index * 2);
     }
 
-    public int getIntElement(int index) {
+    protected int _getIntElement(int index) {
         return this.segment.buffer.getInt(this.ptr + index * 4);
     }
 
-    public long getLongElement(int index) {
+    protected long _getLongElement(int index) {
         return this.segment.buffer.getLong(this.ptr + index * 8);
     }
 
-    public float getFloatElement(int index) {
+    protected float _getFloatElement(int index) {
         return this.segment.buffer.getFloat(this.ptr + index * 4);
     }
 
-    public double getDoubleElement(int index) {
+    protected double _getDoubleElement(int index) {
         return this.segment.buffer.getDouble(this.ptr + index * 8);
     }
 
-    public <T> T getStructElement(FromStructReader<T> factory, int index) {
+    protected <T> T _getStructElement(FromStructReader<T> factory, int index) {
         // TODO check nesting limit
 
         int indexBit = index * this.step;
@@ -78,7 +78,7 @@ public final class ListReader {
                                         this.structPointerCount, (byte) (indexBit % 8), this.nestingLimit - 1);
     }
 
-    public PointerReader getPointerElement(int index) {
+    protected PointerReader _getPointerElement(int index) {
         return new PointerReader(this.segment,
                                  (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
                                  this.nestingLimit);

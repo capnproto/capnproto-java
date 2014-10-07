@@ -188,10 +188,11 @@ final class WireHelpers {
 
     }
 
-    static ListBuilder initListPointer(int refOffset,
-                                       SegmentBuilder segment,
-                                       int elementCount,
-                                       byte elementSize) {
+    static <T> T initListPointer(FromPointerBuilder<T> factory,
+                                 int refOffset,
+                                 SegmentBuilder segment,
+                                 int elementCount,
+                                 byte elementSize) {
         assert elementSize != FieldSize.INLINE_COMPOSITE : "Should have called initStructListPointer instead";
 
         int dataSize = FieldSize.dataBitsPerElement(elementSize);
@@ -202,18 +203,19 @@ final class WireHelpers {
 
         ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, elementCount);
 
-        return new ListBuilder(allocation.segment,
-                               allocation.ptr * Constants.BYTES_PER_WORD,
-                               elementCount, step, dataSize, (short)pointerCount);
+        return factory.constructBuilder(allocation.segment,
+                                          allocation.ptr * Constants.BYTES_PER_WORD,
+                                          elementCount, step, dataSize, (short)pointerCount);
     }
 
-    static ListBuilder initStructListPointer(int refOffset,
-                                             SegmentBuilder segment,
-                                             int elementCount,
-                                             StructSize elementSize) {
+    static <T> T initStructListPointer(FromPointerBuilder<T> factory,
+                                       int refOffset,
+                                       SegmentBuilder segment,
+                                       int elementCount,
+                                       StructSize elementSize) {
         if (elementSize.preferredListEncoding != FieldSize.INLINE_COMPOSITE) {
             //# Small data-only struct. Allocate a list of primitives instead.
-            return initListPointer(refOffset, segment, elementCount,
+            return initListPointer(factory, refOffset, segment, elementCount,
                                    elementSize.preferredListEncoding);
         }
 
@@ -230,15 +232,18 @@ final class WireHelpers {
                                                               WirePointer.STRUCT, elementCount);
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.ptr, elementSize);
 
-        return new ListBuilder(allocation.segment,
-                               (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
-                               elementCount, wordsPerElement * Constants.BITS_PER_WORD,
-                               elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
+        return factory.constructBuilder(allocation.segment,
+                                          (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
+                                          elementCount, wordsPerElement * Constants.BITS_PER_WORD,
+                                          elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
-    static ListBuilder getWritableListPointer(int origRefOffset,
-                                              SegmentBuilder origSegment,
-                                              byte elementSize) {
+    static <T> T getWritableListPointer(FromPointerBuilder<T> factory,
+                                        int origRefOffset,
+                                        SegmentBuilder origSegment,
+                                        byte elementSize,
+                                        SegmentReader defaultSegment,
+                                        int defaultOffset) {
         assert elementSize != FieldSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
 
         long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
@@ -285,9 +290,9 @@ final class WireHelpers {
 
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            return new ListBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
-                                   ListPointer.elementCount(resolved.ref),
-                                   step, dataSize, (short) pointerCount);
+            return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                            ListPointer.elementCount(resolved.ref),
+                                            step, dataSize, (short) pointerCount);
         }
     }
 
@@ -498,18 +503,19 @@ final class WireHelpers {
         throw new Error("copyPointer is unimplemented");
     }
 
-    static ListReader readListPointer(SegmentReader segment,
-                                      int refOffset,
-                                      SegmentReader defaultSegment,
-                                      int defaultOffset,
-                                      byte expectedElementSize,
-                                      int nestingLimit) {
+    static <T> T readListPointer(FromPointerReader<T> factory,
+                                 SegmentReader segment,
+                                 int refOffset,
+                                 SegmentReader defaultSegment,
+                                 int defaultOffset,
+                                 byte expectedElementSize,
+                                 int nestingLimit) {
 
         long ref = WirePointer.get(segment.buffer, refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return new ListReader();
+                factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fffffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -542,13 +548,13 @@ final class WireHelpers {
 
             // TODO check whether the size is compatible
 
-            return new ListReader(resolved.segment,
-                                  ptr * Constants.BYTES_PER_WORD,
-                                  size,
-                                  wordsPerElement * Constants.BITS_PER_WORD,
-                                  StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
-                                  StructPointer.ptrCount(tag),
-                                  nestingLimit - 1);
+            return factory.constructReader(resolved.segment,
+                                             ptr * Constants.BYTES_PER_WORD,
+                                             size,
+                                             wordsPerElement * Constants.BITS_PER_WORD,
+                                             StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
+                                             StructPointer.ptrCount(tag),
+                                             nestingLimit - 1);
         }
         default : {
             //# This is a primitive or pointer list, but all such
@@ -580,13 +586,13 @@ final class WireHelpers {
                 throw new DecodeException("Message contains list with incompatible element type.");
             }
 
-            return new ListReader(resolved.segment,
-                                  resolved.ptr * Constants.BYTES_PER_WORD,
-                                  ListPointer.elementCount(resolved.ref),
-                                  step,
-                                  dataSize,
-                                  (short)pointerCount,
-                                  nestingLimit - 1);
+            return factory.constructReader(resolved.segment,
+                                             resolved.ptr * Constants.BYTES_PER_WORD,
+                                             ListPointer.elementCount(resolved.ref),
+                                             step,
+                                             dataSize,
+                                             (short)pointerCount,
+                                             nestingLimit - 1);
         }
         }
     }

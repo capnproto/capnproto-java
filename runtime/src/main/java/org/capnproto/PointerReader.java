@@ -44,24 +44,6 @@ public final class PointerReader {
                                              this.nestingLimit);
     }
 
-    public ListReader getList(byte expectedElementSize) {
-        return WireHelpers.readListPointer(this.segment,
-                                           this.pointer,
-                                           null, 0,
-                                           expectedElementSize,
-                                           this.nestingLimit);
-    }
-
-
-    public ListReader getList(byte expectedElementSize, SegmentReader defaultSegment, int defaultOffset) {
-        return WireHelpers.readListPointer(this.segment,
-                                           this.pointer,
-                                           defaultSegment,
-                                           defaultOffset,
-                                           expectedElementSize,
-                                           this.nestingLimit);
-    }
-
     public Text.Reader getText() {
         return WireHelpers.readTextPointer(this.segment, this.pointer, null, 0, 0);
     }

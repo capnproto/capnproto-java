@@ -15,57 +15,82 @@ public class EnumList {
         public Factory(T values[]) {
             this.values = values;
         }
+        public final Reader<T> constructReader(SegmentReader segment,
+                                               int ptr,
+                                               int elementCount, int step,
+                                               int structDataSize, short structPointerCount,
+                                               int nestingLimit) {
+            return new Reader<T>(values,
+                                 segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+
+        public final Builder<T> constructBuilder(SegmentBuilder segment,
+                                                 int ptr,
+                                                 int elementCount, int step,
+                                                 int structDataSize, short structPointerCount) {
+            return new Builder<T> (values, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+        }
 
         public final Reader<T> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return new Reader<T>(values, reader.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
+            return WireHelpers.readListPointer(this,
+                                               reader.segment,
+                                               reader.pointer,
+                                               defaultSegment,
+                                               defaultOffset,
+                                               FieldSize.TWO_BYTES,
+                                               reader.nestingLimit);
         }
 
         public final Builder<T> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return new Builder<T>(values, builder.getList(FieldSize.TWO_BYTES, defaultSegment, defaultOffset));
+            return WireHelpers.getWritableListPointer(this,
+                                                      builder.pointer,
+                                                      builder.segment,
+                                                      FieldSize.TWO_BYTES,
+                                                      defaultSegment,
+                                                      defaultOffset);
         }
 
-        public final Builder<T> initFromPointerBuilder(PointerBuilder builder, int size) {
-            return new Builder<T>(values, builder.initList(FieldSize.TWO_BYTES, size));
-        }
-    }
-
-    public static final class Reader<T extends java.lang.Enum> {
-        public final ListReader reader;
-        public final T values[];
-
-        public Reader(T values[], ListReader reader) {
-            this.reader = reader;
-            this.values = values;
-        }
-
-        public int size() {
-            return this.reader.size();
-        }
-
-        public T get(int index) {
-            return clampOrdinal(this.values, this.reader.getShortElement(index));
+        public final Builder<T> initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.TWO_BYTES);
         }
     }
 
-    public static final class Builder<T extends java.lang.Enum> {
-        public final ListBuilder builder;
+    public static final class Reader<T extends java.lang.Enum> extends ListReader {
         public final T values[];
 
-        public Builder(T values[], ListBuilder builder) {
-            this.builder = builder;
+        public Reader(T values[],
+                      SegmentReader segment,
+                      int ptr,
+                      int elementCount, int step,
+                      int structDataSize, short structPointerCount,
+                      int nestingLimit) {
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             this.values = values;
         }
 
-        public int size() {
-            return this.builder.size();
+        public T get(int index) {
+            return clampOrdinal(this.values, _getShortElement(index));
+        }
+    }
+
+    public static final class Builder<T extends java.lang.Enum> extends ListBuilder {
+        public final T values[];
+
+        public Builder(T values[],
+                       SegmentBuilder segment,
+                       int ptr,
+                       int elementCount, int step,
+                       int structDataSize, short structPointerCount) {
+            super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            this.values = values;
         }
 
         public T get(int index) {
-            return clampOrdinal(this.values, this.builder.getShortElement(index));
+            return clampOrdinal(this.values, _getShortElement(index));
         }
 
         public void set(int index, T value) {
-            this.builder.setShortElement(index, (short)value.ordinal());
+            _setShortElement(index, (short)value.ordinal());
         }
     }
 }

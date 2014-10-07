@@ -27,14 +27,6 @@ public final class PointerBuilder {
                                                     defaultReader, defaultOffset);
     }
 
-    public final ListBuilder getList(byte elementSize, SegmentReader defaultBuffer, int defaultOffset) {
-        return WireHelpers.getWritableListPointer(this.pointer, this.segment, elementSize);
-    }
-
-    public final ListBuilder getStructList(StructSize elementSize, SegmentReader defaultSegment, int defaultOffset) {
-        throw new Error("unimplemented");
-    }
-
     public final Text.Builder getText() {
         return WireHelpers.getWritableTextPointer(
             this.pointer, this.segment, null, 0, 0);
@@ -64,14 +56,6 @@ public final class PointerBuilder {
 
     public final <T> T initStruct(FromStructBuilder<T> factory) {
         return WireHelpers.initStructPointer(factory, this.pointer, this.segment, factory.structSize());
-    }
-
-    public final ListBuilder initList(byte elementSize, int elementCount) {
-        return WireHelpers.initListPointer(this.pointer, this.segment, elementCount, elementSize);
-    }
-
-    public final ListBuilder initStructList(int elementCount, StructSize elementSize) {
-        return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
     }
 
     public final Text.Builder initText(int size) {

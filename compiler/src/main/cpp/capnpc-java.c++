@@ -1089,7 +1089,7 @@ private:
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
-            spaces(indent), "    _getPointerField(", offset, ").setList(value.reader);\n",
+            spaces(indent), "    _getPointerField(", offset, ").setList(value);\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,
@@ -1137,7 +1137,7 @@ private:
                                int indent) {
     return kj::strTree(
       spaces(indent), "public static final class Reader extends org.capnproto.StructReader {\n",
-      spaces(indent), "  public Reader(org.capnproto.SegmentReader segment, int data, int pointers,",
+      spaces(indent), "  Reader(org.capnproto.SegmentReader segment, int data, int pointers,",
       "int dataSize, short pointerCount, byte bit0Offset, int nestingLimit){\n",
       spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount, bit0Offset, nestingLimit);\n",
       spaces(indent), "  }\n",
@@ -1153,7 +1153,7 @@ private:
                                 int indent) {
     return kj::strTree(
       spaces(indent), "public static final class Builder extends org.capnproto.StructBuilder {\n",
-      spaces(indent), "  public Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,",
+      spaces(indent), "  Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,",
       "int dataSize, short pointerCount, byte bit0Offset){\n",
       spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
       spaces(indent), "  }\n",
