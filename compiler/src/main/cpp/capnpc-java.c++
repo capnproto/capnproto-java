@@ -1303,8 +1303,10 @@ private:
           true,
             kj::strTree(spaces(indent),
                         "public static final ", typeName_, ".Reader ", upperCase, " =\n",
-                        spaces(indent), "  new ", typeName_, ".Reader((new org.capnproto.PointerReader(Schemas.b_",
-                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getStruct());\n")
+                        spaces(indent), "  ",
+                        "(new org.capnproto.PointerReader(Schemas.b_",
+                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getStruct(",
+                        typeName_, ".factory"");\n")
         };
       }
 

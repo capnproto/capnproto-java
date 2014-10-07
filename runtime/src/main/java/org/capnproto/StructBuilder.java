@@ -25,7 +25,7 @@ public class StructBuilder {
         return (this.segment.buffer.get(position) & (1 << (bitOffset % 8))) != 0;
     }
 
-    protected final boolean getBooleanField(int offset, boolean mask) {
+    protected final boolean _getBooleanField(int offset, boolean mask) {
         return this._getBooleanField(offset) ^ mask;
     }
 

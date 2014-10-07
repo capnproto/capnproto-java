@@ -2,7 +2,16 @@ package org.capnproto;
 
 import org.scalatest.FunSuite
 
+
 class LayoutSuite extends FunSuite {
+
+  class BareStructReader extends FromStructReader[StructReader] {
+    def fromStructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
+                         dataSize: Int, pointerCount: Short, bit0Offset: Byte, nestingLimit:Int) : StructReader = {
+      return new StructReader(segment,data,pointers,dataSize,pointerCount,bit0Offset,nestingLimit);
+    }
+  }
+
 
   test("SimpleRawDataStruct") {
     val data : Array[Byte] =
@@ -15,77 +24,90 @@ class LayoutSuite extends FunSuite {
 
     val arena = new ReaderArena(Array(buffer));
     val pointerReader = new PointerReader(arena.tryGetSegment(0), 0, 0x7fffffff);
-    val reader = pointerReader.getStruct();
+    val reader = pointerReader.getStruct(new BareStructReader());
 
     assert(reader._getLongField(0) === 0xefcdab8967452301L);
     assert(reader._getLongField(1) === 0L);
 
-    assert(reader.getIntField(0) === 0x67452301);
-    assert(reader.getIntField(1) === 0xefcdab89);
-    assert(reader.getIntField(2) === 0);
-    assert(reader.getShortField(0) === 0x2301.toShort);
-    assert(reader.getShortField(1) === 0x6745.toShort);
-    assert(reader.getShortField(2) === 0xab89.toShort);
-    assert(reader.getShortField(3) === 0xefcd.toShort);
-    assert(reader.getShortField(4) === 0.toShort);
+    assert(reader._getIntField(0) === 0x67452301);
+    assert(reader._getIntField(1) === 0xefcdab89);
+    assert(reader._getIntField(2) === 0);
+    assert(reader._getShortField(0) === 0x2301.toShort);
+    assert(reader._getShortField(1) === 0x6745.toShort);
+    assert(reader._getShortField(2) === 0xab89.toShort);
+    assert(reader._getShortField(3) === 0xefcd.toShort);
+    assert(reader._getShortField(4) === 0.toShort);
 
     // TODO masking
 
-    assert(reader.getBooleanField(0) === true);
-    assert(reader.getBooleanField(1) === false);
-    assert(reader.getBooleanField(2) === false);
+    assert(reader._getBooleanField(0) === true);
+    assert(reader._getBooleanField(1) === false);
+    assert(reader._getBooleanField(2) === false);
 
-    assert(reader.getBooleanField(3) === false);
-    assert(reader.getBooleanField(4) === false);
-    assert(reader.getBooleanField(5) === false);
-    assert(reader.getBooleanField(6) === false);
-    assert(reader.getBooleanField(7) == false);
+    assert(reader._getBooleanField(3) === false);
+    assert(reader._getBooleanField(4) === false);
+    assert(reader._getBooleanField(5) === false);
+    assert(reader._getBooleanField(6) === false);
+    assert(reader._getBooleanField(7) == false);
 
-    assert(reader.getBooleanField(8) === true);
-    assert(reader.getBooleanField(9) === true);
-    assert(reader.getBooleanField(10) === false);
-    assert(reader.getBooleanField(11) === false);
-    assert(reader.getBooleanField(12) === false);
-    assert(reader.getBooleanField(13) === true);
-    assert(reader.getBooleanField(14) === false);
-    assert(reader.getBooleanField(15) === false);
+    assert(reader._getBooleanField(8) === true);
+    assert(reader._getBooleanField(9) === true);
+    assert(reader._getBooleanField(10) === false);
+    assert(reader._getBooleanField(11) === false);
+    assert(reader._getBooleanField(12) === false);
+    assert(reader._getBooleanField(13) === true);
+    assert(reader._getBooleanField(14) === false);
+    assert(reader._getBooleanField(15) === false);
 
-    assert(reader.getBooleanField(63) === true);
-    assert(reader.getBooleanField(64) === false);
+    assert(reader._getBooleanField(63) === true);
+    assert(reader._getBooleanField(64) === false);
 
     // TODO masking
 
   }
 
   def setupStruct(builder : StructBuilder) = {
-    builder.setLongField(0, 0x1011121314151617L);
-    builder.setIntField(2, 0x20212223);
-    builder.setShortField(6, 0x3031.toShort);
-    builder.setByteField(14, 0x40);
-    builder.setBooleanField(120, false);
-    builder.setBooleanField(121, false);
-    builder.setBooleanField(122, true);
-    builder.setBooleanField(123, false);
-    builder.setBooleanField(124, true);
-    builder.setBooleanField(125, true);
-    builder.setBooleanField(126, true);
-    builder.setBooleanField(127, false);
+    builder._setLongField(0, 0x1011121314151617L);
+    builder._setIntField(2, 0x20212223);
+    builder._setShortField(6, 0x3031.toShort);
+    builder._setByteField(14, 0x40);
+    builder._setBooleanField(120, false);
+    builder._setBooleanField(121, false);
+    builder._setBooleanField(122, true);
+    builder._setBooleanField(123, false);
+    builder._setBooleanField(124, true);
+    builder._setBooleanField(125, true);
+    builder._setBooleanField(126, true);
+    builder._setBooleanField(127, false);
   }
 
   def checkStruct(builder : StructBuilder) {
-    assert(0x1011121314151617L === builder.getLongField(0));
-    assert(0x20212223 == builder.getIntField(2));
-    assert(0x3031 === builder.getShortField(6));
-    assert(0x40 === builder.getByteField(14));
-    assert(false === builder.getBooleanField(120));
-    assert(false === builder.getBooleanField(121));
-    assert(true === builder.getBooleanField(122));
-    assert(false === builder.getBooleanField(123));
-    assert(true === builder.getBooleanField(124));
-    assert(true === builder.getBooleanField(125));
-    assert(true === builder.getBooleanField(126));
-    assert(false === builder.getBooleanField(127));
+    assert(0x1011121314151617L === builder._getLongField(0));
+    assert(0x20212223 == builder._getIntField(2));
+    assert(0x3031 === builder._getShortField(6));
+    assert(0x40 === builder._getByteField(14));
+    assert(false === builder._getBooleanField(120));
+    assert(false === builder._getBooleanField(121));
+    assert(true === builder._getBooleanField(122));
+    assert(false === builder._getBooleanField(123));
+    assert(true === builder._getBooleanField(124));
+    assert(true === builder._getBooleanField(125));
+    assert(true === builder._getBooleanField(126));
+    assert(false === builder._getBooleanField(127));
   }
+
+
+  class BareStructBuilder(structSize : StructSize) extends FromStructBuilder[StructBuilder] {
+
+    def fromStructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
+                          dataSize: Int, pointerCount: Short, bit0Offset: Byte) : StructBuilder = {
+      return new StructBuilder(segment,data,pointers,dataSize,pointerCount,bit0Offset);
+    }
+    def structSize() : StructSize = {
+      return structSize;
+    }
+  }
+
 
   test("StructRoundTrip_OneSegment") {
     val buffer = java.nio.ByteBuffer.allocate(1024 * 8);
@@ -95,7 +117,7 @@ class LayoutSuite extends FunSuite {
       new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
                                                   BuilderArena.SUGGESTED_ALLOCATION_STRATEGY)),
       0);
-    val builder = pointerBuilder.initStruct(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE));
+    val builder = pointerBuilder.initStruct(new BareStructBuilder(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE)));
     setupStruct(builder);
 
     checkStruct(builder);
