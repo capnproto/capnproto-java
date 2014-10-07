@@ -17,8 +17,8 @@ class LayoutSuite extends FunSuite {
     val pointerReader = new PointerReader(arena.tryGetSegment(0), 0, 0x7fffffff);
     val reader = pointerReader.getStruct();
 
-    assert(reader.getLongField(0) === 0xefcdab8967452301L);
-    assert(reader.getLongField(1) === 0L);
+    assert(reader._getLongField(0) === 0xefcdab8967452301L);
+    assert(reader._getLongField(1) === 0L);
 
     assert(reader.getIntField(0) === 0x67452301);
     assert(reader.getIntField(1) === 0xefcdab89);

@@ -1201,8 +1201,7 @@ private:
         spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
         spaces(indent), "    }\n",
         spaces(indent), "    public final Reader asReader(Builder builder) {\n",
-        spaces(indent), "      throw new Error();\n",
-//        spaces(indent), "      return new Reader(builder._builder.asReader());\n",
+        spaces(indent), "      return builder.asReader();\n",
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",

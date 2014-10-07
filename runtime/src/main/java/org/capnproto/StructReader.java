@@ -32,7 +32,7 @@ public class StructReader {
         this.nestingLimit = nestingLimit;
     }
 
-    public final boolean _getBooleanField(int offset) {
+    protected final boolean _getBooleanField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
             if (offset == 0) {
@@ -46,11 +46,11 @@ public class StructReader {
         }
     }
 
-    public final boolean _getBooleanField(int offset, boolean mask) {
+    protected final boolean _getBooleanField(int offset, boolean mask) {
         return this._getBooleanField(offset) ^ mask;
     }
 
-    public final byte _getByteField(int offset) {
+    protected final byte _getByteField(int offset) {
         if ((offset + 1) * 8 <= this.dataSize) {
             return this.segment.buffer.get(this.data + offset);
         } else {
@@ -58,11 +58,11 @@ public class StructReader {
         }
     }
 
-    public final byte _getByteField(int offset, byte mask) {
+    protected final byte _getByteField(int offset, byte mask) {
         return (byte)(this._getByteField(offset) ^ mask);
     }
 
-    public final short _getShortField(int offset) {
+    protected final short _getShortField(int offset) {
         if ((offset + 1) * 16 <= this.dataSize) {
             return this.segment.buffer.getShort(this.data + offset * 2);
         } else {
@@ -70,11 +70,11 @@ public class StructReader {
         }
     }
 
-    public final short _getShortField(int offset, short mask) {
+    protected final short _getShortField(int offset, short mask) {
         return (short)(this._getShortField(offset) ^ mask);
     }
 
-    public final int _getIntField(int offset) {
+    protected final int _getIntField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
             return this.segment.buffer.getInt(this.data + offset * 4);
         } else {
@@ -82,11 +82,11 @@ public class StructReader {
         }
     }
 
-    public final int _getIntField(int offset, int mask) {
+    protected final int _getIntField(int offset, int mask) {
         return this._getIntField(offset) ^ mask;
     }
 
-    public final long _getLongField(int offset) {
+    protected final long _getLongField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
             return this.segment.buffer.getLong(this.data + offset * 8);
         } else {
@@ -94,11 +94,11 @@ public class StructReader {
         }
     }
 
-    public final long _getLongField(int offset, long mask) {
+    protected final long _getLongField(int offset, long mask) {
         return this._getLongField(offset) ^ mask;
     }
 
-    public final float _getFloatField(int offset) {
+    protected final float _getFloatField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
             return this.segment.buffer.getFloat(this.data + offset * 4);
         } else {
@@ -106,7 +106,7 @@ public class StructReader {
         }
     }
 
-    public final float _getFloatField(int offset, int mask) {
+    protected final float _getFloatField(int offset, int mask) {
         if ((offset + 1) * 32 <= this.dataSize) {
             return Float.intBitsToFloat(this.segment.buffer.getInt(this.data + offset * 4) ^ mask);
         } else {
@@ -114,7 +114,7 @@ public class StructReader {
         }
     }
 
-    public final double _getDoubleField(int offset) {
+    protected final double _getDoubleField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
             return this.segment.buffer.getDouble(this.data + offset * 8);
         } else {
@@ -122,7 +122,7 @@ public class StructReader {
         }
     }
 
-    public final double _getDoubleField(int offset, long mask) {
+    protected final double _getDoubleField(int offset, long mask) {
         if ((offset + 1) * 64 <= this.dataSize) {
             return Double.longBitsToDouble(this.segment.buffer.getLong(this.data + offset * 8) ^ mask);
         } else {
@@ -130,7 +130,7 @@ public class StructReader {
         }
     }
 
-    public final PointerReader _getPointerField(int ptrIndex) {
+    protected final PointerReader _getPointerField(int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return new PointerReader(this.segment,
                 this.pointers + ptrIndex,
