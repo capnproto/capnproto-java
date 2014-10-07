@@ -1046,7 +1046,7 @@ private:
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    throw new Error();\n",
+          spaces(indent), "    return _builder.getPointerField(", offset, ").init", blobKind, "(size);\n",
           spaces(indent), "  }\n"),
       };
     } else if (kind == FieldKind::LIST) {
@@ -1086,7 +1086,7 @@ private:
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
-            spaces(indent), "    throw new Error();\n",
+            spaces(indent), "    _builder.getPointerField(", offset, ").setList(value.reader);\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,

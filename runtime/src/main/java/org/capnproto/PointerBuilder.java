@@ -72,6 +72,18 @@ public final class PointerBuilder {
         return WireHelpers.initStructListPointer(this.pointer, this.segment, elementCount, elementSize);
     }
 
+    public final Text.Builder initText(int size) {
+        return WireHelpers.initTextPointer(this.pointer, this.segment, size);
+    }
+
+    public final Data.Builder initData(int size) {
+        return WireHelpers.initDataPointer(this.pointer, this.segment, size);
+    }
+
+    public final void setList(ListReader value) {
+        WireHelpers.setListPointer(this.segment, this.pointer, value);
+    }
+
     public final void setStruct(StructReader value) {
         WireHelpers.setStructPointer(this.segment, this.pointer, value);
     }

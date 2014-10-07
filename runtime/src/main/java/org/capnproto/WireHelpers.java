@@ -462,6 +462,38 @@ final class WireHelpers {
         throw new Error("setStructPointer is unimplemented");
     };
 
+    static SegmentBuilder setListPointer(SegmentBuilder segment, int refOffset, ListReader value) {
+        int totalSize = roundBitsUpToWords(value.elementCount * value.step);
+
+        if (value.step <= Constants.BITS_PER_WORD) {
+            //# List of non-structs.
+            AllocateResult allocation = allocate(refOffset, segment, totalSize, WirePointer.LIST);
+
+            if (value.structPointerCount == 1) {
+                //# List of pointers.
+                ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.POINTER, value.elementCount);
+                for (int i = 0; i < value.elementCount; ++i) {
+                    //copyPointer(segment);
+                }
+            } else {
+                //# List of data.
+            }
+        } else {
+            //# List of structs.
+        }
+
+        throw new Error("setListPointer is unimplemented");
+    }
+
+    static SegmentBuilder copyPointer(SegmentBuilder dstSegment, int dstOffset,
+                                      SegmentReader srcSegment, int srcOffset, int nestingLimit) {
+        // Deep-copy the object pointed to by src into dst.  It turns out we can't reuse
+        // readStructPointer(), etc. because they do type checking whereas here we want to accept any
+        // valid pointer.
+
+        throw new Error("copyPointer is unimplemented");
+    }
+
     static ListReader readListPointer(SegmentReader segment,
                                       int refOffset,
                                       SegmentReader defaultSegment,
