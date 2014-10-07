@@ -296,6 +296,15 @@ final class WireHelpers {
         }
     }
 
+    static <T> T getWritableStructListPointer(FromPointerBuilder<T> factory,
+                                              int origRefOffset,
+                                              SegmentBuilder origSegment,
+                                              StructSize elementSize,
+                                              SegmentReader defaultSegment,
+                                              int defaultOffset) {
+        throw new Error("getWritableStructListPointer is unimplemented");
+    }
+
     // size is in bytes
     static Text.Builder initTextPointer(int refOffset,
                                         SegmentBuilder segment,
@@ -435,9 +444,11 @@ final class WireHelpers {
         long ref = WirePointer.get(segment.buffer, refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                throw new Error();//return new StructReader();
+                return factory.fromStructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, (byte) 0, 0x7fffffff);
             } else {
-                return (new PointerReader(defaultSegment, defaultOffset, 0x7fffffff)).getStruct(factory);
+                segment = defaultSegment;
+                refOffset = defaultOffset;
+                ref = WirePointer.get(segment.buffer, refOffset);
             }
         }
 

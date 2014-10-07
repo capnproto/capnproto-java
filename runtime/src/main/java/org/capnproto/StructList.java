@@ -37,13 +37,12 @@ public final class StructList {
         }
 
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            throw new Error();
-            /*         return WireHelpers.getWritableStructListPointer(this,
-                                                            builder.pointer,
-                                                            builder.segment,
-                                                            FieldSize.POINTER,
-                                                            defaultSegment,
-                                                            defaultOffset,0); */
+                     return WireHelpers.getWritableStructListPointer(this,
+                                                                     builder.pointer,
+                                                                     builder.segment,
+                                                                     factory.structSize(),
+                                                                     defaultSegment,
+                                                                     defaultOffset);
         }
 
         public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder,
