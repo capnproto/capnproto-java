@@ -59,9 +59,7 @@ public class CarSales
         car.setSeats((byte)(2 + rng.nextLessThan(6)));
         car.setDoors((byte)(2 + rng.nextLessThan(3)));
 
-        StructList.Builder<Wheel.Builder> wheels = car.initWheels(4);
-        for (int i = 0; i < wheels.size(); ++i) {
-            Wheel.Builder wheel = wheels.get(i);
+        for (Wheel.Builder wheel : car.initWheels(4)) {
             wheel.setDiameter((short)(25 + rng.nextLessThan(15)));
             wheel.setAirPressure((float)(30.0 + rng.nextDouble(20.0)));
             wheel.setSnowTires(rng.nextLessThan(16) == 0);

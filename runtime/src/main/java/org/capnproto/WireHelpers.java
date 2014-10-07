@@ -313,10 +313,11 @@ final class WireHelpers {
                                        Text.Reader value) {
         Text.Builder builder = initTextPointer(refOffset, segment, value.size);
 
-        // TODO is there a way to do this with bulk methods?
-        for (int i = 0; i < builder.size; ++i) {
-            builder.buffer.put(builder.offset + i, value.buffer.get(value.offset + i));
-        }
+        ByteBuffer slice = value.buffer.duplicate();
+        slice.position(value.offset);
+        slice.limit(value.offset + value.size);
+        builder.buffer.position(builder.offset);
+        builder.buffer.put(slice);
         return builder;
     }
 
