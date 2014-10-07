@@ -85,17 +85,17 @@ public class ListBuilder {
         this.segment.buffer.putDouble(this.ptr + index * 8, value);
     }
 
-    protected final <T> T _getStructElement(FromStructBuilder<T> factory, int index) {
+    protected final <T> T _getStructElement(StructBuilder.Factory<T> factory, int index) {
         int indexBit = index * this.step;
         int structData = this.ptr + indexBit / 8 ;
         int structPointers = (structData + (this.structDataSize / 8)) / 8;
 
-        return factory.fromStructBuilder(this.segment,
-                                         structData,
-                                         structPointers,
-                                         this.structDataSize,
-                                         this.structPointerCount,
-                                         (byte)(indexBit % 8));
+        return factory.constructBuilder(this.segment,
+                                        structData,
+                                        structPointers,
+                                        this.structDataSize,
+                                        this.structPointerCount,
+                                        (byte)(indexBit % 8));
     }
 
 

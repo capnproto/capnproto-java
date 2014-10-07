@@ -2,6 +2,13 @@ package org.capnproto;
 
 
 public class StructReader {
+
+    public interface Factory<T> {
+        T constructReader(SegmentReader segment, int data, int pointers,
+                          int dataSize, short pointerCount,
+                          byte bit0Offset, int nestingLimit);
+    }
+
     protected final SegmentReader segment;
     protected final int data; //byte offset to data section
     protected final int pointers; // word offset of pointer section

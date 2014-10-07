@@ -7,8 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileDescriptor;
 
-import org.capnproto.FromStructReader;
-import org.capnproto.FromStructBuilder;
 import org.capnproto.StructFactory;
 import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;

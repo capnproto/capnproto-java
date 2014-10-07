@@ -18,11 +18,11 @@ public final class PointerBuilder {
     }
 
 
-    public final <T> T getStruct(FromStructBuilder<T> factory) {
+    public final <T> T getStruct(StructBuilder.Factory<T> factory) {
         return WireHelpers.getWritableStructPointer(factory, this.pointer, this.segment, factory.structSize(), null, 0);
     }
 
-    public final <T> T getStruct(FromStructBuilder<T> factory, SegmentReader defaultReader, int defaultOffset) {
+    public final <T> T getStruct(StructBuilder.Factory<T> factory, SegmentReader defaultReader, int defaultOffset) {
         return WireHelpers.getWritableStructPointer(factory, this.pointer, this.segment, factory.structSize(),
                                                     defaultReader, defaultOffset);
     }
@@ -54,7 +54,7 @@ public final class PointerBuilder {
                                                   defaultSize);
     }
 
-    public final <T> T initStruct(FromStructBuilder<T> factory) {
+    public final <T> T initStruct(StructBuilder.Factory<T> factory) {
         return WireHelpers.initStructPointer(factory, this.pointer, this.segment, factory.structSize());
     }
 

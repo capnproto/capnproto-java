@@ -1,6 +1,13 @@
 package org.capnproto;
 
 public class StructBuilder {
+
+    public interface Factory<T> {
+        T constructBuilder(SegmentBuilder segment, int data, int pointers, int dataSize,
+                           short pointerCount, byte bit0Offset);
+        StructSize structSize();
+    }
+
     protected final SegmentBuilder segment;
     protected final int data; // byte offset to data section
     protected final int pointers; // word offset of pointer section

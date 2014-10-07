@@ -1189,11 +1189,11 @@ private:
 
         spaces(indent), "  public static class Factory implements org.capnproto.StructFactory<Builder, Reader> {\n",
         spaces(indent),
-        "    public final Reader fromStructReader(org.capnproto.SegmentReader segment, int data,",
+        "    public final Reader constructReader(org.capnproto.SegmentReader segment, int data,",
         "int pointers, int dataSize, short pointerCount, byte bit0Offset, int nestingLimit) {\n",
         spaces(indent), "      return new Reader(segment,data,pointers,dataSize,pointerCount,bit0Offset,nestingLimit);\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.SegmentBuilder segment, int data,",
+        spaces(indent), "    public final Builder constructBuilder(org.capnproto.SegmentBuilder segment, int data,",
         "int pointers, int dataSize, short pointerCount, byte bit0Offset) {\n",
         spaces(indent), "      return new Builder(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
         spaces(indent), "    }\n",

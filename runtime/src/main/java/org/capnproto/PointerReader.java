@@ -28,7 +28,7 @@ public final class PointerReader {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
-    public <T> T getStruct(FromStructReader<T> factory) {
+    public <T> T getStruct(StructReader.Factory<T> factory) {
         return WireHelpers.readStructPointer(factory,
                                              this.segment,
                                              this.pointer,
@@ -36,7 +36,7 @@ public final class PointerReader {
                                              this.nestingLimit);
     }
 
-    public <T> T getStruct(FromStructReader<T> factory, SegmentReader defaultSegment, int defaultOffset) {
+    public <T> T getStruct(StructReader.Factory<T> factory, SegmentReader defaultSegment, int defaultOffset) {
         return WireHelpers.readStructPointer(factory,
                                              this.segment,
                                              this.pointer,

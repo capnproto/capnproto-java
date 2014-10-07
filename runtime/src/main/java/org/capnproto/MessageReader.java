@@ -9,7 +9,7 @@ public final class MessageReader {
         this.arena = new ReaderArena(segmentSlices);
     }
 
-    public <T> T getRoot(FromStructReader<T> factory) {
+    public <T> T getRoot(StructReader.Factory<T> factory) {
         SegmentReader segment = this.arena.tryGetSegment(0);
         PointerReader pointerReader = PointerReader.getRoot(segment, 0,
                                                             0x7fffffff /* XXX */);

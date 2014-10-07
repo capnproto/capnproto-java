@@ -146,18 +146,18 @@ final class WireHelpers {
     }
 
 
-    static <T> T initStructPointer(FromStructBuilder<T> factory,
+    static <T> T initStructPointer(StructBuilder.Factory<T> factory,
                                    int refOffset,
                                    SegmentBuilder segment,
                                    StructSize size) {
         AllocateResult allocation = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.refOffset, size);
-        return factory.fromStructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
+        return factory.constructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
                                          allocation.ptr + size.data,
                                          size.data * 64, size.pointers, (byte)0);
     }
 
-    static <T> T getWritableStructPointer(FromStructBuilder<T> factory,
+    static <T> T getWritableStructPointer(StructBuilder.Factory<T> factory,
                                           int refOffset,
                                           SegmentBuilder segment,
                                           StructSize size,
@@ -181,9 +181,9 @@ final class WireHelpers {
         if (oldDataSize < size.data || oldPointerCount < size.pointers) {
             throw new Error("unimplemented");
         } else {
-            return factory.fromStructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
-                                             oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
-                                             oldPointerCount, (byte)0);
+            return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                            oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
+                                            oldPointerCount, (byte)0);
         }
 
     }
@@ -435,7 +435,7 @@ final class WireHelpers {
 
     }
 
-    static <T> T readStructPointer(FromStructReader<T> factory,
+    static <T> T readStructPointer(StructReader.Factory<T> factory,
                                    SegmentReader segment,
                                    int refOffset,
                                    SegmentReader defaultSegment,
@@ -444,7 +444,7 @@ final class WireHelpers {
         long ref = WirePointer.get(segment.buffer, refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.fromStructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, (byte) 0, 0x7fffffff);
+                return factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, (byte) 0, 0x7fffffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -468,7 +468,7 @@ final class WireHelpers {
 
         // TODO "bounds_check" (read limiting)
 
-        return factory.fromStructReader(resolved.segment,
+        return factory.constructReader(resolved.segment,
                                         resolved.ptr * Constants.BYTES_PER_WORD,
                                         (resolved.ptr + dataSizeWords),
                                         dataSizeWords * Constants.BITS_PER_WORD,

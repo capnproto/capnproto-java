@@ -5,9 +5,9 @@ import org.scalatest.FunSuite
 
 class LayoutSuite extends FunSuite {
 
-  class BareStructReader extends FromStructReader[StructReader] {
-    def fromStructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
-                         dataSize: Int, pointerCount: Short, bit0Offset: Byte, nestingLimit:Int) : StructReader = {
+  class BareStructReader extends StructReader.Factory[StructReader] {
+    def constructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
+                        dataSize: Int, pointerCount: Short, bit0Offset: Byte, nestingLimit:Int) : StructReader = {
       return new StructReader(segment,data,pointers,dataSize,pointerCount,bit0Offset,nestingLimit);
     }
   }
@@ -97,9 +97,9 @@ class LayoutSuite extends FunSuite {
   }
 
 
-  class BareStructBuilder(structSize : StructSize) extends FromStructBuilder[StructBuilder] {
+  class BareStructBuilder(structSize : StructSize) extends StructBuilder.Factory[StructBuilder] {
 
-    def fromStructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
+    def constructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
                           dataSize: Int, pointerCount: Short, bit0Offset: Byte) : StructBuilder = {
       return new StructBuilder(segment,data,pointers,dataSize,pointerCount,bit0Offset);
     }

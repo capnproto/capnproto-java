@@ -54,9 +54,9 @@ public final class StructList {
     }
 
     public static final class Reader<T> extends ListReader implements Iterable<T> {
-        public final FromStructReader<T> factory;
+        public final StructReader.Factory<T> factory;
 
-        public Reader(FromStructReader<T> factory,
+        public Reader(StructReader.Factory<T> factory,
                       SegmentReader segment,
                       int ptr,
                       int elementCount, int step,
@@ -95,9 +95,9 @@ public final class StructList {
     }
 
     public static final class Builder<T> extends ListBuilder implements Iterable<T> {
-        public final FromStructBuilder<T> factory;
+        public final StructBuilder.Factory<T> factory;
 
-        public Builder(FromStructBuilder<T> factory,
+        public Builder(StructBuilder.Factory<T> factory,
                        SegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){

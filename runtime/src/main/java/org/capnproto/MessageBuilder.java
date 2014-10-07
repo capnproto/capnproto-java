@@ -19,11 +19,11 @@ public final class MessageBuilder {
                                       allocationStrategy);
     }
 
-    public <T> T getRoot(FromStructBuilder<T> factory) {
+    public <T> T getRoot(StructBuilder.Factory<T> factory) {
         throw new Error("unimplemented");
     }
 
-    public <T> T initRoot(FromStructBuilder<T> factory) {
+    public <T> T initRoot(StructBuilder.Factory <T> factory) {
         SegmentBuilder rootSegment = this.arena.segments.get(0);
         int location = rootSegment.allocate(1);
         if (location == SegmentBuilder.FAILED_ALLOCATION) {
