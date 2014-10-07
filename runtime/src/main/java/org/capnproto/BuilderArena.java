@@ -27,7 +27,6 @@ public final class BuilderArena implements Arena {
         this.allocationStrategy = allocationStrategy;
         SegmentBuilder segment0 = new SegmentBuilder(
             ByteBuffer.allocate(firstSegmentSizeWords * Constants.BYTES_PER_WORD), this);
-        segment0.buffer.mark();
         segment0.buffer.order(ByteOrder.LITTLE_ENDIAN);
         this.segments.add(segment0);
     }
@@ -78,7 +77,6 @@ public final class BuilderArena implements Arena {
 
         // --------
 
-        newSegment.buffer.mark();
         newSegment.buffer.order(ByteOrder.LITTLE_ENDIAN);
         newSegment.id = len;
         this.segments.add(newSegment);

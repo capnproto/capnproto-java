@@ -90,7 +90,6 @@ class LayoutSuite extends FunSuite {
   test("StructRoundTrip_OneSegment") {
     val buffer = java.nio.ByteBuffer.allocate(1024 * 8);
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-    buffer.mark();
 
     val pointerBuilder = PointerBuilder.getRoot(
       new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
