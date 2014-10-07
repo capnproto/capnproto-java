@@ -620,7 +620,7 @@ private:
           "  assert which() == ", scope, "Which.", upperCase, ":\n",
           spaces(indent), "              \"Must check which() before get()ing a union member.\";\n"),
         kj::str(
-          spaces(indent), "  _builder.setShortField(", discrimOffset, ", (short)",
+          spaces(indent), "  _setShortField(", discrimOffset, ", (short)",
           scope, "Which.", upperCase, ".ordinal());\n"),
           kj::strTree(spaces(indent), "public final boolean is", titleCase, "() {\n",
                       spaces(indent), "  return which() == ", scope, "Which.", upperCase,";\n",
@@ -657,7 +657,7 @@ private:
   kj::StringTree makeEnumGetter(EnumSchema schema, kj::String member, uint offset, kj::String defaultMaskParam, int indent) {
     auto enumerants = schema.getEnumerants();
     return kj::strTree(
-      spaces(indent), "switch(", member, ".getShortField(", offset, defaultMaskParam, ")) {\n",
+      spaces(indent), "switch(_getShortField(", offset, defaultMaskParam, ")) {\n",
       KJ_MAP(e, enumerants) {
         return kj::strTree(spaces(indent+1), "case ", e.getOrdinal(), " : return ",
                            javaFullName(schema), ".",
@@ -738,14 +738,16 @@ private:
           kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
-            spaces(indent), "    return new ", scope, titleCase, ".Reader(_reader);\n",
+            spaces(indent), "    return new ", scope, titleCase,
+            ".Reader(segment, data, pointers, dataSize, pointerCount, bit0Offset, nestingLimit);\n",
             spaces(indent), "  }\n",
             "\n"),
 
             kj::strTree(
               kj::mv(unionDiscrim.builderIsDecl),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
-              spaces(indent), "    return new ", scope, titleCase, ".Builder(_builder);\n",
+              spaces(indent), "    return new ", scope, titleCase,
+              ".Builder(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
               spaces(indent), "  }\n",
               spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
               unionDiscrim.set,
@@ -756,16 +758,17 @@ private:
                 case Section::DATA:
                   return kj::strTree(
                     spaces(indent),
-                    "    _builder.set", toTitleCase(maskType(slot.whichType)),
+                    "    _set", toTitleCase(maskType(slot.whichType)),
                     "Field(", slot.offset, ",", maskZeroLiteral(slot.whichType),
                     ");\n");
                 case Section::POINTERS:
                   return kj::strTree(
-                    spaces(indent), "    _builder.getPointerField(", slot.offset, ").clear();\n");
+                    spaces(indent), "    _getPointerField(", slot.offset, ").clear();\n");
                 }
                 KJ_UNREACHABLE;
               },
-              "  return new ", scope, titleCase, ".Builder(_builder);\n",
+              "  return new ", scope, titleCase,
+              ".Builder(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
               spaces(indent), "  }\n",
               "\n")
           };
@@ -896,7 +899,7 @@ private:
                             kj::str("_reader"), offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _reader.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 
@@ -909,16 +912,16 @@ private:
                             kj::str("_builder"), offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _builder.get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
             unionDiscrim.set,
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree(spaces(indent), "    _builder.setShortField(", offset, ", (short)value.ordinal());\n") :
+             kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal());\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree() :
-              kj::strTree(spaces(indent), "    _builder.set",
+              kj::strTree(spaces(indent), "    _set",
                           toTitleCase(type), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n")
@@ -932,31 +935,31 @@ private:
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public boolean has", titleCase, "() {\n",
             unionDiscrim.has,
-            spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Reader get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(_reader.getPointerField(",
+            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(_getPointerField(",
             offset,"));\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Builder get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(_builder.getPointerField(",
+            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(_getPointerField(",
             offset, "));\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Builder init", titleCase, "() {\n",
             unionDiscrim.set,
             spaces(indent), "    org.capnproto.AnyPointer.Builder result =\n",
-            spaces(indent), "      new org.capnproto.AnyPointer.Builder(_builder.getPointerField(",
+            spaces(indent), "      new org.capnproto.AnyPointer.Builder(_getPointerField(",
             offset, "));\n",
             spaces(indent), "    result.clear();\n",
             spaces(indent), "    return result;\n",
@@ -973,32 +976,32 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
-          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
           unionDiscrim.check,
-          spaces(indent), "    return ", type,
-          ".factory.fromStructReader(_reader.getPointerField(", offset,").getStruct(", defaultParams, "));\n",
+          spaces(indent), "    return ",
+          "_getPointerField(", offset,").getStruct(", type, ".factory,", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           unionDiscrim.check,
-          spaces(indent), "    return ", type,
-          ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").getStruct(",
-          type, ".STRUCT_SIZE,", defaultParams, "));\n",
+          spaces(indent), "    return ",
+          "_getPointerField(", offset, ").getStruct(",
+          type, ".factory,", defaultParams,");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _builder.getPointerField(", offset, ").setStruct(value._reader);\n",
+          spaces(indent), "    _getPointerField(", offset, ").setStruct(value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           unionDiscrim.set,
           spaces(indent), "    return ",
-          type, ".factory.fromStructBuilder(_builder.getPointerField(", offset, ").initStruct(",
-          type, ".STRUCT_SIZE", "));\n",
+          "_getPointerField(", offset, ").initStruct(",
+          type, ".factory", ");\n",
           spaces(indent), "  }\n"),
       };
 
@@ -1016,12 +1019,12 @@ private:
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           unionDiscrim.has,
-          spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
-          spaces(indent), "    return _reader.getPointerField(",
+          spaces(indent), "    return _getPointerField(",
           offset, ").get", blobKind, "(", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
@@ -1029,24 +1032,24 @@ private:
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
           unionDiscrim.has,
-          spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
-          spaces(indent), "    return _builder.getPointerField(",
+          spaces(indent), "    return _getPointerField(",
           offset, ").get", blobKind, "(", defaultParams, ");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "(value);\n",
+          spaces(indent), "    _getPointerField(", offset, ").set", blobKind, "(value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", setterInputType, " value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _builder.getPointerField(", offset, ").set", blobKind, "( new",
+          spaces(indent), "    _getPointerField(", offset, ").set", blobKind, "( new",
           type, ".Reader(value));\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    return _builder.getPointerField(", offset, ").init", blobKind, "(size);\n",
+          spaces(indent), "    return _getPointerField(", offset, ").init", blobKind, "(size);\n",
           spaces(indent), "  }\n"),
       };
     } else if (kind == FieldKind::LIST) {
@@ -1063,12 +1066,12 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_reader.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerReader(_reader.getPointerField(", offset, "),",
+            spaces(indent), "    return (", listFactory, ").fromPointerReader(_getPointerField(", offset, "),",
             defaultParams, ");\n",
             spaces(indent), "  }\n",
             "\n"),
@@ -1076,22 +1079,22 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_builder.getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_builder.getPointerField(", offset, "),",
+            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_getPointerField(", offset, "),",
             defaultParams, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
-            spaces(indent), "    _builder.getPointerField(", offset, ").setList(value.reader);\n",
+            spaces(indent), "    _getPointerField(", offset, ").setList(value.reader);\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return (", listFactory, ").initFromPointerBuilder(_builder.getPointerField(", offset, "), size);\n",
+            spaces(indent), "    return (", listFactory, ").initFromPointerBuilder(_getPointerField(", offset, "), size);\n",
             spaces(indent), "  }\n"),
       };
     } else {
@@ -1107,14 +1110,14 @@ private:
     kj::StringTree inlineMethodDefs;
   };
 
-  kj::StringTree makeWhich(StructSchema schema, kj::String member, int indent) {
+  kj::StringTree makeWhich(StructSchema schema, int indent) {
     if (schema.getProto().getStruct().getDiscriminantCount() == 0) {
       return kj::strTree();
     } else {
       auto fields = schema.getUnionFields();
       return kj::strTree(
         spaces(indent), "public Which which() {\n",
-        spaces(indent+1), "switch(", member, ".getShortField(",
+        spaces(indent+1), "switch(_getShortField(",
         schema.getProto().getStruct().getDiscriminantOffset(), ")) {\n",
         KJ_MAP(f, fields) {
           return kj::strTree(spaces(indent+2), "case ", f.getProto().getDiscriminantValue(), " : return ",
@@ -1133,12 +1136,14 @@ private:
                                StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(
-      spaces(indent), "public static final class Reader {\n",
-      spaces(indent), "  public Reader(org.capnproto.StructReader base){ this._reader = base; }\n",
+      spaces(indent), "public static final class Reader extends org.capnproto.StructReader {\n",
+      spaces(indent), "  public Reader(org.capnproto.SegmentReader segment, int data, int pointers,",
+      "int dataSize, short pointerCount, byte bit0Offset, int nestingLimit){\n",
+      spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount, bit0Offset, nestingLimit);\n",
+      spaces(indent), "  }\n",
       "\n",
-      makeWhich(schema, kj::str("_reader"), indent+1),
+      makeWhich(schema, indent+1),
       kj::mv(methodDecls),
-      spaces(indent), "  public org.capnproto.StructReader _reader;\n",
       spaces(indent), "}\n"
       "\n");
   }
@@ -1147,12 +1152,15 @@ private:
                                 StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
     return kj::strTree(
-      spaces(indent), "public static final class Builder {\n",
-      spaces(indent), "  public Builder(org.capnproto.StructBuilder base){ this._builder = base; }\n",
-      spaces(indent), "  public org.capnproto.StructBuilder _builder;\n",
-      makeWhich(schema, kj::str("_builder"), indent+1),
+      spaces(indent), "public static final class Builder extends org.capnproto.StructBuilder {\n",
+      spaces(indent), "  public Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,",
+      "int dataSize, short pointerCount, byte bit0Offset){\n",
+      spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
+      spaces(indent), "  }\n",
+      makeWhich(schema, indent+1),
       spaces(indent), "  public final Reader asReader() {\n",
-      spaces(indent), "    return new Reader(this._builder.asReader());\n",
+      spaces(indent), "    return new Reader(segment, data, pointers, dataSize, pointerCount, bit0Offset, 0x7fffffff);\n",
+      //spaces(indent), "    return new Reader(this._builder.asReader());\n",
       spaces(indent), "  }\n",
       kj::mv(methodDecls),
       spaces(indent), "}\n",
@@ -1181,17 +1189,20 @@ private:
 
         spaces(indent), "  public static class Factory implements org.capnproto.StructFactory<Builder, Reader> {\n",
         spaces(indent),
-        "    public final Reader fromStructReader(org.capnproto.StructReader reader) {\n",
-        spaces(indent), "      return new Reader(reader);\n",
+        "    public final Reader fromStructReader(org.capnproto.SegmentReader segment, int data,",
+        "int pointers, int dataSize, short pointerCount, byte bit0Offset, int nestingLimit) {\n",
+        spaces(indent), "      return new Reader(segment,data,pointers,dataSize,pointerCount,bit0Offset,nestingLimit);\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.StructBuilder builder) {\n",
-        spaces(indent), "      return new Builder(builder);\n",
+        spaces(indent), "    public final Builder fromStructBuilder(org.capnproto.SegmentBuilder segment, int data,",
+        "int pointers, int dataSize, short pointerCount, byte bit0Offset) {\n",
+        spaces(indent), "      return new Builder(segment, data, pointers, dataSize, pointerCount, bit0Offset);\n",
         spaces(indent), "    }\n",
         spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
         spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
         spaces(indent), "    }\n",
         spaces(indent), "    public final Reader asReader(Builder builder) {\n",
-        spaces(indent), "      return new Reader(builder._builder.asReader());\n",
+        spaces(indent), "      throw new Error();\n",
+//        spaces(indent), "      return new Reader(builder._builder.asReader());\n",
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",

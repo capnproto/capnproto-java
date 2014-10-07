@@ -10,7 +10,7 @@ public final class AnyPointer {
         }
 
         public final <T> T getAsStruct(FromStructReader<T> factory) {
-            return factory.fromStructReader(this.reader.getStruct());
+            return this.reader.getStruct(factory);
         }
 
         public final <T> T getAsList(FromPointerReader<T> factory) {
@@ -26,7 +26,7 @@ public final class AnyPointer {
         }
 
         public final <T> T initAsStruct(FromStructBuilder<T> factory) {
-            return factory.fromStructBuilder(this.builder.initStruct(factory.structSize()));
+            return this.builder.initStruct(factory);
         }
 
         public final void clear() {

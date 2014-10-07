@@ -37,7 +37,7 @@ public final class StructList {
         }
 
         public T get(int index) {
-            return this.factory.fromStructReader(this.reader.getStructElement(index));
+            return this.reader.getStructElement(factory, index);
         }
 
 
@@ -49,7 +49,7 @@ public final class StructList {
             }
 
             public T next() {
-                return list.factory.fromStructReader(list.reader.getStructElement(idx++));
+                return list.reader.getStructElement(factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();
@@ -84,7 +84,7 @@ public final class StructList {
         }
 
         public final T get(int index) {
-            return this.factory.fromStructBuilder(this.builder.getStructElement(index));
+            return this.builder.getStructElement(factory, index);
         }
 
 
@@ -96,7 +96,7 @@ public final class StructList {
             }
 
             public T next() {
-                return list.factory.fromStructBuilder(list.builder.getStructElement(idx++));
+                return list.builder.getStructElement(factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();

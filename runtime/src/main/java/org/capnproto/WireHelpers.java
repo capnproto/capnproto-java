@@ -145,26 +145,29 @@ final class WireHelpers {
         // TODO
     }
 
-    static StructBuilder initStructPointer(int refOffset,
-                                           SegmentBuilder segment,
-                                           StructSize size) {
+
+    static <T> T initStructPointer(FromStructBuilder<T> factory,
+                                   int refOffset,
+                                   SegmentBuilder segment,
+                                   StructSize size) {
         AllocateResult allocation = allocate(refOffset, segment, size.total(), WirePointer.STRUCT);
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.refOffset, size);
-        return new StructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
-                                 allocation.ptr + size.data,
-                                 size.data * 64, size.pointers, (byte)0);
+        return factory.fromStructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
+                                         allocation.ptr + size.data,
+                                         size.data * 64, size.pointers, (byte)0);
     }
 
-    static StructBuilder getWritableStructPointer(int refOffset,
-                                                  SegmentBuilder segment,
-                                                  StructSize size,
-                                                  SegmentReader defaultSegment,
-                                                  int defaultOffset) {
+    static <T> T getWritableStructPointer(FromStructBuilder<T> factory,
+                                          int refOffset,
+                                          SegmentBuilder segment,
+                                          StructSize size,
+                                          SegmentReader defaultSegment,
+                                          int defaultOffset) {
         long ref = WirePointer.get(segment.buffer, refOffset);
         int target = WirePointer.target(refOffset, ref);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return initStructPointer(refOffset, segment, size);
+                return initStructPointer(factory, refOffset, segment, size);
             } else {
                 throw new Error("unimplemented");
             }
@@ -178,9 +181,9 @@ final class WireHelpers {
         if (oldDataSize < size.data || oldPointerCount < size.pointers) {
             throw new Error("unimplemented");
         } else {
-            return new StructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
-                                     oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
-                                     oldPointerCount, (byte)0);
+            return factory.fromStructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                             oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
+                                             oldPointerCount, (byte)0);
         }
 
     }
@@ -417,24 +420,24 @@ final class WireHelpers {
 
     }
 
-    static StructReader readStructPointer(SegmentReader segment,
-                                          int refOffset,
-                                          SegmentReader defaultSegment,
-                                          int defaultOffset,
-                                          int nestingLimit) {
+    static <T> T readStructPointer(FromStructReader<T> factory,
+                                   SegmentReader segment,
+                                   int refOffset,
+                                   SegmentReader defaultSegment,
+                                   int defaultOffset,
+                                   int nestingLimit) {
         long ref = WirePointer.get(segment.buffer, refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return new StructReader();
+                throw new Error();//return new StructReader();
             } else {
-                return (new PointerReader(defaultSegment, defaultOffset, 0x7fffffff)).getStruct();
+                return (new PointerReader(defaultSegment, defaultOffset, 0x7fffffff)).getStruct(factory);
             }
         }
 
         if (nestingLimit <= 0) {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
-
 
 
         int refTarget = WirePointer.target(refOffset, ref);
@@ -448,13 +451,13 @@ final class WireHelpers {
 
         // TODO "bounds_check" (read limiting)
 
-        return new StructReader(resolved.segment,
-                                resolved.ptr * Constants.BYTES_PER_WORD,
-                                (resolved.ptr + dataSizeWords),
-                                dataSizeWords * Constants.BITS_PER_WORD,
-                                StructPointer.ptrCount(resolved.ref),
-                                (byte)0,
-                                nestingLimit - 1);
+        return factory.fromStructReader(resolved.segment,
+                                        resolved.ptr * Constants.BYTES_PER_WORD,
+                                        (resolved.ptr + dataSizeWords),
+                                        dataSizeWords * Constants.BITS_PER_WORD,
+                                        StructPointer.ptrCount(resolved.ref),
+                                        (byte)0,
+                                        nestingLimit - 1);
 
     }
 

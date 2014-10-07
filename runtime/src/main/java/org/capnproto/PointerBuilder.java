@@ -17,12 +17,14 @@ public final class PointerBuilder {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
-    public final StructBuilder getStruct(StructSize size) {
-        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size, null, 0);
+
+    public final <T> T getStruct(FromStructBuilder<T> factory) {
+        return WireHelpers.getWritableStructPointer(factory, this.pointer, this.segment, factory.structSize(), null, 0);
     }
 
-    public final StructBuilder getStruct(StructSize size, SegmentReader defaultBuffer, int defaultOffset) {
-        return WireHelpers.getWritableStructPointer(this.pointer, this.segment, size, defaultBuffer, defaultOffset);
+    public final <T> T getStruct(FromStructBuilder<T> factory, SegmentReader defaultReader, int defaultOffset) {
+        return WireHelpers.getWritableStructPointer(factory, this.pointer, this.segment, factory.structSize(),
+                                                    defaultReader, defaultOffset);
     }
 
     public final ListBuilder getList(byte elementSize, SegmentReader defaultBuffer, int defaultOffset) {
@@ -60,8 +62,8 @@ public final class PointerBuilder {
                                                   defaultSize);
     }
 
-    public final StructBuilder initStruct(StructSize size) {
-        return WireHelpers.initStructPointer(this.pointer, this.segment, size);
+    public final <T> T initStruct(FromStructBuilder<T> factory) {
+        return WireHelpers.initStructPointer(factory, this.pointer, this.segment, factory.structSize());
     }
 
     public final ListBuilder initList(byte elementSize, int elementCount) {

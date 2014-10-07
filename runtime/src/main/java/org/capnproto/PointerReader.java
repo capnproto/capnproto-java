@@ -28,15 +28,17 @@ public final class PointerReader {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
-    public StructReader getStruct() {
-        return WireHelpers.readStructPointer(this.segment,
+    public <T> T getStruct(FromStructReader<T> factory) {
+        return WireHelpers.readStructPointer(factory,
+                                             this.segment,
                                              this.pointer,
                                              null, 0,
                                              this.nestingLimit);
     }
 
-    public StructReader getStruct(SegmentReader defaultSegment, int defaultOffset) {
-        return WireHelpers.readStructPointer(this.segment,
+    public <T> T getStruct(FromStructReader<T> factory, SegmentReader defaultSegment, int defaultOffset) {
+        return WireHelpers.readStructPointer(factory,
+                                             this.segment,
                                              this.pointer,
                                              defaultSegment, defaultOffset,
                                              this.nestingLimit);
