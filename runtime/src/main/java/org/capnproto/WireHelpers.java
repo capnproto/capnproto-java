@@ -466,7 +466,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains non-struct pointer where struct pointer was expected.");
         }
 
-        // TODO "bounds_check" (read limiting)
+        resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
 
         return factory.constructReader(resolved.segment,
                                         resolved.ptr * Constants.BYTES_PER_WORD,
@@ -549,7 +549,7 @@ final class WireHelpers {
             long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
             int ptr = resolved.ptr + 1;
 
-            // TODO bounds check
+            resolved.segment.arena.checkReadLimit(wordCount + 1);
 
             int size = WirePointer.inlineCompositeListElementCount(tag);
 
@@ -576,7 +576,8 @@ final class WireHelpers {
             int pointerCount = FieldSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            // TODO "bounds_check"
+            resolved.segment.arena.checkReadLimit(
+                roundBitsUpToWords(ListPointer.elementCount(resolved.ref) * step));
 
             //# Verify that the elements are at least as large as
             //# the expected type. Note that if we expected
@@ -638,7 +639,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains list pointer of non-bytes where text was expected.");
         }
 
-        // TODO bounds check?
+        resolved.segment.arena.checkReadLimit(roundBytesUpToWords(size));
 
         if (size == 0 || resolved.segment.buffer.get(8 * resolved.ptr + size - 1) != 0) {
             throw new DecodeException("Message contains text that is not NUL-terminated.");
@@ -676,7 +677,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains list pointer of non-bytes where data was expected.");
         }
 
-        // TODO bounds check?
+        resolved.segment.arena.checkReadLimit(roundBytesUpToWords(size));
 
         return new Data.Reader(resolved.segment.buffer, resolved.ptr, size);
     }

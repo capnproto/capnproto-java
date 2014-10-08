@@ -27,6 +27,10 @@ public final class AnyPointer {
             this.pointer = pointer;
         }
 
+        public final <T> T getAs(FromPointerBuilder<T> factory) {
+            return factory.fromPointerBuilder(this.segment, this.pointer);
+        }
+
         public final <T> T initAs(InitFromPointerBuilder<T> factory) {
             return factory.initFromPointerBuilder(this.segment, this.pointer);
         }

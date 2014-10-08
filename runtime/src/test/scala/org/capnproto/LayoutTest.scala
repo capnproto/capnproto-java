@@ -21,7 +21,7 @@ class LayoutSuite extends FunSuite {
     val buffer = java.nio.ByteBuffer.wrap(data);
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-    val arena = new ReaderArena(Array(buffer));
+    val arena = new ReaderArena(Array(buffer), 0x7fffffffffffffffL);
 
     val reader = WireHelpers.readStructPointer(new BareStructReader(),
                                                arena.tryGetSegment(0),

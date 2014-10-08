@@ -31,12 +31,14 @@ public final class BuilderArena implements Arena {
         this.segments.add(segment0);
     }
 
-    public SegmentReader tryGetSegment(int id) {
+    public final SegmentReader tryGetSegment(int id) {
         return this.segments.get(id);
     }
-    public SegmentBuilder getSegment(int id) {
+    public final SegmentBuilder getSegment(int id) {
         return this.segments.get(id);
     }
+
+    public final void checkReadLimit(int numBytes) { }
 
     public static class AllocateResult {
         public final SegmentBuilder segment;
