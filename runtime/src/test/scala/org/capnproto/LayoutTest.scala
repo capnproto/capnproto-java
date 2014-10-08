@@ -22,11 +22,10 @@ class LayoutSuite extends FunSuite {
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
     val arena = new ReaderArena(Array(buffer));
-    val pointerReader = new PointerReader(arena.tryGetSegment(0), 0, 0x7fffffff);
 
     val reader = WireHelpers.readStructPointer(new BareStructReader(),
-                                               pointerReader.segment,
-                                               pointerReader.pointer, null, 0, 0x7fffffff);
+                                               arena.tryGetSegment(0),
+                                               0, null, 0, 0x7fffffff);
 
     assert(reader._getLongField(0) === 0xefcdab8967452301L);
     assert(reader._getLongField(1) === 0L);

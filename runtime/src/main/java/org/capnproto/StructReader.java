@@ -135,14 +135,8 @@ public class StructReader {
         }
     }
 
-    protected final PointerReader _getPointerField(int ptrIndex) {
-        if (ptrIndex < this.pointerCount) {
-            return new PointerReader(this.segment,
-                this.pointers + ptrIndex,
-                this.nestingLimit);
-        } else {
-            return new PointerReader();
-        }
+    protected final boolean _pointerFieldIsNull(int ptrIndex) {
+        return this.segment.buffer.getLong(this.pointers + ptrIndex) == 0;
     }
 
     protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex, SegmentReader defaultSegment, int defaultOffset) {

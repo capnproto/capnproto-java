@@ -935,13 +935,13 @@ private:
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public boolean has", titleCase, "() {\n",
             unionDiscrim.has,
-            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Reader get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(_getPointerField(",
-            offset,"));\n",
+            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(this.segment, this.pointers + ", offset,
+            ", this.nestingLimit);\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
@@ -976,7 +976,7 @@ private:
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
-          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
@@ -1018,7 +1018,7 @@ private:
           kj::mv(unionDiscrim.readerIsDecl),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           unionDiscrim.has,
-          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public ", type, ".Reader",
@@ -1065,7 +1065,7 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", readerClass,
@@ -1301,8 +1301,8 @@ private:
             kj::strTree(spaces(indent),
                         "public static final ", typeName_, ".Reader ", upperCase, " =\n",
                         spaces(indent), "  ",
-                        "new org.capnproto.AnyPointer.Reader(new org.capnproto.PointerReader(Schemas.b_",
-                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getAs(",
+                        "new org.capnproto.AnyPointer.Reader(Schemas.b_",
+                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff).getAs(",
                         typeName_, ".factory);\n")
         };
       }
@@ -1315,8 +1315,8 @@ private:
             spaces(indent),
             "public static final ", constType, ' ', upperCase, " =\n",
             spaces(indent), " (",
-            "new org.capnproto.AnyPointer.Reader(new org.capnproto.PointerReader(Schemas.b_",
-            kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getAs(",
+            "new org.capnproto.AnyPointer.Reader(Schemas.b_",
+            kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff).getAs(",
             makeListFactoryArg(type), "));\n")
         };
       }

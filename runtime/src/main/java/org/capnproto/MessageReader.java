@@ -11,9 +11,7 @@ public final class MessageReader {
 
     public <T> T getRoot(FromPointerReader<T> factory) {
         SegmentReader segment = this.arena.tryGetSegment(0);
-        PointerReader pointerReader = PointerReader.getRoot(segment, 0,
-                                                            0x7fffffff /* XXX */);
-        AnyPointer.Reader any = new AnyPointer.Reader(pointerReader);
+        AnyPointer.Reader any = new AnyPointer.Reader(segment, 0, 0x7fffffff);
         return any.getAs(factory);
     }
 }

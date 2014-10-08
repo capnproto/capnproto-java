@@ -86,12 +86,6 @@ public class ListReader {
                                        this.structPointerCount, (byte) (indexBit % 8), this.nestingLimit - 1);
     }
 
-    protected PointerReader _getPointerElement(int index) {
-        return new PointerReader(this.segment,
-                                 (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
-                                 this.nestingLimit);
-    }
-
     protected <T> T _getPointerElement(FromPointerReader<T> factory, int index, SegmentReader defaultSegment, int defaultOffset) {
         return factory.fromPointerReader(this.segment,
                                          (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,

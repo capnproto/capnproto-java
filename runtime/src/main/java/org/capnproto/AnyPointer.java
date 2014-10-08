@@ -3,14 +3,18 @@ package org.capnproto;
 public final class AnyPointer {
 
     public final static class Reader {
-        public final PointerReader reader;
+        final SegmentReader segment;
+        final int pointer;
+        final int nestingLimit;
 
-        public Reader(PointerReader reader) {
-            this.reader = reader;
+        public Reader(SegmentReader segment, int pointer, int nestingLimit) {
+            this.segment = segment;
+            this.pointer = pointer;
+            this.nestingLimit = nestingLimit;
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
-            return factory.fromPointerReader(this.reader.segment, this.reader.pointer, null, 0, this.reader.nestingLimit);
+            return factory.fromPointerReader(this.segment, this.pointer, null, 0, this.nestingLimit);
         }
     }
 
