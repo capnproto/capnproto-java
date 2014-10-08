@@ -22,11 +22,11 @@ public final class AnyPointer {
         }
 
         public final <T> T initAs(InitFromPointerBuilder<T> factory) {
-            return factory.initFromPointerBuilder(this.builder);
+            return factory.initFromPointerBuilder(this.builder.segment, this.builder.pointer);
         }
 
         public final <T> T initAs(InitSizedFromPointerBuilder<T> factory, int elementCount) {
-            return factory.initSizedFromPointerBuilder(this.builder, elementCount);
+            return factory.initSizedFromPointerBuilder(this.builder.segment, this.builder.pointer, elementCount);
         }
 
         public final void clear() {

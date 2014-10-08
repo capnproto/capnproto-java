@@ -99,4 +99,15 @@ public class ListReader {
                                          defaultOffset,
                                          this.nestingLimit);
     }
+
+    protected <T> T _getPointerElement(FromPointerReaderBlobDefault<T> factory, int index,
+                                       java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return factory.fromPointerReaderBlobDefault(
+            this.segment,
+            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
+            defaultBuffer,
+            defaultOffset,
+            defaultSize);
+    }
+
 }

@@ -157,4 +157,17 @@ public class StructBuilder {
         return factory.fromPointerBuilder(this.segment, this.pointers + index, defaultSegment, defaultOffset);
     }
 
+    protected final <T> T _getPointerField(FromPointerBuilderBlobDefault<T> factory, int index,
+                                           java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return factory.fromPointerBuilderBlobDefault(this.segment, this.pointers + index, defaultBuffer, defaultOffset, defaultSize);
+    }
+
+    protected final <T> T _initPointerField(InitFromPointerBuilder<T> factory, int index) {
+        return factory.initFromPointerBuilder(this.segment, this.pointers + index);
+    }
+
+    protected final <T> T _initSizedPointerField(InitSizedFromPointerBuilder<T> factory, int index, int elementCount) {
+        return factory.initSizedFromPointerBuilder(this.segment, this.pointers + index, elementCount);
+    }
+
 }

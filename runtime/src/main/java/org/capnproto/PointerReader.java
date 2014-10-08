@@ -27,20 +27,4 @@ public final class PointerReader {
     public boolean isNull() {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
-
-    public Text.Reader getText() {
-        return WireHelpers.readTextPointer(this.segment, this.pointer, null, 0, 0);
-    }
-
-    public Text.Reader getText(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
-        return WireHelpers.readTextPointer(this.segment, this.pointer, defaultBuffer, defaultOffset, defaultSize);
-    }
-
-    public Data.Reader getData() {
-        return WireHelpers.readDataPointer(this.segment, this.pointer, null, 0, 0);
-    }
-
-    public Data.Reader getData(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
-        return WireHelpers.readDataPointer(this.segment, this.pointer, defaultBuffer, defaultOffset, defaultSize);
-    }
 }

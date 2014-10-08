@@ -16,8 +16,8 @@ public abstract class StructFactory<Builder, Reader> implements FromPointerBuild
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
                                                     defaultSegment, defaultOffset);
     }
-    public final Builder initFromPointerBuilder(PointerBuilder builder) {
-        return WireHelpers.initStructPointer(this, builder.pointer, builder.segment, this.structSize());
+    public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer) {
+        return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());
     }
 
     public abstract Reader asReader(Builder builder);

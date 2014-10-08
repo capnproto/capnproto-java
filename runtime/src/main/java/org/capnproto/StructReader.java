@@ -160,4 +160,22 @@ public class StructReader {
                                              this.nestingLimit);
         }
     }
+
+    protected final <T> T _getPointerField(FromPointerReaderBlobDefault<T> factory, int ptrIndex,
+                                           java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        if (ptrIndex < this.pointerCount) {
+            return factory.fromPointerReaderBlobDefault(this.segment,
+                                                        this.pointers + ptrIndex,
+                                                        defaultBuffer,
+                                                        defaultOffset,
+                                                        defaultSize);
+        } else {
+            return factory.fromPointerReaderBlobDefault(SegmentReader.EMPTY,
+                                                        0,
+                                                        defaultBuffer,
+                                                        defaultOffset,
+                                                        defaultSize);
+        }
+    }
+
 }

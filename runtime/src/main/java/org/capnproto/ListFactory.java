@@ -27,7 +27,7 @@ public abstract class ListFactory<Builder, Reader> implements ListBuilder.Factor
                                                   defaultOffset);
     }
 
-    public Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-        return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, this.elementSize);
+    public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+        return WireHelpers.initListPointer(this, pointer, segment, elementCount, this.elementSize);
     }
 }

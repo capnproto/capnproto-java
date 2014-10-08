@@ -998,19 +998,20 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           unionDiscrim.set,
-          spaces(indent), "    return ", type, ".factory.initFromPointerBuilder(",
-          "_getPointerField(", offset, "));\n",
+          spaces(indent), "    return ",
+          "_initPointerField(", type, ".factory,",  offset, ");\n",
           spaces(indent), "  }\n"),
       };
 
     } else if (kind == FieldKind::BLOB) {
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
-      kj::String defaultParams = defaultOffset == 0 ? kj::str() : kj::str(
+      kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0, 0") : kj::str(
         "Schemas.b_", kj::hex(typeId), ".buffer, ", defaultOffset, ", ", defaultSize);
 
       kj::String blobKind =  typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
       kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");
+      kj::String factory = kj::str("org.capnproto.", kj::str(blobKind), ".factory");
 
       return FieldText {
         kj::strTree(
@@ -1022,8 +1023,8 @@ private:
 
           spaces(indent), "  public ", type, ".Reader",
           " get", titleCase, "() {\n",
-          spaces(indent), "    return _getPointerField(",
-          offset, ").get", blobKind, "(", defaultParams, ");\n",
+          spaces(indent), "    return _getPointerField(", factory, ", ",
+          offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -1033,8 +1034,8 @@ private:
           spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
-          spaces(indent), "    return _getPointerField(",
-          offset, ").get", blobKind, "(", defaultParams, ");\n",
+          spaces(indent), "    return _getPointerField(", factory, ", ",
+          offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
@@ -1047,7 +1048,7 @@ private:
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    return _getPointerField(", offset, ").init", blobKind, "(size);\n",
+          spaces(indent), "    return _initSizedPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
       };
     } else if (kind == FieldKind::LIST) {
@@ -1090,7 +1091,7 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return (", listFactory, ").initSizedFromPointerBuilder(_getPointerField(", offset, "), size);\n",
+            spaces(indent), "    return _initSizedPointerField(", listFactory, ", ", offset, ", size);\n",
             spaces(indent), "  }\n"),
       };
     } else {

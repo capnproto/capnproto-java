@@ -3,6 +3,28 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 
 public final class Text {
+    public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
+                                      FromPointerBuilderBlobDefault<Builder>,
+                                      InitSizedFromPointerBuilder<Builder> {
+        public Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
+                                                   int defaultOffset, int defaultSize) {
+            return WireHelpers.readTextPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
+        }
+
+        public Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
+                                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+            return WireHelpers.getWritableTextPointer(pointer,
+                                                      segment,
+                                                      defaultBuffer,
+                                                      defaultOffset,
+                                                      defaultSize);
+        }
+
+        public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
+            return WireHelpers.initTextPointer(pointer, segment, size);
+        }
+    }
+    public static final Factory factory = new Factory();
 
     public static final class Reader {
         public final ByteBuffer buffer;

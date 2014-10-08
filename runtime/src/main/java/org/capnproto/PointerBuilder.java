@@ -17,42 +17,6 @@ public final class PointerBuilder {
         return this.segment.buffer.getLong(this.pointer) == 0;
     }
 
-
-    public final Text.Builder getText() {
-        return WireHelpers.getWritableTextPointer(
-            this.pointer, this.segment, null, 0, 0);
-    }
-
-    public Text.Builder getText(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
-        return WireHelpers.getWritableTextPointer(this.pointer,
-                                                  this.segment,
-                                                  defaultBuffer,
-                                                  defaultOffset,
-                                                  defaultSize);
-    }
-
-    public final Data.Builder getData() {
-        return WireHelpers.getWritableDataPointer(this.pointer,
-                                                  this.segment,
-                                                  null, 0, 0);
-    }
-
-    public Data.Builder getData(java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
-        return WireHelpers.getWritableDataPointer(this.pointer,
-                                                  this.segment,
-                                                  defaultBuffer,
-                                                  defaultOffset,
-                                                  defaultSize);
-    }
-
-    public final Text.Builder initText(int size) {
-        return WireHelpers.initTextPointer(this.pointer, this.segment, size);
-    }
-
-    public final Data.Builder initData(int size) {
-        return WireHelpers.initDataPointer(this.pointer, this.segment, size);
-    }
-
     public final void setList(ListReader value) {
         WireHelpers.setListPointer(this.segment, this.pointer, value);
     }

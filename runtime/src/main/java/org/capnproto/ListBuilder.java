@@ -117,4 +117,26 @@ public class ListBuilder {
             (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
             defaultSegment, defaultOffset);
     }
+
+    protected final <T> T _getPointerElement(FromPointerBuilderBlobDefault<T> factory, int index,
+                                             java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return factory.fromPointerBuilderBlobDefault(
+            this.segment,
+            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
+            defaultBuffer, defaultOffset, defaultSize);
+    }
+
+
+    protected final <T> T _initPointerElement(InitFromPointerBuilder<T> factory, int index) {
+        return factory.initFromPointerBuilder(
+            this.segment,
+            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
+    }
+
+    protected final <T> T _initSizedPointerElement(InitSizedFromPointerBuilder<T> factory, int index, int elementCount) {
+        return factory.initSizedFromPointerBuilder(
+            this.segment,
+            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
+            elementCount);
+    }
 }
