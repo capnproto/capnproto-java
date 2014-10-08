@@ -12,7 +12,6 @@ class LayoutSuite extends FunSuite {
     }
   }
 
-
   test("SimpleRawDataStruct") {
     val data : Array[Byte] =
       Array(0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -24,7 +23,10 @@ class LayoutSuite extends FunSuite {
 
     val arena = new ReaderArena(Array(buffer));
     val pointerReader = new PointerReader(arena.tryGetSegment(0), 0, 0x7fffffff);
-    val reader = pointerReader.getStruct(new BareStructReader());
+
+    val reader = WireHelpers.readStructPointer(new BareStructReader(),
+                                               pointerReader.segment,
+                                               pointerReader.pointer, null, 0, 0x7fffffff);
 
     assert(reader._getLongField(0) === 0xefcdab8967452301L);
     assert(reader._getLongField(1) === 0L);
@@ -117,9 +119,9 @@ class LayoutSuite extends FunSuite {
       new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
                                                   BuilderArena.SUGGESTED_ALLOCATION_STRATEGY)),
       0);
-    val builder = pointerBuilder.initStruct(new BareStructBuilder(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE)));
+    val factory = new BareStructBuilder(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE));
+    val builder =  WireHelpers.initStructPointer(factory, pointerBuilder.pointer, pointerBuilder.segment, factory.structSize());
     setupStruct(builder);
-
     checkStruct(builder);
   }
 

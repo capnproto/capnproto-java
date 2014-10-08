@@ -23,7 +23,7 @@ public final class MessageBuilder {
         throw new Error("unimplemented");
     }
 
-    public <T> T initRoot(StructBuilder.Factory <T> factory) {
+    public <T> T initRoot(InitFromPointerBuilder<T> factory) {
         SegmentBuilder rootSegment = this.arena.segments.get(0);
         int location = rootSegment.allocate(1);
         if (location == SegmentBuilder.FAILED_ALLOCATION) {
@@ -31,7 +31,7 @@ public final class MessageBuilder {
         }
 
         AnyPointer.Builder ptr = new AnyPointer.Builder(PointerBuilder.getRoot(rootSegment, location));
-        return ptr.initAsStruct(factory);
+        return ptr.initAs(factory);
     }
 
     public final java.nio.ByteBuffer[] getSegmentsForOutput() {

@@ -44,7 +44,7 @@ public final class ListList {
                                                       defaultOffset);
         }
 
-        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder,
+        public final Builder<ElementBuilder> initSizedFromPointerBuilder(PointerBuilder builder,
                                                                     int elementCount) {
             return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.POINTER);
         }
@@ -70,9 +70,9 @@ public final class ListList {
     }
 
     public static final class Builder<T> extends ListBuilder {
-        private final FromPointerBuilder<T> factory;
+        private final ListFactory<T, ?> factory;
 
-        public Builder(FromPointerBuilder<T> factory,
+        public Builder(ListFactory<T, ?> factory,
                        SegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){
@@ -81,7 +81,7 @@ public final class ListList {
         }
 
         public final T init(int index, int size) {
-            return this.factory.initFromPointerBuilder(_getPointerElement(index), size);
+            return this.factory.initSizedFromPointerBuilder(_getPointerElement(index), size);
         }
 
         public final T get(int index) {

@@ -9,11 +9,7 @@ public final class AnyPointer {
             this.reader = reader;
         }
 
-        public final <T> T getAsStruct(StructReader.Factory<T> factory) {
-            return this.reader.getStruct(factory);
-        }
-
-        public final <T> T getAsList(FromPointerReader<T> factory) {
+        public final <T> T getAs(FromPointerReader<T> factory) {
             return factory.fromPointerReader(this.reader, null, 0);
         }
     }
@@ -25,8 +21,12 @@ public final class AnyPointer {
             this.builder = builder;
         }
 
-        public final <T> T initAsStruct(StructBuilder.Factory<T> factory) {
-            return this.builder.initStruct(factory);
+        public final <T> T initAs(InitFromPointerBuilder<T> factory) {
+            return factory.initFromPointerBuilder(this.builder);
+        }
+
+        public final <T> T initAs(InitSizedFromPointerBuilder<T> factory, int elementCount) {
+            return factory.initSizedFromPointerBuilder(this.builder, elementCount);
         }
 
         public final void clear() {

@@ -36,7 +36,7 @@ public final class TextList {
                                                       defaultOffset);
         }
 
-        public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+        public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
             return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.POINTER);
         }
 

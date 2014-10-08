@@ -1,10 +1,9 @@
 package org.capnproto;
 
 public class StructBuilder {
-
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int data, int pointers, int dataSize,
-                           short pointerCount, byte bit0Offset);
+                                    short pointerCount, byte bit0Offset);
         StructSize structSize();
     }
 

@@ -45,7 +45,7 @@ public final class StructList {
                                                                      defaultOffset);
         }
 
-        public final Builder<ElementBuilder> initFromPointerBuilder(PointerBuilder builder,
+        public final Builder<ElementBuilder> initSizedFromPointerBuilder(PointerBuilder builder,
                                                                     int elementCount) {
             return WireHelpers.initStructListPointer(this, builder.pointer, builder.segment, elementCount, factory.structSize());
         }

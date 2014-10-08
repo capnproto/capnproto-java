@@ -50,7 +50,7 @@ public class EnumList {
                                                       defaultOffset);
         }
 
-        public final Builder<T> initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+        public final Builder<T> initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
             return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.TWO_BYTES);
         }
     }

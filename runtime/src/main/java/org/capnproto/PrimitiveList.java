@@ -37,7 +37,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.VOID);
             }
         }
@@ -102,7 +102,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.BIT);
             }
         }
@@ -175,7 +175,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.BYTE);
             }
         }
@@ -249,7 +249,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.TWO_BYTES);
             }
         }
@@ -323,7 +323,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.FOUR_BYTES);
             }
         }
@@ -397,7 +397,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.FOUR_BYTES);
             }
 
@@ -472,7 +472,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.EIGHT_BYTES);
             }
         }
@@ -545,7 +545,7 @@ public class PrimitiveList {
                                                           defaultOffset);
             }
 
-            public final Builder initFromPointerBuilder(PointerBuilder builder, int elementCount) {
+            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
                 return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.EIGHT_BYTES);
             }
         }

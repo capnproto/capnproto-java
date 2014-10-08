@@ -103,7 +103,7 @@ class EncodingSuite extends FunSuite {
 
 
     val oldReader = {
-      val oldVersion = root.getAnyPointerField().initAsStruct(TestOldVersion.factory);
+      val oldVersion = root.getAnyPointerField().initAs(TestOldVersion.factory);
       oldVersion.setOld1(123);
       oldVersion.setOld2("foo");
       val sub = oldVersion.initOld3();

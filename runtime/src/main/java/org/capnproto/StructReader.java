@@ -1,11 +1,10 @@
 package org.capnproto;
 
-
 public class StructReader {
     public interface Factory<T> {
-        T constructReader(SegmentReader segment, int data, int pointers,
-                          int dataSize, short pointerCount,
-                          byte bit0Offset, int nestingLimit);
+        abstract T constructReader(SegmentReader segment, int data, int pointers,
+                                   int dataSize, short pointerCount,
+                                   byte bit0Offset, int nestingLimit);
     }
 
     protected final SegmentReader segment;
