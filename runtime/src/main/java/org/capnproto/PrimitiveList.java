@@ -2,7 +2,9 @@ package org.capnproto;
 
 public class PrimitiveList {
     public static class Void {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.VOID); }
+
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -18,28 +20,6 @@ public class PrimitiveList {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
 
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.VOID,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.VOID,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.VOID);
-            }
         }
         public static final Factory factory = new Factory();
 
@@ -67,7 +47,8 @@ public class PrimitiveList {
     }
 
     public static class Boolean {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.BIT); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -81,29 +62,6 @@ public class PrimitiveList {
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            }
-
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.BIT,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.BIT,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.BIT);
             }
         }
         public static final Factory factory = new Factory();
@@ -140,7 +98,8 @@ public class PrimitiveList {
     }
 
     public static class Byte {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.BYTE); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -154,29 +113,6 @@ public class PrimitiveList {
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            }
-
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.BYTE,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.BYTE,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.BYTE);
             }
         }
         public static final Factory factory = new Factory();
@@ -214,7 +150,8 @@ public class PrimitiveList {
     }
 
     public static class Short {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.TWO_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -230,28 +167,6 @@ public class PrimitiveList {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
 
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.TWO_BYTES,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.TWO_BYTES,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.TWO_BYTES);
-            }
         }
         public static final Factory factory = new Factory();
 
@@ -288,7 +203,8 @@ public class PrimitiveList {
     }
 
     public static class Int {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.FOUR_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -304,28 +220,6 @@ public class PrimitiveList {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
 
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.FOUR_BYTES,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.FOUR_BYTES,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.FOUR_BYTES);
-            }
         }
         public static final Factory factory = new Factory();
 
@@ -361,7 +255,8 @@ public class PrimitiveList {
     }
 
     public static class Float {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.FOUR_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -376,31 +271,6 @@ public class PrimitiveList {
                                                     int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
-
-
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.FOUR_BYTES,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.FOUR_BYTES,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.FOUR_BYTES);
-            }
-
         }
         public static final Factory factory = new Factory();
 
@@ -437,7 +307,8 @@ public class PrimitiveList {
 
 
     public static class Long {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.EIGHT_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -451,29 +322,6 @@ public class PrimitiveList {
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            }
-
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.EIGHT_BYTES,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.EIGHT_BYTES,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.EIGHT_BYTES);
             }
         }
         public static final Factory factory = new Factory();
@@ -510,7 +358,8 @@ public class PrimitiveList {
     }
 
     public static class Double {
-        public static final class Factory implements ListFactory<Builder, Reader> {
+        public static final class Factory extends ListFactory<Builder, Reader> {
+            Factory() {super (FieldSize.EIGHT_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -524,29 +373,6 @@ public class PrimitiveList {
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            }
-
-            public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.readListPointer(this,
-                                                   reader.segment,
-                                                   reader.pointer,
-                                                   defaultSegment,
-                                                   defaultOffset,
-                                                   FieldSize.EIGHT_BYTES,
-                                                   reader.nestingLimit);
-            }
-
-            public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-                return WireHelpers.getWritableListPointer(this,
-                                                          builder.pointer,
-                                                          builder.segment,
-                                                          FieldSize.EIGHT_BYTES,
-                                                          defaultSegment,
-                                                          defaultOffset);
-            }
-
-            public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-                return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.EIGHT_BYTES);
             }
         }
         public static final Factory factory = new Factory();

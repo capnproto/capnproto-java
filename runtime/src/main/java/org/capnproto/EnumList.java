@@ -9,10 +9,11 @@ public class EnumList {
         return values[index];
     }
 
-    public static final class Factory<T extends java.lang.Enum> implements ListFactory<Builder<T>, Reader<T>>{
+    public static final class Factory<T extends java.lang.Enum> extends ListFactory<Builder<T>, Reader<T>>{
         public final T values[];
 
         public Factory(T values[]) {
+            super(FieldSize.TWO_BYTES);
             this.values = values;
         }
         public final Reader<T> constructReader(SegmentReader segment,
@@ -29,29 +30,6 @@ public class EnumList {
                                                  int elementCount, int step,
                                                  int structDataSize, short structPointerCount) {
             return new Builder<T> (values, segment, ptr, elementCount, step, structDataSize, structPointerCount);
-        }
-
-        public final Reader<T> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.readListPointer(this,
-                                               reader.segment,
-                                               reader.pointer,
-                                               defaultSegment,
-                                               defaultOffset,
-                                               FieldSize.TWO_BYTES,
-                                               reader.nestingLimit);
-        }
-
-        public final Builder<T> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.getWritableListPointer(this,
-                                                      builder.pointer,
-                                                      builder.segment,
-                                                      FieldSize.TWO_BYTES,
-                                                      defaultSegment,
-                                                      defaultOffset);
-        }
-
-        public final Builder<T> initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-            return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.TWO_BYTES);
         }
     }
 

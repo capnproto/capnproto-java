@@ -1,7 +1,8 @@
 package org.capnproto;
 
 public final class TextList {
-    public static final class Factory implements ListFactory<Builder, Reader> {
+    public static final class Factory extends ListFactory<Builder, Reader> {
+        Factory() {super (FieldSize.POINTER); }
         public final Reader constructReader(SegmentReader segment,
                                             int ptr,
                                             int elementCount, int step,
@@ -16,30 +17,6 @@ public final class TextList {
                                                 int structDataSize, short structPointerCount) {
             return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
-
-        public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.readListPointer(this,
-                                               reader.segment,
-                                               reader.pointer,
-                                               defaultSegment,
-                                               defaultOffset,
-                                               FieldSize.POINTER,
-                                               reader.nestingLimit);
-        }
-
-        public final Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.getWritableListPointer(this,
-                                                      builder.pointer,
-                                                      builder.segment,
-                                                      FieldSize.POINTER,
-                                                      defaultSegment,
-                                                      defaultOffset);
-        }
-
-        public final Builder initSizedFromPointerBuilder(PointerBuilder builder, int elementCount) {
-            return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.POINTER);
-        }
-
     }
     public static final Factory factory = new Factory();
 

@@ -2,11 +2,12 @@ package org.capnproto;
 
 public final class ListList {
     public static final class Factory<ElementBuilder, ElementReader>
-        implements ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
+        extends ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
 
         public final ListFactory<ElementBuilder, ElementReader> factory;
 
         public Factory(ListFactory<ElementBuilder, ElementReader> factory) {
+            super(FieldSize.POINTER);
             this.factory = factory;
         }
 
@@ -23,30 +24,6 @@ public final class ListList {
                                                               int elementCount, int step,
                                                               int structDataSize, short structPointerCount) {
             return new Builder<ElementBuilder>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
-        }
-
-        public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.readListPointer(this,
-                                               reader.segment,
-                                               reader.pointer,
-                                               defaultSegment,
-                                               defaultOffset,
-                                               FieldSize.POINTER,
-                                               reader.nestingLimit);
-        }
-
-        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.getWritableListPointer(this,
-                                                      builder.pointer,
-                                                      builder.segment,
-                                                      FieldSize.POINTER,
-                                                      defaultSegment,
-                                                      defaultOffset);
-        }
-
-        public final Builder<ElementBuilder> initSizedFromPointerBuilder(PointerBuilder builder,
-                                                                    int elementCount) {
-            return WireHelpers.initListPointer(this, builder.pointer, builder.segment, elementCount, FieldSize.POINTER);
         }
     }
 

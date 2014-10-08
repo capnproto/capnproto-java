@@ -2,11 +2,12 @@ package org.capnproto;
 
 public final class StructList {
     public static final class Factory<ElementBuilder, ElementReader>
-        implements ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
+        extends ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
 
         public final StructFactory<ElementBuilder, ElementReader> factory;
 
         public Factory(StructFactory<ElementBuilder, ElementReader> factory) {
+            super(FieldSize.INLINE_COMPOSITE);
             this.factory = factory;
         }
 
@@ -26,16 +27,6 @@ public final class StructList {
             return new Builder<ElementBuilder> (factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
 
-        public final Reader<ElementReader> fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
-            return WireHelpers.readListPointer(this,
-                                               reader.segment,
-                                               reader.pointer,
-                                               defaultSegment,
-                                               defaultOffset,
-                                               FieldSize.INLINE_COMPOSITE,
-                                               reader.nestingLimit);
-        }
-
         public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
                      return WireHelpers.getWritableStructListPointer(this,
                                                                      builder.pointer,
@@ -49,8 +40,6 @@ public final class StructList {
                                                                     int elementCount) {
             return WireHelpers.initStructListPointer(this, builder.pointer, builder.segment, elementCount, factory.structSize());
         }
-
-
     }
 
     public static final class Reader<T> extends ListReader implements Iterable<T> {
