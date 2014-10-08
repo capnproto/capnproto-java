@@ -188,7 +188,7 @@ final class WireHelpers {
 
     }
 
-    static <T> T initListPointer(FromPointerBuilder<T> factory,
+    static <T> T initListPointer(ListBuilder.Factory<T> factory,
                                  int refOffset,
                                  SegmentBuilder segment,
                                  int elementCount,
@@ -208,7 +208,7 @@ final class WireHelpers {
                                           elementCount, step, dataSize, (short)pointerCount);
     }
 
-    static <T> T initStructListPointer(FromPointerBuilder<T> factory,
+    static <T> T initStructListPointer(ListBuilder.Factory<T> factory,
                                        int refOffset,
                                        SegmentBuilder segment,
                                        int elementCount,
@@ -238,7 +238,7 @@ final class WireHelpers {
                                           elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
-    static <T> T getWritableListPointer(FromPointerBuilder<T> factory,
+    static <T> T getWritableListPointer(ListBuilder.Factory<T> factory,
                                         int origRefOffset,
                                         SegmentBuilder origSegment,
                                         byte elementSize,
@@ -296,7 +296,7 @@ final class WireHelpers {
         }
     }
 
-    static <T> T getWritableStructListPointer(FromPointerBuilder<T> factory,
+    static <T> T getWritableStructListPointer(ListBuilder.Factory<T> factory,
                                               int origRefOffset,
                                               SegmentBuilder origSegment,
                                               StructSize elementSize,
@@ -514,7 +514,7 @@ final class WireHelpers {
         throw new Error("copyPointer is unimplemented");
     }
 
-    static <T> T readListPointer(FromPointerReader<T> factory,
+    static <T> T readListPointer(ListReader.Factory<T> factory,
                                  SegmentReader segment,
                                  int refOffset,
                                  SegmentReader defaultSegment,

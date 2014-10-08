@@ -1,6 +1,12 @@
 package org.capnproto;
 
 public class ListBuilder {
+    public interface Factory<T> {
+        T constructBuilder(SegmentBuilder segment, int ptr,
+                           int elementCount, int step,
+                           int structDataSize, short structPointerCount);
+    }
+
     final SegmentBuilder segment;
     final int ptr; // byte offset to front of list
     final int elementCount;

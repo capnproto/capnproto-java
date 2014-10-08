@@ -1,6 +1,14 @@
 package org.capnproto;
 
 public class ListReader {
+    public interface Factory<T> {
+        T constructReader(SegmentReader segment,
+                          int ptr,
+                          int elementCount, int step,
+                          int structDataSize, short structPointerCount,
+                          int nestingLimit);
+    }
+
     final SegmentReader segment;
     final int ptr; // byte offset to front of list
     final int elementCount;
