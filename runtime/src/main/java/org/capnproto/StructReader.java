@@ -144,4 +144,20 @@ public class StructReader {
             return new PointerReader();
         }
     }
+
+    protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex, SegmentReader defaultSegment, int defaultOffset) {
+        if (ptrIndex < this.pointerCount) {
+            return factory.fromPointerReader(this.segment,
+                                             this.pointers + ptrIndex,
+                                             defaultSegment,
+                                             defaultOffset,
+                                             this.nestingLimit);
+        } else {
+            return factory.fromPointerReader(SegmentReader.EMPTY,
+                                             0,
+                                             defaultSegment,
+                                             defaultOffset,
+                                             this.nestingLimit);
+        }
+    }
 }

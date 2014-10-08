@@ -981,16 +981,16 @@ private:
 
           spaces(indent), "  public ", type, ".Reader get", titleCase, "() {\n",
           unionDiscrim.check,
-          spaces(indent), "    return ", type, ".factory.fromPointerReader(",
-          "_getPointerField(", offset,"),", defaultParams, ");\n",
+          spaces(indent), "    return ",
+          "_getPointerField(", type, ".factory,", offset,",", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           unionDiscrim.check,
-          spaces(indent), "    return ", type, ".factory.fromPointerBuilder("
-          "_getPointerField(", offset, "),", defaultParams,");\n",
+          spaces(indent), "    return ",
+          "_getPointerField(", type, ".factory, ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
@@ -1069,8 +1069,7 @@ private:
 
             spaces(indent), "  public final ", readerClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerReader(_getPointerField(", offset, "),",
-            defaultParams, ");\n",
+            spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
             spaces(indent), "  }\n",
             "\n"),
 
@@ -1082,8 +1081,7 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " get", titleCase, "() {\n",
-            spaces(indent), "    return (", listFactory, ").fromPointerBuilder(_getPointerField(", offset, "),",
-            defaultParams, ");\n",
+            spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
@@ -1301,9 +1299,10 @@ private:
           true,
             kj::strTree(spaces(indent),
                         "public static final ", typeName_, ".Reader ", upperCase, " =\n",
-                        spaces(indent), "  ", typeName_, ".factory.fromPointerReader"
-                        "(new org.capnproto.PointerReader(Schemas.b_",
-                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff), null, 0);\n")
+                        spaces(indent), "  ",
+                        "new org.capnproto.AnyPointer.Reader(new org.capnproto.PointerReader(Schemas.b_",
+                        kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff)).getAs(",
+                        typeName_, ".factory);\n")
         };
       }
 

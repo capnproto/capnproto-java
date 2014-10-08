@@ -41,7 +41,7 @@ public final class ListList {
         }
 
         public T get(int index) {
-            return this.factory.fromPointerReader(_getPointerElement(index), null, 0);
+            return _getPointerElement(this.factory, index, null, 0);
         }
 
     }
@@ -62,7 +62,7 @@ public final class ListList {
         }
 
         public final T get(int index) {
-            return this.factory.fromPointerBuilder(_getPointerElement(index), null, 0);
+            return _getPointerElement(this.factory, index, null, 0);
         }
     }
 }

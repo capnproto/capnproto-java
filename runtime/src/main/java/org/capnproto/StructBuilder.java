@@ -153,4 +153,8 @@ public class StructBuilder {
         return new PointerBuilder(this.segment, this.pointers + index);
     }
 
+    protected final <T> T _getPointerField(FromPointerBuilder<T> factory, int index, SegmentReader defaultSegment, int defaultOffset) {
+        return factory.fromPointerBuilder(this.segment, this.pointers + index, defaultSegment, defaultOffset);
+    }
+
 }

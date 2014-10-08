@@ -6,20 +6,22 @@ public abstract class ListFactory<Builder, Reader> implements ListBuilder.Factor
     final byte elementSize;
     ListFactory(byte elementSize) {this.elementSize = elementSize;}
 
-    public final Reader fromPointerReader(PointerReader reader, SegmentReader defaultSegment, int defaultOffset) {
+    public final Reader fromPointerReader(SegmentReader segment, int pointer,
+                                          SegmentReader defaultSegment, int defaultOffset,
+                                          int nestingLimit) {
         return WireHelpers.readListPointer(this,
-                                           reader.segment,
-                                           reader.pointer,
+                                           segment,
+                                           pointer,
                                            defaultSegment,
                                            defaultOffset,
                                            this.elementSize,
-                                           reader.nestingLimit);
+                                           nestingLimit);
     }
 
-    public Builder fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+    public Builder fromPointerBuilder(SegmentBuilder segment, int pointer, SegmentReader defaultSegment, int defaultOffset) {
         return WireHelpers.getWritableListPointer(this,
-                                                  builder.pointer,
-                                                  builder.segment,
+                                                  pointer,
+                                                  segment,
                                                   this.elementSize,
                                                   defaultSegment,
                                                   defaultOffset);

@@ -27,10 +27,11 @@ public final class StructList {
             return new Builder<ElementBuilder> (factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
 
-        public final Builder<ElementBuilder> fromPointerBuilder(PointerBuilder builder, SegmentReader defaultSegment, int defaultOffset) {
+        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer,
+                                                                SegmentReader defaultSegment, int defaultOffset) {
                      return WireHelpers.getWritableStructListPointer(this,
-                                                                     builder.pointer,
-                                                                     builder.segment,
+                                                                     pointer,
+                                                                     segment,
                                                                      factory.structSize(),
                                                                      defaultSegment,
                                                                      defaultOffset);
