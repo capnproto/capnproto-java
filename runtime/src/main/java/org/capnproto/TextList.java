@@ -30,7 +30,7 @@ public final class TextList {
         }
 
         public Text.Reader get(int index) {
-            return _getPointerElement(Text.factory, index, null, 0, 0);
+            return _getPointerElement(Text.factory, index);
         }
 
         public final class Iterator implements java.util.Iterator<Text.Reader> {
@@ -41,7 +41,7 @@ public final class TextList {
             }
 
             public Text.Reader next() {
-                return _getPointerElement(Text.factory, idx++, null, 0, 0);
+                return this.list._getPointerElement(Text.factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();
@@ -65,7 +65,7 @@ public final class TextList {
         }
 
         public final Text.Builder get(int index) {
-            return _getPointerElement(Text.factory, index, null, 0, 0);
+            return _getPointerElement(Text.factory, index);
         }
 
         public final void set(int index, Text.Reader value) {
@@ -80,7 +80,7 @@ public final class TextList {
             }
 
             public Text.Builder next() {
-                return this.list._getPointerElement(Text.factory, idx++, null, 0, 0);
+                return this.list._getPointerElement(Text.factory, idx++);
             }
             public boolean hasNext() {
                 return this.idx < this.list.size();

@@ -30,7 +30,7 @@ public final class DataList {
         }
 
         public Data.Reader get(int index) {
-            return _getPointerElement(Data.factory, index, null, 0, 0);
+            return _getPointerElement(Data.factory, index);
         }
 
         public final class Iterator implements java.util.Iterator<Data.Reader> {
@@ -41,7 +41,7 @@ public final class DataList {
             }
 
             public Data.Reader next() {
-                return _getPointerElement(Data.factory, idx++, null, 0, 0);
+                return this.list._getPointerElement(Data.factory, idx++);
             }
             public boolean hasNext() {
                 return idx < list.size();
@@ -65,7 +65,7 @@ public final class DataList {
         }
 
         public final Data.Builder get(int index) {
-            return _getPointerElement(Data.factory, index, null, 0, 0);
+            return _getPointerElement(Data.factory, index);
         }
 
         public final void set(int index, Data.Reader value) {
@@ -80,7 +80,7 @@ public final class DataList {
             }
 
             public Data.Builder next() {
-                return this.list._getPointerElement(Data.factory, idx++, null, 0, 0);
+                return this.list._getPointerElement(Data.factory, idx++);
             }
             public boolean hasNext() {
                 return this.idx < this.list.size();

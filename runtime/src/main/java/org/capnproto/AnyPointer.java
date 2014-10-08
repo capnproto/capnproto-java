@@ -14,7 +14,7 @@ public final class AnyPointer {
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
-            return factory.fromPointerReader(this.segment, this.pointer, null, 0, this.nestingLimit);
+            return factory.fromPointerReader(this.segment, this.pointer, this.nestingLimit);
         }
     }
 

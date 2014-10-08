@@ -4,12 +4,17 @@ import java.nio.ByteBuffer;
 
 public final class Data {
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
+                                      FromPointerReader<Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
+                                      FromPointerBuilder<Builder>,
                                       SetPointerBuilder<Reader>,
                                       InitSizedFromPointerBuilder<Builder> {
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
+        }
+        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+            return WireHelpers.readDataPointer(segment, pointer, null, 0, 0);
         }
         public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
                                                      java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
@@ -18,6 +23,11 @@ public final class Data {
                                                       defaultBuffer,
                                                       defaultOffset,
                                                       defaultSize);
+        }
+        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+            return WireHelpers.getWritableDataPointer(pointer,
+                                                      segment,
+                                                      null, 0, 0);
         }
 
         public final Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
