@@ -668,43 +668,16 @@ private:
       );
   }
 
-  kj::String makeListListFactoryArg(schema::Type::Reader type) {
-    auto elementType = type.getList().getElementType();
-    switch (elementType.which()) {
-    case schema::Type::STRUCT:
-      return kj::str("new org.capnproto.StructList.Factory<",
-                     typeName(elementType, kj::str(".Builder")),", ",
-                     typeName(elementType, kj::str(".Reader")), ">(",
-                     typeName(elementType, kj::str("")), ".factory)");
-    case schema::Type::LIST:
-      return kj::str("new org.capnproto.ListList.Factory<",
-                     typeName(elementType, kj::str(".Builder")),", ",
-                     typeName(elementType, kj::str(".Reader")), ">(",
-                     makeListListFactoryArg(elementType),
-                     ")");
-    case schema::Type::ENUM:
-      return kj::str("new org.capnproto.EnumList.Factory<",
-                     typeName(elementType), ">(",
-                     typeName(elementType, kj::str("")),
-                     ".values())");
-    default:
-      return kj::str(typeName(type, kj::str("")), ".factory");
-    }
-  }
-
   kj::String makeListFactoryArg(schema::Type::Reader type) {
     auto elementType = type.getList().getElementType();
     switch (elementType.which()) {
     case schema::Type::STRUCT:
-      return kj::str("new org.capnproto.StructList.Factory<",
-                     typeName(elementType, kj::str(".Builder")),", ",
-                     typeName(elementType, kj::str(".Reader")), ">(",
-                     typeName(elementType, kj::str("")), ".factory)");
+      return kj::str(typeName(elementType, kj::str(".listFactory")));
     case schema::Type::LIST:
       return kj::str("new org.capnproto.ListList.Factory<",
                      typeName(elementType, kj::str(".Builder")),", ",
                      typeName(elementType, kj::str(".Reader")), ">(",
-                     makeListListFactoryArg(elementType),
+                     makeListFactoryArg(elementType),
                      ")");
     case schema::Type::ENUM:
       return kj::str("new org.capnproto.EnumList.Factory<",
@@ -1184,7 +1157,7 @@ private:
           ",(short)", structNode.getPointerCount(),
           ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
 
-        spaces(indent), "  public static class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
+        spaces(indent), "  public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
         spaces(indent),
         "    public final Reader constructReader(org.capnproto.SegmentReader segment, int data,",
         "int pointers, int dataSize, short pointerCount, byte bit0Offset, int nestingLimit) {\n",
@@ -1203,6 +1176,8 @@ private:
 
         spaces(indent), "  }\n",
         spaces(indent), "  public static final Factory factory = new Factory();\n",
+        spaces(indent), "  public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =\n",
+        spaces(indent), "    new org.capnproto.StructList.Factory<Builder, Reader>(factory);\n",
 
 
         kj::strTree(makeReaderDef(fullName, name, schema,
