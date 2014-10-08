@@ -11,10 +11,13 @@ import org.capnproto.StructFactory;
 import org.capnproto.MessageBuilder;
 import org.capnproto.MessageReader;
 
-public abstract class TestCase<RequestFactory extends StructFactory<RequestBuilder, RequestReader>,
-                          RequestBuilder, RequestReader,
+public abstract class TestCase<RequestFactory extends
+                          StructFactory<RequestBuilder, RequestReader>,
+                          RequestBuilder extends org.capnproto.StructBuilder,
+                          RequestReader extends org.capnproto.StructReader,
                           ResponseFactory extends StructFactory<ResponseBuilder, ResponseReader>,
-                          ResponseBuilder, ResponseReader, Expectation> {
+                          ResponseBuilder extends org.capnproto.StructBuilder,
+                          ResponseReader extends org.capnproto.StructReader, Expectation> {
     public abstract Expectation setupRequest(Common.FastRand rng, RequestBuilder request);
     public abstract void handleRequest(RequestReader request, ResponseBuilder response);
     public abstract boolean checkResponse(ResponseReader response, Expectation expected);

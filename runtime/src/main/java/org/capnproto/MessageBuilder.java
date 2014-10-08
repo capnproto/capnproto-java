@@ -30,7 +30,7 @@ public final class MessageBuilder {
             throw new Error("could not allocate root pointer");
         }
 
-        AnyPointer.Builder ptr = new AnyPointer.Builder(PointerBuilder.getRoot(rootSegment, location));
+        AnyPointer.Builder ptr = new AnyPointer.Builder(rootSegment, location);
         return ptr.initAs(factory);
     }
 

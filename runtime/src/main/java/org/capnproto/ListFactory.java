@@ -1,8 +1,11 @@
 package org.capnproto;
 
-public abstract class ListFactory<Builder, Reader> implements ListBuilder.Factory<Builder>, FromPointerBuilder<Builder>,
-                                              InitSizedFromPointerBuilder<Builder>,
-                                              ListReader.Factory<Reader>, FromPointerReader<Reader> {
+public abstract class ListFactory<Builder, Reader extends ListReader>
+    implements ListBuilder.Factory<Builder>, FromPointerBuilder<Builder>,
+    InitSizedFromPointerBuilder<Builder>,
+    SetPointerBuilder<Reader>,
+    ListReader.Factory<Reader>, FromPointerReader<Reader> {
+
     final byte elementSize;
     ListFactory(byte elementSize) {this.elementSize = elementSize;}
 
@@ -29,5 +32,9 @@ public abstract class ListFactory<Builder, Reader> implements ListBuilder.Factor
 
     public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initListPointer(this, pointer, segment, elementCount, this.elementSize);
+    }
+
+    public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+        WireHelpers.setListPointer(segment, pointer, value);
     }
 }

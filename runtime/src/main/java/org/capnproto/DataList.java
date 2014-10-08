@@ -69,7 +69,7 @@ public final class DataList {
         }
 
         public final void set(int index, Data.Reader value) {
-            _getPointerElement(index).setData(value);
+            _setPointerElement(Data.factory, index, value);
         }
 
         public final class Iterator implements java.util.Iterator<Data.Builder> {

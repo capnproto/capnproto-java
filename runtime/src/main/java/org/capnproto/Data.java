@@ -5,12 +5,13 @@ import java.nio.ByteBuffer;
 public final class Data {
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
+                                      SetPointerBuilder<Reader>,
                                       InitSizedFromPointerBuilder<Builder> {
-        public Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
+        public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
-        public Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
+        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
                                                      java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
@@ -19,8 +20,12 @@ public final class Data {
                                                       defaultSize);
         }
 
-        public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
+        public final Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initDataPointer(pointer, segment, size);
+        }
+
+        public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+            WireHelpers.setDataPointer(pointer, segment, value);
         }
     }
     public static final Factory factory = new Factory();

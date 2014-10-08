@@ -763,7 +763,7 @@ private:
                     ");\n");
                 case Section::POINTERS:
                   return kj::strTree(
-                    spaces(indent), "    _getPointerField(", slot.offset, ").clear();\n");
+                    spaces(indent), "    _clearPointerField(", slot.offset, ");\n");
                 }
                 KJ_UNREACHABLE;
               },
@@ -947,20 +947,20 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Builder get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(_getPointerField(",
-            offset, "));\n",
+            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(this.segment, this.pointers + ",
+            offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public org.capnproto.AnyPointer.Builder init", titleCase, "() {\n",
             unionDiscrim.set,
             spaces(indent), "    org.capnproto.AnyPointer.Builder result =\n",
-            spaces(indent), "      new org.capnproto.AnyPointer.Builder(_getPointerField(",
-            offset, "));\n",
+            spaces(indent), "      new org.capnproto.AnyPointer.Builder(this.segment, this.pointers +",
+            offset, ");\n",
             spaces(indent), "    result.clear();\n",
             spaces(indent), "    return result;\n",
             spaces(indent), "  }\n",
@@ -994,7 +994,7 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _getPointerField(", offset, ").setStruct(value);\n",
+          spaces(indent), "    _setPointerField(", type, ".factory,", offset, ", value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           unionDiscrim.set,
@@ -1031,7 +1031,7 @@ private:
           kj::mv(unionDiscrim.builderIsDecl),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
           unionDiscrim.has,
-          spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+          spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           spaces(indent), "    return _getPointerField(", factory, ", ",
@@ -1039,11 +1039,11 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _getPointerField(", offset, ").set", blobKind, "(value);\n",
+          spaces(indent), "    _setPointerField(", factory, ", ", offset, ", value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", setterInputType, " value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _getPointerField(", offset, ").set", blobKind, "( new",
+          spaces(indent), "    _setPointerField(", factory, ", ", offset, ", new",
           type, ".Reader(value));\n",
           spaces(indent), "  }\n",
 
@@ -1077,7 +1077,7 @@ private:
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDecl),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
-            spaces(indent), "    return !_getPointerField(", offset, ").isNull();\n",
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,
@@ -1086,7 +1086,7 @@ private:
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
-            spaces(indent), "    _getPointerField(", offset, ").setList(value);\n",
+            spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderClass,

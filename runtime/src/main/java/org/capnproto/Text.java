@@ -5,13 +5,14 @@ import java.nio.ByteBuffer;
 public final class Text {
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
+                                      SetPointerBuilder<Reader>,
                                       InitSizedFromPointerBuilder<Builder> {
-        public Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
+        public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readTextPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
 
-        public Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
+        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
                                                      java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableTextPointer(pointer,
                                                       segment,
@@ -20,8 +21,12 @@ public final class Text {
                                                       defaultSize);
         }
 
-        public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
+        public final Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initTextPointer(pointer, segment, size);
+        }
+
+        public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+            WireHelpers.setTextPointer(pointer, segment, value);
         }
     }
     public static final Factory factory = new Factory();

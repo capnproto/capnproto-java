@@ -104,13 +104,6 @@ public class ListBuilder {
                                         (byte)(indexBit % 8));
     }
 
-
-    protected final PointerBuilder _getPointerElement(int index) {
-        return new PointerBuilder(
-            this.segment,
-            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
-    }
-
     protected final <T> T _getPointerElement(FromPointerBuilder<T> factory, int index, SegmentReader defaultSegment, int defaultOffset) {
         return factory.fromPointerBuilder(
             this.segment,
@@ -139,4 +132,11 @@ public class ListBuilder {
             (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
             elementCount);
     }
+
+    protected final <Reader> void _setPointerElement(SetPointerBuilder<Reader> factory, int index, Reader value) {
+        factory.setPointerBuilder(this.segment,
+                                  (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
+                                  value);
+    }
+
 }

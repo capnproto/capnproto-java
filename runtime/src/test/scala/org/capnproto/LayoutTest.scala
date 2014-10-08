@@ -114,12 +114,10 @@ class LayoutSuite extends FunSuite {
     val buffer = java.nio.ByteBuffer.allocate(1024 * 8);
     buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-    val pointerBuilder = PointerBuilder.getRoot(
-      new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
-                                                  BuilderArena.SUGGESTED_ALLOCATION_STRATEGY)),
-      0);
+    val segment = new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
+                                                              BuilderArena.SUGGESTED_ALLOCATION_STRATEGY))
     val factory = new BareStructBuilder(new StructSize(2, 4, FieldSize.INLINE_COMPOSITE));
-    val builder =  WireHelpers.initStructPointer(factory, pointerBuilder.pointer, pointerBuilder.segment, factory.structSize());
+    val builder =  WireHelpers.initStructPointer(factory, 0, segment, factory.structSize());
     setupStruct(builder);
     checkStruct(builder);
   }

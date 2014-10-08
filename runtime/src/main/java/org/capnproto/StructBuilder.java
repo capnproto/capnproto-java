@@ -149,8 +149,14 @@ public class StructBuilder {
                                     Double.doubleToLongBits(value) ^ mask);
     }
 
-    protected final PointerBuilder _getPointerField(int index) {
-        return new PointerBuilder(this.segment, this.pointers + index);
+    protected final boolean _pointerFieldIsNull(int ptrIndex) {
+        return this.segment.buffer.getLong((this.pointers + ptrIndex) * Constants.BYTES_PER_WORD) == 0;
+    }
+
+    protected final void _clearPointerField(int ptrIndex) {
+        int pointer = this.pointers + ptrIndex;
+        WireHelpers.zeroObject(this.segment, pointer);
+        this.segment.buffer.putLong(pointer * 8, 0L);
     }
 
     protected final <T> T _getPointerField(FromPointerBuilder<T> factory, int index, SegmentReader defaultSegment, int defaultOffset) {
@@ -168,6 +174,10 @@ public class StructBuilder {
 
     protected final <T> T _initSizedPointerField(InitSizedFromPointerBuilder<T> factory, int index, int elementCount) {
         return factory.initSizedFromPointerBuilder(this.segment, this.pointers + index, elementCount);
+    }
+
+    protected final <Reader> void _setPointerField(SetPointerBuilder<Reader> factory, int index, Reader value) {
+        factory.setPointerBuilder(this.segment, this.pointers + index, value);
     }
 
 }

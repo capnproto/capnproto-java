@@ -1,8 +1,10 @@
 package org.capnproto;
 
-public abstract class StructFactory<Builder, Reader> implements FromPointerBuilder<Builder>, StructBuilder.Factory<Builder>,
-                                                     InitFromPointerBuilder<Builder>,
-                                                     FromPointerReader<Reader>, StructReader.Factory<Reader> {
+public abstract class StructFactory<Builder, Reader extends StructReader>
+    implements FromPointerBuilder<Builder>, StructBuilder.Factory<Builder>,
+    InitFromPointerBuilder<Builder>,
+    SetPointerBuilder<Reader>,
+    FromPointerReader<Reader>, StructReader.Factory<Reader> {
     public final Reader fromPointerReader(SegmentReader segment, int pointer,
                                           SegmentReader defaultSegment, int defaultOffset,
                                           int nestingLimit) {
@@ -18,6 +20,10 @@ public abstract class StructFactory<Builder, Reader> implements FromPointerBuild
     }
     public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer) {
         return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());
+    }
+
+    public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+        WireHelpers.setStructPointer(segment, pointer, value);
     }
 
     public abstract Reader asReader(Builder builder);

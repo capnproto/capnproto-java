@@ -69,7 +69,7 @@ public final class TextList {
         }
 
         public final void set(int index, Text.Reader value) {
-            _getPointerElement(index).setText(value);
+            _setPointerElement(Text.factory, index, value);
         }
 
         public final class Iterator implements java.util.Iterator<Text.Builder> {

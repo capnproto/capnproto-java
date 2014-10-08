@@ -19,22 +19,25 @@ public final class AnyPointer {
     }
 
     public static final class Builder {
-        public final PointerBuilder builder;
+        final SegmentBuilder segment;
+        final int pointer;
 
-        public Builder(PointerBuilder builder) {
-            this.builder = builder;
+        public Builder(SegmentBuilder segment, int pointer) {
+            this.segment = segment;
+            this.pointer = pointer;
         }
 
         public final <T> T initAs(InitFromPointerBuilder<T> factory) {
-            return factory.initFromPointerBuilder(this.builder.segment, this.builder.pointer);
+            return factory.initFromPointerBuilder(this.segment, this.pointer);
         }
 
         public final <T> T initAs(InitSizedFromPointerBuilder<T> factory, int elementCount) {
-            return factory.initSizedFromPointerBuilder(this.builder.segment, this.builder.pointer, elementCount);
+            return factory.initSizedFromPointerBuilder(this.segment, this.pointer, elementCount);
         }
 
         public final void clear() {
-            this.builder.clear();
+            WireHelpers.zeroObject(this.segment, this.pointer);
+            this.segment.buffer.putLong(this.pointer * 8, 0L);
         }
     }
 
