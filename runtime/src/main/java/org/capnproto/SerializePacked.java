@@ -32,12 +32,12 @@ public final class SerializePacked {
         return Serialize.read(packedInput, options);
     }
 
-    public static MessageReader readUnbuffered(java.nio.channels.ReadableByteChannel input) throws java.io.IOException {
-        return readUnbuffered(input, ReaderOptions.DEFAULT_READER_OPTIONS);
+    public static MessageReader readFromUnbuffered(java.nio.channels.ReadableByteChannel input) throws java.io.IOException {
+        return readFromUnbuffered(input, ReaderOptions.DEFAULT_READER_OPTIONS);
     }
 
-    public static MessageReader readUnbuffered(java.nio.channels.ReadableByteChannel input,
-                                               ReaderOptions options) throws java.io.IOException {
+    public static MessageReader readFromUnbuffered(java.nio.channels.ReadableByteChannel input,
+                                                   ReaderOptions options) throws java.io.IOException {
         PackedInputStream packedInput = new PackedInputStream(new BufferedInputStreamWrapper(input));
         return Serialize.read(packedInput, options);
     }
@@ -48,7 +48,7 @@ public final class SerializePacked {
         Serialize.write(packedOutputStream, message);
     }
 
-    public static void writeUnbuffered(java.nio.channels.WritableByteChannel output,
+    public static void writeToUnbuffered(java.nio.channels.WritableByteChannel output,
                                        MessageBuilder message) throws java.io.IOException {
         BufferedOutputStreamWrapper buffered = new BufferedOutputStreamWrapper(output);
         write(buffered, message);

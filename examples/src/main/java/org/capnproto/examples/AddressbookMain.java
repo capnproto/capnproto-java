@@ -57,14 +57,14 @@ public class AddressbookMain {
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
-        org.capnproto.SerializePacked.writeUnbuffered(
+        org.capnproto.SerializePacked.writeToUnbuffered(
             (new FileOutputStream(FileDescriptor.out)).getChannel(),
             message);
     }
 
     public static void printAddressBook() throws java.io.IOException {
         org.capnproto.MessageReader message =
-            org.capnproto.SerializePacked.readUnbuffered(
+            org.capnproto.SerializePacked.readFromUnbuffered(
                 (new FileInputStream(FileDescriptor.in)).getChannel());
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
         for(Person.Reader person : addressbook.getPeople()) {
