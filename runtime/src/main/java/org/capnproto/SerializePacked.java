@@ -24,13 +24,22 @@ package org.capnproto;
 public final class SerializePacked {
 
     public static MessageReader read(BufferedInputStream input) throws java.io.IOException {
+        return read(input, ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
+
+    public static MessageReader read(BufferedInputStream input, ReaderOptions options) throws java.io.IOException {
         PackedInputStream packedInput = new PackedInputStream(input);
-        return Serialize.read(packedInput);
+        return Serialize.read(packedInput, options);
     }
 
     public static MessageReader readUnbuffered(java.nio.channels.ReadableByteChannel input) throws java.io.IOException {
+        return readUnbuffered(input, ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
+
+    public static MessageReader readUnbuffered(java.nio.channels.ReadableByteChannel input,
+                                               ReaderOptions options) throws java.io.IOException {
         PackedInputStream packedInput = new PackedInputStream(new BufferedInputStreamWrapper(input));
-        return Serialize.read(packedInput);
+        return Serialize.read(packedInput, options);
     }
 
     public static void write(BufferedOutputStream output,

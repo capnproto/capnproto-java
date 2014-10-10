@@ -48,10 +48,10 @@ public final class Serialize {
     }
 
     public static MessageReader read(ReadableByteChannel bc) throws IOException {
-        return read(bc, MessageReader.DEFAULT_TRAVERSAL_LIMIT_IN_WORDS, MessageReader.DEFAULT_NESTING_LIMIT);
+        return read(bc, ReaderOptions.DEFAULT_READER_OPTIONS);
     }
 
-    public static MessageReader read(ReadableByteChannel bc, long traversalLimitInWords, int nestingLimit) throws IOException {
+    public static MessageReader read(ReadableByteChannel bc, ReaderOptions options) throws IOException {
         ByteBuffer firstWord = makeByteBuffer(Constants.BYTES_PER_WORD);
         fillBuffer(firstWord, bc);
 
@@ -81,8 +81,7 @@ public final class Serialize {
             }
         }
 
-        // TODO check that totalWords is reasonable
-        if (totalWords > traversalLimitInWords) {
+        if (totalWords > options.traversalLimitInWords) {
             throw new DecodeException("Message size exceeds traversal limit.");
         }
 
@@ -105,7 +104,7 @@ public final class Serialize {
             offset += moreSizes.get(ii - 1);
         }
 
-        return new MessageReader(segmentSlices, traversalLimitInWords, nestingLimit);
+        return new MessageReader(segmentSlices, options);
     }
 
     public static void write(WritableByteChannel outputChannel,
