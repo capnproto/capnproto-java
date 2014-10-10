@@ -26,7 +26,7 @@
 using Cxx = import "/capnp/c++.capnp";
 $Cxx.namespace("addressbook");
 
-using Java = import "/java_support/java.capnp";
+using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.examples");
 $Java.outerClassname("Addressbook");
 

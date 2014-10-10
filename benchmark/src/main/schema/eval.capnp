@@ -22,11 +22,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using Cxx = import "/capnp/c++.capnp";
+using Java = import "/capnp/java.capnp";
 
 @0xe12dc4c3e70e9eda;
 $Cxx.namespace("capnp::benchmark::capnp");
-
-using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.benchmark");
 $Java.outerClassname("EvalSchema");
 

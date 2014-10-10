@@ -62,7 +62,7 @@ object Build extends sbt.Build {
   val compileTestSchema = taskKey[Unit]("Run capnpc-java on test schema")
   val compileTestSchemaTask = compileTestSchema := {
     val result0 = "mkdir -p compiler/src/test/generated".!!
-    val result = "capnp compile -I compiler/src/main/cpp/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp".!!
+    val result = "capnp compile -I compiler/src/main/schema/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp".!!
     println(s"**** CodeGen for test.capnp started\n$result\n**** CodeGen complete.");
   }
 
@@ -82,7 +82,7 @@ object Build extends sbt.Build {
   val compileBenchmarkSchema = taskKey[Unit]("Run capnpc-java on benchmark schema")
   val compileBenchmarkSchemaTask = compileBenchmarkSchema := {
     val result0 = "mkdir -p benchmark/src/main/generated".!!
-    val result = "capnp compile -I compiler/src/main/cpp/  --src-prefix=benchmark/src/main/schema/ -o./capnpc-java:benchmark/src/main/generated benchmark/src/main/schema/eval.capnp benchmark/src/main/schema/carsales.capnp benchmark/src/main/schema/catrank.capnp".!!
+    val result = "capnp compile -I compiler/src/main/schema/  --src-prefix=benchmark/src/main/schema/ -o./capnpc-java:benchmark/src/main/generated benchmark/src/main/schema/eval.capnp benchmark/src/main/schema/carsales.capnp benchmark/src/main/schema/catrank.capnp".!!
     println(s"**** CodeGen for benchmark started\n$result\n**** CodeGen complete.");
   }
 

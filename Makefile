@@ -16,4 +16,4 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 addressbook : capnpc-java
 	PWD=pwd
 	mkdir -p examples/src/main/generated
-	capnp compile -I$(PWD)/compiler/src/main/cpp --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
+	capnp compile -I$(PWD)/compiler/src/main/schema --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp

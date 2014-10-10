@@ -1,6 +1,6 @@
 @0xd6eccba9557a7f51;
 
-using Java = import "/java_support/java.capnp";
+using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.test");
 $Java.outerClassname("Test");
 

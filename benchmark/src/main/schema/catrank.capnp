@@ -22,11 +22,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using Cxx = import "/capnp/c++.capnp";
+using Java = import "/capnp/java.capnp";
 
 @0x82beb8e37ff79aba;
 $Cxx.namespace("capnp::benchmark::capnp");
-
-using Java = import "/java_support/java.capnp";
 $Java.package("org.capnproto.benchmark");
 $Java.outerClassname("CatRankSchema");
 
