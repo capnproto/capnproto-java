@@ -25,17 +25,14 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.FileDescriptor;
 
-import org.capnproto.MessageBuilder;
-import org.capnproto.MessageReader;
-import org.capnproto.SerializePacked;
 import org.capnproto.StructList;
-
-import org.capnproto.examples.Addressbook.*;
+import org.capnproto.examples.Addressbook.AddressBook;
+import org.capnproto.examples.Addressbook.Person;
 
 public class AddressbookMain {
 
     public static void writeAddressBook() throws java.io.IOException {
-        MessageBuilder message = new MessageBuilder();
+        org.capnproto.MessageBuilder message = new org.capnproto.MessageBuilder();
         AddressBook.Builder addressbook = message.initRoot(AddressBook.factory);
         StructList.Builder<Person.Builder> people = addressbook.initPeople(2);
 
@@ -60,13 +57,15 @@ public class AddressbookMain {
         bobPhones.get(1).setType(Person.PhoneNumber.Type.WORK);
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
-        SerializePacked.writeUnbuffered((new FileOutputStream(FileDescriptor.out)).getChannel(),
-                                        message);
+        org.capnproto.SerializePacked.writeUnbuffered(
+            (new FileOutputStream(FileDescriptor.out)).getChannel(),
+            message);
     }
 
     public static void printAddressBook() throws java.io.IOException {
-        MessageReader message = SerializePacked.readUnbuffered(
-            (new FileInputStream(FileDescriptor.in)).getChannel());
+        org.capnproto.MessageReader message =
+            org.capnproto.SerializePacked.readUnbuffered(
+                (new FileInputStream(FileDescriptor.in)).getChannel());
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
         for(Person.Reader person : addressbook.getPeople()) {
             System.out.println(person.getName() + ": " + person.getEmail());
@@ -75,14 +74,11 @@ public class AddressbookMain {
                 String typeName = "UNKNOWN";
                 switch (phone.getType()) {
                 case MOBILE :
-                    typeName = "mobile";
-                    break;
+                    typeName = "mobile"; break;
                 case HOME :
-                    typeName = "home";
-                    break;
+                    typeName = "home"; break;
                 case WORK :
-                    typeName = "work";
-                    break;
+                    typeName = "work"; break;
                 }
                 System.out.println("  " + typeName + " phone: " + phone.getNumber());
             }
