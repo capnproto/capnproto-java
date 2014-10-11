@@ -145,11 +145,11 @@ public class AddressbookMain {
       for (Person.PhoneNumber.Reader phone : person.getPhones()) {
         String typeName = "UNKNOWN";
         switch (phone.getType()) {
-        case MOBILE :
+        case MOBILE:
           typeName = "mobile"; break;
-        case HOME :
+        case HOME:
           typeName = "home"; break;
-        case WORK :
+        case WORK:
           typeName = "work"; break;
         }
         System.out.println("  " + typeName + " phone: " +
@@ -158,13 +158,13 @@ public class AddressbookMain {
 
       Person.Employment.Reader employment = person.getEmployment();
       switch (employment.which()) {
-      case UNEMPLOYED :
+      case UNEMPLOYED:
         System.out.println("  unemployed");
         break;
-      case EMPLOYER :
+      case EMPLOYER:
         System.out.println("  employer: " + employment.getEmployer());
         break;
-      case SCHOOL :
+      case SCHOOL:
         System.out.println("  student at: " + employment.getSchool());
         break;
       case SELF_EMPLOYED:
