@@ -67,32 +67,33 @@ public class ListReader {
     }
 
     protected boolean _getBooleanElement(int index) {
-        byte b = this.segment.buffer.get(this.ptr + index / 8);
-        return (b & (1 << (index % 8))) != 0;
+        long bindex = index * this.step;
+        byte b = this.segment.buffer.get(this.ptr + (int)(bindex / Constants.BITS_PER_BYTE));
+        return (b & (1 << (bindex % 8))) != 0;
     }
 
     protected byte _getByteElement(int index) {
-        return this.segment.buffer.get(this.ptr + index);
+        return this.segment.buffer.get(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected short _getShortElement(int index) {
-        return this.segment.buffer.getShort(this.ptr + index * 2);
+        return this.segment.buffer.getShort(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected int _getIntElement(int index) {
-        return this.segment.buffer.getInt(this.ptr + index * 4);
+        return this.segment.buffer.getInt(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected long _getLongElement(int index) {
-        return this.segment.buffer.getLong(this.ptr + index * 8);
+        return this.segment.buffer.getLong(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected float _getFloatElement(int index) {
-        return this.segment.buffer.getFloat(this.ptr + index * 4);
+        return this.segment.buffer.getFloat(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected double _getDoubleElement(int index) {
-        return this.segment.buffer.getDouble(this.ptr + index * 8);
+        return this.segment.buffer.getDouble(this.ptr + index * this.step / Constants.BITS_PER_BYTE);
     }
 
     protected <T> T _getStructElement(StructReader.Factory<T> factory, int index) {
