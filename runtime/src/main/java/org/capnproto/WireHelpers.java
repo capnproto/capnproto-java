@@ -532,6 +532,40 @@ final class WireHelpers {
         // readStructPointer(), etc. because they do type checking whereas here we want to accept any
         // valid pointer.
 
+        long srcRef = WirePointer.get(srcSegment.buffer, srcOffset);
+
+        if (WirePointer.isNull(srcRef)) {
+            dstSegment.buffer.putLong(dstOffset * 8, 0L);
+            return dstSegment;
+        }
+
+        int srcTarget = WirePointer.target(srcOffset, srcRef);
+        FollowFarsResult resolved = followFars(srcRef, srcTarget, srcSegment);
+
+        switch (WirePointer.kind(resolved.ref)) {
+        case WirePointer.STRUCT :
+            if (nestingLimit <= 0) {
+                throw new DecodeException("Message is too deeply nested or contains cycles. See org.capnproto.ReaderOptions.");
+            }
+            resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
+            // TODO
+            //return setStructPointer(dstSegment, dstOffset, ...);
+        case WirePointer.LIST :
+            byte elementSize = ListPointer.elementSize(resolved.ref);
+            if (nestingLimit <= 0) {
+                throw new DecodeException("Message is too deeply nested or contains cycles. See org.capnproto.ReaderOptions.");
+            }
+            if (elementSize == FieldSize.INLINE_COMPOSITE) {
+                int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
+                //long tag =
+            } else {
+
+            }
+
+        case WirePointer.FAR :
+        case WirePointer.OTHER :
+        }
+
         throw new Error("copyPointer is unimplemented");
     }
 
