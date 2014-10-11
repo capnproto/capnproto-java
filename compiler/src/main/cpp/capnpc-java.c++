@@ -1152,7 +1152,7 @@ private:
           spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
           spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(),
-          ", org.capnproto.FieldSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
+          ", org.capnproto.ElementSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
 
         spaces(indent), "  public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
         spaces(indent),

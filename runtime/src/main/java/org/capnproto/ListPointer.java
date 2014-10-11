@@ -45,6 +45,6 @@ final class ListPointer {
     public static void setInlineComposite(ByteBuffer buffer, int offset, int wordCount) {
         // TODO length assertion
         buffer.putInt(8 * offset + 4,
-                      (wordCount << 3) | FieldSize.INLINE_COMPOSITE);
+                      (wordCount << 3) | ElementSize.INLINE_COMPOSITE);
     }
 }

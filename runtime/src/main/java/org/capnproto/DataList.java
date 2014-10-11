@@ -23,7 +23,7 @@ package org.capnproto;
 
 public final class DataList {
     public static final class Factory extends ListFactory<Builder, Reader> {
-        Factory() {super (FieldSize.POINTER); }
+        Factory() {super (ElementSize.POINTER); }
         public final Reader constructReader(SegmentReader segment,
                                               int ptr,
                                               int elementCount, int step,

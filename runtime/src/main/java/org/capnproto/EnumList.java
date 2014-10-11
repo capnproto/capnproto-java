@@ -34,7 +34,7 @@ public class EnumList {
         public final T values[];
 
         public Factory(T values[]) {
-            super(FieldSize.TWO_BYTES);
+            super(ElementSize.TWO_BYTES);
             this.values = values;
         }
         public final Reader<T> constructReader(SegmentReader segment,

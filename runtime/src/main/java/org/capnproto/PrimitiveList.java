@@ -24,7 +24,7 @@ package org.capnproto;
 public class PrimitiveList {
     public static class Void {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.VOID); }
+            Factory() {super (ElementSize.VOID); }
 
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
@@ -69,7 +69,7 @@ public class PrimitiveList {
 
     public static class Boolean {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.BIT); }
+            Factory() {super (ElementSize.BIT); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -120,7 +120,7 @@ public class PrimitiveList {
 
     public static class Byte {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.BYTE); }
+            Factory() {super (ElementSize.BYTE); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -172,7 +172,7 @@ public class PrimitiveList {
 
     public static class Short {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.TWO_BYTES); }
+            Factory() {super (ElementSize.TWO_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -225,7 +225,7 @@ public class PrimitiveList {
 
     public static class Int {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.FOUR_BYTES); }
+            Factory() {super (ElementSize.FOUR_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -277,7 +277,7 @@ public class PrimitiveList {
 
     public static class Float {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.FOUR_BYTES); }
+            Factory() {super (ElementSize.FOUR_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -329,7 +329,7 @@ public class PrimitiveList {
 
     public static class Long {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.EIGHT_BYTES); }
+            Factory() {super (ElementSize.EIGHT_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -380,7 +380,7 @@ public class PrimitiveList {
 
     public static class Double {
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (FieldSize.EIGHT_BYTES); }
+            Factory() {super (ElementSize.EIGHT_BYTES); }
             public final Reader constructReader(SegmentReader segment,
                                                   int ptr,
                                                   int elementCount, int step,

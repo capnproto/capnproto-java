@@ -28,7 +28,7 @@ public final class ListList {
         public final ListFactory<ElementBuilder, ElementReader> factory;
 
         public Factory(ListFactory<ElementBuilder, ElementReader> factory) {
-            super(FieldSize.POINTER);
+            super(ElementSize.POINTER);
             this.factory = factory;
         }
 

@@ -214,10 +214,10 @@ final class WireHelpers {
                                  SegmentBuilder segment,
                                  int elementCount,
                                  byte elementSize) {
-        assert elementSize != FieldSize.INLINE_COMPOSITE : "Should have called initStructListPointer instead";
+        assert elementSize != ElementSize.INLINE_COMPOSITE : "Should have called initStructListPointer instead";
 
-        int dataSize = FieldSize.dataBitsPerElement(elementSize);
-        int pointerCount = FieldSize.pointersPerElement(elementSize);
+        int dataSize = ElementSize.dataBitsPerElement(elementSize);
+        int pointerCount = ElementSize.pointersPerElement(elementSize);
         int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
         int wordCount = roundBitsUpToWords((long)elementCount * (long)step);
         AllocateResult allocation = allocate(refOffset, segment, wordCount, WirePointer.LIST);
@@ -234,7 +234,7 @@ final class WireHelpers {
                                        SegmentBuilder segment,
                                        int elementCount,
                                        StructSize elementSize) {
-        if (elementSize.preferredListEncoding != FieldSize.INLINE_COMPOSITE) {
+        if (elementSize.preferredListEncoding != ElementSize.INLINE_COMPOSITE) {
             //# Small data-only struct. Allocate a list of primitives instead.
             return initListPointer(factory, refOffset, segment, elementCount,
                                    elementSize.preferredListEncoding);
@@ -265,7 +265,7 @@ final class WireHelpers {
                                         byte elementSize,
                                         SegmentReader defaultSegment,
                                         int defaultOffset) {
-        assert elementSize != FieldSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
+        assert elementSize != ElementSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
 
         long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
@@ -288,7 +288,7 @@ final class WireHelpers {
 
         byte oldSize = ListPointer.elementSize(resolved.ref);
 
-        if (oldSize == FieldSize.INLINE_COMPOSITE) {
+        if (oldSize == ElementSize.INLINE_COMPOSITE) {
             //# The existing element size is InlineComposite, which
             //# means that it is at least two words, which makes it
             //# bigger than the expected element size. Since fields can
@@ -299,13 +299,13 @@ final class WireHelpers {
             //# from what we expected.
             throw new Error("unimplemented");
         } else {
-            int dataSize = FieldSize.dataBitsPerElement(oldSize);
-            int pointerCount = FieldSize.pointersPerElement(oldSize);
+            int dataSize = ElementSize.dataBitsPerElement(oldSize);
+            int pointerCount = ElementSize.pointersPerElement(oldSize);
 
-            if (dataSize < FieldSize.dataBitsPerElement(elementSize)) {
+            if (dataSize < ElementSize.dataBitsPerElement(elementSize)) {
                 throw new DecodeException("Existing list value is incompatible with expected type.");
             }
-            if (pointerCount < FieldSize.pointersPerElement(elementSize)) {
+            if (pointerCount < ElementSize.pointersPerElement(elementSize)) {
                 throw new DecodeException("Existing list value is incompatible with expected type.");
             }
 
@@ -338,7 +338,7 @@ final class WireHelpers {
                                              WirePointer.LIST);
 
         //# Initialize the pointer.
-        ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.BYTE, byteSize);
+        ListPointer.set(allocation.segment.buffer, allocation.refOffset, ElementSize.BYTE, byteSize);
 
         return new Text.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
     }
@@ -382,7 +382,7 @@ final class WireHelpers {
         if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
             throw new DecodeException("Called getText{Field,Element} but existing pointer is not a list.");
         }
-        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(resolved.ref) != ElementSize.BYTE) {
             throw new DecodeException(
                 "Called getText{Field,Element} but existing list pointer is not byte-sized.");
         }
@@ -403,7 +403,7 @@ final class WireHelpers {
                                              WirePointer.LIST);
 
         //# Initialize the pointer.
-        ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.BYTE, size);
+        ListPointer.set(allocation.segment.buffer, allocation.refOffset, ElementSize.BYTE, size);
 
         return new Data.Builder(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD, size);
     }
@@ -446,7 +446,7 @@ final class WireHelpers {
         if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
             throw new DecodeException("Called getData{Field,Element} but existing pointer is not a list.");
         }
-        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(resolved.ref) != ElementSize.BYTE) {
             throw new DecodeException(
                 "Called getData{Field,Element} but existing list pointer is not byte-sized.");
         }
@@ -512,7 +512,7 @@ final class WireHelpers {
 
             if (value.structPointerCount == 1) {
                 //# List of pointers.
-                ListPointer.set(allocation.segment.buffer, allocation.refOffset, FieldSize.POINTER, value.elementCount);
+                ListPointer.set(allocation.segment.buffer, allocation.refOffset, ElementSize.POINTER, value.elementCount);
                 for (int i = 0; i < value.elementCount; ++i) {
                     //copyPointer(segment);
                 }
@@ -555,7 +555,7 @@ final class WireHelpers {
             if (nestingLimit <= 0) {
                 throw new DecodeException("Message is too deeply nested or contains cycles. See org.capnproto.ReaderOptions.");
             }
-            if (elementSize == FieldSize.INLINE_COMPOSITE) {
+            if (elementSize == ElementSize.INLINE_COMPOSITE) {
                 int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
                 //long tag =
             } else {
@@ -598,7 +598,7 @@ final class WireHelpers {
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
         switch (ListPointer.elementSize(resolved.ref)) {
-        case FieldSize.INLINE_COMPOSITE : {
+        case ElementSize.INLINE_COMPOSITE : {
             int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
 
             long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
@@ -627,8 +627,8 @@ final class WireHelpers {
             //# lists can also be interpreted as struct lists. We
             //# need to compute the data size and pointer count for
             //# such structs.
-            int dataSize = FieldSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
-            int pointerCount = FieldSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
+            int dataSize = ElementSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
+            int pointerCount = ElementSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
             resolved.segment.arena.checkReadLimit(
@@ -642,8 +642,8 @@ final class WireHelpers {
             //# case where we expected a list of some primitive or
             //# pointer type.
 
-            int expectedDataBitsPerElement = FieldSize.dataBitsPerElement(expectedElementSize);
-            int expectedPointersPerElement = FieldSize.pointersPerElement(expectedElementSize);
+            int expectedDataBitsPerElement = ElementSize.dataBitsPerElement(expectedElementSize);
+            int expectedPointersPerElement = ElementSize.pointersPerElement(expectedElementSize);
 
             if (expectedDataBitsPerElement > dataSize) {
                 throw new DecodeException("Message contains list with incompatible element type.");
@@ -690,7 +690,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains non-list pointer where text was expected.");
         }
 
-        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(resolved.ref) != ElementSize.BYTE) {
             throw new DecodeException("Message contains list pointer of non-bytes where text was expected.");
         }
 
@@ -728,7 +728,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains non-list pointer where data was expected.");
         }
 
-        if (ListPointer.elementSize(resolved.ref) != FieldSize.BYTE) {
+        if (ListPointer.elementSize(resolved.ref) != ElementSize.BYTE) {
             throw new DecodeException("Message contains list pointer of non-bytes where data was expected.");
         }
 

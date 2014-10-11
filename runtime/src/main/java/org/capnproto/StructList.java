@@ -28,7 +28,7 @@ public final class StructList {
         public final StructFactory<ElementBuilder, ElementReader> factory;
 
         public Factory(StructFactory<ElementBuilder, ElementReader> factory) {
-            super(FieldSize.INLINE_COMPOSITE);
+            super(ElementSize.INLINE_COMPOSITE);
             this.factory = factory;
         }
 
