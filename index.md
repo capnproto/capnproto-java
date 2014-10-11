@@ -33,14 +33,11 @@ but we have not embarked on that project yet.
 
 ## Installation
 
-You will need [sbt](http://scala-sbt.org).
-We recommend [this version](https://github.com/paulp/sbt-extras).
+You will need to [install](http://capnproto.org/install.html) the Cap'n Proto schema compiler.
 
-You will also need to [install](http://capnproto.org/install.html) the Cap'n Proto schema compiler.
-
-Running `sbt compile` at the `capnproto-java` top-level directory should build `capnpc-java`,
+We use [sbt](http://scala-sbt.org) for building and testing.
+Running `sbt compile` at the top-level directory should build `capnpc-java`,
 `org.capnproto`, and `org.capnproto.examples`.
-
 Running `sbt test` should run the test suite.
 
 ## Example
