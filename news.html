@@ -1,0 +1,19 @@
+---
+title: News
+---
+
+{% include header.html %}
+
+<h1>News</h1>
+
+{% for post in site.posts %}
+<h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+<p class="author">
+  <a href="https://github.com/{{ post.author }}">{{ post.author }}</a>
+  on <span class="date">{{ post.date | date_to_string }}</span>
+</p>
+{{ post.content }}
+{% endfor %}
+
+<script type="text/javascript">setupSidebar()</script>
+{% include footer.html %}

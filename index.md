@@ -43,9 +43,10 @@ Running `sbt compile` at the `capnproto-java` top-level directory should build `
 
 Running `sbt test` should run the test suite.
 
-## Examples
+## Example
 
 ```
+@0x9eb32e19f86ee174;
 using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.examples");
 $Java.outerClassname("Addressbook");
