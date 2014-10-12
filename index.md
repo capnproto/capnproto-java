@@ -16,9 +16,11 @@ to the Cap'n Proto schema compiler.
 
 2. A Java package `org.capnproto` that provides runtime support for `capnpc-java`'s generated code.
 
-These components make it easy
-to manipulate data in Java and to share it
-with any other language that has a Cap'n Proto implementation.
+These components let you make your data **mobile**,
+so that you can manipulate your data in Java
+and also easily communicate it
+to distributed components written
+in other programming languages.
 Under the hood, all operations are
 backed by `java.nio.ByteBuffer`.
 If you, for example, want to communicate over a
@@ -41,6 +43,8 @@ Running `sbt compile` at the top-level directory should build `capnpc-java`,
 Running `sbt test` should run the test suite.
 
 ## Example
+
+We can define types in a schema like this:
 
 ```
 @0x9eb32e19f86ee174;
@@ -79,6 +83,8 @@ struct AddressBook {
 }
 ```
 
+Then, after running the schema compiler,
+we can then use those types from Java like this:
 {% highlight java %}
 package org.capnproto.examples;
 
@@ -195,16 +201,56 @@ public class AddressbookMain {
 }
 {% endhighlight %}
 
+
 To read a message:
 
-    $ echo '(people = [(id = 123, name = "Alice", email = "alice@example.com", employment = (school = "MIT"))])' \
-     | capnp encode --packed examples/src/main/schema/addressbook.capnp AddressBook \
-     | java -cp runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes/ \
-       org.capnproto.examples.AddressbookMain read
-
+```
+$ echo '(people = [(id = 123, name = "Alice",' \
+'email = "alice@example.com", employment = (school = "MIT"))])' \
+| capnp encode --packed examples/src/main/schema/addressbook.capnp \
+AddressBook \
+| java -cp \
+runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes \
+org.capnproto.examples.AddressbookMain read
+```
 
 To write a message:
 
-    $ java -cp runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes/  \
-      org.capnproto.examples.AddressbookMain write \
-      | capnp decode --packed examples/src/main/schema/addressbook.capnp AddressBook
+```
+$ java -cp \
+runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes \
+org.capnproto.examples.AddressbookMain write \
+| capnp decode --packed examples/src/main/schema/addressbook.capnp \
+AddressBook
+```
+
+## API
+
+The classes and methods provided by the
+Java runtime and generated code
+correspond directly to those
+provided by the
+[C++ implementation](https://kentonv.github.io/capnproto/cxx.html),
+with just a few adjustments.
+
+- Java does not have unsigned integer types, so a `UInt64`
+in a schema gets mapped to a `long` in Java, a `UInt32` gets
+mapped to an `int` in Java, and so on.
+You are responsible for correctly handling
+arithmetic on values of these types. Note that Java 8 has
+standard functions that can help with this.
+
+- Because Java generics don't get monomorphized at compile time
+like C++ templates do, generic methods
+need to have an additional *factory* argument to
+allow the proper dispatch to occur.
+`MessageReader.getRoot()` is an example, as shown above.
+
+## Future Work
+
+There's a lot still to do, and we'd love to have your help!
+
+- Setter methods for struct and list fields.
+- [Orphans](https://kentonv.github.io/capnproto/cxx.html#orphans).
+- [Dynamic reflection](https://kentonv.github.io/capnproto/cxx.html#dynamic_reflection).
+- Optimizations, e.g. iterators for `StructList` that only allocate once.
