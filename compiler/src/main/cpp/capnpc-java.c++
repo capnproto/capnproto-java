@@ -660,7 +660,7 @@ private:
                            javaFullName(schema), ".",
                            toUpperCase(e.getProto().getName()), ";\n");
       },
-      spaces(indent+1), "default: return ", javaFullName(schema), "._UNKNOWN;\n",
+      spaces(indent+1), "default: return ", javaFullName(schema), "._NOT_IN_SCHEMA;\n",
       spaces(indent), "}\n"
       );
   }
@@ -1091,7 +1091,7 @@ private:
                              "Which.",
                              toUpperCase(f.getProto().getName()), ";\n");
         },
-        spaces(indent+2), "default: return Which._UNKNOWN;\n",
+        spaces(indent+2), "default: return Which._NOT_IN_SCHEMA;\n",
         spaces(indent+1), "}\n",
         spaces(indent), "}\n"
         );
@@ -1195,7 +1195,7 @@ private:
               return kj::strTree();
             }
           },
-          spaces(indent), "    _UNKNOWN,\n",
+          spaces(indent), "    _NOT_IN_SCHEMA,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
         spaces(indent), "}\n"
@@ -1505,7 +1505,7 @@ private:
             KJ_MAP(e, enumerants) {
               return kj::strTree(spaces(indent), "  ", toUpperCase(e.getProto().getName()), ",\n");
             },
-            spaces(indent), "  _UNKNOWN,\n",
+            spaces(indent), "  _NOT_IN_SCHEMA,\n",
             spaces(indent), "}\n"
             "\n"),
 
