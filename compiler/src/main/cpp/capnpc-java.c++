@@ -53,7 +53,7 @@
 namespace capnp {
 namespace {
 
-static constexpr uint64_t OUTER_CLASSNAME_ANNOTATION_ID = 0x9b066bb4881f7cd3;
+static constexpr uint64_t OUTER_CLASSNAME_ANNOTATION_ID = 0x9b066bb4881f7cd3ull;
 static constexpr uint64_t PACKAGE_ANNOTATION_ID = 0x9ee4c8f803b3b596ull;
 
 static constexpr const char* FIELD_SIZE_NAMES[] = {
