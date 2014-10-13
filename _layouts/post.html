@@ -1,0 +1,15 @@
+{% include header.html %}
+<h3>
+{{page.title}}
+</h3>
+<p>
+{{ page.date | date_to_string }}
+<p>
+
+
+{{content}}
+
+<p class="author">
+  -- posted by <a href="https://github.com/{{ page.author }}">{{ page.author }}</a>
+</p>
+{% include footer.html %}

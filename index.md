@@ -244,13 +244,29 @@ standard functions that can help with this.
 like C++ templates do, generic methods
 need to have an additional *factory* argument to
 allow the proper dispatch to occur.
-`MessageReader.getRoot()` is an example, as shown above.
+`MessageReader.getRoot()` and `MessageBuilder.initRoot()` are two examples,
+as shown above.
+
+## Tips
+
+- The main I/O methods in
+`Serialize` and `SerializePacked` are written in terms
+of `WritableByteChannel` and `ReadableByteChannel`.
+You should be very careful if you try to convert a
+`java.io.OutputStream`
+to a `WritableByteChannel` with the
+`java.nio.channels.Channels.newChannel()` method.
+If your `OutputStream` was buffered, the new channel-based
+wrapper of it will have no way to flush it!
+Note that the stream returned by `Process.getOutputStream()` is buffered.
 
 ## Future Work
 
-There's a lot still to do, and we'd love to have your help!
+There's a lot left to do, and we'd love to have your help! Here are some missing pieces:
 
 - Setter methods for struct and list fields.
 - [Orphans](https://kentonv.github.io/capnproto/cxx.html#orphans).
 - [Dynamic reflection](https://kentonv.github.io/capnproto/cxx.html#dynamic_reflection).
-- Optimizations, e.g. iterators for `StructList` that only allocate once.
+- Optimizations, e.g. iterators for `StructList` that update in place instead of allocating for each element.
+- Improvements for build and packaging, e.g. getting a distribution on Maven.
+- The entire [object-capability RPC layer](https://kentonv.github.io/capnproto/rpc.html).
