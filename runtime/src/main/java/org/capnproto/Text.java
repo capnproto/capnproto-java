@@ -91,7 +91,7 @@ public final class Text {
             return this.size;
         }
 
-        public ByteBuffer toByteBuffer() {
+        public ByteBuffer asByteBuffer() {
             ByteBuffer dup = this.buffer.asReadOnlyBuffer();
             dup.position(this.offset);
             ByteBuffer result = dup.slice();
@@ -125,6 +125,14 @@ public final class Text {
             this.buffer = buffer;
             this.offset = offset;
             this.size = size;
+        }
+
+        public ByteBuffer asByteBuffer() {
+            ByteBuffer dup = this.buffer.duplicate();
+            dup.position(this.offset);
+            ByteBuffer result = dup.slice();
+            result.limit(this.size);
+            return result;
         }
 
         @Override

@@ -82,7 +82,7 @@ public final class Data {
             return this.size;
         }
 
-        public ByteBuffer toByteBuffer() {
+        public ByteBuffer asByteBuffer() {
             ByteBuffer dup = this.buffer.asReadOnlyBuffer();
             dup.position(this.offset);
             ByteBuffer result = dup.slice();
@@ -108,6 +108,14 @@ public final class Data {
             this.buffer = buffer;
             this.offset = offset;
             this.size = size;
+        }
+
+        public ByteBuffer asByteBuffer() {
+            ByteBuffer dup = this.buffer.duplicate();
+            dup.position(this.offset);
+            ByteBuffer result = dup.slice();
+            result.limit(this.size);
+            return result;
         }
 
         public byte[] toArray() {
