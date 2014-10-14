@@ -82,8 +82,8 @@ public final class Data {
             return this.size;
         }
 
-        public ByteBuffer asByteBuffer() {
-            ByteBuffer dup = this.buffer.duplicate();
+        public ByteBuffer toByteBuffer() {
+            ByteBuffer dup = this.buffer.asReadOnlyBuffer();
             dup.position(this.offset);
             ByteBuffer result = dup.slice();
             result.limit(this.size);
