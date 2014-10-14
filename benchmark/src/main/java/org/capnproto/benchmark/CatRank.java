@@ -62,14 +62,13 @@ public class CatRank
             int urlSize = rng.nextLessThan(100);
 
             int urlPrefixLength = URL_PREFIX.size();
-            StringBuilder url = new StringBuilder();
-            url.append(URL_PREFIX);
+            Text.Builder url = result.initUrl(urlSize + urlPrefixLength);
+            java.nio.ByteBuffer bytes = url.asByteBuffer();
+            bytes.put(URL_PREFIX.asByteBuffer());
 
             for (int j = 0; j < urlSize; j++) {
-                url.append('a' + rng.nextLessThan(26));
+                bytes.put((byte) (97 + rng.nextLessThan(26)));
             }
-
-            result.setUrl(url.toString());
 
             boolean isCat = rng.nextLessThan(8) == 0;
             boolean isDog = rng.nextLessThan(8) == 0;
