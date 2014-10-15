@@ -551,8 +551,13 @@ final class WireHelpers {
                 throw new DecodeException("Message is too deeply nested or contains cycles. See org.capnproto.ReaderOptions.");
             }
             resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
-            // TODO
-            //return setStructPointer(dstSegment, dstOffset, ...);
+            return setStructPointer(dstSegment, dstOffset,
+                                    new StructReader(srcSegment,
+                                                     resolved.ptr,
+                                                     resolved.ptr + StructPointer.dataSize(resolved.ref),
+                                                     StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
+                                                     StructPointer.ptrCount(resolved.ref),
+                                                     (byte) 0, nestingLimit - 1));
         case WirePointer.LIST :
             byte elementSize = ListPointer.elementSize(resolved.ref);
             if (nestingLimit <= 0) {
@@ -560,9 +565,19 @@ final class WireHelpers {
             }
             if (elementSize == ElementSize.INLINE_COMPOSITE) {
                 int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
-                //long tag =
-            } else {
+                long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
+                int ptr = resolved.ptr + 1;
 
+                resolved.segment.arena.checkReadLimit(wordCount + 1);
+
+                if (WirePointer.kind(tag) != WirePointer.STRUCT) {
+                    throw new DecodeException("INLINE_COMPOSITE lists of non-STRUCT type are not supported.");
+                }
+
+                int elementCount = WirePointer.inlineCompositeListElementCount(tag);
+                // ...
+            } else {
+                // ...
             }
 
         case WirePointer.FAR :

@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 
 final class StructPointer{
     public static short dataSize(long ref) {
+        // in words.
         return (short)(WirePointer.upper32Bits(ref) & 0xffff);
     }
 
