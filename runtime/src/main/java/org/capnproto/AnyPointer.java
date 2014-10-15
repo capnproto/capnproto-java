@@ -25,13 +25,17 @@ public final class AnyPointer {
 
     public final static class Reader {
         final SegmentReader segment;
-        final int pointer;
+        final int pointer; // offset in words
         final int nestingLimit;
 
         public Reader(SegmentReader segment, int pointer, int nestingLimit) {
             this.segment = segment;
             this.pointer = pointer;
             this.nestingLimit = nestingLimit;
+        }
+
+        public final boolean isNull() {
+            return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
@@ -46,6 +50,10 @@ public final class AnyPointer {
         public Builder(SegmentBuilder segment, int pointer) {
             this.segment = segment;
             this.pointer = pointer;
+        }
+
+        public final boolean isNull() {
+            return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerBuilder<T> factory) {

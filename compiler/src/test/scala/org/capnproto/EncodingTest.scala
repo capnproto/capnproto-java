@@ -122,7 +122,6 @@ class EncodingSuite extends FunSuite {
     val builder = new MessageBuilder();
     val root = builder.initRoot(TestAnyPointer.factory);
 
-
     val oldReader = {
       val oldVersion = root.getAnyPointerField().initAs(TestOldVersion.factory);
       oldVersion.setOld1(123);
@@ -209,6 +208,17 @@ class EncodingSuite extends FunSuite {
 
   test("GlobalConstants") {
     assert(12345 == GLOBAL_INT);
+  }
+
+  test("EmptyStruct") {
+    val builder = new MessageBuilder();
+    val root = builder.initRoot(TestAnyPointer.factory);
+    root.hasAnyPointerField() should equal (false);
+    val any = root.getAnyPointerField();
+    any.isNull() should equal (true);
+    any.initAs(TestEmptyStruct.factory);
+    any.isNull() should equal (false);
+    root.hasAnyPointerField() should equal (true);
   }
 
   // to debug, do this:

@@ -48,7 +48,10 @@ final class WireHelpers {
                                    int amount, // in words
                                    byte kind) {
 
-        // TODO check for nullness, amount == 0 case.
+        if (amount == 0 && kind == WirePointer.STRUCT) {
+            WirePointer.setKindAndTargetForEmptyStruct(segment.buffer, refOffset);
+            return new AllocateResult(refOffset, refOffset, segment);
+        }
 
         int ptr = segment.allocate(amount);
         if (ptr == SegmentBuilder.FAILED_ALLOCATION) {

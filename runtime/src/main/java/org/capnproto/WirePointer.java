@@ -50,6 +50,19 @@ final class WirePointer {
                       (((targetOffset - offset) - 1) << 2) | kind);
     }
 
+    public static void setKindAndTargetForEmptyStruct(ByteBuffer buffer, int offset) {
+        //# This pointer points at an empty struct. Assuming the
+        //# WirePointer itself is in-bounds, we can set the target to
+        //# point either at the WirePointer itself or immediately after
+        //# it. The latter would cause the WirePointer to be "null"
+        //# (since for an empty struct the upper 32 bits are going to
+        //# be zero). So we set an offset of -1, as if the struct were
+        //# allocated immediately before this pointer, to distinguish
+        //# it from null.
+
+        buffer.putInt(offset * 8, 0xfffffffc);
+    }
+
     public static void setOffsetAndKind(ByteBuffer buffer, int offset, int offsetAndKind) {
         buffer.putInt(offset * 8, offsetAndKind);
     }
