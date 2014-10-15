@@ -219,6 +219,12 @@ class EncodingSuite extends FunSuite {
     any.initAs(TestEmptyStruct.factory);
     any.isNull() should equal (false);
     root.hasAnyPointerField() should equal (true);
+
+    {
+      val rootReader = root.asReader();
+      rootReader.hasAnyPointerField() should equal (true);
+      rootReader.getAnyPointerField().isNull() should equal (false);
+    }
   }
 
   // to debug, do this:
