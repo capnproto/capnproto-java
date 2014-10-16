@@ -552,7 +552,7 @@ final class WireHelpers {
             }
             resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
             return setStructPointer(dstSegment, dstOffset,
-                                    new StructReader(srcSegment,
+                                    new StructReader(resolved.segment,
                                                      resolved.ptr,
                                                      resolved.ptr + StructPointer.dataSize(resolved.ref),
                                                      StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
@@ -575,16 +575,43 @@ final class WireHelpers {
                 }
 
                 int elementCount = WirePointer.inlineCompositeListElementCount(tag);
-                // ...
+                int wordsPerElement = StructPointer.wordSize(tag);
+                if (wordsPerElement * elementCount > wordCount) {
+                    throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
+                }
+                return setListPointer(dstSegment, dstOffset,
+                                      new ListReader(resolved.segment,
+                                                     resolved.ptr,
+                                                     elementCount,
+                                                     wordsPerElement * Constants.BITS_PER_WORD,
+                                                     StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
+                                                     StructPointer.ptrCount(resolved.ref),
+                                                     nestingLimit - 1));
             } else {
-                // ...
+                int dataSize = ElementSize.dataBitsPerElement(elementSize);
+                short pointerCount = ElementSize.pointersPerElement(elementSize);
+                int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
+                int elementCount = ListPointer.elementCount(resolved.ref);
+                int wordCount = roundBitsUpToWords((long) elementCount * step);
+
+                resolved.segment.arena.checkReadLimit(wordCount);
+
+                return setListPointer(dstSegment, dstOffset,
+                                      new ListReader(resolved.segment,
+                                                     resolved.ptr,
+                                                     elementCount,
+                                                     step,
+                                                     dataSize,
+                                                     pointerCount,
+                                                     nestingLimit - 1));
             }
 
         case WirePointer.FAR :
+            throw new Error("Far pointer should have been handled above.");
         case WirePointer.OTHER :
+            throw new Error("copyPointer is unimplemented");
         }
-
-        throw new Error("copyPointer is unimplemented");
+        throw new Error("unreachable");
     }
 
     static <T> T readListPointer(ListReader.Factory<T> factory,

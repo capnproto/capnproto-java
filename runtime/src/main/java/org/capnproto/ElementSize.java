@@ -45,7 +45,7 @@ public final class ElementSize {
         }
     }
 
-    public static final int pointersPerElement(byte size) {
+    public static final short pointersPerElement(byte size) {
         switch (size) {
         case POINTER: return 1;
         default: return 0;
