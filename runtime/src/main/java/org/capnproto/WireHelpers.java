@@ -503,6 +503,25 @@ final class WireHelpers {
     }
 
     static SegmentBuilder setStructPointer(SegmentBuilder segment, int refOffset, StructReader value) {
+        short dataSize = (short)roundBitsUpToWords(value.dataSize);
+        int totalSize = dataSize + value.pointerCount * Constants.POINTER_SIZE_IN_WORDS;
+
+        AllocateResult allocation = allocate(refOffset, segment, totalSize, WirePointer.STRUCT);
+        StructPointer.set(allocation.segment.buffer, allocation.ptr,
+                          dataSize, value.pointerCount);
+
+        if (value.dataSize == 1) {
+            throw new Error("single bit case not handled");
+        } else {
+            memcpy(allocation.segment.buffer, allocation.refOffset * Constants.BYTES_PER_WORD,
+                   value.segment.buffer, value.data, value.dataSize / Constants.BITS_PER_BYTE);
+        }
+
+        int pointerSection = allocation.ptr + dataSize;
+        for (int i = 0; i < value.pointerCount; ++i) {
+            copyPointer(allocation.segment, pointerSection + i, value.segment, value.pointers + i,
+                        value.nestingLimit);
+        }
         throw new Error("setStructPointer is unimplemented");
     };
 
@@ -535,13 +554,51 @@ final class WireHelpers {
                 }
 
                 ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, value.elementCount);
-                // memcpy
+                memcpy(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD,
+                       value.segment.buffer, value.ptr * 8, totalSize * Constants.BYTES_PER_WORD);
             }
+            return allocation.segment;
         } else {
             //# List of structs.
-        }
+            AllocateResult allocation = allocate(refOffset, segment, totalSize + Constants.POINTER_SIZE_IN_WORDS, WirePointer.LIST);
+            ListPointer.setInlineComposite(allocation.segment.buffer, allocation.refOffset, totalSize);
 
-        throw new Error("setListPointer is unimplemented");
+            short dataSize = (short)roundBitsUpToWords(value.structDataSize);
+            short pointerCount = value.structPointerCount;
+
+            WirePointer.setKindAndInlineCompositeListElementCount(allocation.segment.buffer, allocation.ptr,
+                                                                  WirePointer.STRUCT, value.elementCount);
+            StructPointer.set(allocation.segment.buffer, allocation.ptr,
+                              dataSize, pointerCount);
+
+            int dstOffset = allocation.ptr + Constants.POINTER_SIZE_IN_WORDS;
+            int srcOffset = value.ptr;
+
+            for (int i = 0; i < value.elementCount; ++i) {
+                memcpy(allocation.segment.buffer, dstOffset * Constants.BYTES_PER_WORD,
+                       value.segment.buffer, srcOffset * Constants.BYTES_PER_WORD,
+                       value.structDataSize / Constants.BITS_PER_BYTE);
+                dstOffset += dataSize;
+                srcOffset += dataSize;
+
+                for (int j = 0; j < pointerCount; ++j) {
+                    copyPointer(allocation.segment, dstOffset, value.segment, srcOffset, value.nestingLimit);
+                    dstOffset += Constants.POINTER_SIZE_IN_WORDS;
+                    srcOffset += Constants.POINTER_SIZE_IN_WORDS;
+                }
+            }
+            return allocation.segment;
+        }
+    }
+
+    static void memcpy(ByteBuffer dstBuffer, int dstByteOffset, ByteBuffer srcBuffer, int srcByteOffset, int length) {
+        ByteBuffer dstDup = dstBuffer.duplicate();
+        dstDup.position(dstByteOffset);
+        dstDup.limit(length);
+        ByteBuffer srcDup = srcBuffer.duplicate();
+        srcDup.position(srcByteOffset);
+        srcDup.limit(length);
+        dstDup.put(srcDup);
     }
 
     static SegmentBuilder copyPointer(SegmentBuilder dstSegment, int dstOffset,

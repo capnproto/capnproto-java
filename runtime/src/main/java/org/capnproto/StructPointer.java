@@ -41,4 +41,9 @@ final class StructPointer{
         buffer.putShort(8 * offset + 4, size.data);
         buffer.putShort(8 * offset + 6, size.pointers);
     }
+
+    public static void set(ByteBuffer buffer, int offset, short dataSize, short pointerCount) {
+        buffer.putShort(8 * offset + 4, dataSize);
+        buffer.putShort(8 * offset + 6, pointerCount);
+    }
 }
