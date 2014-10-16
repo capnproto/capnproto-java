@@ -517,10 +517,25 @@ final class WireHelpers {
                 //# List of pointers.
                 ListPointer.set(allocation.segment.buffer, allocation.refOffset, ElementSize.POINTER, value.elementCount);
                 for (int i = 0; i < value.elementCount; ++i) {
-                    //copyPointer(segment);
+                    copyPointer(allocation.segment, allocation.ptr + i,
+                                value.segment, value.ptr + i, value.nestingLimit);
                 }
             } else {
                 //# List of data.
+                byte elementSize = ElementSize.VOID;
+                switch (value.step) {
+                case 0: elementSize = ElementSize.VOID; break;
+                case 1: elementSize = ElementSize.BIT; break;
+                case 8: elementSize = ElementSize.BYTE; break;
+                case 16: elementSize = ElementSize.TWO_BYTES; break;
+                case 32: elementSize = ElementSize.FOUR_BYTES; break;
+                case 64: elementSize = ElementSize.EIGHT_BYTES; break;
+                default:
+                    throw new Error("invalid list step size: " + value.step);
+                }
+
+                ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, value.elementCount);
+                // memcpy
             }
         } else {
             //# List of structs.
