@@ -48,14 +48,22 @@ public final class StructList {
             return new Builder<ElementBuilder> (factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
 
-        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer,
-                                                                SegmentReader defaultSegment, int defaultOffset) {
+        public final Builder<ElementBuilder> fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
+                                                                          SegmentReader defaultSegment, int defaultOffset) {
+            return WireHelpers.getWritableStructListPointer(this,
+                                                            pointer,
+                                                            segment,
+                                                            factory.structSize(),
+                                                            defaultSegment,
+                                                            defaultOffset);
+        }
+
+        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer) {
                      return WireHelpers.getWritableStructListPointer(this,
                                                                      pointer,
                                                                      segment,
                                                                      factory.structSize(),
-                                                                     defaultSegment,
-                                                                     defaultOffset);
+                                                                     null, 0);
         }
 
         public final Builder<ElementBuilder> initSizedFromPointerBuilder(SegmentBuilder segment, int pointer,
