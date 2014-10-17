@@ -522,7 +522,7 @@ final class WireHelpers {
             copyPointer(allocation.segment, pointerSection + i, value.segment, value.pointers + i,
                         value.nestingLimit);
         }
-        throw new Error("setStructPointer is unimplemented");
+        return allocation.segment;
     };
 
     static SegmentBuilder setListPointer(SegmentBuilder segment, int refOffset, ListReader value) {
@@ -562,7 +562,6 @@ final class WireHelpers {
             //# List of structs.
             AllocateResult allocation = allocate(refOffset, segment, totalSize + Constants.POINTER_SIZE_IN_WORDS, WirePointer.LIST);
             ListPointer.setInlineComposite(allocation.segment.buffer, allocation.refOffset, totalSize);
-
             short dataSize = (short)roundBitsUpToWords(value.structDataSize);
             short pointerCount = value.structPointerCount;
 
@@ -594,10 +593,10 @@ final class WireHelpers {
     static void memcpy(ByteBuffer dstBuffer, int dstByteOffset, ByteBuffer srcBuffer, int srcByteOffset, int length) {
         ByteBuffer dstDup = dstBuffer.duplicate();
         dstDup.position(dstByteOffset);
-        dstDup.limit(length);
+        dstDup.limit(dstByteOffset + length);
         ByteBuffer srcDup = srcBuffer.duplicate();
         srcDup.position(srcByteOffset);
-        srcDup.limit(length);
+        srcDup.limit(srcByteOffset + length);
         dstDup.put(srcDup);
     }
 
