@@ -51,7 +51,6 @@ object TestUtil {
     builder.setTextField("foo");
     builder.setDataField(data("bar"));
     {
-
       val subBuilder = builder.initStructField();
       subBuilder.setVoidField(org.capnproto.Void.VOID);
       subBuilder.setBoolField(true);
@@ -103,7 +102,6 @@ object TestUtil {
     val enumList = builder.initEnumList(2);
     enumList.set(0, TestEnum.FOO);
     enumList.set(1, TestEnum.GARPLY);
-
   }
 
 

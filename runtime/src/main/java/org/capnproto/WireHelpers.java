@@ -480,7 +480,6 @@ final class WireHelpers {
             throw new DecodeException("Message is too deeply nested or contains cycles.");
         }
 
-
         int refTarget = WirePointer.target(refOffset, ref);
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
@@ -507,13 +506,13 @@ final class WireHelpers {
         int totalSize = dataSize + value.pointerCount * Constants.POINTER_SIZE_IN_WORDS;
 
         AllocateResult allocation = allocate(refOffset, segment, totalSize, WirePointer.STRUCT);
-        StructPointer.set(allocation.segment.buffer, allocation.ptr,
+        StructPointer.set(allocation.segment.buffer, allocation.refOffset,
                           dataSize, value.pointerCount);
 
         if (value.dataSize == 1) {
             throw new Error("single bit case not handled");
         } else {
-            memcpy(allocation.segment.buffer, allocation.refOffset * Constants.BYTES_PER_WORD,
+            memcpy(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD,
                    value.segment.buffer, value.data, value.dataSize / Constants.BITS_PER_BYTE);
         }
 
@@ -655,8 +654,8 @@ final class WireHelpers {
                                                      resolved.ptr,
                                                      elementCount,
                                                      wordsPerElement * Constants.BITS_PER_WORD,
-                                                     StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
-                                                     StructPointer.ptrCount(resolved.ref),
+                                                     StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
+                                                     StructPointer.ptrCount(tag),
                                                      nestingLimit - 1));
             } else {
                 int dataSize = ElementSize.dataBitsPerElement(elementSize);

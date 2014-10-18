@@ -26,6 +26,7 @@ import org.scalatest.FunSuite
 import org.scalatest.Matchers._;
 
 class EncodingSuite extends FunSuite {
+
   test("AllTypes") {
     val message = new MessageBuilder();
     val allTypes = message.initRoot(TestAllTypes.factory);
@@ -46,19 +47,14 @@ class EncodingSuite extends FunSuite {
   test("Setters") {
     val message = new MessageBuilder();
     val allTypes = message.initRoot(TestAllTypes.factory);
-    //TestUtil.initTestMessage(allTypes);
-
-    val structList = allTypes.initStructList(3);
+    TestUtil.initTestMessage(allTypes);
 
     val message2 = new MessageBuilder();
     val allTypes2 = message.initRoot(TestAllTypes.factory);
 
-    //allTypes2.setStructField(allTypes.asReader());
-
-    // ...
-    //TestUtil.checkTestMessage(allTypes);
-    //TestUtil.checkTestMessage(allTypes.asReader());
-
+    allTypes2.setStructField(allTypes.asReader());
+    val reader = allTypes2.asReader().getStructField();
+    //TestUtil.checkTestMessage(reader);
   }
 
   test("Defaults") {
