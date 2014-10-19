@@ -228,8 +228,8 @@ final class WireHelpers {
         ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, elementCount);
 
         return factory.constructBuilder(allocation.segment,
-                                          allocation.ptr * Constants.BYTES_PER_WORD,
-                                          elementCount, step, dataSize, (short)pointerCount);
+                                        allocation.ptr * Constants.BYTES_PER_WORD,
+                                        elementCount, step, dataSize, (short)pointerCount);
     }
 
     static <T> T initStructListPointer(ListBuilder.Factory<T> factory,
@@ -257,9 +257,9 @@ final class WireHelpers {
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.ptr, elementSize);
 
         return factory.constructBuilder(allocation.segment,
-                                          (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
-                                          elementCount, wordsPerElement * Constants.BITS_PER_WORD,
-                                          elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
+                                        (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
+                                        elementCount, wordsPerElement * Constants.BITS_PER_WORD,
+                                        elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
     static <T> T getWritableListPointer(ListBuilder.Factory<T> factory,
@@ -536,7 +536,7 @@ final class WireHelpers {
                 ListPointer.set(allocation.segment.buffer, allocation.refOffset, ElementSize.POINTER, value.elementCount);
                 for (int i = 0; i < value.elementCount; ++i) {
                     copyPointer(allocation.segment, allocation.ptr + i,
-                                value.segment, value.ptr + i, value.nestingLimit);
+                                value.segment, value.ptr / Constants.BYTES_PER_WORD + i, value.nestingLimit);
                 }
             } else {
                 //# List of data.
@@ -554,7 +554,7 @@ final class WireHelpers {
 
                 ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, value.elementCount);
                 memcpy(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD,
-                       value.segment.buffer, value.ptr * 8, totalSize * Constants.BYTES_PER_WORD);
+                       value.segment.buffer, value.ptr, totalSize * Constants.BYTES_PER_WORD);
             }
             return allocation.segment;
         } else {
@@ -570,7 +570,7 @@ final class WireHelpers {
                               dataSize, pointerCount);
 
             int dstOffset = allocation.ptr + Constants.POINTER_SIZE_IN_WORDS;
-            int srcOffset = value.ptr;
+            int srcOffset = value.ptr / Constants.BYTES_PER_WORD;
 
             for (int i = 0; i < value.elementCount; ++i) {
                 memcpy(allocation.segment.buffer, dstOffset * Constants.BYTES_PER_WORD,
@@ -623,7 +623,7 @@ final class WireHelpers {
             resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
             return setStructPointer(dstSegment, dstOffset,
                                     new StructReader(resolved.segment,
-                                                     resolved.ptr,
+                                                     resolved.ptr * Constants.BYTES_PER_WORD,
                                                      resolved.ptr + StructPointer.dataSize(resolved.ref),
                                                      StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
                                                      StructPointer.ptrCount(resolved.ref),
@@ -651,7 +651,7 @@ final class WireHelpers {
                 }
                 return setListPointer(dstSegment, dstOffset,
                                       new ListReader(resolved.segment,
-                                                     resolved.ptr,
+                                                     ptr * Constants.BYTES_PER_WORD,
                                                      elementCount,
                                                      wordsPerElement * Constants.BITS_PER_WORD,
                                                      StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
@@ -668,7 +668,7 @@ final class WireHelpers {
 
                 return setListPointer(dstSegment, dstOffset,
                                       new ListReader(resolved.segment,
-                                                     resolved.ptr,
+                                                     resolved.ptr * Constants.BYTES_PER_WORD,
                                                      elementCount,
                                                      step,
                                                      dataSize,
