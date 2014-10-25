@@ -104,8 +104,8 @@ void enumerateDeps(schema::Node::Reader node, std::set<uint64_t>& deps) {
     }
     case schema::Node::INTERFACE: {
       auto interfaceNode = node.getInterface();
-      for (auto extend: interfaceNode.getExtends()) {
-        deps.insert(extend);
+      for (auto superclass: interfaceNode.getSuperclasses()) {
+        deps.insert(superclass.getId());
       }
       for (auto method: interfaceNode.getMethods()) {
         deps.insert(method.getParamStructType());
