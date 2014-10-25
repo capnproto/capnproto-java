@@ -14,7 +14,7 @@ install:
   - cd capnproto/c++
   - ./setup-autotools.sh
   - autoreconf -i
-  - ./configure && make -j5 && sudo make install && cd ..
+  - ./configure && make -j5 && sudo make install && cd ../..
 script:
   - make CXX=g++-4.8 CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
   - make addressbook
