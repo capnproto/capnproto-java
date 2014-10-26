@@ -137,7 +137,7 @@ class LayoutSuite extends FunSuite {
 
     val segment = new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
                                                               BuilderArena.SUGGESTED_ALLOCATION_STRATEGY))
-    val factory = new BareStructBuilder(new StructSize(2, 4, ElementSize.INLINE_COMPOSITE));
+    val factory = new BareStructBuilder(new StructSize(2, 4));
     val builder =  WireHelpers.initStructPointer(factory, 0, segment, factory.structSize());
     setupStruct(builder);
     checkStruct(builder);

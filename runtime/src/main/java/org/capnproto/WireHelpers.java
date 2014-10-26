@@ -237,12 +237,6 @@ final class WireHelpers {
                                        SegmentBuilder segment,
                                        int elementCount,
                                        StructSize elementSize) {
-        if (elementSize.preferredListEncoding != ElementSize.INLINE_COMPOSITE) {
-            //# Small data-only struct. Allocate a list of primitives instead.
-            return initListPointer(factory, refOffset, segment, elementCount,
-                                   elementSize.preferredListEncoding);
-        }
-
         int wordsPerElement = elementSize.total();
 
         //# Allocate the list, prefixed by a single WirePointer.
@@ -278,7 +272,7 @@ final class WireHelpers {
         }
 
         //# We must verify that the pointer has the right size. Unlike
-        //# in getWritableStructListReference(), we never need to
+        //# in getWritableStructListPointer(), we never need to
         //# "upgrade" the data, because this method is called only for
         //# non-struct lists, and there is no allowed upgrade path *to*
         //# a non-struct list, only *from* them.
@@ -326,6 +320,28 @@ final class WireHelpers {
                                               StructSize elementSize,
                                               SegmentReader defaultSegment,
                                               int defaultOffset) {
+        long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
+        int origRefTarget = WirePointer.target(origRefOffset, origRef);
+
+        if (WirePointer.isNull(origRef)) {
+            throw new Error("unimplemented");
+        }
+
+        //# We must verify that the pointer has the right size and potentially upgrade it if not.
+
+        FollowBuilderFarsResult resolved = followBuilderFars(origRef, origRefTarget, origSegment);
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
+            throw new DecodeException("Called getList{Field,Element}() but existing pointer is not a list");
+        }
+
+        byte oldSize = ListPointer.elementSize(resolved.ref);
+
+        if (oldSize == ElementSize.INLINE_COMPOSITE) {
+            // ...
+        } else {
+            // ...
+        }
+
         throw new Error("getWritableStructListPointer is unimplemented");
     }
 

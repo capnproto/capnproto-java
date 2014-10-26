@@ -1151,8 +1151,7 @@ private:
         kj::strTree(
           spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
           spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
-          ",(short)", structNode.getPointerCount(),
-          ", org.capnproto.ElementSize.", FIELD_SIZE_NAMES[(int)structNode.getPreferredListEncoding()], ");\n"),
+          ",(short)", structNode.getPointerCount(), ");\n"),
 
         spaces(indent), "  public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
         spaces(indent),
