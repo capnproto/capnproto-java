@@ -339,12 +339,29 @@ final class WireHelpers {
         if (oldSize == ElementSize.INLINE_COMPOSITE) {
             //# Existing list is INLINE_COMPOSITE, but we need to verify that the sizes match.
             long oldTag = resolved.segment.get(resolved.ptr);
+            int oldPtr = resolved.ptr + Constants.POINTER_SIZE_IN_WORDS;
+            if (WirePointer.kind(oldTag) != WirePointer.STRUCT) {
+                throw new DecodeException("INLINE_COMPOSITE list with non-STRUCT elements not supported.");
+            }
+            int oldDataSize = StructPointer.dataSize(oldTag);
+            int oldPointerCount = StructPointer.ptrCount(oldTag);
+            int oldStep = (oldDataSize + oldPointerCount * Constants.POINTER_SIZE_IN_WORDS);
+            int elementCount = WirePointer.inlineCompositeListElementCount(oldTag);
 
+            if (oldDataSize >= elementSize.data && oldPointerCount >= elementSize.pointers) {
+                //# Old size is at least as large as we need. Ship it.
+                return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                                                elementCount, oldDataSize * Constants.BITS_PER_WORD, oldPointerCount,
+                                                ElementSize.INLINE_COMPOSITE);
+            }
+
+            //# The structs in this list are smaller than expected, probably written using an older
+            //# version of the protocol. We need to make a copy and expand them.
+            throw new Error("unimplemented");
         } else {
-            // ...
+            //# We're upgrading from a non-struct list.
+            throw new Error("unimplemented");
         }
-
-        throw new Error("getWritableStructListPointer is unimplemented");
     }
 
     // size is in bytes
