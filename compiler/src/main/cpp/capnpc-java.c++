@@ -549,7 +549,7 @@ private:
           break;
         }
         case schema::Field::GROUP:
-          getSlots(schema.getDependency(proto.getGroup().getTypeId()).asStruct(), slots);
+          getSlots(field.getType().asStruct(), slots);
           break;
       }
     }
@@ -651,7 +651,7 @@ private:
     ANY_POINTER
   };
 
-  kj::StringTree makeEnumGetter(EnumSchema schema, kj::String member, uint offset, kj::String defaultMaskParam, int indent) {
+  kj::StringTree makeEnumGetter(EnumSchema schema, uint offset, kj::String defaultMaskParam, int indent) {
     auto enumerants = schema.getEnumerants();
     return kj::strTree(
       spaces(indent), "switch(_getShortField(", offset, defaultMaskParam, ")) {\n",
@@ -865,8 +865,8 @@ private:
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
-             makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
-                            kj::str("_reader"), offset, kj::str(defaultMaskParam), indent + 2) :
+             makeEnumGetter(field.getType().asEnum(),
+                            offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
@@ -878,8 +878,8 @@ private:
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
-             makeEnumGetter(structSchema.getDependency(typeBody.getEnum().getTypeId()).asEnum(),
-                            kj::str("_builder"), offset, kj::str(defaultMaskParam), indent + 2) :
+             makeEnumGetter(field.getType().asEnum(),
+                            offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
