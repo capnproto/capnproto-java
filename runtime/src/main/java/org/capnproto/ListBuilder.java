@@ -122,8 +122,7 @@ public class ListBuilder {
                                         structData,
                                         structPointers,
                                         this.structDataSize,
-                                        this.structPointerCount,
-                                        (byte)(indexBit % 8));
+                                        this.structPointerCount);
     }
 
     protected final <T> T _getPointerElement(FromPointerBuilder<T> factory, int index) {

@@ -178,7 +178,7 @@ final class WireHelpers {
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.refOffset, size);
         return factory.constructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
                                          allocation.ptr + size.data,
-                                         size.data * 64, size.pointers, (byte)0);
+                                         size.data * 64, size.pointers);
     }
 
     static <T> T getWritableStructPointer(StructBuilder.Factory<T> factory,
@@ -207,7 +207,7 @@ final class WireHelpers {
         } else {
             return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
                                             oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
-                                            oldPointerCount, (byte)0);
+                                            oldPointerCount);
         }
 
     }
@@ -484,7 +484,7 @@ final class WireHelpers {
         long ref = WirePointer.get(segment.buffer, refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, (byte) 0, 0x7fffffff);
+                return factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fffffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -512,7 +512,6 @@ final class WireHelpers {
                                         (resolved.ptr + dataSizeWords),
                                         dataSizeWords * Constants.BITS_PER_WORD,
                                         StructPointer.ptrCount(resolved.ref),
-                                        (byte)0,
                                         nestingLimit - 1);
 
     }
@@ -643,7 +642,7 @@ final class WireHelpers {
                                                      resolved.ptr + StructPointer.dataSize(resolved.ref),
                                                      StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
                                                      StructPointer.ptrCount(resolved.ref),
-                                                     (byte) 0, nestingLimit - 1));
+                                                     nestingLimit - 1));
         case WirePointer.LIST :
             byte elementSize = ListPointer.elementSize(resolved.ref);
             if (nestingLimit <= 0) {

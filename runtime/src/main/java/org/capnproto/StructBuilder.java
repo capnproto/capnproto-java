@@ -24,7 +24,7 @@ package org.capnproto;
 public class StructBuilder {
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int data, int pointers, int dataSize,
-                                    short pointerCount, byte bit0Offset);
+                           short pointerCount);
         StructSize structSize();
     }
 
@@ -33,21 +33,18 @@ public class StructBuilder {
     protected final int pointers; // word offset of pointer section
     protected final int dataSize; // in bits
     protected final short pointerCount;
-    protected final byte bit0Offset;
 
     public StructBuilder(SegmentBuilder segment, int data,
-                         int pointers, int dataSize, short pointerCount,
-                         byte bit0Offset) {
+                         int pointers, int dataSize, short pointerCount) {
         this.segment = segment;
         this.data = data;
         this.pointers = pointers;
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
-        this.bit0Offset = bit0Offset;
     }
 
     protected final boolean _getBooleanField(int offset) {
-        int bitOffset = (offset == 0 ? this.bit0Offset : offset);
+        int bitOffset = offset;
         int position = this.data + (bitOffset / 8);
         return (this.segment.buffer.get(position) & (1 << (bitOffset % 8))) != 0;
     }
@@ -58,7 +55,6 @@ public class StructBuilder {
 
     protected final void _setBooleanField(int offset, boolean value) {
         int bitOffset = offset;
-        if (offset == 0) { bitOffset = this.bit0Offset; }
         byte bitnum = (byte)(bitOffset % 8);
         int position = this.data + (bitOffset / 8);
         byte oldValue = this.segment.buffer.get(position);

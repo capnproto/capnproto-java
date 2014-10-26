@@ -25,7 +25,7 @@ public class StructReader {
     public interface Factory<T> {
         abstract T constructReader(SegmentReader segment, int data, int pointers,
                                    int dataSize, short pointerCount,
-                                   byte bit0Offset, int nestingLimit);
+                                   int nestingLimit);
     }
 
     protected final SegmentReader segment;
@@ -33,7 +33,6 @@ public class StructReader {
     protected final int pointers; // word offset of pointer section
     protected final int dataSize; // in bits
     protected final short pointerCount;
-    protected final byte bit0Offset;
     protected final int nestingLimit;
 
     public StructReader() {
@@ -42,28 +41,23 @@ public class StructReader {
         this.pointers = 0;
         this.dataSize = 0;
         this.pointerCount = 0;
-        this.bit0Offset = 0;
         this.nestingLimit = 0x7fffffff;
     }
 
     public StructReader(SegmentReader segment, int data,
                         int pointers, int dataSize, short pointerCount,
-                        byte bit0Offset, int nestingLimit) {
+                        int nestingLimit) {
         this.segment = segment;
         this.data = data;
         this.pointers = pointers;
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
-        this.bit0Offset = bit0Offset;
         this.nestingLimit = nestingLimit;
     }
 
     protected final boolean _getBooleanField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
-            if (offset == 0) {
-                offset = this.bit0Offset;
-            }
             byte b = this.segment.buffer.get(this.data + offset / 8);
 
             return (b & (1 << (offset % 8))) != 0;

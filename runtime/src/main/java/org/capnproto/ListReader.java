@@ -100,12 +100,11 @@ public class ListReader {
         // TODO check nesting limit
 
         int indexBit = index * this.step;
-
         int structData = this.ptr + (indexBit / 8);
         int structPointers = structData + (this.structDataSize / 8);
 
         return factory.constructReader(this.segment, structData, structPointers / 8, this.structDataSize,
-                                       this.structPointerCount, (byte) (indexBit % 8), this.nestingLimit - 1);
+                                       this.structPointerCount, this.nestingLimit - 1);
     }
 
     protected <T> T _getPointerElement(FromPointerReader<T> factory, int index) {

@@ -28,8 +28,8 @@ class LayoutSuite extends FunSuite {
 
   class BareStructReader extends StructReader.Factory[StructReader] {
     def constructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
-                        dataSize: Int, pointerCount: Short, bit0Offset: Byte, nestingLimit:Int) : StructReader = {
-      return new StructReader(segment,data,pointers,dataSize,pointerCount,bit0Offset,nestingLimit);
+                        dataSize: Int, pointerCount: Short, nestingLimit:Int) : StructReader = {
+      return new StructReader(segment,data,pointers,dataSize,pointerCount,nestingLimit);
     }
   }
 
@@ -122,8 +122,8 @@ class LayoutSuite extends FunSuite {
   class BareStructBuilder(structSize : StructSize) extends StructBuilder.Factory[StructBuilder] {
 
     def constructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
-                          dataSize: Int, pointerCount: Short, bit0Offset: Byte) : StructBuilder = {
-      return new StructBuilder(segment,data,pointers,dataSize,pointerCount,bit0Offset);
+                          dataSize: Int, pointerCount: Short) : StructBuilder = {
+      return new StructBuilder(segment,data,pointers,dataSize,pointerCount);
     }
     def structSize() : StructSize = {
       return structSize;
