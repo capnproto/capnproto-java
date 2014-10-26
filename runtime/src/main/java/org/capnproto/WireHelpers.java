@@ -110,7 +110,7 @@ final class WireHelpers {
             SegmentBuilder resultSegment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
 
             int padOffset = FarPointer.positionInSegment(ref);
-            long pad = WirePointer.get(resultSegment.buffer, padOffset);
+            long pad = resultSegment.get(padOffset);
             if (! FarPointer.isDoubleFar(ref)) {
                 return new FollowBuilderFarsResult(WirePointer.target(padOffset, pad), pad, resultSegment);
             }
@@ -140,7 +140,7 @@ final class WireHelpers {
             SegmentReader resultSegment = segment.arena.tryGetSegment(FarPointer.getSegmentId(ref));
 
             int padOffset = FarPointer.positionInSegment(ref);
-            long pad = WirePointer.get(resultSegment.buffer, padOffset);
+            long pad = resultSegment.get(padOffset);
 
             int padWords = FarPointer.isDoubleFar(ref) ? 2 : 1;
             // TODO read limiting
@@ -187,7 +187,7 @@ final class WireHelpers {
                                           StructSize size,
                                           SegmentReader defaultSegment,
                                           int defaultOffset) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
         int target = WirePointer.target(refOffset, ref);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
@@ -264,7 +264,7 @@ final class WireHelpers {
                                         int defaultOffset) {
         assert elementSize != ElementSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
 
-        long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
+        long origRef = origSegment.get(origRefOffset);
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
@@ -320,7 +320,7 @@ final class WireHelpers {
                                               StructSize elementSize,
                                               SegmentReader defaultSegment,
                                               int defaultOffset) {
-        long origRef = WirePointer.get(origSegment.buffer, origRefOffset);
+        long origRef = origSegment.get(origRefOffset);
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
@@ -337,7 +337,9 @@ final class WireHelpers {
         byte oldSize = ListPointer.elementSize(resolved.ref);
 
         if (oldSize == ElementSize.INLINE_COMPOSITE) {
-            // ...
+            //# Existing list is INLINE_COMPOSITE, but we need to verify that the sizes match.
+            long oldTag = resolved.segment.get(resolved.ptr);
+
         } else {
             // ...
         }
@@ -380,7 +382,7 @@ final class WireHelpers {
                                                ByteBuffer defaultBuffer,
                                                int defaultOffset,
                                                int defaultSize) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
@@ -444,7 +446,7 @@ final class WireHelpers {
                                                ByteBuffer defaultBuffer,
                                                int defaultOffset,
                                                int defaultSize) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
@@ -481,14 +483,14 @@ final class WireHelpers {
                                    SegmentReader defaultSegment,
                                    int defaultOffset,
                                    int nestingLimit) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
                 return factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fffffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
-                ref = WirePointer.get(segment.buffer, refOffset);
+                ref = segment.get(refOffset);
             }
         }
 
@@ -620,7 +622,7 @@ final class WireHelpers {
         // readStructPointer(), etc. because they do type checking whereas here we want to accept any
         // valid pointer.
 
-        long srcRef = WirePointer.get(srcSegment.buffer, srcOffset);
+        long srcRef = srcSegment.get(srcOffset);
 
         if (WirePointer.isNull(srcRef)) {
             dstSegment.buffer.putLong(dstOffset * 8, 0L);
@@ -650,7 +652,7 @@ final class WireHelpers {
             }
             if (elementSize == ElementSize.INLINE_COMPOSITE) {
                 int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
-                long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
+                long tag = resolved.segment.get(resolved.ptr);
                 int ptr = resolved.ptr + 1;
 
                 resolved.segment.arena.checkReadLimit(wordCount + 1);
@@ -707,7 +709,7 @@ final class WireHelpers {
                                  byte expectedElementSize,
                                  int nestingLimit) {
 
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
@@ -715,7 +717,7 @@ final class WireHelpers {
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
-                ref = WirePointer.get(segment.buffer, refOffset);
+                ref = segment.get(refOffset);
             }
         }
 
@@ -731,7 +733,7 @@ final class WireHelpers {
         case ElementSize.INLINE_COMPOSITE : {
             int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
 
-            long tag = WirePointer.get(resolved.segment.buffer, resolved.ptr);
+            long tag = resolved.segment.get(resolved.ptr);
             int ptr = resolved.ptr + 1;
 
             resolved.segment.arena.checkReadLimit(wordCount + 1);
@@ -799,7 +801,7 @@ final class WireHelpers {
                                        ByteBuffer defaultBuffer,
                                        int defaultOffset,
                                        int defaultSize) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
@@ -838,7 +840,7 @@ final class WireHelpers {
                                        ByteBuffer defaultBuffer,
                                        int defaultOffset,
                                        int defaultSize) {
-        long ref = WirePointer.get(segment.buffer, refOffset);
+        long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {

@@ -34,4 +34,8 @@ public class SegmentReader {
     }
 
     public static final SegmentReader EMPTY = new SegmentReader(ByteBuffer.allocate(8), null);
+
+    public final long get(int index) {
+        return buffer.getLong(index * Constants.BYTES_PER_WORD);
+    }
 }

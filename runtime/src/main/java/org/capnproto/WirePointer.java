@@ -81,8 +81,4 @@ final class WirePointer {
     public static int upper32Bits(long wirePointer) {
         return (int)(wirePointer >>> 32);
     }
-
-    public static long get(ByteBuffer buffer, int offset) {
-        return buffer.getLong(offset * 8);
-    }
 }
