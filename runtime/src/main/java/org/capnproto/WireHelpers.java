@@ -344,15 +344,17 @@ final class WireHelpers {
                 throw new DecodeException("INLINE_COMPOSITE list with non-STRUCT elements not supported.");
             }
             int oldDataSize = StructPointer.dataSize(oldTag);
-            int oldPointerCount = StructPointer.ptrCount(oldTag);
+            short oldPointerCount = StructPointer.ptrCount(oldTag);
             int oldStep = (oldDataSize + oldPointerCount * Constants.POINTER_SIZE_IN_WORDS);
             int elementCount = WirePointer.inlineCompositeListElementCount(oldTag);
 
             if (oldDataSize >= elementSize.data && oldPointerCount >= elementSize.pointers) {
                 //# Old size is at least as large as we need. Ship it.
                 return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
-                                                elementCount, oldDataSize * Constants.BITS_PER_WORD, oldPointerCount,
-                                                ElementSize.INLINE_COMPOSITE);
+                                                elementCount,
+                                                oldStep * Constants.BITS_PER_WORD,
+                                                oldDataSize * Constants.BITS_PER_WORD, oldPointerCount);
+                                                //ElementSize.INLINE_COMPOSITE);
             }
 
             //# The structs in this list are smaller than expected, probably written using an older
@@ -403,7 +405,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
-                return new Text.Builder(null, 0, 0);
+                return new Text.Builder();
             } else {
                 Text.Builder builder = initTextPointer(refOffset, segment, defaultSize);
                 // TODO is there a way to do this with bulk methods?
@@ -467,7 +469,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
-                return new Data.Builder(ByteBuffer.allocate(0), 0, 0);
+                return new Data.Builder();
             } else {
                 Data.Builder builder = initDataPointer(refOffset, segment, defaultSize);
                 // TODO is there a way to do this with bulk methods?
@@ -822,8 +824,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
-                // XXX -- what about null terminator?
-                return new Text.Reader(ByteBuffer.wrap(new byte[0]), 0, 0);
+                return new Text.Reader();
             } else {
                 return new Text.Reader(defaultBuffer, defaultOffset, defaultSize);
             }
@@ -861,7 +862,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultBuffer == null) {
-                return new Data.Reader(ByteBuffer.wrap(new byte[0]), 0, 0);
+                return new Data.Reader();
             } else {
                 return new Data.Reader(defaultBuffer, defaultOffset, defaultSize);
             }

@@ -70,6 +70,13 @@ public final class Text {
         public final int offset; // in bytes
         public final int size; // in bytes, not including NUL terminator
 
+        public Reader() {
+            // TODO what about the null terminator?
+            this.buffer = ByteBuffer.allocate(0);
+            this.offset = 0;
+            this.size = 0;
+        }
+
         public Reader(ByteBuffer buffer, int offset, int size) {
             this.buffer = buffer;
             this.offset = offset * 8;
@@ -120,6 +127,12 @@ public final class Text {
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes
+
+        public Builder() {
+            this.buffer = ByteBuffer.allocate(0);
+            this.offset = 0;
+            this.size = 0;
+        }
 
         public Builder(ByteBuffer buffer, int offset, int size) {
             this.buffer = buffer;

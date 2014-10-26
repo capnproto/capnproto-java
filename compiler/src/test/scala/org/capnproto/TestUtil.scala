@@ -162,7 +162,7 @@ object TestUtil {
     assert(textList.get(2).toString() == "thud");
 
     val structList = builder.getStructList();
-    //assert(3 == structList.size());
+    assert(3 == structList.size());
     //assert(structList.get(0).getTextField().toString() == "structlist 1")
     //assert(structList.get(1).getTextField().toString() == "structlist 2")
     //assert(structList.get(2).getTextField().toString() == "structlist 3")
