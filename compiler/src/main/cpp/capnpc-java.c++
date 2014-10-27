@@ -1091,11 +1091,23 @@ private:
   }
 
 
-  kj::StringTree makeReaderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                               StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
+  kj::Vector<kj::String> getTypeParameters(Schema schema) {
+    auto node = schema.getProto();
+    kj::Vector<kj::String> result;
+    if (node.getScopeId() != 0) {
+      Schema parent = schemaLoader.get(node.getScopeId());
+      result = getTypeParameters(parent);
+    }
+    for (auto parameter : node.getParameters()) {
+      result.add(kj::str(parameter.getName(), "_", kj::hex(node.getId())));
+    }
+    return kj::mv(result);
+  }
+
+  kj::StringTree makeReaderDef(StructSchema schema, kj::StringPtr typeParams, kj::Array<kj::StringTree>&& methodDecls,
                                int indent) {
     return kj::strTree(
-      spaces(indent), "public static final class Reader extends org.capnproto.StructReader {\n",
+      spaces(indent), "public static final class Reader", typeParams, " extends org.capnproto.StructReader {\n",
       spaces(indent), "  Reader(org.capnproto.SegmentReader segment, int data, int pointers,",
       "int dataSize, short pointerCount, int nestingLimit){\n",
       spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
@@ -1107,11 +1119,10 @@ private:
       "\n");
   }
 
-  kj::StringTree makeBuilderDef(kj::StringPtr fullName, kj::StringPtr unqualifiedParentType,
-                                StructSchema schema, kj::Array<kj::StringTree>&& methodDecls,
+  kj::StringTree makeBuilderDef(StructSchema schema, kj::StringPtr typeParams, kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
     return kj::strTree(
-      spaces(indent), "public static final class Builder extends org.capnproto.StructBuilder {\n",
+      spaces(indent), "public static final class Builder", typeParams, " extends org.capnproto.StructBuilder {\n",
       spaces(indent), "  Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,",
       "int dataSize, short pointerCount){\n",
       spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount);\n",
@@ -1136,12 +1147,25 @@ private:
     uint discrimOffset = structNode.getDiscriminantOffset();
     structNode.getPointerCount();
 
+    auto typeParamVec = getTypeParameters(schema);
+
+    kj::StringTree typeParamsTree;
+    if (typeParamVec.size() > 0) {
+      typeParamsTree = kj::strTree(
+        "<",
+        kj::StringTree(KJ_MAP(p, typeParamVec) {
+            return kj::strTree(p);
+          }, ", "),
+        ">");
+    }
+    kj::String typeParams = typeParamsTree.flatten();
+
     return StructText {
       kj::strTree(
         spaces(indent), "public static class ", name, " {\n",
         kj::strTree(
-          spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =\n",
-          spaces(indent), "    new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
+          spaces(indent), "  public static final org.capnproto.StructSize STRUCT_SIZE =",
+          " new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(), ");\n"),
 
         spaces(indent), "  public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
@@ -1167,10 +1191,10 @@ private:
         spaces(indent), "    new org.capnproto.StructList.Factory<Builder, Reader>(factory);\n",
 
 
-        kj::strTree(makeReaderDef(fullName, name, schema,
+        kj::strTree(makeReaderDef(schema, typeParams,
                                   KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                   indent + 1),
-                    makeBuilderDef(fullName, name, schema,
+                    makeBuilderDef(schema, typeParams,
                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
                                    indent + 1)),
 
