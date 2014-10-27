@@ -1090,7 +1090,6 @@ private:
     }
   }
 
-
   kj::Vector<kj::String> getTypeParameters(Schema schema) {
     auto node = schema.getProto();
     kj::Vector<kj::String> result;
@@ -1119,17 +1118,18 @@ private:
       "\n");
   }
 
-  kj::StringTree makeBuilderDef(StructSchema schema, kj::StringPtr typeParams, kj::Array<kj::StringTree>&& methodDecls,
+  kj::StringTree makeBuilderDef(StructSchema schema, kj::StringPtr builderTypeParams, kj::StringPtr readerTypeParams,
+                                kj::Array<kj::StringTree>&& methodDecls,
                                 int indent) {
     return kj::strTree(
-      spaces(indent), "public static final class Builder", typeParams, " extends org.capnproto.StructBuilder {\n",
+      spaces(indent), "public static final class Builder", builderTypeParams, " extends org.capnproto.StructBuilder {\n",
       spaces(indent), "  Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,",
       "int dataSize, short pointerCount){\n",
       spaces(indent), "    super(segment, data, pointers, dataSize, pointerCount);\n",
       spaces(indent), "  }\n",
       makeWhich(schema, indent+1),
-      spaces(indent), "  public final Reader asReader() {\n",
-      spaces(indent), "    return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);\n",
+      spaces(indent), "  public final Reader", readerTypeParams, " asReader() {\n",
+      spaces(indent), "    return new Reader", readerTypeParams, "(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);\n",
       spaces(indent), "  }\n",
       kj::mv(methodDecls),
       spaces(indent), "}\n",
@@ -1148,17 +1148,27 @@ private:
     structNode.getPointerCount();
 
     auto typeParamVec = getTypeParameters(schema);
+    bool hasTypeParams = typeParamVec.size() > 0;
 
-    kj::StringTree typeParamsTree;
-    if (typeParamVec.size() > 0) {
-      typeParamsTree = kj::strTree(
+    kj::StringTree readerTypeParamsTree;
+    kj::StringTree builderTypeParamsTree;
+    if (hasTypeParams) {
+      readerTypeParamsTree = kj::strTree(
         "<",
         kj::StringTree(KJ_MAP(p, typeParamVec) {
-            return kj::strTree(p);
+            return kj::strTree(p, "_Reader");
+          }, ", "),
+        ">");
+
+      builderTypeParamsTree = kj::strTree(
+        "<",
+        kj::StringTree(KJ_MAP(p, typeParamVec) {
+            return kj::strTree(p, "_Builder, ", p, "_Reader");
           }, ", "),
         ">");
     }
-    kj::String typeParams = typeParamsTree.flatten();
+    kj::String readerTypeParams = readerTypeParamsTree.flatten();
+    kj::String builderTypeParams = builderTypeParamsTree.flatten();
 
     return StructText {
       kj::strTree(
@@ -1168,33 +1178,36 @@ private:
           " new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(), ");\n"),
 
-        spaces(indent), "  public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {\n",
+        spaces(indent), "  public static final class Factory", builderTypeParams,
+        " extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
         spaces(indent),
-        "    public final Reader constructReader(org.capnproto.SegmentReader segment, int data,",
+        "    public final Reader", readerTypeParams, " constructReader(org.capnproto.SegmentReader segment, int data,",
         "int pointers, int dataSize, short pointerCount, int nestingLimit) {\n",
-        spaces(indent), "      return new Reader(segment,data,pointers,dataSize,pointerCount, nestingLimit);\n",
+        spaces(indent), "      return new Reader", readerTypeParams, "(segment,data,pointers,dataSize,pointerCount, nestingLimit);\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public final Builder constructBuilder(org.capnproto.SegmentBuilder segment, int data,",
+        spaces(indent), "    public final Builder", builderTypeParams, " constructBuilder(org.capnproto.SegmentBuilder segment, int data,",
         "int pointers, int dataSize, short pointerCount) {\n",
-        spaces(indent), "      return new Builder(segment, data, pointers, dataSize, pointerCount);\n",
+        spaces(indent), "      return new Builder", builderTypeParams, "(segment, data, pointers, dataSize, pointerCount);\n",
         spaces(indent), "    }\n",
         spaces(indent), "    public final org.capnproto.StructSize structSize() {\n",
         spaces(indent), "      return ", fullName, ".STRUCT_SIZE;\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public final Reader asReader(Builder builder) {\n",
+        spaces(indent), "    public final Reader", readerTypeParams, " asReader(Builder", builderTypeParams, " builder) {\n",
         spaces(indent), "      return builder.asReader();\n",
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",
-        spaces(indent), "  public static final Factory factory = new Factory();\n",
-        spaces(indent), "  public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =\n",
-        spaces(indent), "    new org.capnproto.StructList.Factory<Builder, Reader>(factory);\n",
+        (hasTypeParams ? kj::strTree() :
+         kj::strTree(
+           spaces(indent), "  public static final Factory factory = new Factory();\n",
+           spaces(indent), "  public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =\n",
+           spaces(indent), "    new org.capnproto.StructList.Factory<Builder, Reader>(factory);\n")),
 
 
-        kj::strTree(makeReaderDef(schema, typeParams,
+        kj::strTree(makeReaderDef(schema, readerTypeParams,
                                   KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
                                   indent + 1),
-                    makeBuilderDef(schema, typeParams,
+                    makeBuilderDef(schema, builderTypeParams, readerTypeParams,
                                    KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
                                    indent + 1)),
 
