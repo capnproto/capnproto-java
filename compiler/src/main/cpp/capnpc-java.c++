@@ -595,9 +595,8 @@ private:
     kj::String has;
     kj::String check;
     kj::String set;
-    kj::StringTree readerIsDecl;
-    kj::StringTree builderIsDecl;
-    kj::StringTree isDefs;
+    kj::StringTree readerIsDef;
+    kj::StringTree builderIsDef;
   };
 
   DiscriminantChecks makeDiscriminantChecks(kj::StringPtr scope,
@@ -624,14 +623,7 @@ private:
                       spaces(indent), "}\n"),
           kj::strTree(spaces(indent), "public final boolean is", titleCase, "() {\n",
                       spaces(indent), "  return which() == ", scope, "Which.", upperCase, ";\n",
-                      spaces(indent), "}\n"),
-          kj::strTree(
-            "inline boolean ", scope, "Reader::is", titleCase, "() const {\n"
-            "  return which() == ", scope, upperCase, ";\n"
-            "}\n"
-            "inline boolean ", scope, "Builder::is", titleCase, "() {\n"
-            "  return which() == ", scope, upperCase, ";\n"
-            "}\n")
+                      spaces(indent), "}\n")
     };
   }
 
@@ -706,7 +698,7 @@ private:
             field.getProto().getGroup().getTypeId()).asStruct());
         return FieldText {
           kj::strTree(
-            kj::mv(unionDiscrim.readerIsDecl),
+            kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
             spaces(indent), "    return new ", scope, titleCase,
             ".Reader(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
@@ -714,7 +706,7 @@ private:
             "\n"),
 
             kj::strTree(
-              kj::mv(unionDiscrim.builderIsDecl),
+              kj::mv(unionDiscrim.builderIsDef),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
               spaces(indent), "    return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
@@ -861,7 +853,7 @@ private:
     if (kind == FieldKind::PRIMITIVE) {
       return FieldText {
         kj::strTree(
-            kj::mv(unionDiscrim.readerIsDecl),
+            kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
@@ -874,7 +866,7 @@ private:
             "\n"),
 
           kj::strTree(
-            kj::mv(unionDiscrim.builderIsDecl),
+            kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
@@ -902,7 +894,7 @@ private:
     } else if (kind == FieldKind::ANY_POINTER) {
       return FieldText {
         kj::strTree(
-            kj::mv(unionDiscrim.readerIsDecl),
+            kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public boolean has", titleCase, "() {\n",
             unionDiscrim.has,
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -915,7 +907,7 @@ private:
             spaces(indent), "  }\n"),
 
         kj::strTree(
-            kj::mv(unionDiscrim.builderIsDecl),
+            kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
@@ -944,7 +936,7 @@ private:
 
       return FieldText {
         kj::strTree(
-          kj::mv(unionDiscrim.readerIsDecl),
+          kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
@@ -956,7 +948,7 @@ private:
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
-          kj::mv(unionDiscrim.builderIsDecl),
+          kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ",
@@ -985,7 +977,7 @@ private:
 
       return FieldText {
         kj::strTree(
-          kj::mv(unionDiscrim.readerIsDecl),
+          kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           unionDiscrim.has,
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -998,7 +990,7 @@ private:
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
-          kj::mv(unionDiscrim.builderIsDecl),
+          kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
           unionDiscrim.has,
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1033,7 +1025,7 @@ private:
 
       return FieldText {
         kj::strTree(
-            kj::mv(unionDiscrim.readerIsDecl),
+            kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
@@ -1045,7 +1037,7 @@ private:
             "\n"),
 
         kj::strTree(
-            kj::mv(unionDiscrim.builderIsDecl),
+            kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
