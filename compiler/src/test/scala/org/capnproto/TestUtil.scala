@@ -163,9 +163,9 @@ object TestUtil {
 
     val structList = builder.getStructList();
     assert(3 == structList.size());
-    //assert(structList.get(0).getTextField().toString() == "structlist 1")
-    //assert(structList.get(1).getTextField().toString() == "structlist 2")
-    //assert(structList.get(2).getTextField().toString() == "structlist 3")
+    assert(structList.get(0).getTextField().toString() == "structlist 1")
+    assert(structList.get(1).getTextField().toString() == "structlist 2")
+    assert(structList.get(2).getTextField().toString() == "structlist 3")
 
     val enumList = builder.getEnumList();
     (enumList.get(0)) should equal (TestEnum.FOO);

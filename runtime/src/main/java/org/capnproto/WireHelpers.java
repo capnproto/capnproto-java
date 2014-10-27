@@ -350,7 +350,7 @@ final class WireHelpers {
 
             if (oldDataSize >= elementSize.data && oldPointerCount >= elementSize.pointers) {
                 //# Old size is at least as large as we need. Ship it.
-                return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+                return factory.constructBuilder(resolved.segment, oldPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
                                                 oldStep * Constants.BITS_PER_WORD,
                                                 oldDataSize * Constants.BITS_PER_WORD, oldPointerCount);
