@@ -1307,7 +1307,6 @@ private:
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
     kj::StringTree capnpSchemaDefs;
-    kj::StringTree capnpPrivateDecls;
     kj::StringTree capnpPrivateDefs;
     kj::StringTree sourceFileDefs;
   };
@@ -1316,7 +1315,6 @@ private:
     kj::StringTree outerTypeDef;
     kj::StringTree readerBuilderDefs;
     kj::StringTree inlineMethodDefs;
-    kj::StringTree capnpPrivateDecls;
     kj::StringTree capnpPrivateDefs;
     kj::StringTree sourceFileDefs;
   };
@@ -1453,10 +1451,6 @@ private:
           KJ_MAP(n, nestedTexts) { return kj::mv(n.capnpSchemaDefs); }),
 
       kj::strTree(
-          kj::mv(top.capnpPrivateDecls),
-          KJ_MAP(n, nestedTexts) { return kj::mv(n.capnpPrivateDecls); }),
-
-      kj::strTree(
           kj::mv(top.capnpPrivateDefs),
           KJ_MAP(n, nestedTexts) { return kj::mv(n.capnpPrivateDefs); }),
 
@@ -1488,9 +1482,7 @@ private:
           kj::mv(structText.readerBuilderDefs),
           kj::mv(structText.inlineMethodDefs),
 
-            kj::strTree(),
-            kj::strTree(),
-
+          kj::strTree(),
           kj::strTree(),
         };
       }
@@ -1511,8 +1503,6 @@ private:
           kj::strTree(),
           kj::strTree(),
           kj::strTree(),
-          kj::strTree(),
-          kj::strTree(),
         };
       }
 
@@ -1528,8 +1518,6 @@ private:
           kj::strTree(kj::mv(constText.decl)),
           kj::strTree(),
           kj::strTree(),
-
-          kj::strTree(),
           kj::strTree(),
           kj::strTree(),
         };
@@ -1537,7 +1525,6 @@ private:
 
       case schema::Node::ANNOTATION: {
         return NodeTextNoSchema {
-          kj::strTree(),
           kj::strTree(),
           kj::strTree(),
           kj::strTree(),
