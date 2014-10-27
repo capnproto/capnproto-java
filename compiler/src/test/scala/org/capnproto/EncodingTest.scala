@@ -53,6 +53,7 @@ class EncodingSuite extends FunSuite {
     val allTypes2 = message.initRoot(TestAllTypes.factory);
 
     allTypes2.setStructField(allTypes.asReader());
+    TestUtil.checkTestMessage(allTypes2.getStructField());
     val reader = allTypes2.asReader().getStructField();
     TestUtil.checkTestMessage(reader);
   }
