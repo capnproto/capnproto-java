@@ -1119,7 +1119,6 @@ private:
       makeWhich(schema, indent+1),
       spaces(indent), "  public final Reader asReader() {\n",
       spaces(indent), "    return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);\n",
-      //spaces(indent), "    return new Reader(this._builder.asReader());\n",
       spaces(indent), "  }\n",
       kj::mv(methodDecls),
       spaces(indent), "}\n",
@@ -1212,9 +1211,6 @@ private:
     auto type = constProto.getType();
     auto typeName_ = typeName(type).flatten();
     auto upperCase = toUpperCase(name);
-
-    // Linkage qualifier for non-primitive types.
-    const char* linkage = scope.size() == 0 ? "extern " : "static ";
 
     switch (type.which()) {
       case schema::Value::VOID:
