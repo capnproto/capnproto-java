@@ -324,7 +324,7 @@ struct TestNewVersion {
 
 struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
-#  rev @1 :TestGenerics(Bar, Foo);
+#  rev @1 :TestGenerics(Text, List(UInt8));
 
 #  struct Inner {
 #    foo @0 :Foo;
