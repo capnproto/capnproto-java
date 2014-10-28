@@ -25,7 +25,6 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
     implements FromPointerBuilder<Builder>,
     FromPointerBuilderRefDefault<Builder>,
     StructBuilder.Factory<Builder>,
-    InitFromPointerBuilder<Builder>,
     SetPointerBuilder<Reader>,
     FromPointerReader<Reader>,
     FromPointerReaderRefDefault<Reader>,
@@ -51,7 +50,7 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
                                                     null, 0);
     }
-    public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer) {
+    public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());
     }
 

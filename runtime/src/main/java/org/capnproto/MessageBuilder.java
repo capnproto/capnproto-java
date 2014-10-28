@@ -44,7 +44,7 @@ public final class MessageBuilder {
         throw new Error("unimplemented");
     }
 
-    public <T> T initRoot(InitFromPointerBuilder<T> factory) {
+    public <T> T initRoot(FromPointerBuilder<T> factory) {
         SegmentBuilder rootSegment = this.arena.segments.get(0);
         int location = rootSegment.allocate(1);
         if (location == SegmentBuilder.FAILED_ALLOCATION) {

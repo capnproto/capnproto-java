@@ -25,7 +25,6 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
     implements ListBuilder.Factory<Builder>,
     FromPointerBuilder<Builder>,
     FromPointerBuilderRefDefault<Builder>,
-    InitSizedFromPointerBuilder<Builder>,
     SetPointerBuilder<Reader>,
     ListReader.Factory<Reader>,
     FromPointerReader<Reader>,
@@ -68,7 +67,7 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                                   null, 0);
     }
 
-    public Builder initSizedFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+    public Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initListPointer(this, pointer, segment, elementCount, this.elementSize);
     }
 

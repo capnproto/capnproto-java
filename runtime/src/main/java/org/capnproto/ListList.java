@@ -79,7 +79,7 @@ public final class ListList {
         }
 
         public final T init(int index, int size) {
-            return _initSizedPointerElement(this.factory, index, size);
+            return _initPointerElement(this.factory, index, size);
         }
 
         public final T get(int index) {

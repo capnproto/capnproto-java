@@ -190,12 +190,8 @@ public class StructBuilder {
         return factory.fromPointerBuilderBlobDefault(this.segment, this.pointers + index, defaultBuffer, defaultOffset, defaultSize);
     }
 
-    protected final <T> T _initPointerField(InitFromPointerBuilder<T> factory, int index) {
-        return factory.initFromPointerBuilder(this.segment, this.pointers + index);
-    }
-
-    protected final <T> T _initSizedPointerField(InitSizedFromPointerBuilder<T> factory, int index, int elementCount) {
-        return factory.initSizedFromPointerBuilder(this.segment, this.pointers + index, elementCount);
+    protected final <T> T _initPointerField(FromPointerBuilder<T> factory, int index, int elementCount) {
+        return factory.initFromPointerBuilder(this.segment, this.pointers + index, elementCount);
     }
 
     protected final <Reader> void _setPointerField(SetPointerBuilder<Reader> factory, int index, Reader value) {

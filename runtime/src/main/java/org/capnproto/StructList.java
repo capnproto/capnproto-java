@@ -58,6 +58,7 @@ public final class StructList {
                                                             defaultOffset);
         }
 
+        @Override
         public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer) {
                      return WireHelpers.getWritableStructListPointer(this,
                                                                      pointer,
@@ -66,8 +67,9 @@ public final class StructList {
                                                                      null, 0);
         }
 
-        public final Builder<ElementBuilder> initSizedFromPointerBuilder(SegmentBuilder segment, int pointer,
-                                                                         int elementCount) {
+        @Override
+        public final Builder<ElementBuilder> initFromPointerBuilder(SegmentBuilder segment, int pointer,
+                                                                    int elementCount) {
             return WireHelpers.initStructListPointer(this, pointer, segment, elementCount, factory.structSize());
         }
     }

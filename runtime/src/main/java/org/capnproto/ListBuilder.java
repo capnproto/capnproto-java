@@ -131,14 +131,8 @@ public class ListBuilder {
             (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
     }
 
-    protected final <T> T _initPointerElement(InitFromPointerBuilder<T> factory, int index) {
+    protected final <T> T _initPointerElement(FromPointerBuilder<T> factory, int index, int elementCount) {
         return factory.initFromPointerBuilder(
-            this.segment,
-            (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
-    }
-
-    protected final <T> T _initSizedPointerElement(InitSizedFromPointerBuilder<T> factory, int index, int elementCount) {
-        return factory.initSizedFromPointerBuilder(
             this.segment,
             (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
             elementCount);

@@ -29,6 +29,11 @@ public final class AnyPointer {
         public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
             return new Builder(segment, pointer);
         }
+        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+            Builder result = new Builder(segment, pointer);
+            result.clear();
+            return result;
+        }
     }
 
     public final static class Reader {
@@ -68,12 +73,12 @@ public final class AnyPointer {
             return factory.fromPointerBuilder(this.segment, this.pointer);
         }
 
-        public final <T> T initAs(InitFromPointerBuilder<T> factory) {
-            return factory.initFromPointerBuilder(this.segment, this.pointer);
+        public final <T> T initAs(FromPointerBuilder<T> factory) {
+            return factory.initFromPointerBuilder(this.segment, this.pointer, 0);
         }
 
-        public final <T> T initAs(InitSizedFromPointerBuilder<T> factory, int elementCount) {
-            return factory.initSizedFromPointerBuilder(this.segment, this.pointer, elementCount);
+        public final <T> T initAs(FromPointerBuilder<T> factory, int elementCount) {
+            return factory.initFromPointerBuilder(this.segment, this.pointer, elementCount);
         }
 
         public final void clear() {

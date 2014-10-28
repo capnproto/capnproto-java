@@ -932,19 +932,20 @@ private:
               spaces(indent), "  }\n",
 
               spaces(indent), "  public ", typeParam.flatten(), "_Builder get", titleCase, "() {\n",
-            unionDiscrim.check,
+              unionDiscrim.check,
               spaces(indent), "    return _getPointerField(", typeParam.flatten(), "_Factory, ", offset, ");\n",
-            spaces(indent), "  }\n",
+              spaces(indent), "  }\n",
 
-            spaces(indent), "  public org.capnproto.AnyPointer.Builder init", titleCase, "() {\n",
-            unionDiscrim.set,
-            spaces(indent), "    org.capnproto.AnyPointer.Builder result =\n",
-            spaces(indent), "      new org.capnproto.AnyPointer.Builder(this.segment, this.pointers +",
-            offset, ");\n",
-            spaces(indent), "    result.clear();\n",
-            spaces(indent), "    return result;\n",
-            spaces(indent), "  }\n",
-            "\n"),
+              spaces(indent), "  public ", typeParam.flatten(), "_Builder init", titleCase, "() {\n",
+              unionDiscrim.set,
+              spaces(indent), "    return _initPointerField(", typeParam.flatten(), "_Factory, ", offset, ", 0);\n",
+              spaces(indent), "  }\n",
+
+              spaces(indent), "  public ", typeParam.flatten(), "_Builder init", titleCase, "(int size) {\n",
+              unionDiscrim.set,
+              spaces(indent), "    return _initPointerField(", typeParam.flatten(), "_Factory, ", offset, ", size);\n",
+              spaces(indent), "  }\n",
+              "\n"),
           };
       };
       return FieldText {
@@ -1016,7 +1017,7 @@ private:
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
           unionDiscrim.set,
           spaces(indent), "    return ",
-          "_initPointerField(", type, ".factory,",  offset, ");\n",
+          "_initPointerField(", type, ".factory,",  offset, ", 0);\n",
           spaces(indent), "  }\n"),
       };
 
@@ -1065,7 +1066,7 @@ private:
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
-          spaces(indent), "    return _initSizedPointerField(", factory, ", ", offset, ", size);\n",
+          spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
       };
     } else if (kind == FieldKind::LIST) {
@@ -1108,7 +1109,7 @@ private:
 
             spaces(indent), "  public final ", builderClass,
             " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return _initSizedPointerField(", listFactory, ", ", offset, ", size);\n",
+            spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
             spaces(indent), "  }\n"),
       };
     } else {
