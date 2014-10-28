@@ -1116,7 +1116,7 @@ private:
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
 
-          spaces(indent), "  public ", type, ".Reader",
+          spaces(indent), "  public ", readerType,
           " get", titleCase, "() {\n",
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
@@ -1128,21 +1128,21 @@ private:
           unionDiscrim.has,
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final ", type, ".Builder get", titleCase, "() {\n",
+          spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+          spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _setPointerField(", factory, ", ", offset, ", value);\n",
           spaces(indent), "  }\n",
           spaces(indent), "  public final void set", titleCase, "(", setterInputType, " value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _setPointerField(", factory, ", ", offset, ", new",
-          type, ".Reader(value));\n",
+          spaces(indent), "    _setPointerField(", factory, ", ", offset, ", new ",
+          readerType, "(value));\n",
           spaces(indent), "  }\n",
 
-          spaces(indent), "  public final ", type, ".Builder init", titleCase, "(int size) {\n",
+          spaces(indent), "  public final ", builderType, " init", titleCase, "(int size) {\n",
           spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
       };
@@ -1153,8 +1153,6 @@ private:
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
       kj::String listFactory = makeFactoryArg(field.getType());
-      kj::String readerClass = kj::str(typeName(field.getType(), kj::str(".Reader")));
-      kj::String builderClass = kj::str(typeName(field.getType(), kj::str(".Builder")));
 
       return FieldText {
         kj::strTree(
@@ -1163,7 +1161,7 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", readerClass,
+            spaces(indent), "  public final ", readerType,
             " get", titleCase, "() {\n",
             spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
             spaces(indent), "  }\n",
@@ -1175,16 +1173,16 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", builderClass,
+            spaces(indent), "  public final ", builderType,
             " get", titleCase, "() {\n",
             spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final void set", titleCase, "(", readerClass, " value) {\n",
+            spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", builderClass,
+            spaces(indent), "  public final ", builderType,
             " init", titleCase, "(int size) {\n",
             spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
             spaces(indent), "  }\n"),
