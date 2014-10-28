@@ -829,7 +829,6 @@ private:
     kj::String type = typeName(field.getType(), kj::str("")).flatten();
     kj::String builderType = typeName(field.getType(), kj::str(".Builder")).flatten();
     kj::String readerType = typeName(field.getType(), kj::str(".Reader")).flatten();
-    kj::StringPtr setterDefault;  // only for void
     kj::String defaultMask;    // primitives only
     size_t defaultOffset = 0;    // pointers only: offset of the default value within the schema.
     size_t defaultSize = 0;      // blobs only: byte size of the default value.
@@ -839,7 +838,6 @@ private:
     switch (typeBody.which()) {
       case schema::Type::VOID:
         kind = FieldKind::PRIMITIVE;
-        setterDefault = " = ::capnp::VOID";
         break;
 
 #define HANDLE_PRIMITIVE(discrim, typeName, javaTypeName, defaultName, suffix) \
