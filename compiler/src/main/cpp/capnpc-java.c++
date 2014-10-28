@@ -826,7 +826,6 @@ private:
 
     FieldKind kind = FieldKind::PRIMITIVE;
     kj::String ownedType;
-    kj::String type = typeName(field.getType(), kj::str("")).flatten();
     kj::String builderType = typeName(field.getType(), kj::str(".Builder")).flatten();
     kj::String readerType = typeName(field.getType(), kj::str(".Reader")).flatten();
     kj::String defaultMask;    // primitives only
@@ -939,37 +938,37 @@ private:
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDef),
-            spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
+            spaces(indent), "  public final ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
              makeEnumGetter(field.getType().asEnum(),
                             offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
 
           kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
-            spaces(indent), "  public final ", type, " get", titleCase, "() {\n",
+            spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
              makeEnumGetter(field.getType().asEnum(),
                             offset, kj::str(defaultMaskParam), indent + 2) :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _get",toTitleCase(type),"Field(", offset, defaultMaskParam, ");\n"))),
+              kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final void set", titleCase, "(", type, " value) {\n",
+            spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
             (typeBody.which() == schema::Type::ENUM ?
              kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal());\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree() :
               kj::strTree(spaces(indent), "    _set",
-                          toTitleCase(type), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
+                          toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n")
       };
