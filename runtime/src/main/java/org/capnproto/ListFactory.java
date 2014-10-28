@@ -23,11 +23,10 @@ package org.capnproto;
 
 public abstract class ListFactory<Builder, Reader extends ListReader>
     implements ListBuilder.Factory<Builder>,
-    FromPointerBuilder<Builder>,
     FromPointerBuilderRefDefault<Builder>,
     SetPointerBuilder<Reader>,
     ListReader.Factory<Reader>,
-    FromPointerReader<Reader>,
+    PointerFactory<Builder, Reader>,
     FromPointerReaderRefDefault<Reader> {
 
     final byte elementSize;

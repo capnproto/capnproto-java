@@ -26,9 +26,8 @@ import java.nio.ByteBuffer;
 public final class Text {
     public static final class Factory implements
                                       FromPointerReaderBlobDefault<Reader>,
-                                      FromPointerReader<Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
-                                      FromPointerBuilder<Builder>,
+                                      PointerFactory<Builder, Reader>,
                                       SetPointerBuilder<Reader> {
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {

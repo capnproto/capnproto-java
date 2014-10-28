@@ -25,9 +25,8 @@ import java.nio.ByteBuffer;
 
 public final class Data {
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
-                                      FromPointerReader<Reader>,
+                                      PointerFactory<Builder, Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
-                                      FromPointerBuilder<Builder>,
                                       SetPointerBuilder<Reader> {
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {

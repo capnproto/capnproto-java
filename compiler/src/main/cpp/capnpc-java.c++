@@ -239,6 +239,22 @@ private:
     return kj::mv(result);
   }
 
+  kj::Vector<kj::String> getFactoryArguments(Schema leaf, Schema schema) {
+    auto node = schema.getProto();
+    kj::Vector<kj::String> result;
+    if (node.getScopeId() != 0) {
+      Schema parent = schemaLoader.get(node.getScopeId());
+      result = getFactoryArguments(leaf, parent);
+    }
+    auto brandArguments = leaf.getBrandArgumentsAtScope(node.getId());
+    auto parameters = node.getParameters();
+    for (int ii = 0; ii < parameters.size(); ++ii) {
+      result.add(makeFactoryArg(brandArguments[ii]));
+    }
+    return kj::mv(result);
+  }
+
+
   kj::String toUpperCase(kj::StringPtr name) {
     kj::Vector<char> result(name.size() + 4);
 
@@ -292,11 +308,11 @@ private:
         KJ_LOG(ERROR, suffix);
         auto typeArgs = getTypeArguments(structSchema, structSchema, kj::str(suffix));
         return kj::strTree(
-          javaFullName(structSchema), "<",
+          javaFullName(structSchema), suffix, "<",
           kj::StringTree(KJ_MAP(arg, typeArgs){
               return kj::strTree(arg);
             }, ", "),
-          ">", suffix
+          ">"
           );
       } else {
         return kj::strTree(javaFullName(type.asStruct()), suffix);
@@ -697,24 +713,53 @@ private:
       );
   }
 
-  kj::String makeListFactoryArg(capnp::Type type) {
-    auto elementType = type.asList().getElementType();
-    switch (elementType.which()) {
-    case schema::Type::STRUCT:
-      return kj::str(typeName(elementType, kj::str(".listFactory")));
-    case schema::Type::LIST:
-      return kj::str("new org.capnproto.ListList.Factory<",
-                     typeName(elementType, kj::str(".Builder")),", ",
-                     typeName(elementType, kj::str(".Reader")), ">(",
-                     makeListFactoryArg(elementType),
-                     ")");
-    case schema::Type::ENUM:
-      return kj::str("new org.capnproto.EnumList.Factory<",
-                     typeName(elementType), ">(",
-                     typeName(elementType, kj::str("")),
-                     ".values())");
+  kj::String makeFactoryArg(capnp::Type type) {
+    switch (type.which()) {
+    case schema::Type::TEXT : {
+      return kj::str("org.capnproto.Text.factory");
+    }
+    case schema::Type::DATA : {
+      return kj::str("org.capnproto.Data.factory");
+    }
+    case schema::Type::STRUCT : {
+      auto structSchema = type.asStruct();
+      auto node = structSchema.getProto();
+      if (node.getIsGeneric()) {
+        auto factoryArgs = getFactoryArguments(structSchema, structSchema);
+        return kj::strTree(
+          javaFullName(structSchema), ".newFactory(",
+          kj::StringTree(
+            KJ_MAP(arg, factoryArgs) {
+              return kj::strTree(arg);
+            }, ","),
+          ")"
+          ).flatten();
+      } else {
+        return kj::str(typeName(type, kj::str(".factory")));
+      }
+    }
+    case schema::Type::LIST: {
+      auto elementType = type.asList().getElementType();
+      switch (elementType.which()) {
+      case schema::Type::STRUCT:
+        return kj::str(typeName(elementType, kj::str(".listFactory")));
+      case schema::Type::LIST:
+        return kj::str("new org.capnproto.ListList.Factory<",
+                       typeName(elementType, kj::str(".Builder")),", ",
+                       typeName(elementType, kj::str(".Reader")), ">(",
+                       makeFactoryArg(elementType),
+                       ")");
+      case schema::Type::ENUM:
+        return kj::str("new org.capnproto.EnumList.Factory<",
+                       typeName(elementType), ">(",
+                       typeName(elementType, kj::str("")),
+                       ".values())");
+      default:
+        return kj::str(typeName(type, kj::str(".factory")));
+      }
+    }
     default:
-      return kj::str(typeName(type, kj::str(".factory")));
+      KJ_UNREACHABLE;
     }
 
   }
@@ -1020,6 +1065,8 @@ private:
       kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
+      auto factoryArg = makeFactoryArg(field.getType());
+
       return FieldText {
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDef),
@@ -1030,7 +1077,7 @@ private:
           spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ",
-          "_getPointerField(", type, ".factory,", offset,",", defaultParams, ");\n",
+          "_getPointerField(", factoryArg, ",", offset,",", defaultParams, ");\n",
           spaces(indent), "  }\n", "\n"),
 
         kj::strTree(
@@ -1038,16 +1085,16 @@ private:
           spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ",
-          "_getPointerField(", type, ".factory, ", offset, ", ", defaultParams, ");\n",
+          "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", type, ".Reader value) {\n",
+          spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
           unionDiscrim.set,
-          spaces(indent), "    _setPointerField(", type, ".factory,", offset, ", value);\n",
+          spaces(indent), "    _setPointerField(", factoryArg, ",", offset, ", value);\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final ", type, ".Builder init", titleCase, "() {\n",
+          spaces(indent), "  public final ", builderType, " init", titleCase, "() {\n",
           unionDiscrim.set,
           spaces(indent), "    return ",
-          "_initPointerField(", type, ".factory,",  offset, ", 0);\n",
+          "_initPointerField(", factoryArg, ",",  offset, ", 0);\n",
           spaces(indent), "  }\n"),
       };
 
@@ -1105,7 +1152,7 @@ private:
       kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
-      kj::String listFactory = makeListFactoryArg(field.getType());
+      kj::String listFactory = makeFactoryArg(field.getType());
       kj::String readerClass = kj::str(typeName(field.getType(), kj::str(".Reader")));
       kj::String builderClass = kj::str(typeName(field.getType(), kj::str(".Builder")));
 
@@ -1272,7 +1319,17 @@ private:
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",
-        (hasTypeParams ? kj::strTree() :
+        (hasTypeParams ?
+         kj::strTree(
+           spaces(indent), "  public static final ", factoryTypeParams, "Factory", factoryTypeParams, "\n",
+           spaces(indent), "    newFactory(", factoryArgs.flatten(), "){\n",
+           spaces(indent), "   return new Factory", factoryTypeParams, "(",
+           kj::StringTree(KJ_MAP(p, typeParamVec) {
+               return kj::strTree(p, "_Factory");
+             }, ", "),
+           ");\n",
+           spaces(indent), "  }\n"
+           ) :
          kj::strTree(
            spaces(indent), "  public static final Factory factory = new Factory();\n",
            spaces(indent), "  public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =\n",
@@ -1434,7 +1491,7 @@ private:
             spaces(indent), " (",
             "new org.capnproto.AnyPointer.Reader(Schemas.b_",
             kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff).getAs(",
-            makeListFactoryArg(type), "));\n")
+            makeFactoryArg(type), "));\n")
         };
       }
 
