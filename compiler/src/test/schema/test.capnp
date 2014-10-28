@@ -324,27 +324,28 @@ struct TestNewVersion {
 
 struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
-  rev @1 :TestGenerics(Text, List(UInt8));
-#  dub @2 :TestGenerics(Foo, Bar);
+  bar @1 :Bar;
+  rev @2 :TestGenerics(Text, List(UInt8));
+  dub @3 :TestGenerics(Foo, Bar);
 
-#  struct Inner {
-#    foo @0 :Foo;
-#    bar @1 :Bar;
-#  }
+  struct Inner {
+    foo @0 :Foo;
+    bar @1 :Bar;
+  }
 
-#  struct Inner2(Baz) {
-#    bar @0 :Bar;
-#    baz @1 :Baz;
-#    innerBound @2 :Inner;
-#    innerUnbound @3 :TestGenerics.Inner;
+  struct Inner2(Baz) {
+    bar @0 :Bar;
+    baz @1 :Baz;
+    innerBound @2 :Inner;
+    innerUnbound @3 :TestGenerics.Inner;
 
-#    struct DeepNest(Qux) {
-#      foo @0 :Foo;
-#      bar @1 :Bar;
-#      baz @2 :Baz;
-#      qux @3 :Qux;
-#    }
-#  }
+    struct DeepNest(Qux) {
+      foo @0 :Foo;
+      bar @1 :Bar;
+      baz @2 :Baz;
+      qux @3 :Qux;
+    }
+  }
 }
 
 

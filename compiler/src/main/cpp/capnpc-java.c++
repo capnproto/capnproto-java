@@ -305,7 +305,6 @@ private:
     case schema::Type::STRUCT: {
       auto structSchema = type.asStruct();
       if (structSchema.getProto().getIsGeneric()) {
-        KJ_LOG(ERROR, suffix);
         auto typeArgs = getTypeArguments(structSchema, structSchema, kj::str(suffix));
         return kj::strTree(
           javaFullName(structSchema), ".", suffix, "<",
@@ -1103,10 +1102,15 @@ private:
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
-          unionDiscrim.set,
-          spaces(indent), "    _setPointerField(", factoryArg, ",", offset, ", value);\n",
-          spaces(indent), "  }\n",
+
+          // TODO deal with generics here.
+          (field.getType().asStruct().getProto().getIsGeneric() ? kj::strTree() :
+           kj::strTree(
+             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+             unionDiscrim.set,
+             spaces(indent), "    _setPointerField(", factoryArg, ",", offset, ", value);\n",
+             spaces(indent), "  }\n")),
+
           spaces(indent), "  public final ", builderType, " init", titleCase, "() {\n",
           unionDiscrim.set,
           spaces(indent), "    return ",
@@ -1352,11 +1356,11 @@ private:
         kj::strTree(
           spaces(indent+1), "public static final class Builder", builderTypeParams, " extends org.capnproto.StructBuilder {\n",
           kj::strTree(KJ_MAP(p, typeParamVec) {
-              return kj::strTree(spaces(indent), "    final org.capnproto.FromPointerBuilder<", p, "_Builder> ", p, "_Factory;\n");
+              return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ?> ", p, "_Factory;\n");
             }),
           spaces(indent+1), "  Builder(",
           KJ_MAP(p, typeParamVec) {
-            return kj::strTree("org.capnproto.FromPointerBuilder<", p, "_Builder> ", p, "_Factory,");
+            return kj::strTree("org.capnproto.PointerFactory<", p, "_Builder, ?> ", p, "_Factory,");
           },
           "org.capnproto.SegmentBuilder segment, int data, int pointers,",
           "int dataSize, short pointerCount){\n",
@@ -1384,11 +1388,11 @@ private:
         kj::strTree(
           spaces(indent+1), "public static final class Reader", readerTypeParams, " extends org.capnproto.StructReader {\n",
           KJ_MAP(p, typeParamVec) {
-              return kj::strTree(spaces(indent), "    final org.capnproto.FromPointerReader<", p, "_Reader> ", p, "_Factory;\n");
+              return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory;\n");
             },
           spaces(indent+1), "  Reader(",
           KJ_MAP(p, typeParamVec) {
-            return kj::strTree("org.capnproto.FromPointerReader<", p, "_Reader> ", p, "_Factory,");
+            return kj::strTree("org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory,");
           },
           "org.capnproto.SegmentReader segment, int data, int pointers,",
           "int dataSize, short pointerCount, int nestingLimit){\n",

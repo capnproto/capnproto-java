@@ -22,11 +22,10 @@
 package org.capnproto;
 
 public abstract class StructFactory<Builder, Reader extends StructReader>
-    implements FromPointerBuilder<Builder>,
+    implements PointerFactory<Builder, Reader>,
     FromPointerBuilderRefDefault<Builder>,
     StructBuilder.Factory<Builder>,
     SetPointerBuilder<Reader>,
-    FromPointerReader<Reader>,
     FromPointerReaderRefDefault<Reader>,
     StructReader.Factory<Reader> {
     public final Reader fromPointerReaderRefDefault(SegmentReader segment, int pointer,

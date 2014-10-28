@@ -58,6 +58,23 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(reader);
   }
 
+  test("Generics") {
+    val message = new MessageBuilder();
+    val factory = TestGenerics.newFactory(TestAllTypes.factory, Text.factory);
+    val root = message.initRoot(factory);
+    TestUtil.initTestMessage(root.getFoo());
+    //root.getRev().setFoo(Text.factory, new Text.Reader("Hello"));
+    val bar = root.getRev().initBar(1);
+    bar.set(0, 11);
+    var boolList = root.getDub().getFoo().initBoolList(2);
+    boolList.set(0, false);
+    boolList.set(1, true);
+
+
+    TestUtil.checkTestMessage(root.getFoo());
+    TestUtil.checkTestMessage(root.asReader(factory).getFoo());
+  }
+
   test("Defaults") {
     val message = new MessageBuilder();
     val defaults = message.initRoot(TestDefaults.factory);
