@@ -298,8 +298,8 @@ private:
     case schema::Type::FLOAT32: return kj::strTree("float");
     case schema::Type::FLOAT64: return kj::strTree("double");
 
-    case schema::Type::TEXT: return kj::strTree(" org.capnproto.Text", suffix);
-    case schema::Type::DATA: return kj::strTree(" org.capnproto.Data", suffix);
+    case schema::Type::TEXT: return kj::strTree(" org.capnproto.Text.", suffix);
+    case schema::Type::DATA: return kj::strTree(" org.capnproto.Data.", suffix);
 
     case schema::Type::ENUM: return javaFullName(type.asEnum());
     case schema::Type::STRUCT: {
@@ -308,14 +308,14 @@ private:
         KJ_LOG(ERROR, suffix);
         auto typeArgs = getTypeArguments(structSchema, structSchema, kj::str(suffix));
         return kj::strTree(
-          javaFullName(structSchema), suffix, "<",
+          javaFullName(structSchema), ".", suffix, "<",
           kj::StringTree(KJ_MAP(arg, typeArgs){
               return kj::strTree(arg);
             }, ", "),
           ">"
           );
       } else {
-        return kj::strTree(javaFullName(type.asStruct()), suffix);
+        return kj::strTree(javaFullName(type.asStruct()), ".", suffix);
       }
     }
     case schema::Type::INTERFACE:
@@ -326,43 +326,43 @@ private:
       auto elementType = type.asList().getElementType();
       switch (elementType.which()) {
       case schema::Type::VOID:
-        return kj::strTree("org.capnproto.PrimitiveList.Void", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Void.", suffix);
       case schema::Type::BOOL:
-        return kj::strTree("org.capnproto.PrimitiveList.Boolean", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Boolean.", suffix);
       case schema::Type::INT8:
       case schema::Type::UINT8:
-        return kj::strTree("org.capnproto.PrimitiveList.Byte", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Byte.", suffix);
       case schema::Type::INT16:
       case schema::Type::UINT16:
-        return kj::strTree("org.capnproto.PrimitiveList.Short", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Short.", suffix);
       case schema::Type::INT32:
       case schema::Type::UINT32:
-        return kj::strTree("org.capnproto.PrimitiveList.Int", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Int.", suffix);
       case schema::Type::INT64:
       case schema::Type::UINT64:
-        return kj::strTree("org.capnproto.PrimitiveList.Long", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Long.", suffix);
       case schema::Type::FLOAT32:
-        return kj::strTree("org.capnproto.PrimitiveList.Float", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Float.", suffix);
       case schema::Type::FLOAT64:
-        return kj::strTree("org.capnproto.PrimitiveList.Double", suffix);
+        return kj::strTree("org.capnproto.PrimitiveList.Double.", suffix);
       case schema::Type::STRUCT:
       {
         auto inner = typeName(elementType, kj::str(suffix));
-        return kj::strTree("org.capnproto.StructList", suffix, "<", kj::mv(inner), ">");
+        return kj::strTree("org.capnproto.StructList.", suffix, "<", kj::mv(inner), ">");
       }
       case schema::Type::TEXT:
-        return kj::strTree( "org.capnproto.TextList", suffix);
+        return kj::strTree( "org.capnproto.TextList.", suffix);
       case schema::Type::DATA:
-        return kj::strTree( "org.capnproto.DataList", suffix);
+        return kj::strTree( "org.capnproto.DataList.", suffix);
       case schema::Type::ENUM:
       {
         auto inner = typeName(elementType, kj::str(suffix));
-        return kj::strTree("org.capnproto.EnumList", suffix, "<", kj::mv(inner), ">");
+        return kj::strTree("org.capnproto.EnumList.", suffix, "<", kj::mv(inner), ">");
       }
       case schema::Type::LIST:
       {
         auto inner = typeName(elementType, kj::str(suffix));
-        return kj::strTree("org.capnproto.ListList", suffix, "<", kj::mv(inner), ">");
+        return kj::strTree("org.capnproto.ListList.", suffix, "<", kj::mv(inner), ">");
       }
       case schema::Type::INTERFACE:
       case schema::Type::ANY_POINTER:
@@ -735,18 +735,20 @@ private:
           ")"
           ).flatten();
       } else {
-        return kj::str(typeName(type, kj::str(".factory")));
+        return kj::str(typeName(type, kj::str("factory")));
       }
     }
     case schema::Type::LIST: {
       auto elementType = type.asList().getElementType();
       switch (elementType.which()) {
-      case schema::Type::STRUCT:
-        return kj::str(typeName(elementType, kj::str(".listFactory")));
+      case schema::Type::STRUCT: {
+        // XXX
+        return kj::str(typeName(elementType, kj::str("listFactory")));
+      }
       case schema::Type::LIST:
         return kj::str("new org.capnproto.ListList.Factory<",
-                       typeName(elementType, kj::str(".Builder")),", ",
-                       typeName(elementType, kj::str(".Reader")), ">(",
+                       typeName(elementType, kj::str("Builder")),", ",
+                       typeName(elementType, kj::str("Reader")), ">(",
                        makeFactoryArg(elementType),
                        ")");
       case schema::Type::ENUM:
@@ -755,7 +757,7 @@ private:
                        typeName(elementType, kj::str("")),
                        ".values())");
       default:
-        return kj::str(typeName(type, kj::str(".factory")));
+        return kj::str(typeName(type, kj::str("factory")));
       }
     }
     default:
@@ -826,8 +828,8 @@ private:
 
     FieldKind kind = FieldKind::PRIMITIVE;
     kj::String ownedType;
-    kj::String builderType = typeName(field.getType(), kj::str(".Builder")).flatten();
-    kj::String readerType = typeName(field.getType(), kj::str(".Reader")).flatten();
+    kj::String builderType = typeName(field.getType(), kj::str("Builder")).flatten();
+    kj::String readerType = typeName(field.getType(), kj::str("Reader")).flatten();
     kj::String defaultMask;    // primitives only
     size_t defaultOffset = 0;    // pointers only: offset of the default value within the schema.
     size_t defaultSize = 0;      // blobs only: byte size of the default value.
@@ -1419,7 +1421,7 @@ private:
     auto proto = schema.getProto();
     auto constProto = proto.getConst();
     auto type = schema.getType();
-    auto typeName_ = typeName(type).flatten();
+    auto typeName_ = typeName(type, kj::str("Reader")).flatten();
     auto upperCase = toUpperCase(name);
 
     switch (type.which()) {
@@ -1468,21 +1470,20 @@ private:
         return ConstText {
           true,
             kj::strTree(spaces(indent),
-                        "public static final ", typeName_, ".Reader ", upperCase, " =\n",
+                        "public static final ", typeName_, " ", upperCase, " =\n",
                         spaces(indent), "  ",
                         "new org.capnproto.AnyPointer.Reader(Schemas.b_",
                         kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff).getAs(",
-                        typeName_, ".factory);\n")
+                        makeFactoryArg(type), ");\n")
         };
       }
 
       case schema::Value::LIST: {
-        kj::String constType = typeName(type, kj::str(".Reader")).flatten();;
         return ConstText {
           true,
           kj::strTree(
             spaces(indent),
-            "public static final ", constType, ' ', upperCase, " =\n",
+            "public static final ", typeName_, ' ', upperCase, " =\n",
             spaces(indent), " (",
             "new org.capnproto.AnyPointer.Reader(Schemas.b_",
             kj::hex(proto.getId()), ",", schema.getValueSchemaOffset(), ",0x7fffffff).getAs(",
