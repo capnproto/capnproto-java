@@ -1142,7 +1142,7 @@ private:
       }, ", ");
 
     kj::StringTree factoryMembers = kj::strTree(KJ_MAP(p, typeParamVec) {
-          return kj::strTree(spaces(indent), "    org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory;\n");
+          return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory;\n");
       });
 
     return StructText {
@@ -1155,9 +1155,7 @@ private:
 
         spaces(indent), "  public static final class Factory", builderTypeParams,
         " extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
-
         factoryMembers.flatten(),
-
         spaces(indent), "    public Factory(",
         factoryArgs.flatten(),
         ") {\n",
@@ -1169,7 +1167,11 @@ private:
         spaces(indent),
         "    public final Reader", readerTypeParams, " constructReader(org.capnproto.SegmentReader segment, int data,",
         "int pointers, int dataSize, short pointerCount, int nestingLimit) {\n",
-        spaces(indent), "      return new Reader", readerTypeParams, "(segment,data,pointers,dataSize,pointerCount,nestingLimit);\n",
+        spaces(indent), "      return new Reader", readerTypeParams, "(",
+        KJ_MAP(p, typeParamVec) {
+          return kj::strTree(p, "_Factory, ");
+        },
+        "segment,data,pointers,dataSize,pointerCount,nestingLimit);\n",
         spaces(indent), "    }\n",
         spaces(indent), "    public final Builder", builderTypeParams, " constructBuilder(org.capnproto.SegmentBuilder segment, int data,",
         "int pointers, int dataSize, short pointerCount) {\n",
@@ -1209,7 +1211,11 @@ private:
           spaces(indent+1), "  }\n",
           makeWhich(schema, indent+2),
           spaces(indent+1), "  public final Reader", readerTypeParams, " asReader() {\n",
-          spaces(indent+1), "    return new Reader", readerTypeParams, "(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);\n",
+          spaces(indent+1), "    return new Reader", readerTypeParams, "(",
+          KJ_MAP(p, typeParamVec) {
+              return kj::strTree(p, "_Factory, ");
+          },
+          "segment, data, pointers, dataSize, pointerCount, 0x7fffffff);\n",
           spaces(indent+1), "  }\n",
           KJ_MAP(f, fieldTexts) { return kj::mv(f.builderMethodDecls); },
           spaces(indent+1), "}\n",
@@ -1217,9 +1223,19 @@ private:
 
         kj::strTree(
           spaces(indent+1), "public static final class Reader", readerTypeParams, " extends org.capnproto.StructReader {\n",
-          spaces(indent+1), "  Reader(org.capnproto.SegmentReader segment, int data, int pointers,",
+          KJ_MAP(p, typeParamVec) {
+              return kj::strTree(spaces(indent), "    final org.capnproto.FromPointerReader<", p, "_Reader> ", p, "_Factory;\n");
+            },
+          spaces(indent+1), "  Reader(",
+          KJ_MAP(p, typeParamVec) {
+            return kj::strTree("org.capnproto.FromPointerReader<", p, "_Reader> ", p, "_Factory,");
+          },
+          "org.capnproto.SegmentReader segment, int data, int pointers,",
           "int dataSize, short pointerCount, int nestingLimit){\n",
           spaces(indent+1), "    super(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
+          KJ_MAP(p, typeParamVec) {
+            return kj::strTree(spaces(indent), "      this.", p, "_Factory = ", p, "_Factory;\n");
+          },
           spaces(indent+1), "  }\n",
           "\n",
           makeWhich(schema, indent+2),
