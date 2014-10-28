@@ -66,7 +66,9 @@ class EncodingSuite extends FunSuite {
     //root.getRev().setFoo(Text.factory, new Text.Reader("Hello"));
     val bar = root.getRev().initBar(1);
     bar.set(0, 11);
-    var boolList = root.getDub().getFoo().initBoolList(2);
+    val dubFoo = root.getDub().getFoo()
+    dubFoo.setInt8Field(111);
+    var boolList = dubFoo.initBoolList(2);
     boolList.set(0, false);
     boolList.set(1, true);
 
