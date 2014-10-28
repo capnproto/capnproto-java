@@ -370,9 +370,16 @@ private:
       }
       KJ_UNREACHABLE;
     }
-    case schema::Type::ANY_POINTER:
-      // Not used.
-      return kj::strTree();
+    case schema::Type::ANY_POINTER: {
+      KJ_IF_MAYBE(brandParam, type.getBrandParameter()) {
+        return
+          kj::strTree(schemaLoader.get(brandParam->scopeId).getProto().getParameters()[brandParam->index].getName(),
+                      "_", kj::hex(brandParam->scopeId), "_", suffix);
+
+      } else {
+        return kj::strTree("org.capnproto.AnyPointer.", suffix);
+      }
+    }
     }
     KJ_UNREACHABLE;
   }
@@ -720,6 +727,16 @@ private:
     }
     case schema::Type::DATA : {
       return kj::str("org.capnproto.Data.factory");
+    }
+    case schema::Type::ANY_POINTER : {
+      KJ_IF_MAYBE(brandParam, type.getBrandParameter()) {
+        return
+          kj::str(schemaLoader.get(brandParam->scopeId).getProto().getParameters()[brandParam->index].getName(),
+                  "_", kj::hex(brandParam->scopeId), "_Factory");
+
+      } else {
+        return kj::str("org.capnproto.AnyPointer.factory");
+      }
     }
     case schema::Type::STRUCT : {
       auto structSchema = type.asStruct();
@@ -1530,14 +1547,14 @@ private:
     kj::Vector<NodeText> nestedTexts(proto.getNestedNodes().size());
     for (auto nested: proto.getNestedNodes()) {
       nestedTexts.add(makeNodeText(
-                                   subScope, nested.getName(), schemaLoader.get(nested.getId()), indent + 1));
+                                   subScope, nested.getName(), schemaLoader.getUnbound(nested.getId()), indent + 1));
     };
 
     if (proto.isStruct()) {
       for (auto field: proto.getStruct().getFields()) {
         if (field.isGroup()) {
           nestedTexts.add(makeNodeText(subScope, toTitleCase(field.getName()),
-              schemaLoader.get(field.getGroup().getTypeId()), indent + 1));
+              schemaLoader.getUnbound(field.getGroup().getTypeId()), indent + 1));
         }
       }
     } else if (proto.isInterface()) {
@@ -1769,7 +1786,7 @@ private:
     }
 
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
-      return makeNodeText("", nested.getName(), schemaLoader.get(nested.getId()), 1);
+      return makeNodeText("", nested.getName(), schemaLoader.getUnbound(nested.getId()), 1);
     };
 
     kj::String separator = kj::str("// ", kj::repeat('=', 87), "\n");

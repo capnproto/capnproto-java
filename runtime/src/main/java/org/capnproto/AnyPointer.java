@@ -35,6 +35,7 @@ public final class AnyPointer {
             return result;
         }
     }
+    public static final Factory factory = new Factory();
 
     public final static class Reader {
         final SegmentReader segment;
