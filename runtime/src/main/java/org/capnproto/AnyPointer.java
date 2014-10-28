@@ -22,6 +22,14 @@
 package org.capnproto;
 
 public final class AnyPointer {
+    public static final class Factory implements PointerFactory<Builder, Reader> {
+        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+            return new Reader(segment, pointer, nestingLimit);
+        }
+        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+            return new Builder(segment, pointer);
+        }
+    }
 
     public final static class Reader {
         final SegmentReader segment;
