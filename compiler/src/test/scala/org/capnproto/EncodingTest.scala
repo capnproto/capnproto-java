@@ -82,6 +82,22 @@ class EncodingSuite extends FunSuite {
     barReader.get(0) should equal (11);
   }
 
+  test("UseGenerics") {
+    val message = new MessageBuilder();
+    val root = message.initRoot(TestUseGenerics.factory);
+    {
+      val message2 = new MessageBuilder();
+      val factory2 = TestGenerics.newFactory(AnyPointer.factory, AnyPointer.factory);
+      val root2 = message2.initRoot(factory2);
+      val dub2 = root2.initDub().setFoo(Text.factory, new Text.Reader("foobar"));
+
+      root.setUnspecified(factory2, root2.asReader(factory2));
+    }
+
+    val rootReader = root.asReader();
+    root.getUnspecified().getDub().getFoo().toString() should equal ("foobar");
+  }
+
   test("Defaults") {
     val message = new MessageBuilder();
     val defaults = message.initRoot(TestDefaults.factory);

@@ -1049,6 +1049,7 @@ private:
       kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
+      auto typeParamVec = getTypeParameters(field.getContainingStruct());
       auto factoryArg = makeFactoryArg(field.getType());
 
       return FieldText {
@@ -1072,8 +1073,22 @@ private:
           "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
 
-          // TODO deal with generics here.
-          (field.getType().asStruct().getProto().getIsGeneric() ? kj::strTree() :
+          (field.getType().asStruct().getProto().getIsGeneric() ?
+           kj::strTree(
+             spaces(indent), "  public final ",
+             (typeParamVec.size() == 0 ? kj::strTree() :
+              kj::strTree(
+                "<",
+                kj::StringTree(KJ_MAP(p, typeParamVec) {
+                    return kj::strTree(p, "_Reader");
+                  }, ", "),
+                "> ")),
+             "void set", titleCase,
+             "(org.capnproto.SetPointerBuilder<", builderType, ", ", readerType, "> factory, ", readerType, " value) {\n",
+             unionDiscrim.set,
+             spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
+             spaces(indent), "  }\n"
+             ) :
            kj::strTree(
              spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
              unionDiscrim.set,
