@@ -24,7 +24,7 @@ package org.capnproto;
 public abstract class ListFactory<Builder, Reader extends ListReader>
     implements ListBuilder.Factory<Builder>,
     FromPointerBuilderRefDefault<Builder>,
-    SetPointerBuilder<Reader>,
+    SetPointerBuilder<Builder, Reader>,
     ListReader.Factory<Reader>,
     PointerFactory<Builder, Reader>,
     FromPointerReaderRefDefault<Reader> {

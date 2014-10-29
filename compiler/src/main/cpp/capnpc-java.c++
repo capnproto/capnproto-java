@@ -1031,6 +1031,16 @@ private:
             unionDiscrim.set,
             spaces(indent), "    return _initPointerField(", factoryArg, ", ", offset, ", size);\n",
             spaces(indent), "  }\n",
+
+            (field.getType().getBrandParameter() == nullptr ? kj::strTree() :
+             kj::strTree(spaces(indent), "  public <", readerType, "> void set", titleCase,
+                         "(org.capnproto.SetPointerBuilder<", builderType, ",", readerType, "> factory,",
+                         readerType, " value) {\n",
+                         unionDiscrim.set,
+                         spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
+                         spaces(indent), "  }\n")),
+
+
             "\n"),
       };
 

@@ -27,7 +27,7 @@ public final class Data {
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
                                       PointerFactory<Builder, Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
-                                      SetPointerBuilder<Reader> {
+                                      SetPointerBuilder<Builder, Reader> {
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);

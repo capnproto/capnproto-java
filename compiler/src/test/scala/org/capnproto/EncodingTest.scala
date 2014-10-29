@@ -63,18 +63,23 @@ class EncodingSuite extends FunSuite {
     val factory = TestGenerics.newFactory(TestAllTypes.factory, Text.factory);
     val root = message.initRoot(factory);
     TestUtil.initTestMessage(root.getFoo());
-    //root.getRev().setFoo(Text.factory, new Text.Reader("Hello"));
-    val bar = root.getRev().initBar(1);
+    root.getDub().setFoo(Text.factory, new Text.Reader("Hello"));
+    val bar = root.getDub().initBar(1);
     bar.set(0, 11);
-    val dubFoo = root.getDub().getFoo()
-    dubFoo.setInt8Field(111);
-    var boolList = dubFoo.initBoolList(2);
+    val revBar = root.getRev().getBar()
+    revBar.setInt8Field(111);
+    var boolList = revBar.initBoolList(2);
     boolList.set(0, false);
     boolList.set(1, true);
 
-
     TestUtil.checkTestMessage(root.getFoo());
-    TestUtil.checkTestMessage(root.asReader(factory).getFoo());
+    val rootReader = root.asReader(factory);
+    TestUtil.checkTestMessage(rootReader.getFoo());
+    val dubReader = root.getDub();
+    dubReader.getFoo().toString() should equal ("Hello");
+    val barReader = dubReader.getBar();
+    barReader.size() should equal (1);
+    barReader.get(0) should equal (11);
   }
 
   test("Defaults") {

@@ -21,6 +21,6 @@
 
 package org.capnproto;
 
-public interface SetPointerBuilder<Reader> {
+public interface SetPointerBuilder<Builder, Reader> {
     void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value);
 }

@@ -25,7 +25,7 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
     implements PointerFactory<Builder, Reader>,
     FromPointerBuilderRefDefault<Builder>,
     StructBuilder.Factory<Builder>,
-    SetPointerBuilder<Reader>,
+    SetPointerBuilder<Builder, Reader>,
     FromPointerReaderRefDefault<Reader>,
     StructReader.Factory<Reader> {
     public final Reader fromPointerReaderRefDefault(SegmentReader segment, int pointer,

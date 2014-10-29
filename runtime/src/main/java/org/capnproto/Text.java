@@ -28,7 +28,7 @@ public final class Text {
                                       FromPointerReaderBlobDefault<Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
                                       PointerFactory<Builder, Reader>,
-                                      SetPointerBuilder<Reader> {
+                                      SetPointerBuilder<Builder, Reader> {
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readTextPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);

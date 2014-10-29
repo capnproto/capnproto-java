@@ -325,8 +325,8 @@ struct TestNewVersion {
 struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
   bar @1 :Bar;
-  rev @2 :TestGenerics(Text, List(UInt8));
-  dub @3 :TestGenerics(Foo, Bar);
+  rev @2 :TestGenerics(Bar, Foo);
+  dub @3 :TestGenerics(Text, List(UInt8));
 
   struct Inner {
     foo @0 :Foo;
@@ -346,6 +346,33 @@ struct TestGenerics(Foo, Bar) {
       qux @3 :Qux;
     }
   }
+}
+
+struct TestGenericsWrapper(Foo, Bar) {
+  value @0 :TestGenerics(Foo, Bar);
+}
+
+struct TestGenericsWrapper2 {
+  value @0 :TestGenericsWrapper(Text, TestAllTypes);
+}
+
+struct TestUseGenerics  {
+  basic @0 :TestGenerics(TestAllTypes, TestAnyPointer);
+  inner @1 :TestGenerics(TestAllTypes, TestAnyPointer).Inner;
+  inner2 @2 :TestGenerics(TestAllTypes, TestAnyPointer).Inner2(Text);
+  unspecified @3 :TestGenerics;
+  unspecifiedInner @4 :TestGenerics.Inner2(Text);
+  wrapper @8 :TestGenericsWrapper(TestAllTypes, TestAnyPointer);
+
+  default @5 :TestGenerics(TestAllTypes, Text) =
+      (foo = (int16Field = 123), rev = (foo = "text", rev = (foo = (int16Field = 321))));
+  defaultInner @6 :TestGenerics(TestAllTypes, Text).Inner =
+      (foo = (int16Field = 123), bar = "text");
+  defaultUser @7 :TestUseGenerics = (basic = (foo = (int16Field = 123)));
+  defaultWrapper @9 :TestGenericsWrapper(Text, TestAllTypes) =
+      (value = (foo = "text", rev = (foo = (int16Field = 321))));
+  defaultWrapper2 @10 :TestGenericsWrapper2 =
+      (value = (value = (foo = "text", rev = (foo = (int16Field = 321)))));
 }
 
 

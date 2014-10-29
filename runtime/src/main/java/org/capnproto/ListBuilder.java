@@ -138,7 +138,7 @@ public class ListBuilder {
             elementCount);
     }
 
-    protected final <Reader> void _setPointerElement(SetPointerBuilder<Reader> factory, int index, Reader value) {
+    protected final <Builder, Reader> void _setPointerElement(SetPointerBuilder<Builder, Reader> factory, int index, Reader value) {
         factory.setPointerBuilder(this.segment,
                                   (this.ptr + (index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
                                   value);

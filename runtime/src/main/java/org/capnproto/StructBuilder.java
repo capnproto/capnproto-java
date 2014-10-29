@@ -194,8 +194,7 @@ public class StructBuilder {
         return factory.initFromPointerBuilder(this.segment, this.pointers + index, elementCount);
     }
 
-    protected final <Reader> void _setPointerField(SetPointerBuilder<Reader> factory, int index, Reader value) {
+    protected final <Builder, Reader> void _setPointerField(SetPointerBuilder<Builder, Reader> factory, int index, Reader value) {
         factory.setPointerBuilder(this.segment, this.pointers + index, value);
     }
-
 }
