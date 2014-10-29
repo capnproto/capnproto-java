@@ -35,7 +35,7 @@ but we have not embarked on that project yet.
 
 ## Installation
 
-You will need to [install](http://capnproto.org/install.html) the Cap'n Proto schema compiler.
+You will need to [install](http://capnproto.org/install.html#building-from-git-with-autotools) the Cap'n Proto schema compiler.
 
 We use [sbt](http://scala-sbt.org) for building and testing.
 Running `sbt compile` at the top-level directory should build `capnpc-java`,
