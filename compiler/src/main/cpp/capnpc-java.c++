@@ -995,49 +995,9 @@ private:
       KJ_FAIL_REQUIRE("interfaces unimplemented");
 
     } else if (kind == FieldKind::ANY_POINTER) {
-      if (typeBody.getAnyPointer().isParameter()) {
-        auto brandParam = typeBody.getAnyPointer().getParameter();
-        auto structSchema = field.getContainingStruct();
-        auto typeParam =
-          kj::strTree(schemaLoader.get(brandParam.getScopeId()).getProto().getParameters()[brandParam.getParameterIndex()].getName(),
-                      "_", kj::hex(brandParam.getScopeId()));;
 
-        return FieldText {
-          kj::strTree(
-            kj::mv(unionDiscrim.readerIsDef),
-            spaces(indent), "  public boolean has", titleCase, "() {\n",
-            unionDiscrim.has,
-            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
-            spaces(indent), "  }\n",
+      auto factoryArg = makeFactoryArg(field.getType());
 
-            spaces(indent), "  public ", typeParam.flatten(), "_Reader get", titleCase, "() {\n",
-            unionDiscrim.check,
-            spaces(indent), "    return _getPointerField(", typeParam.flatten(), "_Factory, ", offset, ");\n",
-            spaces(indent), "  }\n"),
-
-            kj::strTree(
-              kj::mv(unionDiscrim.builderIsDef),
-              spaces(indent), "  public final boolean has", titleCase, "() {\n",
-              spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
-              spaces(indent), "  }\n",
-
-              spaces(indent), "  public ", typeParam.flatten(), "_Builder get", titleCase, "() {\n",
-              unionDiscrim.check,
-              spaces(indent), "    return _getPointerField(", typeParam.flatten(), "_Factory, ", offset, ");\n",
-              spaces(indent), "  }\n",
-
-              spaces(indent), "  public ", typeParam.flatten(), "_Builder init", titleCase, "() {\n",
-              unionDiscrim.set,
-              spaces(indent), "    return _initPointerField(", typeParam.flatten(), "_Factory, ", offset, ", 0);\n",
-              spaces(indent), "  }\n",
-
-              spaces(indent), "  public ", typeParam.flatten(), "_Builder init", titleCase, "(int size) {\n",
-              unionDiscrim.set,
-              spaces(indent), "    return _initPointerField(", typeParam.flatten(), "_Factory, ", offset, ", size);\n",
-              spaces(indent), "  }\n",
-              "\n"),
-          };
-      };
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDef),
@@ -1046,10 +1006,9 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public org.capnproto.AnyPointer.Reader get", titleCase, "() {\n",
+            spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Reader(this.segment, this.pointers + ", offset,
-            ", this.nestingLimit);\n",
+            spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
@@ -1058,19 +1017,19 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public org.capnproto.AnyPointer.Builder get", titleCase, "() {\n",
+            spaces(indent), "  public ", builderType, " get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new org.capnproto.AnyPointer.Builder(this.segment, this.pointers + ",
-            offset, ");\n",
+            spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public org.capnproto.AnyPointer.Builder init", titleCase, "() {\n",
+            spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
             unionDiscrim.set,
-            spaces(indent), "    org.capnproto.AnyPointer.Builder result =\n",
-            spaces(indent), "      new org.capnproto.AnyPointer.Builder(this.segment, this.pointers +",
-            offset, ");\n",
-            spaces(indent), "    result.clear();\n",
-            spaces(indent), "    return result;\n",
+            spaces(indent), "    return _initPointerField(", factoryArg, ", ", offset, ", 0);\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public ", builderType, " init", titleCase, "(int size) {\n",
+            unionDiscrim.set,
+            spaces(indent), "    return _initPointerField(", factoryArg, ", ", offset, ", size);\n",
             spaces(indent), "  }\n",
             "\n"),
       };
