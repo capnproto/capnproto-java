@@ -373,6 +373,8 @@ struct TestUseGenerics  {
       (value = (foo = "text", rev = (foo = (int16Field = 321))));
   defaultWrapper2 @10 :TestGenericsWrapper2 =
       (value = (value = (foo = "text", rev = (foo = (int16Field = 321)))));
+
+  listOfGenerics @11 :List(TestGenerics(TestAllTypes, Text));
 }
 
 

@@ -298,8 +298,8 @@ private:
     case schema::Type::FLOAT32: return kj::strTree("float");
     case schema::Type::FLOAT64: return kj::strTree("double");
 
-    case schema::Type::TEXT: return kj::strTree(" org.capnproto.Text.", suffix);
-    case schema::Type::DATA: return kj::strTree(" org.capnproto.Data.", suffix);
+    case schema::Type::TEXT: return kj::strTree("org.capnproto.Text.", suffix);
+    case schema::Type::DATA: return kj::strTree("org.capnproto.Data.", suffix);
 
     case schema::Type::ENUM: return javaFullName(type.asEnum());
     case schema::Type::STRUCT: {
@@ -758,8 +758,25 @@ private:
       auto elementType = type.asList().getElementType();
       switch (elementType.which()) {
       case schema::Type::STRUCT: {
-        // XXX
-        return kj::str(typeName(elementType, kj::str("listFactory")));
+        auto elementStructSchema = elementType.asStruct();
+        auto elementNode = elementStructSchema.getProto();
+        if (elementNode.getIsGeneric()) {
+          auto factoryArgs = getFactoryArguments(elementStructSchema, elementStructSchema);
+          return kj::strTree(
+            "new org.capnproto.StructList.Factory<",
+            typeName(elementType, kj::str("Builder")), ", ",
+            typeName(elementType, kj::str("Reader")),
+            ">(",
+            javaFullName(elementStructSchema), ".newFactory(",
+            kj::StringTree(
+              KJ_MAP(arg, factoryArgs) {
+                return kj::strTree(arg);
+              }, ","),
+            "))"
+            ).flatten();
+        } else {
+          return kj::str(typeName(elementType, kj::str("listFactory")));
+        }
       }
       case schema::Type::LIST:
         return kj::str("new org.capnproto.ListList.Factory<",
