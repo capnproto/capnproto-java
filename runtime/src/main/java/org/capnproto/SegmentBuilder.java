@@ -63,4 +63,9 @@ public final class SegmentBuilder extends SegmentReader {
     public final BuilderArena getArena() {
         return (BuilderArena)this.arena;
     }
+
+    public final boolean isWritable() {
+        // TODO support external non-writable segments
+        return true;
+    }
 }

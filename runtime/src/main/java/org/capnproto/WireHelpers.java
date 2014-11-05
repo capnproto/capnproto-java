@@ -166,9 +166,54 @@ final class WireHelpers {
         //# about to be overwritten making the target object no longer
         //# reachable.
 
-        // TODO
+        //# We shouldn't zero out external data linked into the message.
+        if (!segment.isWritable()) return;
+
+        long ref = segment.get(refOffset);
+
+        switch (WirePointer.kind(ref)) {
+        case WirePointer.STRUCT:
+        case WirePointer.LIST:
+            zeroObject(segment, ref, WirePointer.target(refOffset, ref));
+            break;
+        case WirePointer.FAR: {
+            segment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
+            if (!segment.isWritable()) { //# Don't zero external data.
+                // TODO
+
+            }
+            break;
+        }
+        case WirePointer.OTHER: {
+        }
+        }
     }
 
+    static void zeroObject(SegmentBuilder segment, long tag, int ptr) {
+        //# We shouldn't zero out external data linked into the message.
+        if (!segment.isWritable()) return;
+
+        switch (WirePointer.kind(tag)) {
+        case WirePointer.STRUCT: {
+            int pointerSection = ptr + StructPointer.dataSize(tag);
+            int count = StructPointer.ptrCount(tag);
+            for (int ii = 0; ii < count; ++ii) {
+                zeroObject(segment, pointerSection + ii);
+            }
+            memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte)0,
+                   StructPointer.wordSize(tag) * Constants.BYTES_PER_WORD);
+            break;
+        }
+        case WirePointer.LIST: {
+            // TODO
+            break;
+        }
+        case WirePointer.FAR:
+            throw new Error("Unexpected FAR pointer.");
+        case WirePointer.OTHER:
+            throw new Error("Unexpected OTHER pointer.");
+        }
+    }
 
     static <T> T initStructPointer(StructBuilder.Factory<T> factory,
                                    int refOffset,
@@ -622,6 +667,13 @@ final class WireHelpers {
                 }
             }
             return allocation.segment;
+        }
+    }
+
+    static void memset(ByteBuffer dstBuffer, int dstByteOffset, byte value, int length) {
+        // TODO we can probably do this faster
+        for (int ii = dstByteOffset; ii < dstByteOffset + length; ++ii) {
+            dstBuffer.put(ii, value);
         }
     }
 
