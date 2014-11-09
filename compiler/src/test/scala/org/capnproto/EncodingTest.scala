@@ -50,12 +50,40 @@ class EncodingSuite extends FunSuite {
     TestUtil.initTestMessage(allTypes);
 
     val message2 = new MessageBuilder();
-    val allTypes2 = message.initRoot(TestAllTypes.factory);
+    val allTypes2 = message2.initRoot(TestAllTypes.factory);
 
     allTypes2.setStructField(allTypes.asReader());
     TestUtil.checkTestMessage(allTypes2.getStructField());
     val reader = allTypes2.asReader().getStructField();
     TestUtil.checkTestMessage(reader);
+  }
+
+  test("Zeroing") {
+    val message = new MessageBuilder();
+    val allTypes = message.initRoot(TestAllTypes.factory);
+
+    val structList = allTypes.initStructList(3);
+    TestUtil.initTestMessage(structList.get(0));
+
+    val structField = allTypes.initStructField();
+    TestUtil.initTestMessage(structField);
+
+    TestUtil.initTestMessage(structList.get(1));
+    TestUtil.initTestMessage(structList.get(2));
+    TestUtil.checkTestMessage(structList.get(0));
+    allTypes.initStructList(0);
+
+    TestUtil.checkTestMessage(allTypes.getStructField());
+    val allTypesReader = allTypes.asReader();
+    TestUtil.checkTestMessage(allTypesReader.getStructField());
+
+    val any = message.initRoot(AnyPointer.factory);
+    val segments = message.getSegmentsForOutput();
+    for (segment <- segments) {
+      for (jj <- 0 to segment.limit - 1) {
+        segment.get(jj) should equal (0);
+      }
+    }
   }
 
   test("Generics") {
