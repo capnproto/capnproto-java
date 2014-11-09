@@ -178,13 +178,27 @@ final class WireHelpers {
             break;
         case WirePointer.FAR: {
             segment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
-            if (!segment.isWritable()) { //# Don't zero external data.
-                // TODO
+            if (segment.isWritable()) { //# Don't zero external data.
+                int padOffset = FarPointer.positionInSegment(ref);
+                long pad = segment.get(padOffset);
+                if (FarPointer.isDoubleFar(ref)) {
+                    SegmentBuilder otherSegment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
+                    if (otherSegment.isWritable()) {
+                        zeroObject(otherSegment, padOffset + 1, FarPointer.positionInSegment(pad));
+                    }
+                    segment.buffer.putLong(padOffset * 8, 0L);
+                    segment.buffer.putLong((padOffset + 1) * 8, 0L);
 
+                } else {
+                    zeroObject(segment, padOffset);
+                    segment.buffer.putLong(padOffset * 8, 0L);
+                }
             }
+
             break;
         }
         case WirePointer.OTHER: {
+            // TODO
         }
         }
     }
@@ -205,7 +219,51 @@ final class WireHelpers {
             break;
         }
         case WirePointer.LIST: {
-            // TODO
+            switch (ListPointer.elementSize(tag)) {
+            case ElementSize.VOID: break;
+            case ElementSize.BIT:
+            case ElementSize.BYTE:
+            case ElementSize.TWO_BYTES:
+            case ElementSize.FOUR_BYTES:
+            case ElementSize.EIGHT_BYTES: {
+                memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte)0,
+                       roundBitsUpToWords(
+                           ListPointer.elementCount(tag) *
+                           ElementSize.dataBitsPerElement(ListPointer.elementSize(tag))) * Constants.BYTES_PER_WORD);
+                break;
+            }
+            case ElementSize.POINTER: {
+                int count = ListPointer.elementCount(tag);
+                for (int ii = 0; ii < count; ++ii) {
+                    zeroObject(segment, ptr + ii);
+                }
+                memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte)0,
+                       count * Constants.BYTES_PER_WORD);
+                break;
+            }
+            case ElementSize.INLINE_COMPOSITE: {
+                long elementTag = segment.get(ptr);
+                if (WirePointer.kind(elementTag) != WirePointer.STRUCT) {
+                    throw new Error("Don't know how to handle non-STRUCT inline composite.");
+                }
+                int dataSize = StructPointer.dataSize(elementTag);
+                int pointerCount = StructPointer.ptrCount(elementTag);
+
+                int pos = ptr + Constants.POINTER_SIZE_IN_WORDS;
+                int count = WirePointer.inlineCompositeListElementCount(elementTag);
+                for (int ii = 0; ii < count; ++ii) {
+                    pos += dataSize;
+                    for (int jj = 0; jj < pointerCount; ++jj) {
+                        zeroObject(segment, pos);
+                        pos += Constants.POINTER_SIZE_IN_WORDS;
+                    }
+                }
+
+                memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte)0,
+                       (StructPointer.wordSize(elementTag) * count + Constants.POINTER_SIZE_IN_WORDS) * Constants.BYTES_PER_WORD);
+                break;
+            }
+            }
             break;
         }
         case WirePointer.FAR:
