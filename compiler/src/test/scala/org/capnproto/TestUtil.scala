@@ -65,12 +65,20 @@ object TestUtil {
       subBuilder.setFloat32Field(-1.25e-10f);
       subBuilder.setFloat64Field(345);
       subBuilder.setTextField(new Text.Reader("baz"));
-
+      subBuilder.setDataField(data("qux"));
       {
         val subSubBuilder = subBuilder.initStructField();
         subSubBuilder.setTextField(new Text.Reader("nested"));
         subSubBuilder.initStructField().setTextField(new Text.Reader("really nested"));
       }
+      subBuilder.setEnumField(TestEnum.BAZ);
+
+      val boolList = subBuilder.initBoolList(5);
+      boolList.set(0, false);
+      boolList.set(1, true);
+      boolList.set(2, false);
+      boolList.set(3, true);
+      boolList.set(4, true);
     }
 
     builder.setEnumField(TestEnum.CORGE);
@@ -139,7 +147,18 @@ object TestUtil {
         val subSubBuilder = subBuilder.getStructField();
         assert(subSubBuilder.getTextField().toString() == "nested")
       }
+
+      subBuilder.getEnumField() should equal (TestEnum.BAZ);
+
+      val boolList = subBuilder.getBoolList();
+      assert(boolList.get(0) == false);
+      assert(boolList.get(1) == true);
+      assert(boolList.get(2) == false);
+      assert(boolList.get(3) == true);
+      assert(boolList.get(4) == true);
+
     }
+    builder.getEnumField() should equal (TestEnum.CORGE);
 
     assert(builder.getVoidList().size() == 6);
 
@@ -206,6 +225,13 @@ object TestUtil {
         val subSubReader = subReader.getStructField();
         assert(subSubReader.getTextField().toString() == "nested")
       }
+      val boolList = subReader.getBoolList();
+      assert(boolList.get(0) == false);
+      assert(boolList.get(1) == true);
+      assert(boolList.get(2) == false);
+      assert(boolList.get(3) == true);
+      assert(boolList.get(4) == true);
+
     }
 
     assert(reader.getVoidList().size() == 6);
