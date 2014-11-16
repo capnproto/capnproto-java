@@ -26,7 +26,6 @@ import org.scalatest.FunSuite
 import org.scalatest.Matchers._;
 
 class EncodingSuite extends FunSuite {
-
   test("AllTypes") {
     val message = new MessageBuilder();
     val allTypes = message.initRoot(TestAllTypes.factory);
@@ -84,6 +83,19 @@ class EncodingSuite extends FunSuite {
         segment.get(jj) should equal (0);
       }
     }
+  }
+
+  test("DoubleFarPointers") {
+    val bytes = Array[Byte](2,0,0,0, 1,0,0,0, 2,0,0,0, 1,0,0,0,
+                            6,0,0,0, 1,0,0,0, 2,0,0,0, 2,0,0,0,
+                            0,0,0,0, 1,0,0,0, 1,7, -1, 127, 0,0,0,0);
+
+    val input = new ArrayInputStream (java.nio.ByteBuffer.wrap(bytes));
+    val message = org.capnproto.Serialize.read(input);
+    val root = message.getRoot(TestAllTypes.factory);
+    root.getBoolField() should equal (true);
+    root.getInt8Field() should equal (7);
+    root.getInt16Field() should equal (32767);
   }
 
   test("Generics") {
