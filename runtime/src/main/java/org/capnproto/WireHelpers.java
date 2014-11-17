@@ -378,13 +378,52 @@ final class WireHelpers {
 
         short oldDataSize = StructPointer.dataSize(resolved.ref);
         short oldPointerCount = StructPointer.ptrCount(resolved.ref);
-        int oldPointerSectionOffset = resolved.ptr + oldDataSize;
+        int oldPointerSection = resolved.ptr + oldDataSize;
 
         if (oldDataSize < size.data || oldPointerCount < size.pointers) {
-            throw new Error("unimplemented");
+            //# The space allocated for this struct is too small. Unlike with readers, we can't just
+            //# run with it and do bounds checks at access time, because how would we handle writes?
+            //# Instead, we have to copy the struct to a new space now.
+
+            short newDataSize = (short)Math.max(oldDataSize, size.data);
+            short newPointerCount = (short)Math.max(oldPointerCount, size.pointers);
+            int totalSize = newDataSize + newPointerCount * Constants.WORDS_PER_POINTER;
+
+            //# Don't let allocate() zero out the object just yet.
+            zeroPointerAndFars(segment, refOffset);
+
+            AllocateResult allocation = allocate(refOffset, segment,
+                                                 totalSize, WirePointer.STRUCT);
+
+            StructPointer.set(allocation.segment.buffer, allocation.refOffset,
+                              newDataSize, newPointerCount);
+
+            //# Copy data section.
+            memcpy(allocation.segment.buffer, allocation.ptr * Constants.BYTES_PER_WORD,
+                   resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
+                   oldDataSize * Constants.BYTES_PER_WORD);
+
+            //# Copy pointer section.
+            int newPointerSection = allocation.ptr + newDataSize;
+            for (int ii = 0; ii < oldPointerCount; ++ii) {
+                transferPointer(allocation.segment, newPointerSection + ii,
+                                resolved.segment, oldPointerSection + ii);
+            }
+
+            //# Zero out old location.  This has two purposes:
+            //# 1) We don't want to leak the original contents of the struct when the message is written
+            //#    out as it may contain secrets that the caller intends to remove from the new copy.
+            //# 2) Zeros will be deflated by packing, making this dead memory almost-free if it ever
+            //#    hits the wire.
+            memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD, (byte)0,
+                   (oldDataSize + oldPointerCount * Constants.WORDS_PER_POINTER) * Constants.BYTES_PER_WORD);
+
+            return factory.constructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
+                                            newPointerSection, newDataSize * Constants.BITS_PER_WORD,
+                                            newPointerCount);
         } else {
             return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
-                                            oldPointerSectionOffset, oldDataSize * Constants.BITS_PER_WORD,
+                                            oldPointerSection, oldDataSize * Constants.BITS_PER_WORD,
                                             oldPointerCount);
         }
 

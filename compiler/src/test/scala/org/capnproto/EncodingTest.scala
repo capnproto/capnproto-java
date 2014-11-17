@@ -98,6 +98,43 @@ class EncodingSuite extends FunSuite {
     root.getInt16Field() should equal (32767);
   }
 
+  test("UpgradeStructInBuilder") {
+    val builder = new MessageBuilder();
+    val root = builder.initRoot(TestAnyPointer.factory);
+
+    {
+      val oldVersion = root.getAnyPointerField().initAs(TestOldVersion.factory);
+      oldVersion.setOld1(123);
+      oldVersion.setOld2("foo");
+      val sub = oldVersion.initOld3();
+      sub.setOld1(456);
+      sub.setOld2("bar");
+    }
+
+    {
+      val newVersion = root.getAnyPointerField().getAs(TestNewVersion.factory);
+      newVersion.getOld1() should equal (123);
+      newVersion.getOld2().toString() should equal ("foo");
+      newVersion.getNew1() should equal (987);
+      newVersion.getNew2().toString() should equal ("baz");
+      val sub = newVersion.getOld3();
+      sub.getOld1() should equal (456);
+      sub.getOld2().toString() should equal ("bar");
+
+      newVersion.setOld1(234);
+      newVersion.setOld2("qux");
+      newVersion.setNew1(654);
+      newVersion.setNew2("quux");
+
+    }
+
+    {
+      val oldVersion = root.getAnyPointerField().getAs(TestOldVersion.factory);
+      oldVersion.getOld1() should equal (234);
+      oldVersion.getOld2.toString() should equal ("qux");
+    }
+  }
+
   test("StructListUpgrade") {
     val message = new MessageBuilder();
     val root = message.initRoot(TestAnyPointer.factory);
@@ -252,27 +289,6 @@ class EncodingSuite extends FunSuite {
       intList1.size() should equal (1);
       intList1.get(0) should equal(100);
     }
-  }
-
-  test("UpgradeStructInBuilder") {
-    val builder = new MessageBuilder();
-    val root = builder.initRoot(TestAnyPointer.factory);
-
-    val oldReader = {
-      val oldVersion = root.getAnyPointerField().initAs(TestOldVersion.factory);
-      oldVersion.setOld1(123);
-      oldVersion.setOld2("foo");
-      val sub = oldVersion.initOld3();
-      sub.setOld1(456);
-      sub.setOld2("bar");
-      oldVersion
-    }
-
-    {
-      //val newVersion = root.getAnyPointerField().getAsStruct(TestNewVersion.factory);
-    }
-
-    //...
   }
 
   test("Constants") {
