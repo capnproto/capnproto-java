@@ -98,6 +98,35 @@ class EncodingSuite extends FunSuite {
     root.getInt16Field() should equal (32767);
   }
 
+  test("StructListUpgrade") {
+    val message = new MessageBuilder();
+    val root = message.initRoot(TestAnyPointer.factory);
+    val any = root.getAnyPointerField();
+    {
+      val longs = any.initAs(PrimitiveList.Long.factory, 3);
+      longs.set(0, 123);
+      longs.set(1, 456);
+      longs.set(2, 789);
+    }
+    {
+      val olds = any.asReader().getAs(TestOldVersion.listFactory);
+      olds.get(0).getOld1() should equal (123);
+      olds.get(1).getOld1() should equal (456);
+      olds.get(2).getOld1() should equal (789);
+    }
+    {
+      val olds = any.getAs(TestOldVersion.listFactory);
+      olds.size() should equal (3);
+      olds.get(0).getOld1() should equal (123);
+      olds.get(1).getOld1() should equal (456);
+      olds.get(2).getOld1() should equal (789);
+
+      olds.get(0).setOld2("zero");
+      olds.get(1).setOld2("one");
+      olds.get(2).setOld2("two");
+    }
+  }
+
   test("Generics") {
     val message = new MessageBuilder();
     val factory = TestGenerics.newFactory(TestAllTypes.factory, Text.factory);
@@ -323,7 +352,7 @@ class EncodingSuite extends FunSuite {
   }
 
   // to debug, do this:
-  //Serialize.writeMessage((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
-  //                       message);
+  //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
+  //                 message);
 
 }

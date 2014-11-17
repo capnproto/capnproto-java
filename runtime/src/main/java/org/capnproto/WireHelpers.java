@@ -29,6 +29,10 @@ final class WireHelpers {
         return (bytes + 7) / 8;
     }
 
+    static int roundBitsUpToBytes(int bits) {
+        return (bits + 7) / Constants.BITS_PER_BYTE;
+    }
+
     static int roundBitsUpToWords(long bits) {
         //# This code assumes 64-bit words.
         return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
@@ -279,6 +283,24 @@ final class WireHelpers {
         }
     }
 
+    static void zeroPointerAndFars(SegmentBuilder segment, int refOffset) {
+        //# Zero out the pointer itself and, if it is a far pointer, zero the landing pad as well,
+        //# but do not zero the object body. Used when upgrading.
+
+        long ref = segment.get(refOffset);
+        if (WirePointer.kind(ref) == WirePointer.FAR) {
+            SegmentBuilder padSegment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
+            if (padSegment.isWritable()) { //# Don't zero external data.
+                int padOffset = FarPointer.positionInSegment(ref);
+                padSegment.buffer.putLong(padOffset * Constants.BYTES_PER_WORD, 0L);
+                if (FarPointer.isDoubleFar(ref)) {
+                    padSegment.buffer.putLong(padOffset * Constants.BYTES_PER_WORD + 1, 0L);
+                }
+            }
+        }
+        segment.buffer.putLong(refOffset * Constants.BYTES_PER_WORD, 0L);
+    }
+
     static <T> T initStructPointer(StructBuilder.Factory<T> factory,
                                    int refOffset,
                                    SegmentBuilder segment,
@@ -463,7 +485,6 @@ final class WireHelpers {
                                                 elementCount,
                                                 oldStep * Constants.BITS_PER_WORD,
                                                 oldDataSize * Constants.BITS_PER_WORD, oldPointerCount);
-                                                //ElementSize.INLINE_COMPOSITE);
             }
 
             //# The structs in this list are smaller than expected, probably written using an older
@@ -471,7 +492,80 @@ final class WireHelpers {
             throw new Error("unimplemented");
         } else {
             //# We're upgrading from a non-struct list.
-            throw new Error("unimplemented");
+
+            int oldDataSize = ElementSize.dataBitsPerElement(oldSize);
+            int oldPointerCount = ElementSize.pointersPerElement(oldSize);
+            int oldStep = oldDataSize + oldPointerCount * Constants.BITS_PER_POINTER;
+            int elementCount = ListPointer.elementCount(origRef);
+
+            if (oldSize == ElementSize.VOID) {
+                //# Nothing to copy, just allocate a new list.
+                return initStructListPointer(factory, origRefOffset, origSegment,
+                                             elementCount, elementSize);
+            } else {
+                //# Upgrading to an inline composite list.
+
+                if (oldSize == ElementSize.BIT) {
+                    throw new Error("Found bit list where struct list was expected; " +
+                                    "upgrading boolean lists to struct is no longer supported.");
+                }
+
+                short newDataSize = elementSize.data;
+                short newPointerCount = elementSize.pointers;
+
+                if (oldSize == ElementSize.POINTER) {
+                    newPointerCount = (short)Math.max(newPointerCount, 1);
+                } else {
+                    //# Old list contains data elements, so we need at least 1 word of data.
+                    newDataSize = (short)Math.max(newDataSize, 1);
+                }
+
+                int newStep = (newDataSize + newPointerCount * Constants.WORDS_PER_POINTER);
+                int totalWords = elementCount * newStep;
+
+                //# Don't let allocate() zero out the object just yet.
+                zeroPointerAndFars(origSegment, origRefOffset);
+
+                AllocateResult allocation = allocate(origRefOffset, origSegment,
+                                                     totalWords + Constants.POINTER_SIZE_IN_WORDS,
+                                                     WirePointer.LIST);
+
+                ListPointer.setInlineComposite(allocation.segment.buffer, allocation.refOffset, totalWords);
+
+                long tag = allocation.segment.get(allocation.ptr);
+                WirePointer.setKindAndInlineCompositeListElementCount(
+                    allocation.segment.buffer, allocation.ptr,
+                    WirePointer.STRUCT, elementCount);
+                StructPointer.set(allocation.segment.buffer, allocation.ptr,
+                                  newDataSize, newPointerCount);
+                int newPtr = allocation.ptr + Constants.POINTER_SIZE_IN_WORDS;
+
+                if (oldSize == ElementSize.POINTER) {
+                    for (int ii = 0; ii < elementCount; ++ii) {
+                        throw new Error("unimplemented");
+                    }
+                } else {
+                    int dst = newPtr;
+                    int srcByteOffset = resolved.ptr * Constants.BYTES_PER_WORD;
+                    int oldByteStep = oldDataSize / Constants.BITS_PER_BYTE;
+                    for (int ii = 0; ii < elementCount; ++ii) {
+                        memcpy(allocation.segment.buffer, dst * Constants.BYTES_PER_WORD,
+                               resolved.segment.buffer, srcByteOffset, oldByteStep);
+                        srcByteOffset += oldByteStep;
+                        dst += newStep;
+                    }
+                }
+
+                //# Zero out old location. See explanation in getWritableStructPointer().
+                memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
+                       (byte)0, roundBitsUpToBytes(oldStep * elementCount));
+
+                return factory.constructBuilder(origSegment, newPtr * Constants.BYTES_PER_WORD,
+                                                elementCount,
+                                                newStep * Constants.BITS_PER_WORD,
+                                                newDataSize * Constants.BITS_PER_WORD,
+                                                newPointerCount);
+            }
         }
     }
 

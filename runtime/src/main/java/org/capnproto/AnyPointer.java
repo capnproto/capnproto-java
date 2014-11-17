@@ -82,6 +82,10 @@ public final class AnyPointer {
             return factory.initFromPointerBuilder(this.segment, this.pointer, elementCount);
         }
 
+        public final Reader asReader() {
+            return new Reader(segment, pointer, 0x7fffffff);
+        }
+
         public final void clear() {
             WireHelpers.zeroObject(this.segment, this.pointer);
             this.segment.buffer.putLong(this.pointer * 8, 0L);
