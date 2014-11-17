@@ -298,7 +298,54 @@ final class WireHelpers {
                 }
             }
         }
-        segment.buffer.putLong(refOffset * Constants.BYTES_PER_WORD, 0L);
+        segment.put(refOffset, 0L);
+    }
+
+    static void transferPointer(SegmentBuilder dstSegment, int dstOffset,
+                                SegmentBuilder srcSegment, int srcOffset) {
+        //# Make *dst point to the same object as *src. Both must reside in the same message, but can
+        //# be in different segments.
+        //#
+        //# Caller MUST zero out the source pointer after calling this, to make sure no later code
+        //# mistakenly thinks the source location still owns the object.  transferPointer() doesn't do
+        //# this zeroing itself because many callers transfer several pointers in a loop then zero out
+        //# the whole section.
+
+        long src = srcSegment.get(srcOffset);
+        if (WirePointer.isNull(src)) {
+            dstSegment.put(dstOffset, 0L);
+        } else if (WirePointer.kind(src) == WirePointer.FAR) {
+            //# Far pointers are position-independent, so we can just copy.
+            dstSegment.put(dstOffset, srcSegment.get(srcOffset));
+        } else {
+            transferPointer(dstSegment, dstOffset, srcSegment, srcOffset,
+                            WirePointer.target(srcOffset, src));
+        }
+    }
+
+    static void transferPointer(SegmentBuilder dstSegment, int dstOffset,
+                                SegmentBuilder srcSegment, int srcOffset, int srcTargetOffset) {
+        //# Like the other overload, but splits src into a tag and a target. Particularly useful for
+        //# OrphanBuilder.
+
+        long src = srcSegment.get(srcOffset);
+        long srcTarget = srcSegment.get(srcTargetOffset);
+
+        if (dstSegment == srcSegment) {
+            //# Same segment, so create a direct pointer.
+            WirePointer.setKindAndTarget(dstSegment.buffer, dstOffset,
+                                         WirePointer.kind(src), srcTargetOffset);
+
+            // We can just copy the upper 32 bits.
+            dstSegment.buffer.putInt(dstOffset * Constants.BYTES_PER_WORD + 4,
+                                     srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
+        } else {
+            //# Need to create a far pointer. Try to allocate it in the same segment as the source,
+            //# so that it doesn't need to be a double-far.
+
+            throw new Error("unimplemented");
+        }
+
     }
 
     static <T> T initStructPointer(StructBuilder.Factory<T> factory,
@@ -489,7 +536,58 @@ final class WireHelpers {
 
             //# The structs in this list are smaller than expected, probably written using an older
             //# version of the protocol. We need to make a copy and expand them.
-            throw new Error("unimplemented");
+
+            short newDataSize = (short)Math.max(oldDataSize, elementSize.data);
+            short newPointerCount = (short)Math.max(oldPointerCount, elementSize.pointers);
+            int newStep = newDataSize + newPointerCount * Constants.WORDS_PER_POINTER;
+            int totalSize = newStep * elementCount;
+
+            //# Don't let allocate() zero out the object just yet.
+            zeroPointerAndFars(origSegment, origRefOffset);
+
+            AllocateResult allocation = allocate(origRefOffset, origSegment,
+                                                 totalSize + Constants.POINTER_SIZE_IN_WORDS,
+                                                 WirePointer.LIST);
+
+            ListPointer.setInlineComposite(allocation.segment.buffer, allocation.refOffset, totalSize);
+
+            long tag = allocation.segment.get(allocation.ptr);
+            WirePointer.setKindAndInlineCompositeListElementCount(
+                allocation.segment.buffer, allocation.ptr,
+                WirePointer.STRUCT, elementCount);
+            StructPointer.set(allocation.segment.buffer, allocation.ptr,
+                              newDataSize, newPointerCount);
+            int newPtr = allocation.ptr + Constants.POINTER_SIZE_IN_WORDS;
+
+            int src = oldPtr;
+            int dst = newPtr;
+            for (int ii = 0; ii < elementCount; ++ii) {
+                //# Copy data section.
+                memcpy(allocation.segment.buffer, dst * Constants.BYTES_PER_WORD,
+                       resolved.segment.buffer, src * Constants.BYTES_PER_WORD,
+                       oldDataSize * Constants.BYTES_PER_WORD);
+
+                //# Copy pointer section.
+                int newPointerSection = dst + newDataSize;
+                int oldPointerSection = src + oldDataSize;
+                for (int jj = 0; jj < oldPointerCount; ++jj) {
+                    transferPointer(allocation.segment, newPointerSection + jj,
+                                    resolved.segment, oldPointerSection + jj);
+                }
+
+                dst += newStep;
+                src += oldStep;
+            }
+
+            //# Zero out old location. See explanation in getWritableStructPointer().
+            memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
+                   (byte)0, oldStep * elementCount * Constants.BYTES_PER_WORD);
+
+            return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
+                                            elementCount,
+                                            newStep * Constants.BITS_PER_WORD,
+                                            newDataSize * Constants.BITS_PER_WORD,
+                                            newPointerCount);
         } else {
             //# We're upgrading from a non-struct list.
 
@@ -541,8 +639,12 @@ final class WireHelpers {
                 int newPtr = allocation.ptr + Constants.POINTER_SIZE_IN_WORDS;
 
                 if (oldSize == ElementSize.POINTER) {
+                    int dst = newPtr + newDataSize;
+                    int src = resolved.ptr;
                     for (int ii = 0; ii < elementCount; ++ii) {
-                        throw new Error("unimplemented");
+                        transferPointer(origSegment, dst, resolved.segment, src);
+                        dst += newStep / Constants.WORDS_PER_POINTER;
+                        src += 1;
                     }
                 } else {
                     int dst = newPtr;
@@ -560,7 +662,7 @@ final class WireHelpers {
                 memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
                        (byte)0, roundBitsUpToBytes(oldStep * elementCount));
 
-                return factory.constructBuilder(origSegment, newPtr * Constants.BYTES_PER_WORD,
+                return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
                                                 newStep * Constants.BITS_PER_WORD,
                                                 newDataSize * Constants.BITS_PER_WORD,

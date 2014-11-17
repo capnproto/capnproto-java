@@ -68,4 +68,8 @@ public final class SegmentBuilder extends SegmentReader {
         // TODO support external non-writable segments
         return true;
     }
+
+    public final void put(int index, long value) {
+        buffer.putLong(index * Constants.BYTES_PER_WORD, value);
+    }
 }

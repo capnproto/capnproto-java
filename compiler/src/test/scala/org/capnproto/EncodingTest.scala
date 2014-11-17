@@ -125,6 +125,18 @@ class EncodingSuite extends FunSuite {
       olds.get(1).setOld2("one");
       olds.get(2).setOld2("two");
     }
+    {
+      val news = any.getAs(TestNewVersion.listFactory);
+      news.size() should equal (3);
+      news.get(0).getOld1() should equal (123);
+      news.get(0).getOld2().toString() should equal ("zero");
+
+      news.get(1).getOld1() should equal (456);
+      news.get(1).getOld2().toString() should equal ("one");
+
+      news.get(2).getOld1() should equal (789);
+      news.get(2).getOld2().toString() should equal ("two");
+    }
   }
 
   test("Generics") {
