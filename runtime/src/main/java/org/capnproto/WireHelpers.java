@@ -343,7 +343,39 @@ final class WireHelpers {
             //# Need to create a far pointer. Try to allocate it in the same segment as the source,
             //# so that it doesn't need to be a double-far.
 
-            throw new Error("unimplemented");
+            int landingPadOffset = srcSegment.allocate(1);
+            if (landingPadOffset == SegmentBuilder.FAILED_ALLOCATION) {
+                //# Darn, need a double-far.
+
+                BuilderArena.AllocateResult allocation = srcSegment.getArena().allocate(2);
+                SegmentBuilder farSegment = allocation.segment;
+                landingPadOffset = allocation.offset;
+
+                FarPointer.set(farSegment.buffer, landingPadOffset, false, srcTargetOffset);
+                FarPointer.setSegmentId(farSegment.buffer, landingPadOffset, srcSegment.id);
+
+                WirePointer.setKindWithZeroOffset(farSegment.buffer, landingPadOffset + 1,
+                                                  WirePointer.kind(srcTarget));
+
+                farSegment.buffer.putInt((landingPadOffset + 1) * Constants.BYTES_PER_WORD + 4,
+                                         srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
+
+                FarPointer.set(dstSegment.buffer, dstOffset,
+                               true, landingPadOffset);
+                FarPointer.setSegmentId(dstSegment.buffer, dstOffset,
+                                        farSegment.id);
+            } else {
+                //# Simple landing pad is just a pointer.
+                WirePointer.setKindAndTarget(srcSegment.buffer, landingPadOffset,
+                                             WirePointer.kind(srcTarget), srcTargetOffset);
+                srcSegment.buffer.putInt(landingPadOffset * Constants.BYTES_PER_WORD + 4,
+                                         srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
+
+                FarPointer.set(dstSegment.buffer, dstOffset,
+                               false, landingPadOffset);
+                FarPointer.setSegmentId(dstSegment.buffer, dstOffset,
+                                        srcSegment.id);
+            }
         }
 
     }

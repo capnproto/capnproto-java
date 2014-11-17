@@ -50,6 +50,10 @@ final class WirePointer {
                       (((targetOffset - offset) - 1) << 2) | kind);
     }
 
+    public static void setKindWithZeroOffset(ByteBuffer buffer, int offset, byte kind) {
+        buffer.putInt(offset * Constants.BYTES_PER_WORD, kind);
+    }
+
     public static void setKindAndTargetForEmptyStruct(ByteBuffer buffer, int offset) {
         //# This pointer points at an empty struct. Assuming the
         //# WirePointer itself is in-bounds, we can set the target to
