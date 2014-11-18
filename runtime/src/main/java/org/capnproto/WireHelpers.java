@@ -126,8 +126,11 @@ final class WireHelpers {
 
             //# Landing pad is another far pointer. It is followed by a
             //# tag describing the pointed-to object.
-            throw new Error("unimplemented");
+            int refOffset = padOffset + 1;
+            ref = resultSegment.get(refOffset);
 
+            resultSegment = resultSegment.getArena().getSegment(FarPointer.getSegmentId(pad));
+            return new FollowBuilderFarsResult(FarPointer.positionInSegment(pad), ref, resultSegment);
         } else {
             return new FollowBuilderFarsResult(refTarget, ref, segment);
         }
