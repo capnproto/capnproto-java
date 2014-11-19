@@ -264,7 +264,6 @@ Note that the stream returned by `Process.getOutputStream()` is buffered.
 
 There's a lot left to do, and we'd love to have your help! Here are some missing pieces:
 
-- Setter methods for struct and list fields.
 - [Orphans](https://kentonv.github.io/capnproto/cxx.html#orphans).
 - [Dynamic reflection](https://kentonv.github.io/capnproto/cxx.html#dynamic_reflection).
 - Optimizations, e.g. iterators for `StructList` that update in place instead of allocating for each element.
