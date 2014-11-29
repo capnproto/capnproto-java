@@ -46,6 +46,10 @@
 #include "config.h"
 #endif
 
+#if CAPNP_VERSION < 5000
+#error "This version of capnpc-java requires Cap'n Proto version 0.5 or higher."
+#endif
+
 #ifndef VERSION
 #define VERSION "(unknown)"
 #endif
