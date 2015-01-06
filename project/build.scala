@@ -26,7 +26,8 @@ object Build extends sbt.Build {
     project(
       id = "runtime",
       base = file("runtime")
-    )
+    ).settings(publishArtifact := true)
+     .settings(crossPaths := false)     // disable outputting the _<scala-version> suffix
 
   lazy val examples =
     project(
@@ -107,7 +108,9 @@ object Shared {
     ),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
-    shellPrompt := ShellPrompt.buildShellPrompt
+    shellPrompt := ShellPrompt.buildShellPrompt,
+    organization := "org.capnproto",
+    publishArtifact := false
   )
 }
 
