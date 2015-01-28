@@ -209,8 +209,7 @@ $ echo '(people = [(id = 123, name = "Alice",' \
 'email = "alice@example.com", employment = (school = "MIT"))])' \
 | capnp encode --packed examples/src/main/schema/addressbook.capnp \
 AddressBook \
-| java -cp \
-runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes \
+| java -cp runtime/target/classes:examples/target/classes \
 org.capnproto.examples.AddressbookMain read
 ```
 
@@ -218,7 +217,7 @@ To write a message:
 
 ```
 $ java -cp \
-runtime/target/scala-2.11/classes:examples/target/scala-2.11/classes \
+runtime/target/classes:examples/target/classes \
 org.capnproto.examples.AddressbookMain write \
 | capnp decode --packed examples/src/main/schema/addressbook.capnp \
 AddressBook
