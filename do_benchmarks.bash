@@ -6,7 +6,7 @@ shopt -s expand_aliases
 rm -f fifo;
 mkfifo fifo
 
-alias run_java="java -cp runtime/target/scala-2.11/classes:benchmark/target/scala-2.11/classes"
+alias run_java="java -cp runtime/target/classes:benchmark/target/scala-2.11/classes"
 
 ITERS=100000
 
