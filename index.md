@@ -216,8 +216,7 @@ org.capnproto.examples.AddressbookMain read
 To write a message:
 
 ```
-$ java -cp \
-runtime/target/classes:examples/target/classes \
+$ java -cp runtime/target/classes:examples/target/classes \
 org.capnproto.examples.AddressbookMain write \
 | capnp decode --packed examples/src/main/schema/addressbook.capnp \
 AddressBook
