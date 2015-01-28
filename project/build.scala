@@ -39,6 +39,7 @@ object Build extends sbt.Build {
       .settings(compile <<= compile in Compile dependsOn makeExamples)
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
       .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
+      .settings(crossPaths := false)     // disable outputting the _<scala-version> suffix
 
   lazy val benchmark =
     project(
@@ -49,6 +50,7 @@ object Build extends sbt.Build {
      .settings(compile <<= compile in Compile dependsOn compileBenchmarkSchema)
       .settings(unmanagedSourceDirectories in Compile += sourceDirectory.value / "main" / "generated")
       .settings(cleanFiles += sourceDirectory.value / "main" / "generated")
+      .settings(crossPaths := false)     // disable outputting the _<scala-version> suffix
 
   def project(id: String, base: File) =
     Project(
