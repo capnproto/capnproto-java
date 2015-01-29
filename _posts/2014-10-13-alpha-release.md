@@ -19,7 +19,7 @@ and
 [OCaml](http://pelzlpj.github.io/capnp-ocaml/2014/09/02/capnp-ocaml-2.0/)
 implementations,
 I've made some informal measurements
-with the [usual](https://github.com/kentonv/capnproto/tree/master/c%2B%2B/src/capnp/benchmark)
+with the [usual](https://github.com/kentonv/capnproto/tree/master/c%2B%2B/src/benchmark)
 toy benchmark suite.
 The results show
 the Java implementation performing
@@ -39,7 +39,7 @@ is written to a flat array and then re-read in-process.
 In the "pipe" mode, the data is passed
 as a byte stream between separate processes.
 In the "packed" sub-modes,
-a [compression scheme](https://kentonv.github.io/capnproto/encoding.html#packing)
+a [compression scheme](https://capnproto.org/encoding.html#packing)
 is applied to the bytes before they are passed.
 
 To give the JVM a chance to amortize
