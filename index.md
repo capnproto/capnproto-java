@@ -263,7 +263,7 @@ Note that the stream returned by `Process.getOutputStream()` is buffered.
 There's a lot left to do, and we'd love to have your help! Here are some missing pieces:
 
 - [Orphans](https://capnproto.org/cxx.html#orphans).
-- [Dynamic reflection](https://capnproto.org/cxx.html#dynamic_reflection).
+- [Dynamic reflection](https://capnproto.org/cxx.html#dynamic-reflection).
 - Optimizations, e.g. iterators for `StructList` that update in place instead of allocating for each element.
 - Improvements for build and packaging, e.g. getting a distribution on Maven.
 - The entire [object-capability RPC layer](https://capnproto.org/rpc.html).
