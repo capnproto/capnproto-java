@@ -9,9 +9,9 @@ This is a Java implementation of [Cap'n Proto](http://capnproto.org).
 It has two main components:
 
 1. A C++ program `capnpc-java` that
-generates Java source code from Cap'n Proto [schemas](https://kentonv.github.io/capnproto/language.html)
+generates Java source code from Cap'n Proto [schemas](https://capnproto.org/language.html)
 by acting as a
-[plugin](https://kentonv.github.io/capnproto/otherlang.html#how_to_write_compiler_plugins)
+[plugin](https://capnproto.org/otherlang.html#how_to_write_compiler_plugins)
 to the Cap'n Proto schema compiler.
 
 2. A Java package `org.capnproto` that provides runtime support for `capnpc-java`'s generated code.
@@ -28,7 +28,7 @@ network, you can just directly write the bytes to the wire.
 There is no encode or decode step!
 
 We hope eventually to provide support in Java for a
-[distributed object-capability layer](https://kentonv.github.io/capnproto/rpc.html)
+[distributed object-capability layer](https://capnproto.org/rpc.html)
 built on top of this serialization layer,
 but we have not embarked on that project yet.
 
@@ -228,7 +228,7 @@ The classes and methods provided by the
 Java runtime and generated code
 correspond directly to those
 provided by the
-[C++ implementation](https://kentonv.github.io/capnproto/cxx.html),
+[C++ implementation](https://capnproto.org/cxx.html),
 with just a few adjustments.
 
 - Java does not have unsigned integer types, so a `UInt64`
@@ -262,8 +262,8 @@ Note that the stream returned by `Process.getOutputStream()` is buffered.
 
 There's a lot left to do, and we'd love to have your help! Here are some missing pieces:
 
-- [Orphans](https://kentonv.github.io/capnproto/cxx.html#orphans).
-- [Dynamic reflection](https://kentonv.github.io/capnproto/cxx.html#dynamic_reflection).
+- [Orphans](https://capnproto.org/cxx.html#orphans).
+- [Dynamic reflection](https://capnproto.org/cxx.html#dynamic_reflection).
 - Optimizations, e.g. iterators for `StructList` that update in place instead of allocating for each element.
 - Improvements for build and packaging, e.g. getting a distribution on Maven.
-- The entire [object-capability RPC layer](https://kentonv.github.io/capnproto/rpc.html).
+- The entire [object-capability RPC layer](https://capnproto.org/rpc.html).
