@@ -17,10 +17,17 @@ CAPNPC_JAVA_SOURCES=compiler/src/main/cpp/capnpc-java.c++
 all : capnpc-java
 
 clean :
-	rm -f capnpc-java
+	rm -f capnpc-java capnpc-java.exe
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
 	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -o capnpc-java
+
+
+MINGW_LIBS=~/src/capnproto/c++/build-mingw/.libs/libcapnp.a ~/src/capnproto/c++/build-mingw/.libs/libkj.a
+MINGW_CXX=i686-w64-mingw32-g++
+MINGW_FLAGS=-O2 -DNDEBUG -I/usr/local/include -std=c++11 -static -static-libgcc -static-libstdc++
+capnpc-java.exe : $(CAPNPC_JAVA_SOURCES)
+	$(MINGW_CXX) $(MINGW_FLAGS) $(CAPNPC_JAVA_SOURCES) $(MINGW_LIBS) -o capnpc-java.exe
 
 addressbook : capnpc-java
 	PWD=pwd
