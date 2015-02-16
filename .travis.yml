@@ -1,7 +1,6 @@
 language: java
 jdk:
   - oraclejdk8
-  - openjdk8
   - oraclejdk7
   - openjdk7
 before_install:
@@ -13,6 +12,7 @@ install:
   - export CXX=g++-4.8
   - curl -O https://capnproto.org/capnproto-c++-0.5.1.tar.gz
   - tar zxf capnproto-c++-0.5.1.tar.gz
+  - cd capnproto-c++-0.5.1
   - ./configure && make -j5 && sudo make install && cd ../..
 
   - cd capnproto-c++-0.5.1 && ./configure && make -j5 && sudo make install && cd ..
