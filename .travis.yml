@@ -13,7 +13,7 @@ install:
   - curl -O https://capnproto.org/capnproto-c++-0.5.1.tar.gz
   - tar zxf capnproto-c++-0.5.1.tar.gz
   - cd capnproto-c++-0.5.1
-  - ./configure && make -j5 && sudo make install && cd ../..
+  - ./configure && make -j5 && sudo make install && cd ..
 
   - cd capnproto-c++-0.5.1 && ./configure && make -j5 && sudo make install && cd ..
 script:
