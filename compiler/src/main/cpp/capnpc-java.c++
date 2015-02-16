@@ -1792,10 +1792,10 @@ private:
     }
 
     if (packageName.size() == 0) {
-      context.exitError(kj::str(displayName, ": must provide a Java package name."));
+      context.exitError(kj::str(displayName, ": no Java package name found. See java.capnp."));
     }
     if (outerClassname.size() == 0) {
-      context.exitError(kj::str(displayName, ": must provide a Java outer classname."));
+      context.exitError(kj::str(displayName, ": no Java outer classname found. See java.capnp."));
     }
 
     auto nodeTexts = KJ_MAP(nested, node.getNestedNodes()) {
