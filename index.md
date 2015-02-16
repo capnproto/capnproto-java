@@ -35,11 +35,32 @@ but we have not embarked on that project yet.
 
 ## Installation
 
-You will need to [install](http://capnproto.org/install.html#building-from-git-with-autotools) the Cap'n Proto schema compiler.
+### Schema Compiler and Plugin
 
-We use [sbt](http://scala-sbt.org) for building and testing.
-Running `sbt compile` at the top-level directory should build `capnpc-java`,
-`org.capnproto`, and `org.capnproto.examples`.
+You will need to [install](http://capnproto.org/install.html) the
+latest release of the Cap'n Proto schema compiler.
+Then, running `make` should build `capnpc-java`.
+On Windows, you can instead
+grab a prebuilt win32 executable from here:
+
+ <pre><a href="https://dwrensha.ws/capnproto/capnpc-java.exe.zip">https://dwrensha.ws/capnproto/capnpc-java.exe.zip</a></pre>
+
+
+For help on how to invoke the schema compiler:
+
+```
+capnp compile --help
+```
+
+Note that you'll need to include `java.capnp` so that you can use the `package` and `outerClassname`
+annotations. This schema is located in `compiler/src/main/schema`.
+
+
+### Runtime
+
+We use [sbt](http://scala-sbt.org) for building and testing the Java code.
+Running `sbt compile` at the top-level directory should build
+`org.capnproto` and `org.capnproto.examples`.
 Running `sbt test` should run the test suite.
 
 ## Example
