@@ -112,8 +112,40 @@ object Shared {
     resolvers += Resolver.sonatypeRepo("releases"),
     shellPrompt := ShellPrompt.buildShellPrompt,
     organization := "org.capnproto",
-    publishArtifact := false
+    publishArtifact := false,
+    publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots"),
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { x => false },
+    pomExtra := (
+      <url>https://capnproto.org/</url>
+      <licenses>
+        <license>
+          <name>MIT</name>
+          <url>http://opensource.org/licenses/MIT</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:dwrensha/capnproto-java.git</url>
+        <connection>scm:git@github.com:dwrensha/capnproto-java.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>dwrensha</id>
+          <name>David Renshaw</name>
+          <url>https://github.com/dwrensha</url>
+        </developer>
+        <developer>
+          <id>larroy</id>
+          <name>Pedro Larroy</name>
+          <url>https://github.com/larroy</url>
+        </developer>
+      </developers>
+    )
+
   )
+
 }
 
 object ShellPrompt {
@@ -137,3 +169,5 @@ object ShellPrompt {
     }
   }
 }
+
+
