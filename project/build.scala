@@ -27,6 +27,36 @@ object Build extends sbt.Build {
       id = "runtime",
       base = file("runtime")
     ).settings(publishArtifact := true)
+     .settings(publishMavenStyle := true)
+     .settings(organization := "org.capnproto")
+     .settings(autoScalaLibrary := false)
+     .settings(autoScalaLibrary in test := false)
+     .settings(publishTo := {
+        val nexus = "https://oss.sonatype.org/"
+        if (isSnapshot.value)
+          Some("snapshots" at nexus + "content/repositories/snapshots")
+        else
+          Some("releases" at nexus + "service/local/staging/deploy/maven2")
+      })
+     .settings(pomExtra := (
+       <url>https://dwrensha.github.io/capnproto-java/index.html</url>
+       <licenses>
+         <license>
+           <name>BSD-style</name>
+         <url>http://www.opensource.org/licenses/bsd-license.php</url>
+         <distribution>repo</distribution>
+         </license>
+       </licenses>
+       <scm>
+         <url>git@github.com:dwrensha/capnproto-java.git</url>
+         <connection>scm:git:git@github.com:dwrensha/capnproto-java.git</connection>
+       </scm>
+       <developers>
+         <developer>
+           <id>dwrensha</id>
+           <name>David Renshaw</name>
+         </developer>
+       </developers>))
      .settings(crossPaths := false)     // disable outputting the _<scala-version> suffix
 
   lazy val examples =
