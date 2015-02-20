@@ -6,3 +6,5 @@ project/target
 *.iws
 capnpc-java
 generated/
+/bin/
+.settings
