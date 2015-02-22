@@ -29,6 +29,7 @@ object Build extends sbt.Build {
     ).settings(publishArtifact := true)
      .settings(publishMavenStyle := true)
      .settings(organization := "org.capnproto")
+     .settings(version := "0.1.0-SNAPSHOT")
      .settings(autoScalaLibrary := false)
      .settings(autoScalaLibrary in test := false)
      .settings(publishTo := {
@@ -42,8 +43,8 @@ object Build extends sbt.Build {
        <url>https://dwrensha.github.io/capnproto-java/index.html</url>
        <licenses>
          <license>
-           <name>BSD-style</name>
-         <url>http://www.opensource.org/licenses/bsd-license.php</url>
+           <name>MIT</name>
+         <url>http://opensource.org/licenses/MIT</url>
          <distribution>repo</distribution>
          </license>
        </licenses>
