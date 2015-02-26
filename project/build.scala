@@ -123,7 +123,9 @@ object Shared {
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     version := "0.1.0-SNAPSHOT",
+    autoScalaLibrary := false,
     publishArtifact in Test := false,
+    autoScalaLibrary in test := false,
     pomIncludeRepository := { x => false },
     pomExtra := (
       <url>https://capnproto.org/</url>
