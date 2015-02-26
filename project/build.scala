@@ -112,8 +112,45 @@ object Shared {
     resolvers += Resolver.sonatypeRepo("releases"),
     shellPrompt := ShellPrompt.buildShellPrompt,
     organization := "org.capnproto",
-    publishArtifact := false
+    publishArtifact := false,
+    publishTo := {
+      val nexus = "https://oss.sonatype.org/"
+      if (isSnapshot.value)
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    },
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    publishMavenStyle := true,
+    version := "0.1.0-SNAPSHOT",
+    autoScalaLibrary := false,
+    publishArtifact in Test := false,
+    autoScalaLibrary in test := false,
+    pomIncludeRepository := { x => false },
+    pomExtra := (
+      <url>https://capnproto.org/</url>
+      <licenses>
+        <license>
+          <name>MIT</name>
+          <url>http://opensource.org/licenses/MIT</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:dwrensha/capnproto-java.git</url>
+        <connection>scm:git@github.com:dwrensha/capnproto-java.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>dwrensha</id>
+          <name>David Renshaw</name>
+          <url>https://github.com/dwrensha</url>
+        </developer>
+      </developers>
+    )
+
   )
+
 }
 
 object ShellPrompt {
@@ -137,3 +174,5 @@ object ShellPrompt {
     }
   }
 }
+
+
