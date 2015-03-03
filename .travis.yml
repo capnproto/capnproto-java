@@ -10,9 +10,9 @@ install:
   - sudo apt-get install g++-4.8 gcc-4.8
   - export CC=gcc-4.8
   - export CXX=g++-4.8
-  - curl -O https://capnproto.org/capnproto-c++-0.5.1.tar.gz
-  - tar zxf capnproto-c++-0.5.1.tar.gz
-  - cd capnproto-c++-0.5.1
+  - curl -O https://capnproto.org/capnproto-c++-0.5.1.1.tar.gz
+  - tar zxf capnproto-c++-0.5.1.1.tar.gz
+  - cd capnproto-c++-0.5.1.1
   - ./configure && make -j5 && sudo make install && cd ..
 script:
   - make CXX=g++-4.8 CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
