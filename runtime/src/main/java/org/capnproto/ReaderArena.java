@@ -44,9 +44,8 @@ public final class ReaderArena implements Arena {
     }
 
     public final void checkReadLimit(int numBytes) {
-        // TODO worry about thread safety?
         if (numBytes > limit) {
-            return;
+            throw new DecodeException("Read limit exceeded.");
         } else {
             limit -= numBytes;
         }
