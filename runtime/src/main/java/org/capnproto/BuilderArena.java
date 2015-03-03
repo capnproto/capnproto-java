@@ -114,6 +114,7 @@ public final class BuilderArena implements Arena {
             segment.buffer.rewind();
             ByteBuffer slice = segment.buffer.slice();
             slice.limit(segment.currentSize() * Constants.BYTES_PER_WORD);
+            slice.order(ByteOrder.LITTLE_ENDIAN);
             result[ii] = slice;
         }
         return result;

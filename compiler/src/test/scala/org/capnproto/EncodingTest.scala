@@ -379,6 +379,35 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+
+  test("VoidListAmplification") {
+    val builder = new MessageBuilder();
+    builder.initRoot(TestAnyPointer.factory).getAnyPointerField().initAs(PrimitiveList.Void.factory, 1 << 28);
+
+    val segments = builder.getSegmentsForOutput();
+    segments.length should equal (1);
+
+    val reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
+    val root = reader.getRoot(TestAnyPointer.factory);
+    a [DecodeException] should be thrownBy
+       root.getAnyPointerField().getAs(new StructList.Factory(TestAllTypes.factory));
+  }
+
+  test("EmptyStructListAmplification") {
+    val builder = new MessageBuilder();
+    builder.initRoot(TestAnyPointer.factory).getAnyPointerField()
+           .initAs(new StructList.Factory(TestEmptyStruct.factory), (1 << 29) - 1);
+
+    val segments = builder.getSegmentsForOutput();
+    segments.length should equal (1);
+
+    val reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
+    val root = reader.getRoot(TestAnyPointer.factory);
+    a [DecodeException] should be thrownBy
+       root.getAnyPointerField().getAs(new StructList.Factory(TestAllTypes.factory));
+  }
+
+
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                 message);

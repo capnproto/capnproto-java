@@ -1071,6 +1071,13 @@ final class WireHelpers {
                 if (wordsPerElement * elementCount > wordCount) {
                     throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
                 }
+
+                if (wordsPerElement == 0) {
+                    // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
+                    // large without having sent actual data.
+                    resolved.segment.arena.checkReadLimit(elementCount);
+                }
+
                 return setListPointer(dstSegment, dstOffset,
                                       new ListReader(resolved.segment,
                                                      ptr * Constants.BYTES_PER_WORD,
@@ -1087,6 +1094,12 @@ final class WireHelpers {
                 int wordCount = roundBitsUpToWords((long) elementCount * step);
 
                 resolved.segment.arena.checkReadLimit(wordCount);
+
+                if (elementSize == ElementSize.VOID) {
+                    // Watch out for lists of void, which can claim to be arbitrarily large without
+                    // having sent actual data.
+                    resolved.segment.arena.checkReadLimit(elementCount);
+                }
 
                 return setListPointer(dstSegment, dstOffset,
                                       new ListReader(resolved.segment,
@@ -1134,7 +1147,8 @@ final class WireHelpers {
 
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
-        switch (ListPointer.elementSize(resolved.ref)) {
+        byte elementSize = ListPointer.elementSize(resolved.ref);
+        switch (elementSize) {
         case ElementSize.INLINE_COMPOSITE : {
             int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
 
@@ -1148,6 +1162,12 @@ final class WireHelpers {
             int wordsPerElement = StructPointer.wordSize(tag);
 
             // TODO check that elemements do not overrun word count
+
+            if (wordsPerElement == 0) {
+                // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
+                // large without having sent actual data.
+                resolved.segment.arena.checkReadLimit(size);
+            }
 
             // TODO check whether the size is compatible
 
@@ -1166,10 +1186,17 @@ final class WireHelpers {
             //# such structs.
             int dataSize = ElementSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
             int pointerCount = ElementSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
+            int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
             resolved.segment.arena.checkReadLimit(
-                roundBitsUpToWords(ListPointer.elementCount(resolved.ref) * step));
+                roundBitsUpToWords(elementCount * step));
+
+            if (elementSize == ElementSize.VOID) {
+                // Watch out for lists of void, which can claim to be arbitrarily large without
+                // having sent actual data.
+                resolved.segment.arena.checkReadLimit(elementCount);
+            }
 
             //# Verify that the elements are at least as large as
             //# the expected type. Note that if we expected
