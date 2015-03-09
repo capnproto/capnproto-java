@@ -807,9 +807,13 @@ final class WireHelpers {
         }
 
 
-        //# Subtract 1 from the size for the NUL terminator.
+        int size = ListPointer.elementCount(resolved.ref);
+        if (size == 0 ||
+            resolved.segment.buffer.get(resolved.ptr * Constants.BYTES_PER_WORD + size - 1) != 0) {
+            throw new DecodeException("Text blob missing NUL terminator.");
+        }
         return new Text.Builder(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
-                                ListPointer.elementCount(resolved.ref) - 1);
+                                size - 1);
 
     }
 
@@ -1068,7 +1072,7 @@ final class WireHelpers {
 
                 int elementCount = WirePointer.inlineCompositeListElementCount(tag);
                 int wordsPerElement = StructPointer.wordSize(tag);
-                if (wordsPerElement * elementCount > wordCount) {
+                if ((long)wordsPerElement * elementCount > wordCount) {
                     throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
                 }
 
@@ -1161,7 +1165,9 @@ final class WireHelpers {
 
             int wordsPerElement = StructPointer.wordSize(tag);
 
-            // TODO check that elemements do not overrun word count
+            if ((long)size * wordsPerElement > wordCount) {
+                throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
+            }
 
             if (wordsPerElement == 0) {
                 // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
