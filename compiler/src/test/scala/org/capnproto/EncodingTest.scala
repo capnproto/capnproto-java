@@ -386,6 +386,29 @@ class EncodingSuite extends FunSuite {
     a [DecodeException] should be thrownBy root.getAnyPointerField.getAs(org.capnproto.Text.factory);
   }
 
+  test("InlineCompositeListIntOverflow") {
+    val bytes = Array[Byte](0,0,0,0, 0,0,1,0,
+                            1,0,0,0, 0x17,0,0,0, 0,0,0,-128, 16,0,0,0,
+                            0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0);
+
+    val segment = java.nio.ByteBuffer.wrap(bytes);
+    segment.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    val message = new MessageReader(Array(segment), ReaderOptions.DEFAULT_READER_OPTIONS);
+
+    val root = message.getRoot(TestAnyPointer.factory);
+    // TODO add this after we impelement totalSize():
+    //root.totalSize();
+
+    a [DecodeException] should be thrownBy
+      root.getAnyPointerField.getAs(new StructList.Factory(TestAllTypes.factory));
+
+    val messageBuilder = new MessageBuilder();
+    val builderRoot = messageBuilder.initRoot(TestAnyPointer.factory);
+    a [DecodeException] should be thrownBy
+      builderRoot.getAnyPointerField.setAs(TestAnyPointer.factory, root);
+
+  }
+
   test("VoidListAmplification") {
     val builder = new MessageBuilder();
     builder.initRoot(TestAnyPointer.factory).getAnyPointerField().initAs(PrimitiveList.Void.factory, 1 << 28);

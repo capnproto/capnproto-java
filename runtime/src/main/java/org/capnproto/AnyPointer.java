@@ -82,6 +82,10 @@ public final class AnyPointer {
             return factory.initFromPointerBuilder(this.segment, this.pointer, elementCount);
         }
 
+        public final <T, U> void setAs(SetPointerBuilder<T, U> factory, U reader) {
+            factory.setPointerBuilder(this.segment, this.pointer, reader);
+        }
+
         public final Reader asReader() {
             return new Reader(segment, pointer, 0x7fffffff);
         }

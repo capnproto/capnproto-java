@@ -1072,7 +1072,7 @@ final class WireHelpers {
 
                 int elementCount = WirePointer.inlineCompositeListElementCount(tag);
                 int wordsPerElement = StructPointer.wordSize(tag);
-                if (wordsPerElement * elementCount > wordCount) {
+                if ((long)wordsPerElement * elementCount > wordCount) {
                     throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
                 }
 
@@ -1165,7 +1165,9 @@ final class WireHelpers {
 
             int wordsPerElement = StructPointer.wordSize(tag);
 
-            // TODO check that elemements do not overrun word count
+            if ((long)size * wordsPerElement > wordCount) {
+                throw new DecodeException("INLINE_COMPOSITE list's elements overrun its word count.");
+            }
 
             if (wordsPerElement == 0) {
                 // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
