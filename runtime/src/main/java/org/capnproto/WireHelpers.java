@@ -807,9 +807,13 @@ final class WireHelpers {
         }
 
 
-        //# Subtract 1 from the size for the NUL terminator.
+        int size = ListPointer.elementCount(resolved.ref);
+        if (size == 0 ||
+            resolved.segment.buffer.get(resolved.ptr * Constants.BYTES_PER_WORD + size - 1) != 0) {
+            throw new DecodeException("Text blob missing NUL terminator.");
+        }
         return new Text.Builder(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
-                                ListPointer.elementCount(resolved.ref) - 1);
+                                size - 1);
 
     }
 

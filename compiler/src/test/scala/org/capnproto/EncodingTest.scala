@@ -379,6 +379,12 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("TextBuilderIntUnderflow") {
+    val message = new MessageBuilder();
+    val root = message.initRoot(TestAnyPointer.factory);
+    root.getAnyPointerField.initAs(org.capnproto.Data.factory, 0);
+    a [DecodeException] should be thrownBy root.getAnyPointerField.getAs(org.capnproto.Text.factory);
+  }
 
   test("VoidListAmplification") {
     val builder = new MessageBuilder();
