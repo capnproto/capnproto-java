@@ -1007,7 +1007,7 @@ private:
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal());\n") :
+             kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal()", defaultMaskParam, ");\n") :
              (typeBody.which() == schema::Type::VOID ?
               kj::strTree() :
               kj::strTree(spaces(indent), "    _set",
