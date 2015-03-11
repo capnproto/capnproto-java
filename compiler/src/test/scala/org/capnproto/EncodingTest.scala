@@ -221,6 +221,8 @@ class EncodingSuite extends FunSuite {
     val defaults = message.initRoot(TestDefaults.factory);
     TestUtil.checkDefaultMessage(defaults);
     TestUtil.checkDefaultMessage(defaults.asReader());
+    TestUtil.setDefaultMessage(defaults);
+    TestUtil.checkSettedDefaultMessage(defaults.asReader());
   }
 
   test("Groups") {

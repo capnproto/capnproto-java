@@ -21,6 +21,7 @@
 
 package org.capnproto;
 
+import org.capnproto.Text.Reader
 import org.scalatest.Matchers._;
 import org.capnproto.test.Test._;
 
@@ -280,6 +281,8 @@ object TestUtil {
     assert(builder.getUInt64Field() == 0xab54a98ceb1f0ad2L);
     assert(builder.getFloat32Field() == 1234.5f);
     assert(builder.getFloat64Field() == -123e45);
+    assert(builder.getEnumField() == TestEnum.CORGE);
+
     (builder.getTextField().toString()) should equal ("foo");
     (builder.getDataField().toArray()) should equal (Array(0x62,0x61,0x72));
   }
@@ -337,4 +340,35 @@ object TestUtil {
 
   }
 
+
+  def setDefaultMessage(builder : TestDefaults.Builder) {
+    builder.setBoolField(false);
+    builder.setInt8Field(-122);
+    builder.setInt16Field(-12344);
+    builder.setInt32Field(-12345677);
+    builder.setInt64Field(-123456789012344L);
+    builder.setUInt8Field(0xe9.toByte);
+    builder.setUInt16Field(45677.toShort);
+    builder.setUInt32Field(0xce0a6a13);
+    builder.setUInt64Field(0xab54a98ceb1f0ad1L);
+    builder.setFloat32Field(1234.4f);
+    builder.setFloat64Field(-123e44);
+    builder.setTextField(new Reader("bar"));
+    builder.setEnumField(TestEnum.QUX);
+  }
+
+  def checkSettedDefaultMessage(reader : TestDefaults.Reader) {
+    assert(reader.getBoolField() == false);
+    assert(reader.getInt8Field() == -122);
+    assert(reader.getInt16Field() == -12344);
+    assert(reader.getInt32Field() == -12345677);
+    assert(reader.getInt64Field() == -123456789012344L);
+    assert(reader.getUInt8Field() == 0xe9.toByte);
+    assert(reader.getUInt16Field() == 45677.toShort);
+    assert(reader.getUInt32Field() == 0xce0a6a13);
+    assert(reader.getUInt64Field() == 0xab54a98ceb1f0ad1L);
+    assert(reader.getFloat32Field() == 1234.4f);
+    assert(reader.getFloat64Field() == -123e44);
+    assert(reader.getEnumField() == TestEnum.QUX)
+  }
 }
