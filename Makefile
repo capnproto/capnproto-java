@@ -1,35 +1,26 @@
-CAPNP_CXX_FLAGS=$(shell pkg-config capnp --cflags --libs)
+all: local test build-compiler generate-benchmarks-schema generate-examples-schema
 
-ifeq ($(CAPNP_CXX_FLAGS),)
-$(warning "Warning: pkg-config failed to find compilation configuration for capnp.")
-$(warning "Falling back to a guess based on the location of the capnp executable.")
-CAPNP_PREFIX=$(shell dirname $(shell which capnp))/..
-CAPNP_CXX_FLAGS=-I $(CAPNP_PREFIX)/include -L $(CAPNP_PREFIX)/lib -lkj -lcapnp
-endif
+local: build-compiler build-packages
+	mkdir -p output
+	cp capnproto-runtime/target/*.jar output/
+	cp capnproto-compiler/bin/* output/
+	cp capnproto-compiler/schema/java.capnp output/
 
-CXX=g++
-CXX_FLAGS=-std=c++11 $(CAPNP_CXX_FLAGS)
+benchmark: generate-benchmarks-schema local
+	cd capnproto-benchmarks && $(MAKE)
+	rm -f capnproto-bencmarks/fifo
 
-CAPNPC_JAVA_SOURCES=compiler/src/main/cpp/capnpc-java.c++
+test:
+	mvn test
 
-.PHONY: all clean
+build-packages:
+	mvn package
 
-all : capnpc-java
+build-compiler:
+	cd capnproto-compiler && $(MAKE)
 
-clean :
-	rm -f capnpc-java capnpc-java.exe
+generate-benchmarks-schema: build-compiler
+	cd capnproto-benchmarks/src/main/schema && $(MAKE) benchmarkschema
 
-capnpc-java : $(CAPNPC_JAVA_SOURCES)
-	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -o capnpc-java
-
-
-MINGW_LIBS=~/src/capnproto/c++/build-mingw/.libs/libcapnp.a ~/src/capnproto/c++/build-mingw/.libs/libkj.a
-MINGW_CXX=i686-w64-mingw32-g++
-MINGW_FLAGS=-O2 -DNDEBUG -I/usr/local/include -std=c++11 -static -static-libgcc -static-libstdc++
-capnpc-java.exe : $(CAPNPC_JAVA_SOURCES)
-	$(MINGW_CXX) $(MINGW_FLAGS) $(CAPNPC_JAVA_SOURCES) $(MINGW_LIBS) -o capnpc-java.exe
-
-addressbook : capnpc-java
-	PWD=pwd
-	mkdir -p examples/src/main/generated
-	capnp compile -I$(PWD)/compiler/src/main/schema --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp
+generate-examples-schema: build-compiler
+	cd capnproto-examples/src/main/schema && $(MAKE) exampleschema
