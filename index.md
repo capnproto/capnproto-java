@@ -11,7 +11,7 @@ It has two main components:
 1. A C++ program `capnpc-java` that
 generates Java source code from Cap'n Proto [schemas](https://capnproto.org/language.html)
 by acting as a
-[plugin](https://capnproto.org/otherlang.html#how_to_write_compiler_plugins)
+[plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins)
 to the Cap'n Proto schema compiler.
 
 2. A Java package `org.capnproto` that provides runtime support for `capnpc-java`'s generated code.
