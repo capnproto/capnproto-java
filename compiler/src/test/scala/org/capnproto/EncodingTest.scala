@@ -438,6 +438,123 @@ class EncodingSuite extends FunSuite {
        root.getAnyPointerField().getAs(new StructList.Factory(TestAllTypes.factory));
   }
 
+  test("LongUint8List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 28) + 1;
+      val list = allTypes.initUInt8List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3);
+      list.get(length - 1) should equal (3);
+      allTypes.asReader().getUInt8List().get(length - 1) should equal (3);
+    }
+  }
+
+
+  test("LongUint16List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 27) + 1;
+      val list = allTypes.initUInt16List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3);
+      list.get(length - 1) should equal (3);
+      allTypes.asReader().getUInt16List().get(length - 1) should equal (3);
+    }
+  }
+
+  test("LongUint32List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 26) + 1;
+      val list = allTypes.initUInt32List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3);
+      list.get(length - 1) should equal (3);
+      allTypes.asReader().getUInt32List().get(length - 1) should equal (3);
+    }
+  }
+
+  test("LongUint64List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 25) + 1;
+      val list = allTypes.initUInt64List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3);
+      list.get(length - 1) should equal (3);
+      allTypes.asReader().getUInt64List().get(length - 1) should equal (3);
+    }
+  }
+
+  test("LongFloat32List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 26) + 1;
+      val list = allTypes.initFloat32List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3.14f);
+      list.get(length - 1) should equal (3.14f);
+      allTypes.asReader().getFloat32List().get(length - 1) should equal (3.14f);
+    }
+  }
+
+  test("LongFloat64List") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 25) + 1;
+      val list = allTypes.initFloat64List(length);
+      list.size() should equal (length);
+      list.set(length - 1, 3.14);
+      list.get(length - 1) should equal (3.14);
+      allTypes.asReader().getFloat64List().get(length - 1) should equal (3.14);
+    }
+  }
+
+  test("LongStructList") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 21) + 1;
+      val list = allTypes.initStructList(length);
+      list.size() should equal (length);
+      list.get(length - 1).setUInt8Field(3);
+      allTypes.asReader().getStructList().get(length - 1).getUInt8Field() should equal (3);
+    }
+  }
+
+  test("LongTextList") {
+    {
+      val message = new MessageBuilder();
+      val allTypes = message.initRoot(TestAllTypes.factory);
+      val length = (1 << 25) + 1;
+      val list = allTypes.initTextList(length);
+      list.size() should equal (length);
+      list.set(length - 1, new Text.Reader("foo"));
+      allTypes.asReader().getTextList().get(length - 1).toString() should equal ("foo");
+    }
+  }
+
+
+  test("LongListList") {
+    {
+      val message = new MessageBuilder();
+      val root = message.initRoot(TestLists.factory);
+      val length = (1 << 25) + 1;
+      val list = root.initStructListList(length);
+      list.size() should equal (length);
+      list.init(length - 1, 3);
+      list.get(length - 1).size() should equal (3);
+      root.asReader().getStructListList().get(length - 1).size() should equal (3);
+    }
+  }
+
 
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
