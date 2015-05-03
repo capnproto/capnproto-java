@@ -190,7 +190,7 @@ class EncodingSuite extends FunSuite {
     bar.set(0, 11)
     val revBar = root.getRev().getBar()
     revBar.setInt8Field(111)
-    var boolList = revBar.initBoolList(2)
+    val boolList = revBar.initBoolList(2)
     boolList.set(0, false)
     boolList.set(1, true)
 
