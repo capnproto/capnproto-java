@@ -107,6 +107,46 @@ public final class Serialize {
         return new MessageReader(segmentSlices, options);
     }
 
+    public static MessageReader read(ByteBuffer bb) throws IOException {
+        return read(bb, ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
+
+    public static MessageReader read(ByteBuffer bb, ReaderOptions options) throws IOException {
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+
+        int segmentCount = 1 + bb.getInt();
+        if (segmentCount > 512) {
+            throw new IOException("too many segments");
+        }
+
+        ByteBuffer[] segmentSlices = new ByteBuffer[segmentCount];
+
+        int segmentSizesBase = bb.position();
+        int segmentSizesSize = segmentCount * 4;
+
+        int align = Constants.BYTES_PER_WORD - 1;
+        int segmentBase = (segmentSizesBase + segmentSizesSize + align) & ~align;
+
+        int totalWords = 0;
+
+        for (int ii = 0; ii < segmentCount; ++ii) {
+            int segmentSize = bb.getInt(segmentSizesBase + ii * 4);
+
+            bb.position(segmentBase + totalWords * Constants.BYTES_PER_WORD);
+            segmentSlices[ii] = bb.slice();
+            segmentSlices[ii].limit(segmentSize * Constants.BYTES_PER_WORD);
+            segmentSlices[ii].order(ByteOrder.LITTLE_ENDIAN);
+
+            totalWords += segmentSize;
+        }
+
+        if (totalWords > options.traversalLimitInWords) {
+            throw new DecodeException("Message size exceeds traversal limit.");
+        }
+
+        return new MessageReader(segmentSlices, options);
+    }
+
     public static void write(WritableByteChannel outputChannel,
                              MessageBuilder message) throws IOException {
         ByteBuffer[] segments = message.getSegmentsForOutput();
