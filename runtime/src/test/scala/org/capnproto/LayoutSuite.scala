@@ -119,14 +119,11 @@ class LayoutSuite extends FunSuite {
   }
 
 
-  class BareStructBuilder(structSize : StructSize) extends StructBuilder.Factory[StructBuilder] {
+  class BareStructBuilder(val structSize : StructSize) extends StructBuilder.Factory[StructBuilder] {
 
     def constructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
                           dataSize: Int, pointerCount: Short) : StructBuilder = {
       return new StructBuilder(segment,data,pointers,dataSize,pointerCount)
-    }
-    def structSize() : StructSize = {
-      return structSize
     }
   }
 
@@ -138,7 +135,7 @@ class LayoutSuite extends FunSuite {
     val segment = new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
                                                               BuilderArena.SUGGESTED_ALLOCATION_STRATEGY))
     val factory = new BareStructBuilder(new StructSize(2, 4))
-    val builder =  WireHelpers.initStructPointer(factory, 0, segment, factory.structSize())
+    val builder =  WireHelpers.initStructPointer(factory, 0, segment, factory.structSize)
     setupStruct(builder)
     checkStruct(builder)
   }
