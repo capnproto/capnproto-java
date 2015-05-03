@@ -30,7 +30,7 @@ object TestUtil {
 
   def data(str : String) : Array[Byte] = {
     try {
-      return str.getBytes("ISO_8859-1")
+      str.getBytes("ISO_8859-1")
     } catch {
       case e: Exception => throw new Error("could not decode")
     }

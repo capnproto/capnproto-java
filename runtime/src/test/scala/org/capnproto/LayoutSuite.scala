@@ -29,7 +29,7 @@ class LayoutSuite extends FunSuite {
   class BareStructReader extends StructReader.Factory[StructReader] {
     def constructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
                         dataSize: Int, pointerCount: Short, nestingLimit:Int) : StructReader = {
-      return new StructReader(segment,data,pointers,dataSize,pointerCount,nestingLimit)
+      new StructReader(segment,data,pointers,dataSize,pointerCount,nestingLimit)
     }
   }
 
@@ -123,7 +123,7 @@ class LayoutSuite extends FunSuite {
 
     def constructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
                           dataSize: Int, pointerCount: Short) : StructBuilder = {
-      return new StructBuilder(segment,data,pointers,dataSize,pointerCount)
+      new StructBuilder(segment,data,pointers,dataSize,pointerCount)
     }
   }
 
