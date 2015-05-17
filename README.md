@@ -25,3 +25,5 @@ There are two components to this project:
 
 - `make` - builds the compiler, runtime, generates the code for tests and benchmarks, and runs the tests.
 - `make benchmark` - runs various benchmarks cases.
+
+Travis CI is set up to build some sample schema, and run tests via Maven. 
