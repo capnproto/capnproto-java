@@ -8,7 +8,7 @@ ifeq ($(CAPNP_CXX_FLAGS),)
 endif
 
 CXX=g++
-CXX_FLAGS=-std=c++11 $(CAPNP_CXX_FLAGS)
+CXX_FLAGS=-std=gnu++11 $(CAPNP_CXX_FLAGS)
 
 CAPNPC_JAVA_SOURCES=src/capnpc-java.c++
 
@@ -25,7 +25,7 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 
 MINGW_LIBS=~/src/capnproto/c++/build-mingw/.libs/libcapnp.a ~/src/capnproto/c++/build-mingw/.libs/libkj.a
 MINGW_CXX=i686-w64-mingw32-g++
-MINGW_FLAGS=-O2 -DNDEBUG -I/usr/local/include -std=c++11 -static -static-libgcc -static-libstdc++
+MINGW_FLAGS=-O2 -DNDEBUG -I/usr/local/include -std=gnu++11 -static -static-libgcc -static-libstdc++
 capnpc-java.exe : $(CAPNPC_JAVA_SOURCES)
 	mkdir -p bin
 	$(MINGW_CXX) $(MINGW_FLAGS) $(CAPNPC_JAVA_SOURCES) $(MINGW_LIBS) -o bin/capnpc-java.exe
