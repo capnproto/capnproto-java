@@ -8,7 +8,7 @@ local: build-compiler build-packages
 
 benchmark: generate-benchmarks-schema local
 	cd capnproto-benchmarks && $(MAKE)
-	rm -f capnproto-bencmarks/fifo
+	rm -f capnproto-benchmarks/fifo
 
 test:
 	mvn test
