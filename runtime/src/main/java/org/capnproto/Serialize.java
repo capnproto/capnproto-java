@@ -147,6 +147,31 @@ public final class Serialize {
         return new MessageReader(segmentSlices, options);
     }
 
+    public static long computeSerializedSizeInWords(MessageBuilder message)
+    {
+        final ByteBuffer[] segments = message.getSegmentsForOutput();
+
+        // From the capnproto documentation:
+        // "When transmitting over a stream, the following should be sent..."
+        long bytes = 0;
+        // "(4 bytes) The number of segments, minus one..."
+        bytes += 4;
+        // "(N * 4 bytes) The size of each segment, in words."
+        bytes += segments.length * 4;
+        // "(0 or 4 bytes) Padding up to the next word boundary."
+        if (bytes % 8 != 0) {
+            bytes += 4;
+        }
+
+        // The content of each segment, in order.
+        for (int i = 0; i < segments.length; ++i) {
+            final ByteBuffer s = segments[i];
+            bytes += s.limit();
+        }
+
+        return bytes / 8;
+    }
+
     public static void write(WritableByteChannel outputChannel,
                              MessageBuilder message) throws IOException {
         ByteBuffer[] segments = message.getSegmentsForOutput();
