@@ -589,6 +589,16 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("SerializedSize") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestAnyPointer.factory)
+    root.getAnyPointerField().setAs(Text.factory, new Text.Reader("12345"))
+
+    // one word for segment table, one for the root pointer,
+    // one for the body of the TestAnyPointer struct,
+    // and one for the body of the Text.
+    Serialize.computeSerializedSizeInWords(builder) should equal (4)
+  }
 
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
