@@ -147,8 +147,7 @@ public final class Serialize {
         return new MessageReader(segmentSlices, options);
     }
 
-    public static long computeSerializedSizeInWords(MessageBuilder message)
-    {
+    public static long computeSerializedSizeInWords(MessageBuilder message) {
         final ByteBuffer[] segments = message.getSegmentsForOutput();
 
         // From the capnproto documentation:
@@ -169,7 +168,7 @@ public final class Serialize {
             bytes += s.limit();
         }
 
-        return bytes / 8;
+        return bytes / Constants.BYTES_PER_WORD;
     }
 
     public static void write(WritableByteChannel outputChannel,
