@@ -563,6 +563,42 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("StructSetters") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestAllTypes.factory)
+    TestUtil.initTestMessage(root)
+
+    {
+      val builder2 = new MessageBuilder()
+      builder2.setRoot(TestAllTypes.factory, root.asReader())
+      TestUtil.checkTestMessage(builder2.getRoot(TestAllTypes.factory))
+    }
+
+    {
+      val builder2 = new MessageBuilder()
+      val root2 = builder2.getRoot(TestAllTypes.factory)
+      root2.setStructField(root.asReader())
+      TestUtil.checkTestMessage(root2.getStructField())
+    }
+
+    {
+      val builder2 = new MessageBuilder()
+      val root2 = builder2.getRoot(TestAnyPointer.factory)
+      root2.getAnyPointerField().setAs(TestAllTypes.factory, root.asReader())
+      TestUtil.checkTestMessage(root2.getAnyPointerField.getAs(TestAllTypes.factory))
+    }
+  }
+
+  test("SerializedSize") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestAnyPointer.factory)
+    root.getAnyPointerField().setAs(Text.factory, new Text.Reader("12345"))
+
+    // one word for segment table, one for the root pointer,
+    // one for the body of the TestAnyPointer struct,
+    // and one for the body of the Text.
+    Serialize.computeSerializedSizeInWords(builder) should equal (4)
+  }
 
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),

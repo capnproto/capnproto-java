@@ -40,11 +40,7 @@ public final class MessageBuilder {
                                       allocationStrategy);
     }
 
-    public <T> T getRoot(StructBuilder.Factory<T> factory) {
-        throw new Error("unimplemented");
-    }
-
-    public <T> T initRoot(FromPointerBuilder<T> factory) {
+    private AnyPointer.Builder getRootInternal() {
         SegmentBuilder rootSegment = this.arena.segments.get(0);
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
@@ -54,10 +50,22 @@ public final class MessageBuilder {
             if (location != 0) {
                 throw new Error("First allocated word of new segment was not at offset 0");
             }
-           return factory.initFromPointerBuilder(rootSegment, location, 0);
+            return new AnyPointer.Builder(rootSegment, location);
         } else {
-           return factory.initFromPointerBuilder(rootSegment, 0, 0);
+            return new AnyPointer.Builder(rootSegment, 0);
         }
+    }
+
+    public <T> T getRoot(FromPointerBuilder<T> factory) {
+        return this.getRootInternal().getAs(factory);
+    }
+
+    public <T, U> void setRoot(SetPointerBuilder<T, U> factory, U reader) {
+        this.getRootInternal().setAs(factory, reader);
+    }
+
+    public <T> T initRoot(FromPointerBuilder<T> factory) {
+        return this.getRootInternal().initAs(factory);
     }
 
     public final java.nio.ByteBuffer[] getSegmentsForOutput() {
