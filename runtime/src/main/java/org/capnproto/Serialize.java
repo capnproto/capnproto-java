@@ -112,7 +112,7 @@ public final class Serialize {
     }
 
     /*
-     * Upon return, `bb.position()` we be at the end of the message.
+     * Upon return, `bb.position()` will be at the end of the message.
      */
     public static MessageReader read(ByteBuffer bb, ReaderOptions options) throws IOException {
         bb.order(ByteOrder.LITTLE_ENDIAN);
