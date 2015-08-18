@@ -111,6 +111,9 @@ public final class Serialize {
         return read(bb, ReaderOptions.DEFAULT_READER_OPTIONS);
     }
 
+    /*
+     * Upon return, `bb.position()` we be at the end of the message.
+     */
     public static MessageReader read(ByteBuffer bb, ReaderOptions options) throws IOException {
         bb.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -139,6 +142,7 @@ public final class Serialize {
 
             totalWords += segmentSize;
         }
+        bb.position(segmentBase + totalWords * Constants.BYTES_PER_WORD);
 
         if (totalWords > options.traversalLimitInWords) {
             throw new DecodeException("Message size exceeds traversal limit.");
