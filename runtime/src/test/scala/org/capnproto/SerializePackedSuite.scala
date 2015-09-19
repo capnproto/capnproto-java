@@ -51,8 +51,6 @@ class SerializePackedSuite extends FunSuite {
 
       (bytes) should equal (unpacked)
     }
-
-
   }
 
   test("SimplePacking") {
@@ -80,5 +78,12 @@ class SerializePackedSuite extends FunSuite {
 
     expectPacksTo(Array(0,0,0,0,2,0,0,0, 0,0,0,0,0,0,1,0, 0,0,0,0,0,0,0,0),
                   Array(0x10,2, 0x40,1, 0,0))
+
+    expectPacksTo(Array.tabulate[Byte](8 * 200)((n) => 0),
+                  Array(0, 199.toByte))
+
+    expectPacksTo(Array.tabulate[Byte](8 * 200)((n) => 1),
+                  Array.concat(Array(0xff.toByte, 1,1,1,1,1,1,1,1, 199.toByte),
+                               Array.tabulate[Byte](8 * 199)((n) => 1)))
   }
 }
