@@ -76,7 +76,7 @@ public final class PackedInputStream implements ReadableByteChannel {
                     }
                 }
 
-                if (inBuf.remaining() ==0 && (tag == 0 || tag == (byte)0xff)) {
+                if (inBuf.remaining() == 0 && (tag == 0 || tag == (byte)0xff)) {
                     inBuf = this.inner.getReadBuffer();
                 }
             } else {
@@ -94,7 +94,7 @@ public final class PackedInputStream implements ReadableByteChannel {
                     throw new Error("Should always have non-empty buffer here.");
                 }
 
-                int runLength = inBuf.get() * 8;
+                int runLength = (0xff & (int)inBuf.get()) * 8;
 
                 if (runLength > outEnd - outPtr) {
                     throw new Error("Packed input did not end cleanly on a segment boundary");
@@ -105,8 +105,7 @@ public final class PackedInputStream implements ReadableByteChannel {
                 }
             } else if (tag == (byte)0xff) {
 
-                int runLength = inBuf.get() * 8;
-
+                int runLength = (0xff & (int)inBuf.get()) * 8;
 
                 if (inBuf.remaining() >= runLength) {
                     //# Fast path.
