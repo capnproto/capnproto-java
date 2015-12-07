@@ -65,7 +65,7 @@ object Build extends sbt.Build {
   val compileTestSchema = taskKey[Unit]("Run capnpc-java on test schema")
   val compileTestSchemaTask = compileTestSchema := {
     val result0 = "mkdir -p compiler/src/test/generated".!!
-    val result = "capnp compile -I compiler/src/main/schema/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp".!!
+    val result = "capnp compile -I compiler/src/main/schema/  --src-prefix=compiler/src/test/schema/ -o./capnpc-java:compiler/src/test/generated compiler/src/test/schema/test.capnp compiler/src/test/schema/test-import.capnp".!!
     println(s"**** CodeGen for test.capnp started\n$result\n**** CodeGen complete.");
   }
 

@@ -202,12 +202,17 @@ private:
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
+      kj::String className;
+      kj::String package;
       for (auto annotation: node.getAnnotations()) {
         if (annotation.getId() == OUTER_CLASSNAME_ANNOTATION_ID) {
-          return kj::strTree("", toTitleCase(annotation.getValue().getText()));
+          className = toTitleCase(annotation.getValue().getText());
+        }
+        if (annotation.getId() == PACKAGE_ANNOTATION_ID) {
+          package = kj::str(annotation.getValue().getText());
         }
       }
-      return kj::strTree(" ");//kj::strTree(outerClassName);
+      return kj::strTree(kj::mv(package), ".", kj::mv(className));
     } else {
       Schema parent = schemaLoader.get(node.getScopeId());
       for (auto nested: parent.getProto().getNestedNodes()) {

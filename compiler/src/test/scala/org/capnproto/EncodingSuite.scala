@@ -600,6 +600,15 @@ class EncodingSuite extends FunSuite {
     Serialize.computeSerializedSizeInWords(builder) should equal (4)
   }
 
+  test("Import") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(org.capnproto.testimport.TestImport.Foo.factory)
+    val field = root.initImportedStruct()
+    TestUtil.initTestMessage(field)
+    TestUtil.checkTestMessage(field)
+    TestUtil.checkTestMessage(field.asReader())
+  }
+
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                 message)
