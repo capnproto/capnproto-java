@@ -122,7 +122,7 @@ object Shared {
     },
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
-    version := "0.1.0-SNAPSHOT",
+    version := "0.1.0",
     autoScalaLibrary := false,
     publishArtifact in Test := false,
     autoScalaLibrary in test := false,
