@@ -342,11 +342,11 @@ final class WireHelpers {
             } else {
                 WirePointer.setKindAndTarget(dstSegment.buffer, dstOffset,
                                              WirePointer.kind(src), srcTargetOffset);
-
-                // We can just copy the upper 32 bits.
-                dstSegment.buffer.putInt(dstOffset * Constants.BYTES_PER_WORD + 4,
-                                         srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
             }
+            // We can just copy the upper 32 bits.
+            dstSegment.buffer.putInt(dstOffset * Constants.BYTES_PER_WORD + 4,
+                                     srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
+
         } else {
             //# Need to create a far pointer. Try to allocate it in the same segment as the source,
             //# so that it doesn't need to be a double-far.
