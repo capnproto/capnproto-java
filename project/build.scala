@@ -108,7 +108,7 @@ object Shared {
       "-unchecked",
       "-feature"
     ),
-    javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
+    javacOptions in (Compile, compile) ++= Seq("-source", "1.7", "-target", "1.7"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
     shellPrompt := ShellPrompt.buildShellPrompt,
@@ -123,7 +123,7 @@ object Shared {
     },
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
-    version := "0.1.0",
+    version := "0.1.1",
     autoScalaLibrary := false,
     publishArtifact in Test := false,
     autoScalaLibrary in test := false,
