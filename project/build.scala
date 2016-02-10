@@ -108,6 +108,7 @@ object Shared {
       "-unchecked",
       "-feature"
     ),
+    javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
     shellPrompt := ShellPrompt.buildShellPrompt,
