@@ -18,4 +18,5 @@ script:
   - make CXX=g++-4.8 CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
   - make addressbook
   - sbt test
+  - sbt doc
 
