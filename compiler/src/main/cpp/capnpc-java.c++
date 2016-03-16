@@ -1009,7 +1009,7 @@ private:
               kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+            spaces(indent), "  public final Builder set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
             (typeBody.which() == schema::Type::ENUM ?
              kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal()", defaultMaskParam, ");\n") :
@@ -1017,6 +1017,7 @@ private:
               kj::strTree() :
               kj::strTree(spaces(indent), "    _set",
                           toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
+            spaces(indent), "    return this;\n",
             spaces(indent), "  }\n",
             "\n")
       };
@@ -1113,16 +1114,18 @@ private:
                     return kj::strTree(p, "_Reader");
                   }, ", "),
                 "> ")),
-             "void set", titleCase,
+             "Builder set", titleCase,
              "(org.capnproto.SetPointerBuilder<", builderType, ", ", readerType, "> factory, ", readerType, " value) {\n",
              unionDiscrim.set,
              spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
+             spaces(indent), "    return this;\n",
              spaces(indent), "  }\n"
              ) :
            kj::strTree(
-             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+             spaces(indent), "  public final Builder set", titleCase, "(", readerType, " value) {\n",
              unionDiscrim.set,
              spaces(indent), "    _setPointerField(", factoryArg, ",", offset, ", value);\n",
+             spaces(indent), "    return this;\n",
              spaces(indent), "  }\n")),
 
           spaces(indent), "  public final ", builderType, " init", titleCase, "() {\n",
@@ -1166,14 +1169,16 @@ private:
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+          spaces(indent), "  public final Builder set", titleCase, "(", readerType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _setPointerField(", factory, ", ", offset, ", value);\n",
+          spaces(indent), "    return this;\n",
           spaces(indent), "  }\n",
-          spaces(indent), "  public final void set", titleCase, "(", setterInputType, " value) {\n",
+          spaces(indent), "  public final Builder set", titleCase, "(", setterInputType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _setPointerField(", factory, ", ", offset, ", new ",
           readerType, "(value));\n",
+          spaces(indent), "    return this;\n",
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", builderType, " init", titleCase, "(int size) {\n",
@@ -1212,8 +1217,9 @@ private:
             spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+            spaces(indent), "  public final Builder set", titleCase, "(", readerType, " value) {\n",
             spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
+            spaces(indent), "    return this;\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public final ", builderType,
