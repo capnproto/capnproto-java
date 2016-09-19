@@ -1186,7 +1186,16 @@ private:
       kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0") : kj::str(
         "Schemas.b_", kj::hex(typeId), ", ", defaultOffset);
 
+      auto typeParamVec = getTypeParameters(field.getContainingStruct());
       kj::String listFactory = makeFactoryArg(field.getType());
+
+      bool isGeneric = false;
+      {
+        auto type = field.getType().asList().getElementType();
+        if (type.isStruct()) {
+          isGeneric = type.asStruct().getProto().getIsGeneric();
+        }
+      }
 
       return FieldText {
         kj::strTree(
@@ -1195,10 +1204,28 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", readerType,
-            " get", titleCase, "() {\n",
-            spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
-            spaces(indent), "  }\n",
+            (isGeneric ?
+             kj::strTree(
+               spaces(indent), "  public final ",
+               (typeParamVec.size() == 0 ? kj::strTree() :
+                kj::strTree(
+                  "<",
+                  kj::StringTree(KJ_MAP(p, typeParamVec) {
+                      return kj::strTree(p, "_Builder");
+                    }, ", "),
+                  "> ")),
+               readerType,
+               " get", titleCase, "( org.capnproto.ListFactory<", builderType, ", ", readerType, "> factory) {\n",
+               spaces(indent), "    return _getPointerField(factory,", offset, ");\n",
+               spaces(indent), "  }\n"
+               ) :
+             kj::strTree(
+               spaces(indent), "  public final ", readerType,
+               " get", titleCase, "() {\n",
+               spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
+               spaces(indent), "  }\n"
+               )
+              ),
             "\n"),
 
         kj::strTree(
@@ -1207,19 +1234,75 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public final ", builderType,
-            " get", titleCase, "() {\n",
-            spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
-            spaces(indent), "  }\n",
+            (isGeneric ?
+             kj::strTree(
+               spaces(indent), "  public final ",
+               (typeParamVec.size() == 0 ? kj::strTree() :
+                kj::strTree(
+                  "<",
+                  kj::StringTree(KJ_MAP(p, typeParamVec) {
+                      return kj::strTree(p, "_Reader");
+                    }, ", "),
+                  "> ")),
+               builderType,
+               " get", titleCase, "( org.capnproto.ListFactory<", builderType, ", ", readerType, "> factory) {\n",
+               spaces(indent), "    return _getPointerField(factory,", offset, ");\n",
+               spaces(indent), "  }\n"
+               ) :
+             kj::strTree(
+               spaces(indent), "  public final ", builderType,
+               " get", titleCase, "() {\n",
+               spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
+               spaces(indent), "  }\n"
+               )
+              ),
 
-            spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
-            spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
-            spaces(indent), "  }\n",
+            (isGeneric ?
+             kj::strTree(
+               spaces(indent), "  public final ",
+               (typeParamVec.size() == 0 ? kj::strTree() :
+                kj::strTree(
+                  "<",
+                  kj::StringTree(KJ_MAP(p, typeParamVec) {
+                      return kj::strTree(p, "_Reader");
+                    }, ", "),
+                  "> ")),
+               "void set", titleCase,
+               "(org.capnproto.SetPointerBuilder<", builderType, ", ", readerType, "> factory, ", readerType, " value) {\n",
+               spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
+               spaces(indent), "  }\n"
+               ) :
+             kj::strTree(
+               spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+               spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
+               spaces(indent), "  }\n"
+               )
+              ),
 
-            spaces(indent), "  public final ", builderType,
-            " init", titleCase, "(int size) {\n",
-            spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
-            spaces(indent), "  }\n"),
+            (isGeneric ?
+             kj::strTree(
+               spaces(indent), "  public final ",
+               (typeParamVec.size() == 0 ? kj::strTree() :
+                kj::strTree(
+                  "<",
+                  kj::StringTree(KJ_MAP(p, typeParamVec) {
+                      return kj::strTree(p, "_Reader");
+                    }, ", "),
+                  "> ")),
+               builderType,
+               " init", titleCase, "( org.capnproto.ListFactory<", builderType, ", ", readerType, "> factory, int size) {\n",
+               spaces(indent), "    return _initPointerField(factory, ", offset, ", size);\n",
+               spaces(indent), "  }\n"
+               ) :
+             kj::strTree(
+               spaces(indent), "  public final ", builderType,
+               " init", titleCase, "(int size) {\n",
+               spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
+               spaces(indent), "  }\n")
+              )
+          ),
+
+
       };
     } else {
       KJ_UNREACHABLE;

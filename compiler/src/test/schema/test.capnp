@@ -377,6 +377,16 @@ struct TestUseGenerics  {
   listOfGenerics @11 :List(TestGenerics(TestAllTypes, Text));
 }
 
+struct GenericMap(K, V)
+{
+  entries @0 :List(Entry);
+
+  struct Entry
+  {
+    key @0 :K;
+    value @1 :V;
+  }
+}
 
 struct TestEmptyStruct {}
 

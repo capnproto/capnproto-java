@@ -609,6 +609,47 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(field.asReader())
   }
 
+  test("GenericMap") {
+    val builder = new MessageBuilder()
+    val mapFactory = new GenericMap.Factory(Text.factory, TestAllTypes.factory)
+    val entryFactory = new StructList.Factory(new GenericMap.Entry.Factory(Text.factory, TestAllTypes.factory));
+    val root = builder.initRoot(mapFactory)
+
+    {
+      val entries = root.initEntries(entryFactory, 3);
+
+      val entry0 = entries.get(0)
+      entry0.setKey(Text.factory, new Text.Reader("foo"))
+      val value0 = entry0.initValue()
+      value0.setInt64Field(101);
+
+      val entry1 = entries.get(1)
+      entry1.setKey(Text.factory, new Text.Reader("bar"))
+      val value1 = entry1.initValue()
+      value1.setInt64Field(202);
+
+      val entry2 = entries.get(2)
+      entry2.setKey(Text.factory, new Text.Reader("baz"))
+      val value2 = entry2.initValue()
+      value2.setInt64Field(303);
+    }
+
+    {
+      val entries = root.asReader(mapFactory).getEntries(entryFactory)
+      val entry0 = entries.get(0)
+      assert(entry0.getKey().toString() == "foo")
+      assert(entry0.getValue().getInt64Field() == 101)
+
+      val entry1 = entries.get(1)
+      assert(entry1.getKey().toString() == "bar")
+      assert(entry1.getValue().getInt64Field() == 202)
+
+      val entry2 = entries.get(2)
+      assert(entry2.getKey().toString() == "baz")
+      assert(entry2.getValue().getInt64Field == 303)
+    }
+  }
+
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                 message)
