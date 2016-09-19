@@ -386,6 +386,11 @@ struct GenericMap(K, V)
     key @0 :K;
     value @1 :V;
   }
+
+ # Some other things that might cause problems.
+ a @1 :List(TestAllTypes);
+ b @2 :List(List(Entry));
+ c @3 :List(List(List(Entry)));
 }
 
 struct TestEmptyStruct {}

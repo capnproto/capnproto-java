@@ -1191,7 +1191,11 @@ private:
 
       bool isGeneric = false;
       {
-        auto type = field.getType().asList().getElementType();
+        auto type = field.getType();
+        while (type.isList()) {
+          type = type.asList().getElementType();
+        }
+
         if (type.isStruct()) {
           isGeneric = type.asStruct().getProto().getIsGeneric();
         }
