@@ -1177,6 +1177,7 @@ private:
           spaces(indent), "  }\n",
 
           spaces(indent), "  public final ", builderType, " init", titleCase, "(int size) {\n",
+          unionDiscrim.set,
           spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
       };
@@ -1273,11 +1274,13 @@ private:
                   "> ")),
                "void set", titleCase,
                "(org.capnproto.SetPointerBuilder<", builderType, ", ", readerType, "> factory, ", readerType, " value) {\n",
+               unionDiscrim.set,
                spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
                spaces(indent), "  }\n"
                ) :
              kj::strTree(
                spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
+               unionDiscrim.set,
                spaces(indent), "    _setPointerField(", listFactory, ", ", offset, ", value);\n",
                spaces(indent), "  }\n"
                )
@@ -1295,12 +1298,14 @@ private:
                   "> ")),
                builderType,
                " init", titleCase, "( org.capnproto.ListFactory<", builderType, ", ", readerType, "> factory, int size) {\n",
+               unionDiscrim.set,
                spaces(indent), "    return _initPointerField(factory, ", offset, ", size);\n",
                spaces(indent), "  }\n"
                ) :
              kj::strTree(
                spaces(indent), "  public final ", builderType,
                " init", titleCase, "(int size) {\n",
+               unionDiscrim.set,
                spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
                spaces(indent), "  }\n")
               )
