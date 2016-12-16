@@ -230,6 +230,17 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkSettedDefaultMessage(defaults.asReader())
   }
 
+  test("Unions") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestUnion.factory)
+    val u0 = root.initUnion0()
+    u0.initU0f1sp(10)
+    assert(u0.which() == TestUnion.Union0.Which.U0F1SP)
+
+    u0.initPrimitiveList(10)
+    assert(u0.which() == TestUnion.Union0.Which.PRIMITIVE_LIST)
+  }
+
   test("Groups") {
     val builder = new MessageBuilder()
     val root = builder.initRoot(TestGroups.factory)

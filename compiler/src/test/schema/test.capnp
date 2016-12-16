@@ -180,6 +180,8 @@ struct TestUnion {
     u0f1s32 @15: Int32;
     u0f1s64 @16: Int64;
     u0f1sp  @17: Text;
+
+    primitiveList @56: List(UInt32);
   }
 
   # Pack one bit in order to make pathological situation for union1.
@@ -392,6 +394,14 @@ struct GenericMap(K, V)
  b @2 :List(List(Entry));
  c @3 :List(List(List(Entry)));
 }
+
+# TODO. this is currently broken
+#struct TestGenericUnion(T) {
+#  union0: union {
+#    nothing @0 :Void;
+#    something @1 :T;
+#  }
+#}
 
 struct TestEmptyStruct {}
 
