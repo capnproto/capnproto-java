@@ -214,9 +214,6 @@ class EncodingSuite extends FunSuite {
     newVersion.get(0).getOld1() should equal (91)
     newVersion.get(0).getOld2().toString() should equal ("hello!!")
 
-    Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
-                    message)
-
     val segments1 = message.getSegmentsForOutput()
     segments(0).limit() should equal (6 * 8)
     for (ii <- 8 to (5 * 8) - 1) {
