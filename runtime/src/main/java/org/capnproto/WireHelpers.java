@@ -1121,7 +1121,7 @@ final class WireHelpers {
             }
 
         case WirePointer.FAR :
-            throw new Error("Unexpected FAR pointer.");
+            throw new DecodeException("Unexpected FAR pointer.");
         case WirePointer.OTHER :
             throw new Error("copyPointer is unimplemented for OTHER pointers");
         }
