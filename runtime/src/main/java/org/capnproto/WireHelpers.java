@@ -363,7 +363,7 @@ final class WireHelpers {
                 FarPointer.setSegmentId(farSegment.buffer, landingPadOffset, srcSegment.id);
 
                 WirePointer.setKindWithZeroOffset(farSegment.buffer, landingPadOffset + 1,
-                                                  WirePointer.kind(srcTarget));
+                                                  WirePointer.kind(src));
 
                 farSegment.buffer.putInt((landingPadOffset + 1) * Constants.BYTES_PER_WORD + 4,
                                          srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
@@ -659,8 +659,9 @@ final class WireHelpers {
             }
 
             //# Zero out old location. See explanation in getWritableStructPointer().
+            //# Make sure to include the tag word.
             memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
-                   (byte)0, oldStep * elementCount * Constants.BYTES_PER_WORD);
+                   (byte)0, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
 
             return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                             elementCount,

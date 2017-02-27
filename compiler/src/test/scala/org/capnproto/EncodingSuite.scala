@@ -180,6 +180,51 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("StructListUpgradeDoubleFar") {
+    val bytes = Array[Byte](
+            1,0,0,0,0x1f,0,0,0, // list, inline composite, 3 words
+            4, 0, 0, 0, 1, 0, 2, 0, // struct tag. 1 element, 1 word data, 2 pointers.
+            91,0,0,0,0,0,0,0, // data: 91
+            0x05,0,0,0, 0x42,0,0,0, // list pointer, offset 1, type = BYTE, length 8.
+            0,0,0,0,0,0,0,0, // null pointer
+            0x68,0x65,0x6c,0x6c,0x6f,0x21,0x21,0) // "hello!!"
+
+    val segment = java.nio.ByteBuffer.wrap(bytes)
+    segment.order(java.nio.ByteOrder.LITTLE_ENDIAN)
+    val messageReader = new MessageReader(Array(segment), ReaderOptions.DEFAULT_READER_OPTIONS)
+
+    val oldFactory = new StructList.Factory(TestOldVersion.factory)
+    val oldVersion = messageReader.getRoot(oldFactory)
+
+    oldVersion.size() should equal (1)
+    oldVersion.get(0).getOld1() should equal (91)
+    oldVersion.get(0).getOld2().toString() should equal ("hello!!")
+
+    // Make the first segment exactly large enough to fit the original message.
+    // This leaves no room for a far pointer landing pad in the first segment.
+    val message = new MessageBuilder(6)
+    message.setRoot(oldFactory, oldVersion)
+
+    val segments = message.getSegmentsForOutput()
+    segments.length should equal (1)
+    segments(0).limit() should equal (6 * 8)
+
+    val newVersion = message.getRoot(new StructList.Factory(TestNewVersion.factory))
+    newVersion.size() should equal (1)
+    newVersion.get(0).getOld1() should equal (91)
+    newVersion.get(0).getOld2().toString() should equal ("hello!!")
+
+    Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
+                    message)
+
+    val segments1 = message.getSegmentsForOutput()
+    segments(0).limit() should equal (6 * 8)
+    for (ii <- 8 to (5 * 8) - 1) {
+      // Check the the old list, including the tag, was zeroed.
+      segments(0).get(ii) should equal (0)
+    }
+  }
+
   test("Generics") {
     val message = new MessageBuilder()
     val factory = TestGenerics.newFactory(TestAllTypes.factory, Text.factory)
