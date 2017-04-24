@@ -519,7 +519,7 @@ final class WireHelpers {
                                         byte elementSize,
                                         SegmentReader defaultSegment,
                                         int defaultOffset) {
-        assert elementSize != ElementSize.INLINE_COMPOSITE : "Use getStructList{Element,Field} for structs";
+        assert elementSize != ElementSize.INLINE_COMPOSITE : "Use getWritableStructListPointer() for struct lists";
 
         long origRef = origSegment.get(origRefOffset);
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
