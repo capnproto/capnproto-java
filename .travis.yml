@@ -1,21 +1,31 @@
+dist: trusty
+sudo: false
 language: java
+env:
+  global:
+    - export PATH="$PATH:$HOME/bin"
+    - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib"
+    - export PKG_CONFIG_PATH="$HOME/lib/pkgconfig"
+addons:
+  apt:
+    packages:
+      - gcc
+      - g++
+install:
+  - curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
+  - tar zxf capnproto-c++-0.5.3.tar.gz
+  - cd capnproto-c++-0.5.3
+  - ./configure --prefix=$HOME
+  - make -j3
+  - make install
+  - cd ../
+
 jdk:
   - oraclejdk8
   - oraclejdk7
   - openjdk7
-before_install:
-  - yes | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-install:
-  - sudo apt-get install g++-4.8 gcc-4.8
-  - export CC=gcc-4.8
-  - export CXX=g++-4.8
-  - curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
-  - tar zxf capnproto-c++-0.5.3.tar.gz
-  - cd capnproto-c++-0.5.3
-  - ./configure && make -j5 && sudo make install && cd ..
 script:
-  - make CXX=g++-4.8 CXX_FLAGS="-std=c++11 -I/usr/local/include -L/usr/local/lib -lcapnp -lkj"
+  - make
   - make addressbook
   - sbt test
   - sbt doc
