@@ -138,8 +138,8 @@ object Shared {
         </license>
       </licenses>
       <scm>
-        <url>git@github.com:dwrensha/capnproto-java.git</url>
-        <connection>scm:git@github.com:dwrensha/capnproto-java.git</connection>
+        <url>git@github.com:capnproto/capnproto-java.git</url>
+        <connection>scm:git@github.com:capnproto/capnproto-java.git</connection>
       </scm>
       <developers>
         <developer>
