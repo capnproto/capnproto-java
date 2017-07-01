@@ -6,4 +6,4 @@
 and capabilities,
 and capnproto-java is a work-in-progress pure Java implementation.
 
-[Read more here.](https://capnproto.github.io/capnproto-java/index.html)
+[Read more here.](https://dwrensha.github.io/capnproto-java/index.html)
