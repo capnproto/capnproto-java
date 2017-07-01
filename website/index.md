@@ -72,7 +72,7 @@ Running `sbt test` should run the test suite.
 
 We can define types in a schema like this:
 
-```
+{% highlight capnp %}
 @0x9eb32e19f86ee174;
 using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.examples");
@@ -107,7 +107,7 @@ struct Person {
 struct AddressBook {
   people @0 :List(Person);
 }
-```
+{% endhighlight %}
 
 Then, after running the schema compiler,
 we can then use those types from Java like this:

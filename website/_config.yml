@@ -1,4 +1,5 @@
 name: Cap'n Proto for Java
-markdown: rdiscount
+markdown: kramdown
+highlighter: rouge
 baseurl: /capnproto-java
 url: http://dwrensha.github.io/capnproto-java
