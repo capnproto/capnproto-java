@@ -151,7 +151,7 @@ public class StructReader {
     }
 
     protected final boolean _pointerFieldIsNull(int ptrIndex) {
-        return this.segment.buffer.getLong((this.pointers + ptrIndex) * Constants.BYTES_PER_WORD) == 0;
+        return ptrIndex >= this.pointerCount || this.segment.buffer.getLong((this.pointers + ptrIndex) * Constants.BYTES_PER_WORD) == 0;
     }
 
     protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex) {
