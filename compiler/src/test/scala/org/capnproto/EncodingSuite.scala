@@ -98,6 +98,29 @@ class EncodingSuite extends FunSuite {
     root.getInt16Field() should equal (32767)
   }
 
+  test("UpgradeStruct") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestAnyPointer.factory)
+
+    {
+      val oldVersion = root.getAnyPointerField().initAs(TestOldVersion.factory)
+      oldVersion.setOld1(123)
+      oldVersion.setOld2("foo")
+      val sub = oldVersion.initOld3()
+      sub.setOld1(456)
+      sub.setOld2("bar")
+    }
+
+    {
+      val newVersion = root.getAnyPointerField().asReader().getAs(TestNewVersion.factory)
+      newVersion.getOld1() should equal (123)
+      newVersion.getOld2().toString() should equal ("foo")
+      newVersion.getNew2().toString() should equal ("baz")
+      newVersion.hasNew2() should equal (false)
+      newVersion.hasNew3() should equal (false)
+    }
+  }
+
   test("UpgradeStructInBuilder") {
     val builder = new MessageBuilder()
     val root = builder.initRoot(TestAnyPointer.factory)

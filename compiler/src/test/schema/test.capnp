@@ -322,6 +322,7 @@ struct TestNewVersion {
   old3 @2 :TestNewVersion;
   new1 @3 :Int64 = 987;
   new2 @4 :Text = "baz";
+  new3 @5 :Data;
 }
 
 struct TestGenerics(Foo, Bar) {
