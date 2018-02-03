@@ -93,6 +93,12 @@ public final class TextList {
             _setPointerElement(Text.factory, index, value);
         }
 
+        public final Reader asReader() {
+            return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                              this.structDataSize, this.structPointerCount,
+                              java.lang.Integer.MAX_VALUE);
+        }
+
         public final class Iterator implements java.util.Iterator<Text.Builder> {
             public Builder list;
             public int idx = 0;

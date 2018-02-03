@@ -91,5 +91,12 @@ public class EnumList {
         public void set(int index, T value) {
             _setShortElement(index, (short)value.ordinal());
         }
+
+        public final Reader<T> asReader() {
+            return new Reader(this.values,
+                              this.segment, this.ptr, this.elementCount, this.step,
+                              this.structDataSize, this.structPointerCount,
+                              java.lang.Integer.MAX_VALUE);
+        }
     }
 }

@@ -116,7 +116,6 @@ object TestUtil {
     enumList.set(1, TestEnum.GARPLY)
   }
 
-
   def checkTestMessage(builder : TestAllTypes.Builder) {
     builder.getVoidField()
     assert(builder.getBoolField() == true)
@@ -167,6 +166,7 @@ object TestUtil {
     assert(builder.getVoidList().size() == 6)
 
     val boolList = builder.getBoolList()
+    assert(boolList.size() == 4)
     assert(boolList.get(0) == true)
     assert(boolList.get(1) == false)
     assert(boolList.get(2) == false)

@@ -64,6 +64,13 @@ public class PrimitiveList {
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
+
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
+            }
         }
     }
 
@@ -96,7 +103,7 @@ public class PrimitiveList {
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public boolean get(int index) {
+            public final boolean get(int index) {
                 return _getBooleanElement(index);
             }
         }
@@ -114,6 +121,12 @@ public class PrimitiveList {
 
             public void set(int index, boolean value) {
                 _setBooleanElement(index, value);
+            }
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
             }
         }
     }
@@ -166,8 +179,13 @@ public class PrimitiveList {
             public void set(int index, byte value) {
                 _setByteElement(index, value);
             }
-        }
 
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
+            }
+        }
     }
 
     public static class Short {
@@ -219,8 +237,13 @@ public class PrimitiveList {
             public void set(int index, short value) {
                 _setShortElement(index, value);
             }
-        }
 
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
+            }
+        }
     }
 
     public static class Int {
@@ -272,6 +295,12 @@ public class PrimitiveList {
             public void set(int index, int value) {
                 _setIntElement(index, value);
             }
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
+            }
         }
     }
 
@@ -322,6 +351,12 @@ public class PrimitiveList {
 
             public void set(int index, float value) {
                 _setFloatElement(index, value);
+            }
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
             }
         }
     }
@@ -375,6 +410,12 @@ public class PrimitiveList {
             public void set(int index, long value) {
                 _setLongElement(index, value);
             }
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
+            }
         }
     }
 
@@ -425,6 +466,12 @@ public class PrimitiveList {
 
             public void set(int index, double value) {
                 _setDoubleElement(index, value);
+            }
+
+            public final Reader asReader() {
+                return new Reader(this.segment, this.ptr, this.elementCount, this.step,
+                                  this.structDataSize, this.structPointerCount,
+                                  java.lang.Integer.MAX_VALUE);
             }
         }
     }

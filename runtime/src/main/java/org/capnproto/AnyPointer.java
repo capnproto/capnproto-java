@@ -87,7 +87,7 @@ public final class AnyPointer {
         }
 
         public final Reader asReader() {
-            return new Reader(segment, pointer, 0x7fffffff);
+            return new Reader(segment, pointer, java.lang.Integer.MAX_VALUE);
         }
 
         public final void clear() {

@@ -64,7 +64,6 @@ public final class ListList {
         public T get(int index) {
             return _getPointerElement(this.factory, index);
         }
-
     }
 
     public static final class Builder<T> extends ListBuilder {
@@ -84,6 +83,14 @@ public final class ListList {
 
         public final T get(int index) {
             return _getPointerElement(this.factory, index);
+        }
+
+        // TODO: rework generics so that we don't need this factory parameter
+        public final <U extends ListReader> Reader<U> asReader(ListFactory<T, U> factor) {
+            return new Reader(factor,
+                              this.segment, this.ptr, this.elementCount, this.step,
+                              this.structDataSize, this.structPointerCount,
+                              java.lang.Integer.MAX_VALUE);
         }
     }
 }

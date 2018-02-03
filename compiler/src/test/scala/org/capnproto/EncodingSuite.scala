@@ -245,6 +245,98 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("ListBuilderAsReader") {
+    val message = new MessageBuilder()
+    val allTypes = message.initRoot(TestAllTypes.factory)
+
+    allTypes.initVoidList(10)
+    allTypes.getVoidList().asReader().size() should equal (10)
+
+    val boolList = allTypes.initBoolList(7)
+    boolList.set(3, true)
+    val boolListReader = boolList.asReader()
+    boolListReader.size() should equal (7)
+    boolListReader.get(0) should equal (false)
+    boolListReader.get(1) should equal (false)
+    boolListReader.get(2) should equal (false)
+    boolListReader.get(3) should equal (true)
+    boolListReader.get(4) should equal (false)
+
+    val int8List = allTypes.initInt8List(9)
+    int8List.set(4, 100)
+    int8List.set(8, 11)
+    val int8ListReader = int8List.asReader()
+    int8ListReader.size() should equal (9)
+    int8ListReader.get(0) should equal (0)
+    int8ListReader.get(4) should equal (100)
+    int8ListReader.get(8) should equal (11)
+
+    val int16List = allTypes.initInt16List(2)
+    int16List.set(0, 1)
+    val int16ListReader = int16List.asReader()
+    int16ListReader.size() should equal (2)
+    int16ListReader.get(0) should equal (1)
+    int16ListReader.get(1) should equal (0)
+
+    // TODO other primitive lists
+
+    val textList = allTypes.initTextList(1)
+    textList.set(0, new Text.Reader("abcdefg"))
+    val textListReader = textList.asReader()
+    textListReader.size() should equal (1)
+    textListReader.get(0).toString() should equal ("abcdefg")
+
+    val dataList = allTypes.initDataList(1)
+    dataList.set(0, new Data.Reader(Array(1,2,3,4)))
+    val dataListReader = dataList.asReader()
+    dataListReader.size() should equal (1)
+    dataListReader.get(0).toArray() should equal (Array(1,2,3,4))
+
+    val structList = allTypes.initStructList(2)
+    structList.get(0).setInt8Field(5)
+    structList.get(1).setInt8Field(9)
+    val structListReader = structList.asReader(TestAllTypes.factory)
+    structListReader.size() should equal (2)
+    structListReader.get(0).getInt8Field() should equal (5)
+    structListReader.get(1).getInt8Field() should equal (9)
+
+    val enumList = allTypes.initEnumList(3)
+    enumList.set(0, TestEnum.FOO)
+    enumList.set(1, TestEnum.BAR)
+    enumList.set(2, TestEnum.BAZ)
+    val enumListReader = enumList.asReader()
+    enumListReader.size() should equal (3)
+    enumListReader.get(0) should equal (TestEnum.FOO)
+    enumListReader.get(1) should equal (TestEnum.BAR)
+    enumListReader.get(2) should equal (TestEnum.BAZ)
+  }
+
+  test("NestedListBuilderAsReader") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestLists.factory)
+
+    val structListList = root.initStructListList(3)
+    val structList0 = structListList.init(0, 1)
+    structList0.get(0).setInt16Field(1)
+    // leave structList1 as default
+    val structList2 = structListList.init(2, 3)
+    structList2.get(0).setInt16Field(22)
+    structList2.get(1).setInt16Field(333)
+    structList2.get(2).setInt16Field(4444)
+
+    val structListListReader = structListList.asReader(new StructList.Factory(TestAllTypes.factory))
+    structListListReader.size() should equal (3)
+    val structList0Reader = structListListReader.get(0)
+    structList0Reader.size() should equal(1)
+    structList0Reader.get(0).getInt16Field() should equal (1)
+    structListListReader.get(1).size() should equal (0)
+    val structList2Reader = structListListReader.get(2)
+    structList2Reader.size() should equal (3)
+    structList2Reader.get(0).getInt16Field() should equal (22)
+    structList2Reader.get(1).getInt16Field() should equal (333)
+    structList2Reader.get(2).getInt16Field() should equal (4444)
+  }
+
   test("Generics") {
     val message = new MessageBuilder()
     val factory = TestGenerics.newFactory(TestAllTypes.factory, Text.factory)
@@ -343,7 +435,6 @@ class EncodingSuite extends FunSuite {
       assert("quxquux" == baz.getGarply().toString())
     }
   }
-
 
   test("NestedLists") {
     val builder = new MessageBuilder()
