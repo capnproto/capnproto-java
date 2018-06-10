@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Sandstorm Development Group, Inc. and contributors
+// Copyright (c) 2018 Sandstorm Development Group, Inc. and contributors
 // Licensed under the MIT License:
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,41 +19,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.capnproto;
+package org.capnproto
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.ByteBuffer
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 
-public final class ArrayInputStream implements BufferedInputStream {
-
-    public final ByteBuffer buf;
-
-    public ArrayInputStream(ByteBuffer buf) {
-        this.buf = buf.asReadOnlyBuffer();
-    }
-
-    public final int read(ByteBuffer dst) throws IOException {
-        int available = this.buf.remaining();
-        int size = java.lang.Math.min(dst.remaining(), available);
-
-        ByteBuffer slice = this.buf.slice();
-        slice.limit(size);
-        dst.put(slice);
-
-        this.buf.position(this.buf.position() + size);
-        return size;
-    }
-
-    public final ByteBuffer getReadBuffer() {
-        return this.buf;
-    }
-
-    public final void close() throws IOException {
-        return;
-    }
-
-    public final boolean isOpen() {
-        return true;
-    }
+class ArrayInputStreamSuite extends FunSuite {
+  test("EmptyArray") {
+    val stream = new ArrayInputStream(ByteBuffer.allocate(0))
+    val dst = ByteBuffer.allocate(10)
+    stream.read(dst) should equal (0)
+  }
 }
