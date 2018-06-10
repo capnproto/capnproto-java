@@ -36,6 +36,10 @@ public final class ArrayInputStream implements BufferedInputStream {
     public final int read(ByteBuffer dst) throws IOException {
         int available = this.buf.remaining();
         int size = java.lang.Math.min(dst.remaining(), available);
+        if (size == 0) {
+            // end of stream
+            return -1;
+        }
 
         ByteBuffer slice = this.buf.slice();
         slice.limit(size);

@@ -29,6 +29,17 @@ class ArrayInputStreamSuite extends FunSuite {
   test("EmptyArray") {
     val stream = new ArrayInputStream(ByteBuffer.allocate(0))
     val dst = ByteBuffer.allocate(10)
-    stream.read(dst) should equal (0)
+
+    // read() should return -1 at the end of the stream
+    // https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html
+    stream.read(dst) should equal (-1)
+  }
+
+  test("Request more bytes than are present") {
+    val oneByte: Array[Byte] = Array(42)
+    val stream = new ArrayInputStream(ByteBuffer.wrap(oneByte))
+    val dst = ByteBuffer.allocate(10)
+    stream.read(dst) should equal (1)
+    stream.read(dst) should equal (-1) // end of stream
   }
 }
