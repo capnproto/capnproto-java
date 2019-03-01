@@ -149,7 +149,7 @@ final class WireHelpers {
         //# If the segment is null, this is an unchecked message,
         //# so there are no FAR pointers.
         if (segment != null && WirePointer.kind(ref) == WirePointer.FAR) {
-            SegmentReader resultSegment = segment.arena.tryGetSegment(FarPointer.getSegmentId(ref));
+            SegmentReader resultSegment = segment.getArena().tryGetSegment(FarPointer.getSegmentId(ref));
             int padOffset = FarPointer.positionInSegment(ref);
             long pad = resultSegment.get(padOffset);
 
@@ -166,7 +166,7 @@ final class WireHelpers {
                 //# object.
 
                 long tag = resultSegment.get(padOffset + 1);
-                resultSegment = resultSegment.arena.tryGetSegment(FarPointer.getSegmentId(pad));
+                resultSegment = resultSegment.getArena().tryGetSegment(FarPointer.getSegmentId(pad));
                 return new FollowFarsResult(FarPointer.positionInSegment(pad), tag, resultSegment);
             }
         } else {
@@ -915,7 +915,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains non-struct pointer where struct pointer was expected.");
         }
 
-        resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
+        resolved.segment.getArena().checkReadLimit(StructPointer.wordSize(resolved.ref));
 
         return factory.constructReader(resolved.segment,
                                         resolved.ptr * Constants.BYTES_PER_WORD,
@@ -1052,7 +1052,7 @@ final class WireHelpers {
             if (nestingLimit <= 0) {
                 throw new DecodeException("Message is too deeply nested or contains cycles. See org.capnproto.ReaderOptions.");
             }
-            resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
+            resolved.segment.getArena().checkReadLimit(StructPointer.wordSize(resolved.ref));
             return setStructPointer(dstSegment, dstOffset,
                                     new StructReader(resolved.segment,
                                                      resolved.ptr * Constants.BYTES_PER_WORD,
@@ -1070,7 +1070,7 @@ final class WireHelpers {
                 long tag = resolved.segment.get(resolved.ptr);
                 int ptr = resolved.ptr + 1;
 
-                resolved.segment.arena.checkReadLimit(wordCount + 1);
+                resolved.segment.getArena().checkReadLimit(wordCount + 1);
 
                 if (WirePointer.kind(tag) != WirePointer.STRUCT) {
                     throw new DecodeException("INLINE_COMPOSITE lists of non-STRUCT type are not supported.");
@@ -1085,7 +1085,7 @@ final class WireHelpers {
                 if (wordsPerElement == 0) {
                     // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
                     // large without having sent actual data.
-                    resolved.segment.arena.checkReadLimit(elementCount);
+                    resolved.segment.getArena().checkReadLimit(elementCount);
                 }
 
                 return setListPointer(dstSegment, dstOffset,
@@ -1103,12 +1103,12 @@ final class WireHelpers {
                 int elementCount = ListPointer.elementCount(resolved.ref);
                 int wordCount = roundBitsUpToWords((long) elementCount * step);
 
-                resolved.segment.arena.checkReadLimit(wordCount);
+                resolved.segment.getArena().checkReadLimit(wordCount);
 
                 if (elementSize == ElementSize.VOID) {
                     // Watch out for lists of void, which can claim to be arbitrarily large without
                     // having sent actual data.
-                    resolved.segment.arena.checkReadLimit(elementCount);
+                    resolved.segment.getArena().checkReadLimit(elementCount);
                 }
 
                 return setListPointer(dstSegment, dstOffset,
@@ -1165,7 +1165,7 @@ final class WireHelpers {
             long tag = resolved.segment.get(resolved.ptr);
             int ptr = resolved.ptr + 1;
 
-            resolved.segment.arena.checkReadLimit(wordCount + 1);
+            resolved.segment.getArena().checkReadLimit(wordCount + 1);
 
             int size = WirePointer.inlineCompositeListElementCount(tag);
 
@@ -1178,7 +1178,7 @@ final class WireHelpers {
             if (wordsPerElement == 0) {
                 // Watch out for lists of zero-sized structs, which can claim to be arbitrarily
                 // large without having sent actual data.
-                resolved.segment.arena.checkReadLimit(size);
+                resolved.segment.getArena().checkReadLimit(size);
             }
 
             // TODO check whether the size is compatible
@@ -1201,13 +1201,13 @@ final class WireHelpers {
             int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            resolved.segment.arena.checkReadLimit(
+            resolved.segment.getArena().checkReadLimit(
                 roundBitsUpToWords(elementCount * step));
 
             if (elementSize == ElementSize.VOID) {
                 // Watch out for lists of void, which can claim to be arbitrarily large without
                 // having sent actual data.
-                resolved.segment.arena.checkReadLimit(elementCount);
+                resolved.segment.getArena().checkReadLimit(elementCount);
             }
 
             //# Verify that the elements are at least as large as
@@ -1269,7 +1269,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains list pointer of non-bytes where text was expected.");
         }
 
-        resolved.segment.arena.checkReadLimit(roundBytesUpToWords(size));
+        resolved.segment.getArena().checkReadLimit(roundBytesUpToWords(size));
 
         if (size == 0 || resolved.segment.buffer.get(8 * resolved.ptr + size - 1) != 0) {
             throw new DecodeException("Message contains text that is not NUL-terminated.");
@@ -1307,7 +1307,7 @@ final class WireHelpers {
             throw new DecodeException("Message contains list pointer of non-bytes where data was expected.");
         }
 
-        resolved.segment.arena.checkReadLimit(roundBytesUpToWords(size));
+        resolved.segment.getArena().checkReadLimit(roundBytesUpToWords(size));
 
         return new Data.Reader(resolved.segment.buffer, resolved.ptr, size);
     }

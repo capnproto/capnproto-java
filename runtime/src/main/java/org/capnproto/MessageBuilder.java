@@ -23,7 +23,15 @@ package org.capnproto;
 
 public final class MessageBuilder {
 
-    private final BuilderArena arena;
+    private final AllocatingArena arena;
+
+    /**
+     * Creates a MessageBuilder with an injected custom AllocatingArena.
+     * @param arena The custom AllocatingArena.
+     */
+    public MessageBuilder(AllocatingArena arena) {
+        this.arena = arena;
+    }
 
     public MessageBuilder() {
         this.arena = new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
@@ -41,7 +49,7 @@ public final class MessageBuilder {
     }
 
     private AnyPointer.Builder getRootInternal() {
-        SegmentBuilder rootSegment = this.arena.segments.get(0);
+        SegmentBuilder rootSegment = this.arena.getSegment(0);
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
             if (location == SegmentBuilder.FAILED_ALLOCATION) {

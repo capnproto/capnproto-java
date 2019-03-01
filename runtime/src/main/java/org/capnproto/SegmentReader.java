@@ -18,7 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.nio.ByteBuffer;
@@ -26,7 +25,7 @@ import java.nio.ByteBuffer;
 public class SegmentReader {
 
     public final ByteBuffer buffer;
-    final Arena arena;
+    private final Arena arena;
 
     public SegmentReader(ByteBuffer buffer, Arena arena) {
         this.buffer = buffer;
@@ -37,5 +36,9 @@ public class SegmentReader {
 
     public final long get(int index) {
         return buffer.getLong(index * Constants.BYTES_PER_WORD);
+    }
+
+    Arena getArena() {
+        return arena;
     }
 }

@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-public final class BuilderArena implements Arena {
+public final class BuilderArena implements AllocatingArena {
 
     public enum AllocationStrategy {
         FIXED_SIZE,
