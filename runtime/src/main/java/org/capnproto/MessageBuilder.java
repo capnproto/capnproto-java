@@ -77,7 +77,7 @@ public final class MessageBuilder {
     }
 
     /**
-     * @Deprecated use {@link MessageBuilder#getArena()} instead.
+     * @deprecated use {@link MessageBuilder#getArena()} instead.
      */
     @Deprecated
     public final java.nio.ByteBuffer[] getSegmentsForOutput() {
