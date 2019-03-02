@@ -152,7 +152,7 @@ public final class Serialize {
     }
 
     public static long computeSerializedSizeInWords(MessageBuilder message) {
-        final ByteBuffer[] segments = message.getSegmentsForOutput();
+        final ByteBuffer[] segments = message.getArena().getSegmentsForOutput();
 
         // From the capnproto documentation:
         // "When transmitting over a stream, the following should be sent..."
@@ -177,7 +177,7 @@ public final class Serialize {
 
     public static void write(WritableByteChannel outputChannel,
                              MessageBuilder message) throws IOException {
-        ByteBuffer[] segments = message.getSegmentsForOutput();
+        ByteBuffer[] segments = message.getArena().getSegmentsForOutput();
         int tableSize = (segments.length + 2) & (~1);
 
         ByteBuffer table = ByteBuffer.allocate(4 * tableSize);

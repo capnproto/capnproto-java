@@ -76,7 +76,20 @@ public final class MessageBuilder {
         return this.getRootInternal().initAs(factory);
     }
 
+    /**
+     * @Deprecated use {@link MessageBuilder#getArena()} instead.
+     */
+    @Deprecated
     public final java.nio.ByteBuffer[] getSegmentsForOutput() {
         return this.arena.getSegmentsForOutput();
+    }
+
+    /**
+     * provide the {@link AllocatingArena} for output.
+     *
+     * @return the arena.
+     */
+    public AllocatingArena getArena() {
+        return arena;
     }
 }
