@@ -23,12 +23,12 @@ package org.capnproto;
 
 public class StructReader {
     public interface Factory<T> {
-        abstract T constructReader(SegmentReader segment, int data, int pointers,
+        abstract T constructReader(SegmentDataContainer segment, int data, int pointers,
                                    int dataSize, short pointerCount,
                                    int nestingLimit);
     }
 
-    protected final SegmentReader segment;
+    protected final SegmentDataContainer segment;
     protected final int data; //byte offset to data section
     protected final int pointers; // word offset of pointer section
     protected final int dataSize; // in bits
@@ -36,7 +36,7 @@ public class StructReader {
     protected final int nestingLimit;
 
     public StructReader() {
-        this.segment = SegmentReader.EMPTY;
+        this.segment = GenericSegmentReader.EMPTY;
         this.data = 0;
         this.pointers = 0;
         this.dataSize = 0;
@@ -44,7 +44,7 @@ public class StructReader {
         this.nestingLimit = 0x7fffffff;
     }
 
-    public StructReader(SegmentReader segment, int data,
+    public StructReader(SegmentDataContainer segment, int data,
                         int pointers, int dataSize, short pointerCount,
                         int nestingLimit) {
         this.segment = segment;
@@ -58,7 +58,7 @@ public class StructReader {
     protected final boolean _getBooleanField(int offset) {
         // XXX should use unsigned operations
         if (offset < this.dataSize) {
-            byte b = this.segment.buffer.get(this.data + offset / 8);
+            byte b = this.segment.getBuffer().get(this.data + offset / 8);
 
             return (b & (1 << (offset % 8))) != 0;
         } else {
@@ -72,7 +72,7 @@ public class StructReader {
 
     protected final byte _getByteField(int offset) {
         if ((offset + 1) * 8 <= this.dataSize) {
-            return this.segment.buffer.get(this.data + offset);
+            return this.segment.getBuffer().get(this.data + offset);
         } else {
             return 0;
         }
@@ -84,7 +84,7 @@ public class StructReader {
 
     protected final short _getShortField(int offset) {
         if ((offset + 1) * 16 <= this.dataSize) {
-            return this.segment.buffer.getShort(this.data + offset * 2);
+            return this.segment.getBuffer().getShort(this.data + offset * 2);
         } else {
             return 0;
         }
@@ -96,7 +96,7 @@ public class StructReader {
 
     protected final int _getIntField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
-            return this.segment.buffer.getInt(this.data + offset * 4);
+            return this.segment.getBuffer().getInt(this.data + offset * 4);
         } else {
             return 0;
         }
@@ -108,7 +108,7 @@ public class StructReader {
 
     protected final long _getLongField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
-            return this.segment.buffer.getLong(this.data + offset * 8);
+            return this.segment.getBuffer().getLong(this.data + offset * 8);
         } else {
             return 0;
         }
@@ -120,7 +120,7 @@ public class StructReader {
 
     protected final float _getFloatField(int offset) {
         if ((offset + 1) * 32 <= this.dataSize) {
-            return this.segment.buffer.getFloat(this.data + offset * 4);
+            return this.segment.getBuffer().getFloat(this.data + offset * 4);
         } else {
             return 0;
         }
@@ -128,7 +128,7 @@ public class StructReader {
 
     protected final float _getFloatField(int offset, int mask) {
         if ((offset + 1) * 32 <= this.dataSize) {
-            return Float.intBitsToFloat(this.segment.buffer.getInt(this.data + offset * 4) ^ mask);
+            return Float.intBitsToFloat(this.segment.getBuffer().getInt(this.data + offset * 4) ^ mask);
         } else {
             return Float.intBitsToFloat(mask);
         }
@@ -136,7 +136,7 @@ public class StructReader {
 
     protected final double _getDoubleField(int offset) {
         if ((offset + 1) * 64 <= this.dataSize) {
-            return this.segment.buffer.getDouble(this.data + offset * 8);
+            return this.segment.getBuffer().getDouble(this.data + offset * 8);
         } else {
             return 0;
         }
@@ -144,14 +144,14 @@ public class StructReader {
 
     protected final double _getDoubleField(int offset, long mask) {
         if ((offset + 1) * 64 <= this.dataSize) {
-            return Double.longBitsToDouble(this.segment.buffer.getLong(this.data + offset * 8) ^ mask);
+            return Double.longBitsToDouble(this.segment.getBuffer().getLong(this.data + offset * 8) ^ mask);
         } else {
             return Double.longBitsToDouble(mask);
         }
     }
 
     protected final boolean _pointerFieldIsNull(int ptrIndex) {
-        return ptrIndex >= this.pointerCount || this.segment.buffer.getLong((this.pointers + ptrIndex) * Constants.BYTES_PER_WORD) == 0;
+        return ptrIndex >= this.pointerCount || this.segment.getBuffer().getLong((this.pointers + ptrIndex) * Constants.BYTES_PER_WORD) == 0;
     }
 
     protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex) {
@@ -160,7 +160,7 @@ public class StructReader {
                                              this.pointers + ptrIndex,
                                              this.nestingLimit);
         } else {
-            return factory.fromPointerReader(SegmentReader.EMPTY,
+            return factory.fromPointerReader(GenericSegmentReader.EMPTY,
                                              0,
                                              this.nestingLimit);
         }
@@ -168,7 +168,7 @@ public class StructReader {
 
 
     protected final <T> T _getPointerField(FromPointerReaderRefDefault<T> factory, int ptrIndex,
-                                           SegmentReader defaultSegment, int defaultOffset) {
+                                           SegmentDataContainer defaultSegment, int defaultOffset) {
         if (ptrIndex < this.pointerCount) {
             return factory.fromPointerReaderRefDefault(this.segment,
                                                        this.pointers + ptrIndex,
@@ -176,7 +176,7 @@ public class StructReader {
                                                        defaultOffset,
                                                        this.nestingLimit);
         } else {
-            return factory.fromPointerReaderRefDefault(SegmentReader.EMPTY,
+            return factory.fromPointerReaderRefDefault(GenericSegmentReader.EMPTY,
                                                        0,
                                                        defaultSegment,
                                                        defaultOffset,
@@ -193,7 +193,7 @@ public class StructReader {
                                                         defaultOffset,
                                                         defaultSize);
         } else {
-            return factory.fromPointerReaderBlobDefault(SegmentReader.EMPTY,
+            return factory.fromPointerReaderBlobDefault(GenericSegmentReader.EMPTY,
                                                         0,
                                                         defaultBuffer,
                                                         defaultOffset,

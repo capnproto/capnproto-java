@@ -26,7 +26,7 @@ public class PrimitiveList {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.VOID); }
 
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -34,7 +34,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -45,7 +45,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -59,7 +59,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -77,7 +77,7 @@ public class PrimitiveList {
     public static class Boolean {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.BIT); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -85,7 +85,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -95,7 +95,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -109,7 +109,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -134,7 +134,7 @@ public class PrimitiveList {
     public static class Byte {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.BYTE); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -142,7 +142,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -152,7 +152,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -166,7 +166,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -191,7 +191,7 @@ public class PrimitiveList {
     public static class Short {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.TWO_BYTES); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -199,7 +199,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -210,7 +210,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -224,7 +224,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -249,7 +249,7 @@ public class PrimitiveList {
     public static class Int {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.FOUR_BYTES); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -257,7 +257,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -268,7 +268,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -282,7 +282,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -307,7 +307,7 @@ public class PrimitiveList {
     public static class Float {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.FOUR_BYTES); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -315,7 +315,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -325,7 +325,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -339,7 +339,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -365,7 +365,7 @@ public class PrimitiveList {
     public static class Long {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.EIGHT_BYTES); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -373,7 +373,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -383,7 +383,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -397,7 +397,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
@@ -422,7 +422,7 @@ public class PrimitiveList {
     public static class Double {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.EIGHT_BYTES); }
-            public final Reader constructReader(SegmentReader segment,
+            public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
                                                   int structDataSize, short structPointerCount,
@@ -430,7 +430,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
-            public final Builder constructBuilder(SegmentBuilder segment,
+            public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
                                                     int structDataSize, short structPointerCount) {
@@ -440,7 +440,7 @@ public class PrimitiveList {
         public static final Factory factory = new Factory();
 
         public static final class Reader extends ListReader {
-            public Reader(SegmentReader segment,
+            public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
@@ -454,7 +454,7 @@ public class PrimitiveList {
         }
 
         public static final class Builder extends ListBuilder {
-            public Builder(SegmentBuilder segment, int ptr,
+            public Builder(GenericSegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount){
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount);

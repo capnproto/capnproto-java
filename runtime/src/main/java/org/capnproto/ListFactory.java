@@ -32,8 +32,8 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
     final byte elementSize;
     ListFactory(byte elementSize) {this.elementSize = elementSize;}
 
-    public final Reader fromPointerReaderRefDefault(SegmentReader segment, int pointer,
-                                                    SegmentReader defaultSegment, int defaultOffset,
+    public final Reader fromPointerReaderRefDefault(SegmentDataContainer segment, int pointer,
+                                                    SegmentDataContainer defaultSegment, int defaultOffset,
                                                     int nestingLimit) {
         return WireHelpers.readListPointer(this,
                                            segment,
@@ -44,12 +44,12 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                            nestingLimit);
     }
 
-    public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+    public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
         return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
     }
 
-    public Builder fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
-                                                SegmentReader defaultSegment, int defaultOffset) {
+    public Builder fromPointerBuilderRefDefault(GenericSegmentBuilder segment, int pointer,
+                                                SegmentDataContainer defaultSegment, int defaultOffset) {
         return WireHelpers.getWritableListPointer(this,
                                                   pointer,
                                                   segment,
@@ -58,7 +58,7 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                                   defaultOffset);
     }
 
-    public Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+    public Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
         return WireHelpers.getWritableListPointer(this,
                                                   pointer,
                                                   segment,
@@ -66,11 +66,11 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                                   null, 0);
     }
 
-    public Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+    public Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initListPointer(this, pointer, segment, elementCount, this.elementSize);
     }
 
-    public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+    public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
         WireHelpers.setListPointer(segment, pointer, value);
     }
 }

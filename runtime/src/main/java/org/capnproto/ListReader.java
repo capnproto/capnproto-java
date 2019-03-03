@@ -23,14 +23,14 @@ package org.capnproto;
 
 public class ListReader {
     public interface Factory<T> {
-        T constructReader(SegmentReader segment,
+        T constructReader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
                           int nestingLimit);
     }
 
-    final SegmentReader segment;
+    final SegmentDataContainer segment;
     final int ptr; // byte offset to front of list
     final int elementCount;
     final int step; // in bits
@@ -48,7 +48,7 @@ public class ListReader {
         this.nestingLimit = 0x7fffffff;
     }
 
-    public ListReader(SegmentReader segment, int ptr,
+    public ListReader(SegmentDataContainer segment, int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
                       int nestingLimit) {
@@ -68,32 +68,32 @@ public class ListReader {
 
     protected boolean _getBooleanElement(int index) {
         long bindex = (long)index * this.step;
-        byte b = this.segment.buffer.get(this.ptr + (int)(bindex / Constants.BITS_PER_BYTE));
+        byte b = this.segment.getBuffer().get(this.ptr + (int)(bindex / Constants.BITS_PER_BYTE));
         return (b & (1 << (bindex % 8))) != 0;
     }
 
     protected byte _getByteElement(int index) {
-        return this.segment.buffer.get(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().get(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected short _getShortElement(int index) {
-        return this.segment.buffer.getShort(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().getShort(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected int _getIntElement(int index) {
-        return this.segment.buffer.getInt(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().getInt(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected long _getLongElement(int index) {
-        return this.segment.buffer.getLong(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().getLong(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected float _getFloatElement(int index) {
-        return this.segment.buffer.getFloat(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().getFloat(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected double _getDoubleElement(int index) {
-        return this.segment.buffer.getDouble(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
+        return this.segment.getBuffer().getDouble(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
     protected <T> T _getStructElement(StructReader.Factory<T> factory, int index) {

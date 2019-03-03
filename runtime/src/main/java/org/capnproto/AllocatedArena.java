@@ -20,29 +20,27 @@
 // THE SOFTWARE.
 package org.capnproto;
 
-import java.nio.ByteBuffer;
+import java.util.List;
 
-public class SegmentReader implements GenericSegmentReader {
+/**
+ * Represents an Arena with previously allocated Segments.
+ */
+public interface AllocatedArena extends Arena {
 
-    public final ByteBuffer buffer;
-    private final AllocatedArena arena;
-
-    public SegmentReader(ByteBuffer buffer, AllocatedArena arena) {
-        this.buffer = buffer;
-        this.arena = arena;
-    }
-
-    public long get(int index) {
-        return buffer.getLong(index * Constants.BYTES_PER_WORD);
-    }
-
-    public AllocatedArena getArena() {
-        return arena;
-    }
-
+    /**
+     * Provides the {@link GenericSegmentReader} for the given segment ID.
+     *
+     * @param segmentId the segment ID.
+     * @return the segment.
+     */
     @Override
-    public ByteBuffer getBuffer() {
-        return buffer;
-    }
+    public GenericSegmentReader tryGetSegment(int segmentId);
+
+    /**
+     * Access all existing segments
+     *
+     * @return the segments.
+     */
+    List<GenericSegmentReader> getSegments();
 
 }

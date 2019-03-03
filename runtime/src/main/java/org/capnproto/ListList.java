@@ -32,7 +32,7 @@ public final class ListList {
             this.factory = factory;
         }
 
-        public final Reader<ElementReader> constructReader(SegmentReader segment,
+        public final Reader<ElementReader> constructReader(SegmentDataContainer segment,
                                                              int ptr,
                                                              int elementCount, int step,
                                                              int structDataSize, short structPointerCount,
@@ -40,7 +40,7 @@ public final class ListList {
             return new Reader<ElementReader>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
-        public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
+        public final Builder<ElementBuilder> constructBuilder(GenericSegmentBuilder segment,
                                                               int ptr,
                                                               int elementCount, int step,
                                                               int structDataSize, short structPointerCount) {
@@ -52,7 +52,7 @@ public final class ListList {
         private final FromPointerReader<T> factory;
 
         public Reader(FromPointerReader<T> factory,
-                      SegmentReader segment,
+                      SegmentDataContainer segment,
                       int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
@@ -70,7 +70,7 @@ public final class ListList {
         private final ListFactory<T, ?> factory;
 
         public Builder(ListFactory<T, ?> factory,
-                       SegmentBuilder segment, int ptr,
+                       GenericSegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){
             super(segment, ptr, elementCount, step, structDataSize, structPointerCount);

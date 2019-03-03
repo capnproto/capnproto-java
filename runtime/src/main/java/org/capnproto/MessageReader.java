@@ -18,14 +18,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.nio.ByteBuffer;
 
 public final class MessageReader {
-    final ReaderArena arena;
+
+    final AllocatedArena arena;
     final int nestingLimit;
+
+    /**
+     * Construct a MessageReader with an injected custom {@link Arena}, that can
+     * provide custom {@link GenericSegmentReader}.
+     *
+     * @param arena the Arena implementation.
+     */
+    public MessageReader(AllocatedArena arena) {
+        this.arena = arena;
+        // as the nesting limit is currently completely ignored, we use the default.
+        this.nestingLimit = ReaderOptions.DEFAULT_NESTING_LIMIT;
+    }
 
     public MessageReader(ByteBuffer[] segmentSlices, ReaderOptions options) {
         this.nestingLimit = options.nestingLimit;
@@ -33,7 +45,7 @@ public final class MessageReader {
     }
 
     public <T> T getRoot(FromPointerReader<T> factory) {
-        SegmentReader segment = this.arena.tryGetSegment(0);
+        GenericSegmentReader segment = this.arena.tryGetSegment(0);
         AnyPointer.Reader any = new AnyPointer.Reader(segment, 0, this.nestingLimit);
         return any.getAs(factory);
     }

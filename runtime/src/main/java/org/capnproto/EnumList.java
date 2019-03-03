@@ -37,7 +37,7 @@ public class EnumList {
             super(ElementSize.TWO_BYTES);
             this.values = values;
         }
-        public final Reader<T> constructReader(SegmentReader segment,
+        public final Reader<T> constructReader(SegmentDataContainer segment,
                                                int ptr,
                                                int elementCount, int step,
                                                int structDataSize, short structPointerCount,
@@ -46,7 +46,7 @@ public class EnumList {
                                  segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
-        public final Builder<T> constructBuilder(SegmentBuilder segment,
+        public final Builder<T> constructBuilder(GenericSegmentBuilder segment,
                                                  int ptr,
                                                  int elementCount, int step,
                                                  int structDataSize, short structPointerCount) {
@@ -58,7 +58,7 @@ public class EnumList {
         public final T values[];
 
         public Reader(T values[],
-                      SegmentReader segment,
+                      SegmentDataContainer segment,
                       int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
@@ -76,7 +76,7 @@ public class EnumList {
         public final T values[];
 
         public Builder(T values[],
-                       SegmentBuilder segment,
+                       GenericSegmentBuilder segment,
                        int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount) {

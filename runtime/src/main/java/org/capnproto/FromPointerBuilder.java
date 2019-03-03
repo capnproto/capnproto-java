@@ -22,6 +22,6 @@
 package org.capnproto;
 
 public interface FromPointerBuilder<T> {
-    T fromPointerBuilder(SegmentBuilder segment, int pointer);
-    T initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount);
+    T fromPointerBuilder(GenericSegmentBuilder segment, int pointer);
+    T initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int elementCount);
 }

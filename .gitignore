@@ -6,3 +6,11 @@ project/target
 *.iws
 capnpc-java
 generated/
+/nbproject/private/
+/build/
+/dist/
+build.xml
+manifest.mf
+nbproject/*
+**/pom.xml
+

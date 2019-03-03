@@ -18,31 +18,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
 package org.capnproto;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-public final class SegmentBuilder extends SegmentReader {
-
-    public static final int FAILED_ALLOCATION = -1;
+public final class SegmentBuilder implements GenericSegmentBuilder {
 
     public int pos = 0; // in words
     public int id = 0;
+    public final ByteBuffer buffer;
     // store the AllocatingArena
     private final AllocatingArena arena;
 
     public SegmentBuilder(ByteBuffer buf, AllocatingArena arena) {
-        super(buf, arena);
+        this.buffer = buf;
         this.arena = arena;
     }
 
     // the total number of words the buffer can hold
     private final int capacity() {
-        this.buffer.rewind();
-        return this.buffer.remaining() / 8;
+        buffer.rewind();
+        return buffer.remaining() / 8;
     }
 
     // return how many words have already been allocated
+    @Override
     public final int currentSize() {
         return this.pos;
     }
@@ -50,6 +52,7 @@ public final class SegmentBuilder extends SegmentReader {
     /*
        Allocate `amount` words.
      */
+    @Override
     public final int allocate(int amount) {
         assert amount >= 0 : "tried to allocate a negative number of words";
 
@@ -62,16 +65,48 @@ public final class SegmentBuilder extends SegmentReader {
         }
     }
 
+    @Override
     public final AllocatingArena getArena() {
         return this.arena;
     }
 
+    @Override
     public final boolean isWritable() {
         // TODO support external non-writable segments
         return true;
     }
 
-    public final void put(int index, long value) {
+    @Override
+    public void put(int index, long value) {
         buffer.putLong(index * Constants.BYTES_PER_WORD, value);
+    }
+
+    @Override
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public ByteBuffer getSegmentForOutput() {
+        buffer.rewind();
+        ByteBuffer slice = buffer.slice();
+        slice.limit(currentSize() * Constants.BYTES_PER_WORD);
+        slice.order(ByteOrder.LITTLE_ENDIAN);
+        return slice;
+    }
+
+    @Override
+    public void setId(int len) {
+        this.id = len;
+    }
+
+    @Override
+    public long get(int index) {
+        return buffer.getLong(index * Constants.BYTES_PER_WORD);
     }
 }

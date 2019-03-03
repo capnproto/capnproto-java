@@ -32,7 +32,7 @@ public final class StructList {
             this.factory = factory;
         }
 
-        public final Reader<ElementReader> constructReader(SegmentReader segment,
+        public final Reader<ElementReader> constructReader(SegmentDataContainer segment,
                                                            int ptr,
                                                            int elementCount, int step,
                                                            int structDataSize, short structPointerCount,
@@ -41,15 +41,15 @@ public final class StructList {
                                              segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
-        public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
+        public final Builder<ElementBuilder> constructBuilder(GenericSegmentBuilder segment,
                                                               int ptr,
                                                               int elementCount, int step,
                                                               int structDataSize, short structPointerCount) {
             return new Builder<ElementBuilder> (factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
 
-        public final Builder<ElementBuilder> fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
-                                                                          SegmentReader defaultSegment, int defaultOffset) {
+        public final Builder<ElementBuilder> fromPointerBuilderRefDefault(GenericSegmentBuilder segment, int pointer,
+                                                                          SegmentDataContainer defaultSegment, int defaultOffset) {
             return WireHelpers.getWritableStructListPointer(this,
                                                             pointer,
                                                             segment,
@@ -59,7 +59,7 @@ public final class StructList {
         }
 
         @Override
-        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder<ElementBuilder> fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
                      return WireHelpers.getWritableStructListPointer(this,
                                                                      pointer,
                                                                      segment,
@@ -68,7 +68,7 @@ public final class StructList {
         }
 
         @Override
-        public final Builder<ElementBuilder> initFromPointerBuilder(SegmentBuilder segment, int pointer,
+        public final Builder<ElementBuilder> initFromPointerBuilder(GenericSegmentBuilder segment, int pointer,
                                                                     int elementCount) {
             return WireHelpers.initStructListPointer(this, pointer, segment, elementCount, factory.structSize());
         }
@@ -78,7 +78,7 @@ public final class StructList {
         public final StructReader.Factory<T> factory;
 
         public Reader(StructReader.Factory<T> factory,
-                      SegmentReader segment,
+                      SegmentDataContainer segment,
                       int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
@@ -119,7 +119,7 @@ public final class StructList {
         public final StructBuilder.Factory<T> factory;
 
         public Builder(StructBuilder.Factory<T> factory,
-                       SegmentBuilder segment, int ptr,
+                       GenericSegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){
             super(segment, ptr, elementCount, step, structDataSize, structPointerCount);

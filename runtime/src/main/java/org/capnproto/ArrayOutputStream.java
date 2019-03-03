@@ -23,7 +23,6 @@ package org.capnproto;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
 
 public final class ArrayOutputStream implements BufferedOutputStream {
 
