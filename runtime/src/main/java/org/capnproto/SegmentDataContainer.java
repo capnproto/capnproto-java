@@ -22,27 +22,30 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 
-public class SegmentReader implements GenericSegmentReader {
+/**
+ * A Container for Segments.
+ */
+public interface SegmentDataContainer {
 
-    public final ByteBuffer buffer;
-    private final AllocatedArena arena;
+    /**
+     * Retrieves a long from a word index.
+     *
+     * @param index the word index.
+     * @return the long value.
+     */
+    long get(int index);
 
-    public SegmentReader(ByteBuffer buffer, AllocatedArena arena) {
-        this.buffer = buffer;
-        this.arena = arena;
-    }
+    /**
+     * Retrieve the internal {@link ByteBuffer}.
+     *
+     * @return the buffer.
+     */
+    ByteBuffer getBuffer();
 
-    public long get(int index) {
-        return buffer.getLong(index * Constants.BYTES_PER_WORD);
-    }
-
-    public AllocatedArena getArena() {
-        return arena;
-    }
-
-    @Override
-    public ByteBuffer getBuffer() {
-        return buffer;
-    }
-
+    /**
+     * Retrieve the Arena used in this SegmentDataContainer.
+     *
+     * @return the Arena.
+     */
+    Arena getArena();
 }

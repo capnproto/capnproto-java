@@ -1136,7 +1136,7 @@ private:
 
       uint64_t typeId = field.getContainingStruct().getProto().getId();
       kj::String defaultParams = defaultOffset == 0 ? kj::str("null, 0, 0") : kj::str(
-        "Schemas.b_", kj::hex(typeId), ".buffer, ", defaultOffset, ", ", defaultSize);
+        "Schemas.b_", kj::hex(typeId), ".getBuffer(), ", defaultOffset, ", ", defaultSize);
 
       kj::String blobKind =  typeBody.which() == schema::Type::TEXT ? kj::str("Text") : kj::str("Data");
       kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");
@@ -1417,7 +1417,7 @@ private:
         spaces(indent), "    }\n",
 
         spaces(indent),
-        "    public final Reader", readerTypeParams, " constructReader(org.capnproto.SegmentReader segment, int data,",
+        "    public final Reader", readerTypeParams, " constructReader(org.capnproto.SegmentDataContainer segment, int data,",
         "int pointers, int dataSize, short pointerCount, int nestingLimit) {\n",
         spaces(indent), "      return new Reader", readerTypeParams, "(",
         KJ_MAP(p, typeParamVec) {
@@ -1425,7 +1425,7 @@ private:
         },
         "segment,data,pointers,dataSize,pointerCount,nestingLimit);\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public final Builder", builderTypeParams, " constructBuilder(org.capnproto.SegmentBuilder segment, int data,",
+        spaces(indent), "    public final Builder", builderTypeParams, " constructBuilder(org.capnproto.GenericSegmentBuilder segment, int data,",
         "int pointers, int dataSize, short pointerCount) {\n",
         spaces(indent), "      return new Builder", builderTypeParams, "(",
         KJ_MAP(p, typeParamVec) {
@@ -1468,7 +1468,7 @@ private:
           KJ_MAP(p, typeParamVec) {
             return kj::strTree("org.capnproto.PointerFactory<", p, "_Builder, ?> ", p, "_Factory,");
           },
-          "org.capnproto.SegmentBuilder segment, int data, int pointers,",
+          "org.capnproto.GenericSegmentBuilder segment, int data, int pointers,",
           "int dataSize, short pointerCount){\n",
           spaces(indent+1), "    super(segment, data, pointers, dataSize, pointerCount);\n",
           KJ_MAP(p, typeParamVec) {
@@ -1500,7 +1500,7 @@ private:
           KJ_MAP(p, typeParamVec) {
             return kj::strTree("org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory,");
           },
-          "org.capnproto.SegmentReader segment, int data, int pointers,",
+          "org.capnproto.SegmentDataContainer segment, int data, int pointers,",
           "int dataSize, short pointerCount, int nestingLimit){\n",
           spaces(indent+1), "    super(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
           KJ_MAP(p, typeParamVec) {
@@ -1577,7 +1577,7 @@ private:
           kj::strTree(spaces(indent),
                       "public static final org.capnproto.Text.Reader ", upperCase,
                       " = new org.capnproto.Text.Reader(Schemas.b_",
-                      kj::hex(proto.getId()), ".buffer, ", schema.getValueSchemaOffset(),
+                      kj::hex(proto.getId()), ".getBuffer(), ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getText().size(), ");\n")
         };
       }
@@ -1588,7 +1588,7 @@ private:
           kj::strTree(spaces(indent),
                       "public static final org.capnproto.Data.Reader ", upperCase,
                       " = new org.capnproto.Data.Reader(Schemas.b_",
-                      kj::hex(proto.getId()), ".buffer, ", schema.getValueSchemaOffset(),
+                      kj::hex(proto.getId()), ".getBuffer(), ", schema.getValueSchemaOffset(),
                       ", ", constProto.getValue().getData().size(), ");\n")
         };
       }
@@ -1727,7 +1727,7 @@ private:
 
     // Java limits method code size to 64KB. Maybe we should use class.getResource()?
     auto schemaDef = kj::strTree(
-      "public static final org.capnproto.SegmentReader b_", hexId, " =\n",
+      "public static final org.capnproto.SegmentDataContainer b_", hexId, " =\n",
       "   org.capnproto.GeneratedClassSupport.decodeRawBytes(\n",
       "   ", kj::mv(schemaLiteral), " \"\"",
       ");\n");

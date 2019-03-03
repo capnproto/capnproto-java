@@ -18,28 +18,32 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.util.ArrayList;
 import java.nio.ByteBuffer;
+import java.util.List;
 
-public final class ReaderArena implements Arena {
+public final class ReaderArena implements AllocatedArena {
 
     public long limit;
     // current limit
 
-    public final ArrayList<SegmentReader> segments;
+    private final List<GenericSegmentReader> segments;
 
     public ReaderArena(ByteBuffer[] segmentSlices, long traversalLimitInWords) {
         this.limit = traversalLimitInWords;
-        this.segments = new ArrayList<SegmentReader>();
-        for(int ii = 0; ii < segmentSlices.length; ++ii) {
+        this.segments = new ArrayList<GenericSegmentReader>();
+        for (int ii = 0; ii < segmentSlices.length; ++ii) {
             this.segments.add(new SegmentReader(segmentSlices[ii], this));
         }
     }
 
-    public SegmentReader tryGetSegment(int id) {
+    public List<GenericSegmentReader> getSegments() {
+        return segments;
+    }
+
+    public GenericSegmentReader tryGetSegment(int id) {
         return segments.get(id);
     }
 

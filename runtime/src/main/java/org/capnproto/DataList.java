@@ -24,7 +24,7 @@ package org.capnproto;
 public final class DataList {
     public static final class Factory extends ListFactory<Builder, Reader> {
         Factory() {super (ElementSize.POINTER); }
-        public final Reader constructReader(SegmentReader segment,
+        public final Reader constructReader(SegmentDataContainer segment,
                                               int ptr,
                                               int elementCount, int step,
                                               int structDataSize, short structPointerCount,
@@ -32,7 +32,7 @@ public final class DataList {
             return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
-        public final Builder constructBuilder(SegmentBuilder segment,
+        public final Builder constructBuilder(GenericSegmentBuilder segment,
                                               int ptr,
                                               int elementCount, int step,
                                               int structDataSize, short structPointerCount) {
@@ -42,7 +42,7 @@ public final class DataList {
     public static final Factory factory = new Factory();
 
     public static final class Reader extends ListReader implements Iterable<Data.Reader> {
-        public Reader(SegmentReader segment,
+        public Reader(SegmentDataContainer segment,
                       int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
@@ -79,7 +79,7 @@ public final class DataList {
 
     public static final class Builder extends ListBuilder implements Iterable<Data.Builder> {
 
-        public Builder(SegmentBuilder segment, int ptr,
+        public Builder(GenericSegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){
             super(segment, ptr, elementCount, step, structDataSize, structPointerCount);

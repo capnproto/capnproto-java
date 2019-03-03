@@ -23,13 +23,13 @@ package org.capnproto;
 
 public final class AnyPointer {
     public static final class Factory implements PointerFactory<Builder, Reader> {
-        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+        public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return new Reader(segment, pointer, nestingLimit);
         }
-        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
             return new Builder(segment, pointer);
         }
-        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+        public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int elementCount) {
             Builder result = new Builder(segment, pointer);
             result.clear();
             return result;
@@ -38,18 +38,18 @@ public final class AnyPointer {
     public static final Factory factory = new Factory();
 
     public final static class Reader {
-        final SegmentReader segment;
+        final SegmentDataContainer segment;
         final int pointer; // offset in words
         final int nestingLimit;
 
-        public Reader(SegmentReader segment, int pointer, int nestingLimit) {
+        public Reader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             this.segment = segment;
             this.pointer = pointer;
             this.nestingLimit = nestingLimit;
         }
 
         public final boolean isNull() {
-            return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
+            return WirePointer.isNull(this.segment.getBuffer().getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
@@ -58,16 +58,16 @@ public final class AnyPointer {
     }
 
     public static final class Builder {
-        final SegmentBuilder segment;
+        final GenericSegmentBuilder segment;
         final int pointer;
 
-        public Builder(SegmentBuilder segment, int pointer) {
+        public Builder(GenericSegmentBuilder segment, int pointer) {
             this.segment = segment;
             this.pointer = pointer;
         }
 
         public final boolean isNull() {
-            return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
+            return WirePointer.isNull(this.segment.getBuffer().getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerBuilder<T> factory) {
@@ -92,7 +92,7 @@ public final class AnyPointer {
 
         public final void clear() {
             WireHelpers.zeroObject(this.segment, this.pointer);
-            this.segment.buffer.putLong(this.pointer * 8, 0L);
+            this.segment.getBuffer().putLong(this.pointer * 8, 0L);
         }
     }
 

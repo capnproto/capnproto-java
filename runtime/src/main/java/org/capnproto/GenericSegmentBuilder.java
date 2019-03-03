@@ -21,42 +21,72 @@
 package org.capnproto;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 /**
- * The Arena used for allocating new Segments.
+ * Representation of the SegmentBuilder. This Builder is responsible to manage
+ * one Segment for building a new Message.
  */
-public interface AllocatingArena extends Arena {
+public interface GenericSegmentBuilder extends SegmentDataContainer {
+
+    static final int FAILED_ALLOCATION = -1;
 
     /**
-     * Allocate a new Segment in case the previous Segment is not big enough for
-     * the requested data.
+     * Puts the long value into the buffer at word index.
      *
-     * @param amountPlusRef the number of words needed.
-     * @return The result of the allocation.
+     * @param index The word index.
+     * @param value The value to add.
      */
-    BuilderArena.AllocateResult allocate(int amountPlusRef);
+    void put(int index, long value);
 
     /**
-     * Provides the {@link GenericSegmentBuilder} for the given segment ID.
+     * The current size of the Segment.
      *
-     * @param segmentId the segment ID
-     * @return the segment.
+     * @return size
      */
-    @Override
-    GenericSegmentBuilder tryGetSegment(int segmentId);
+    int currentSize();
 
     /**
-     * Retrieve the ByteBuffers for Serialization.
+     * allocate more memory in this segment.
      *
-     * @return the buffers.
+     * @param words
+     * @return the start position of the allocated words. -1 means there was not
+     * enough space in the segment.
      */
-    ByteBuffer[] getSegmentsForOutput();
+    int allocate(int words);
 
     /**
-     * Access all currently existing segments.
+     * Retrieve the AllocatingArena.
      *
-     * @return the segments.
+     * @return the arena.
      */
-    List<GenericSegmentBuilder> getSegments();
+    AllocatingArena getArena();
+
+    /**
+     * Checks if the Segment is writable.
+     *
+     * @return {@code true}
+     */
+    boolean isWritable();
+
+    /**
+     * Retrieve the ID of this segment.
+     *
+     * @return the ID
+     */
+    int getId();
+
+    /**
+     * Sets the ID of the Segment.
+     *
+     * @param id the new ID.
+     */
+    void setId(int id);
+
+    /**
+     * Prepares the underlying ByteBuffer to be written.
+     *
+     * @return
+     */
+    ByteBuffer getSegmentForOutput();
+
 }

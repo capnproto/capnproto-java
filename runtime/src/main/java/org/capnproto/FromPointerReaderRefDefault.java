@@ -22,5 +22,5 @@
 package org.capnproto;
 
 public interface FromPointerReaderRefDefault<T> {
-    T fromPointerReaderRefDefault(SegmentReader segment, int pointer, SegmentReader defaultSegment, int defaultOffset, int nestingLimit);
+    T fromPointerReaderRefDefault(SegmentDataContainer segment, int pointer, SegmentDataContainer defaultSegment, int defaultOffset, int nestingLimit);
 }

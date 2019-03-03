@@ -32,11 +32,11 @@ class SerializeSuite extends FunSuite {
    * @param exampleBytes byte array containing `segmentCount` segments; segment `i` contains `i` words each set to `i`
    */
   def expectSerializesTo(exampleSegmentCount: Int, exampleBytes: Array[Byte]): Unit = {
-    def checkSegmentContents(arena: ReaderArena): Unit = {
-      arena.segments should have length exampleSegmentCount
+    def checkSegmentContents(arena: AllocatedArena): Unit = {
+      arena.getSegments() should have length exampleSegmentCount
       for (i <- 0 until exampleSegmentCount) {
-        val segment = arena.segments.get(i)
-        val segmentWords = segment.buffer.asLongBuffer()
+        val segment = arena.getSegments().get(i)
+        val segmentWords = segment.getBuffer().asLongBuffer()
 
         segmentWords.capacity should equal (i)
         segmentWords.rewind()

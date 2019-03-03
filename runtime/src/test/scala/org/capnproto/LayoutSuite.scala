@@ -27,7 +27,7 @@ import org.scalatest.FunSuite
 class LayoutSuite extends FunSuite {
 
   class BareStructReader extends StructReader.Factory[StructReader] {
-    def constructReader(segment: org.capnproto.SegmentReader, data: Int, pointers: Int,
+    def constructReader(segment: org.capnproto.SegmentDataContainer, data: Int, pointers: Int,
                         dataSize: Int, pointerCount: Short, nestingLimit:Int) : StructReader = {
       new StructReader(segment,data,pointers,dataSize,pointerCount,nestingLimit)
     }
@@ -121,7 +121,7 @@ class LayoutSuite extends FunSuite {
 
   class BareStructBuilder(val structSize : StructSize) extends StructBuilder.Factory[StructBuilder] {
 
-    def constructBuilder(segment: org.capnproto.SegmentBuilder, data: Int, pointers: Int,
+    def constructBuilder(segment: org.capnproto.GenericSegmentBuilder, data: Int, pointers: Int,
                           dataSize: Int, pointerCount: Short) : StructBuilder = {
       new StructBuilder(segment,data,pointers,dataSize,pointerCount)
     }

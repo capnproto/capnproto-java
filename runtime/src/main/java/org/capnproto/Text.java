@@ -18,52 +18,54 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.nio.ByteBuffer;
 
 public final class Text {
+
     public static final class Factory implements
-                                      FromPointerReaderBlobDefault<Reader>,
-                                      FromPointerBuilderBlobDefault<Builder>,
-                                      PointerFactory<Builder, Reader>,
-                                      SetPointerBuilder<Builder, Reader> {
-        public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
-                                                   int defaultOffset, int defaultSize) {
+            FromPointerReaderBlobDefault<Reader>,
+            FromPointerBuilderBlobDefault<Builder>,
+            PointerFactory<Builder, Reader>,
+            SetPointerBuilder<Builder, Reader> {
+
+        public final Reader fromPointerReaderBlobDefault(SegmentDataContainer segment, int pointer, java.nio.ByteBuffer defaultBuffer,
+                int defaultOffset, int defaultSize) {
             return WireHelpers.readTextPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
 
-        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+        public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return WireHelpers.readTextPointer(segment, pointer, null, 0, 0);
         }
 
-        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
-                                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        public final Builder fromPointerBuilderBlobDefault(GenericSegmentBuilder segment, int pointer,
+                java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableTextPointer(pointer,
-                                                      segment,
-                                                      defaultBuffer,
-                                                      defaultOffset,
-                                                      defaultSize);
+                    segment,
+                    defaultBuffer,
+                    defaultOffset,
+                    defaultSize);
         }
 
-        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
             return WireHelpers.getWritableTextPointer(pointer,
-                                                      segment,
-                                                      null, 0, 0);
+                    segment,
+                    null, 0, 0);
         }
 
-        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
+        public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initTextPointer(pointer, segment, size);
         }
 
-        public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+        public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
             WireHelpers.setTextPointer(pointer, segment, value);
         }
     }
     public static final Factory factory = new Factory();
 
     public static final class Reader {
+
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes, not including NUL terminator
@@ -122,6 +124,7 @@ public final class Text {
     }
 
     public static final class Builder {
+
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes
@@ -159,6 +162,22 @@ public final class Text {
             } catch (java.io.UnsupportedEncodingException e) {
                 throw new Error("UTF-8 is unsupported");
             }
+        }
+
+        void copy(Reader value) {
+            ByteBuffer slice = value.buffer.duplicate();
+            slice.position(value.offset);
+            slice.limit(value.offset + value.size);
+            buffer.position(offset);
+            buffer.put(slice);
+        }
+
+        void put(int i, byte get) {
+            buffer.put(i, get);
+        }
+
+        ByteBuffer getBuffer() {
+            return buffer;
         }
 
     }

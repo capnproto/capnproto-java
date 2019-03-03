@@ -49,10 +49,10 @@ public final class MessageBuilder {
     }
 
     private AnyPointer.Builder getRootInternal() {
-        SegmentBuilder rootSegment = this.arena.getSegment(0);
+        GenericSegmentBuilder rootSegment = this.arena.tryGetSegment(0);
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
-            if (location == SegmentBuilder.FAILED_ALLOCATION) {
+            if (location == GenericSegmentBuilder.FAILED_ALLOCATION) {
                 throw new Error("could not allocate root pointer");
             }
             if (location != 0) {
