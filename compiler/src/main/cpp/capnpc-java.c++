@@ -817,8 +817,8 @@ private:
     kj::String titleCase = toTitleCase(proto.getName());
 
     DiscriminantChecks unionDiscrim;
-    bool itsAnUnion = hasDiscriminantValue(proto);
-    if (itsAnUnion) {
+    bool unionCheck = hasDiscriminantValue(proto);
+    if (unionCheck) {
       unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
 
@@ -989,7 +989,7 @@ private:
         // reader
         //##################
         kj::strTree(
-          spaces(indent), "  //####################################### primitive '",titleCase,"'\n",
+          spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
@@ -1006,7 +1006,7 @@ private:
         //##################
         // builder
         //##################
-          spaces(indent), "  //####################################### primitive '",titleCase,"'\n",
+          spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
             unionDiscrim.check,
@@ -1042,7 +1042,7 @@ private:
         // reader
         //##################
         kj::strTree(
-          spaces(indent), "  //####################################### ANY '",titleCase,"'\n",
+          spaces(indent), "  //####################################### ANY '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public boolean has", titleCase, "() {\n",
             unionDiscrim.has,
@@ -1061,9 +1061,9 @@ private:
             spaces(indent), "   */\n",                                
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((itsAnUnion) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n",
 
              "  }\n"
@@ -1073,7 +1073,7 @@ private:
         //##################
         // builder
         //##################
-          spaces(indent), "  //####################################### ANY '",titleCase,"'\n",
+          spaces(indent), "  //####################################### ANY '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1090,9 +1090,9 @@ private:
                 
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionDiscrim.builderIsDef.size()>0) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n",
 
             spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
@@ -1129,7 +1129,7 @@ private:
         // reader
         //##################
         kj::strTree(
-          spaces(indent), "  //####################################### Struct '",titleCase,"'\n",
+          spaces(indent), "  //####################################### Struct '",titleCase,"' union:",unionCheck,"\n",
           kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1146,9 +1146,9 @@ private:
           spaces(indent), "   */\n",                                
  // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((itsAnUnion) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
               spaces(indent), "  }\n",
           "  }\n", 
           "\n"
@@ -1159,7 +1159,7 @@ private:
         //##################
         // builder
         //##################
-          spaces(indent), "  //####################################### Struct '",titleCase,"'\n",
+          spaces(indent), "  //####################################### Struct '",titleCase,"' union:",unionCheck,"\n",
           kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
           unionDiscrim.check,
@@ -1172,9 +1172,9 @@ private:
             spaces(indent), "   */\n",                                
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionDiscrim.builderIsDef.size()>0) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n",
 
           (field.getType().asStruct().getProto().getIsGeneric() ?
@@ -1221,7 +1221,7 @@ private:
         //##################
         // reader
         //##################
-          spaces(indent), "  //####################################### Blob '",titleCase,"'\n",
+          spaces(indent), "  //####################################### Blob '",titleCase,"' union:",unionCheck,"\n",
           kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           unionDiscrim.has,
@@ -1238,9 +1238,9 @@ private:
           spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((itsAnUnion) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n"
                 ),
 
@@ -1248,7 +1248,7 @@ private:
         //##################
         // builder
         //##################
-          spaces(indent), "  //####################################### Blob '",titleCase,"'\n",
+          spaces(indent), "  //####################################### Blob '",titleCase,"' union:",unionCheck,"\n",
           kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
           unionDiscrim.has,
@@ -1279,9 +1279,9 @@ private:
           spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionDiscrim.builderIsDef.size()>0) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n"
 
 
@@ -1314,7 +1314,7 @@ private:
         //##################
 
         kj::strTree(
-            spaces(indent), "  //####################################### List '",titleCase,"'\n",
+            spaces(indent), "  //####################################### List '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1346,7 +1346,7 @@ private:
                spaces(indent), "   */\n",                                
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((itsAnUnion) ?
+                ((!unionCheck) ?
                     kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
                     kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
                spaces(indent), "  }\n"
@@ -1358,7 +1358,7 @@ private:
         //##################
         // builder
         //##################
-            spaces(indent), "  //####################################### List '",titleCase,"'\n",
+            spaces(indent), "  //####################################### List '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1390,9 +1390,9 @@ private:
                spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionDiscrim.builderIsDef.size()>0) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+                ((unionCheck) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
                spaces(indent), "  }\n"
 
                )
