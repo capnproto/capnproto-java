@@ -682,7 +682,7 @@ private:
 
     kj::String titleCase = toTitleCase(memberName);
     kj::String upperCase = toUpperCase(memberName);
-
+    
     return DiscriminantChecks {
       kj::str(spaces(indent),
               "  if (which() != ", scope, "Which.", upperCase, ") return false;\n"),
@@ -821,7 +821,7 @@ private:
     if (unionCheck) {
       unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
-
+        
     switch (proto.which()) {
       case schema::Field::SLOT:
         // Continue below.
@@ -989,45 +989,82 @@ private:
         // reader
         //##################
         kj::strTree(
-          spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
+            spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.readerIsDef),
+
+            // getter
             spaces(indent), "  public final ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
-             makeEnumGetter(field.getType().asEnum(),
-                            offset, kj::str(defaultMaskParam), indent + 2) :
-             (typeBody.which() == schema::Type::VOID ?
-              kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
+                makeEnumGetter(field.getType().asEnum(), offset, kj::str(defaultMaskParam), indent + 2) 
+            :
+                (typeBody.which() == schema::Type::VOID ?
+                    kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") 
+                :
+                    kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n")
+                )
+            ),
             spaces(indent), "  }\n",
-            "\n"),
+            // consumer
+            (unionCheck ?
+                kj::strTree(
+                    spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                    spaces(indent), "    if (is",titleCase,"()) consumer.accept( get",titleCase, "() );\n",
+                    spaces(indent), "  }\n"
+                ) 
+            :
+                kj::StringTree()
+            ),
+            "\n"
+        ),
 
-          kj::strTree(
         //##################
         // builder
         //##################
-          spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
+        kj::strTree(
+            spaces(indent), "  //####################################### primitive '",titleCase,"' union:",unionCheck,"\n",
             kj::mv(unionDiscrim.builderIsDef),
+            
+            // getter
             spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             (typeBody.which() == schema::Type::ENUM ?
-             makeEnumGetter(field.getType().asEnum(),
-                            offset, kj::str(defaultMaskParam), indent + 2) :
-             (typeBody.which() == schema::Type::VOID ?
-              kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
-              kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
+                makeEnumGetter(field.getType().asEnum(), offset, kj::str(defaultMaskParam), indent + 2) 
+            :
+                (typeBody.which() == schema::Type::VOID ?
+                    kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n")
+                :
+                    kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n")
+                )
+            ),
             spaces(indent), "  }\n",
-
+            
+            // setter
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
             (typeBody.which() == schema::Type::ENUM ?
-             kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal()", defaultMaskParam, ");\n") :
-             (typeBody.which() == schema::Type::VOID ?
-              kj::strTree() :
-              kj::strTree(spaces(indent), "    _set",
-                          toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
+                kj::strTree(spaces(indent), "    _setShortField(", offset, ", (short)value.ordinal()", defaultMaskParam, ");\n") 
+            :
+                (typeBody.which() == schema::Type::VOID ?
+                    kj::strTree() 
+                :
+                    kj::strTree(spaces(indent), "    _set", toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n")
+                )
+            ),
             spaces(indent), "  }\n",
-            "\n")
+            
+            // consumer
+            (unionCheck?
+                kj::strTree(
+                    spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                    spaces(indent), "    if (is",titleCase,"()) consumer.accept( get",titleCase, "() );\n",
+                    spaces(indent), "  }\n"
+                )
+            :
+                kj::StringTree()
+            ),
+            "\n"
+        )
       };
 
     } else if (kind == FieldKind::INTERFACE) {
@@ -1059,14 +1096,18 @@ private:
             spaces(indent), "  /**\n",                
             spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
             spaces(indent), "   */\n",                                
-// consumer
-               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
-               spaces(indent), "  }\n",
+            // consumer
+            (unionCheck?
+                kj::strTree(
+                    spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                    spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n",
+                    spaces(indent), "  }\n"
+                )
+            :
+                kj::StringTree()
+            ),
 
-             "  }\n"
+             " }\n"
         ),
 
         kj::strTree(
@@ -1090,9 +1131,7 @@ private:
                 
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n",
 
             spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
@@ -1146,9 +1185,7 @@ private:
           spaces(indent), "   */\n",                                
  // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
               spaces(indent), "  }\n",
           "  }\n", 
           "\n"
@@ -1172,9 +1209,7 @@ private:
             spaces(indent), "   */\n",                                
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n",
 
           (field.getType().asStruct().getProto().getIsGeneric() ?
@@ -1238,9 +1273,7 @@ private:
           spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n"
                 ),
 
@@ -1279,9 +1312,7 @@ private:
           spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n"
 
 
@@ -1346,9 +1377,7 @@ private:
                spaces(indent), "   */\n",                                
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
-                ((!unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n"
                )
               ),            "\n"
@@ -1390,9 +1419,7 @@ private:
                spaces(indent), "   */\n",
 // consumer
                spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
-                ((unionCheck) ?
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   ):
-                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ),
+               kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") ,
                spaces(indent), "  }\n"
 
                )
