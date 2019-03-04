@@ -817,7 +817,8 @@ private:
     kj::String titleCase = toTitleCase(proto.getName());
 
     DiscriminantChecks unionDiscrim;
-    if (hasDiscriminantValue(proto)) {
+    bool itsAnUnion = hasDiscriminantValue(proto);
+    if (itsAnUnion) {
       unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
 
@@ -984,7 +985,11 @@ private:
 
     if (kind == FieldKind::PRIMITIVE) {
       return FieldText {
+        //##################
+        // reader
+        //##################
         kj::strTree(
+          spaces(indent), "  //####################################### primitive '",titleCase,"'\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
@@ -998,6 +1003,10 @@ private:
             "\n"),
 
           kj::strTree(
+        //##################
+        // builder
+        //##################
+          spaces(indent), "  //####################################### primitive '",titleCase,"'\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
             unionDiscrim.check,
@@ -1029,7 +1038,11 @@ private:
       auto factoryArg = makeFactoryArg(field.getType());
 
       return FieldText {
+        //##################
+        // reader
+        //##################
         kj::strTree(
+          spaces(indent), "  //####################################### ANY '",titleCase,"'\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public boolean has", titleCase, "() {\n",
             unionDiscrim.has,
@@ -1039,9 +1052,28 @@ private:
             spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
-            spaces(indent), "  }\n"),
+            spaces(indent), "  }\n",
+            spaces(indent), 
+                
+            // java approach
+            spaces(indent), "  /**\n",                
+            spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+            spaces(indent), "   */\n",                                
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                ((itsAnUnion) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               spaces(indent), "  }\n",
+
+             "  }\n"
+        ),
 
         kj::strTree(
+        //##################
+        // builder
+        //##################
+          spaces(indent), "  //####################################### ANY '",titleCase,"'\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1051,6 +1083,17 @@ private:
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
+            // java approach
+            spaces(indent), "  /**\n",                
+            spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+            spaces(indent), "   */\n",
+                
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
+                ((unionDiscrim.builderIsDef.size()>0) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               spaces(indent), "  }\n",
 
             spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
             unionDiscrim.set,
@@ -1068,10 +1111,9 @@ private:
                          readerType, " value) {\n",
                          unionDiscrim.set,
                          spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
-                         spaces(indent), "  }\n")),
-
-
-            "\n"),
+                         spaces(indent), "  }\n")
+        ),
+                "\n")
       };
 
     } else if (kind == FieldKind::STRUCT) {
@@ -1083,7 +1125,11 @@ private:
       auto factoryArg = makeFactoryArg(field.getType());
 
       return FieldText {
+        //##################
+        // reader
+        //##################
         kj::strTree(
+          spaces(indent), "  //####################################### Struct '",titleCase,"'\n",
           kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1091,17 +1137,45 @@ private:
 
           spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
           unionDiscrim.check,
-          spaces(indent), "    return ",
-          "_getPointerField(", factoryArg, ",", offset,",", defaultParams, ");\n",
-          spaces(indent), "  }\n", "\n"),
+          spaces(indent), "    return ", "_getPointerField(", factoryArg, ",", offset,",", defaultParams, ");\n",
+          spaces(indent), "  }\n",
+
+          // java approach
+          spaces(indent), "  /**\n",                
+          spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+          spaces(indent), "   */\n",                                
+ // consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                ((itsAnUnion) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+              spaces(indent), "  }\n",
+          "  }\n", 
+          "\n"
+        
+        ),
 
         kj::strTree(
+        //##################
+        // builder
+        //##################
+          spaces(indent), "  //####################################### Struct '",titleCase,"'\n",
           kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
+            // java approach
+            spaces(indent), "  /**\n",                
+            spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+            spaces(indent), "   */\n",                                
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
+                ((unionDiscrim.builderIsDef.size()>0) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               spaces(indent), "  }\n",
 
           (field.getType().asStruct().getProto().getIsGeneric() ?
            kj::strTree(
@@ -1144,19 +1218,37 @@ private:
 
       return FieldText {
         kj::strTree(
+        //##################
+        // reader
+        //##################
+          spaces(indent), "  //####################################### Blob '",titleCase,"'\n",
           kj::mv(unionDiscrim.readerIsDef),
           spaces(indent), "  public boolean has", titleCase, "() {\n",
           unionDiscrim.has,
           spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
           spaces(indent), "  }\n",
 
-          spaces(indent), "  public ", readerType,
-          " get", titleCase, "() {\n",
-          spaces(indent), "    return _getPointerField(", factory, ", ",
-          offset, ", ", defaultParams, ");\n",
-          spaces(indent), "  }\n", "\n"),
+          spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
+          spaces(indent), "    return _getPointerField(", factory, ", ", offset, ", ", defaultParams, ");\n",
+          spaces(indent), "  }\n",
+
+          // java approach
+          spaces(indent), "  /**\n",                
+          spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+          spaces(indent), "   */\n",
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                ((itsAnUnion) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               spaces(indent), "  }\n"
+                ),
 
         kj::strTree(
+        //##################
+        // builder
+        //##################
+          spaces(indent), "  //####################################### Blob '",titleCase,"'\n",
           kj::mv(unionDiscrim.builderIsDef),
           spaces(indent), "  public final boolean has", titleCase, "() {\n",
           unionDiscrim.has,
@@ -1179,7 +1271,21 @@ private:
           spaces(indent), "  public final ", builderType, " init", titleCase, "(int size) {\n",
           unionDiscrim.set,
           spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
-          spaces(indent), "  }\n"),
+          spaces(indent), "  }\n",
+          
+          // java approach
+          spaces(indent), "  /**\n",                
+          spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+          spaces(indent), "   */\n",
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
+                ((unionDiscrim.builderIsDef.size()>0) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
+               spaces(indent), "  }\n"
+
+
+        )
       };
     } else if (kind == FieldKind::LIST) {
 
@@ -1203,7 +1309,12 @@ private:
       }
 
       return FieldText {
+        //##################
+        // reader
+        //##################
+
         kj::strTree(
+            spaces(indent), "  //####################################### List '",titleCase,"'\n",
             kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1225,15 +1336,29 @@ private:
                spaces(indent), "  }\n"
                ) :
              kj::strTree(
-               spaces(indent), "  public final ", readerType,
-               " get", titleCase, "() {\n",
+               spaces(indent), "  public final ", readerType, " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
+               spaces(indent), "  }\n",
+                            
+               // java approach
+               spaces(indent), "  /**\n",                
+               spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+               spaces(indent), "   */\n",                                
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",readerType,"> consumer) {\n",
+                ((itsAnUnion) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
                spaces(indent), "  }\n"
                )
-              ),
-            "\n"),
+              ),            "\n"
+            ),
 
         kj::strTree(
+        //##################
+        // builder
+        //##################
+            spaces(indent), "  //####################################### List '",titleCase,"'\n",
             kj::mv(unionDiscrim.builderIsDef),
             spaces(indent), "  public final boolean has", titleCase, "() {\n",
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
@@ -1255,10 +1380,21 @@ private:
                spaces(indent), "  }\n"
                ) :
              kj::strTree(
-               spaces(indent), "  public final ", builderType,
-               " get", titleCase, "() {\n",
+               spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
+               spaces(indent), "  }\n",
+                            
+               // java approach
+               spaces(indent), "  /**\n",                
+               spaces(indent), "   * The given consumer will only receive the ",titleCase," if it is present.\n",                
+               spaces(indent), "   */\n",
+// consumer
+               spaces(indent), "  public void consume", titleCase, "( java.util.function.Consumer<",builderType,"> consumer) {\n",
+                ((unionDiscrim.builderIsDef.size()>0) ?
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"()) consumer.accept( get",titleCase, "() );\n") :
+                    kj::strTree(spaces(indent), "    if (has",titleCase,"() && is",titleCase,"()) consumer.accept( get",titleCase, "() );\n"   )),
                spaces(indent), "  }\n"
+
                )
               ),
 
@@ -1309,9 +1445,7 @@ private:
                spaces(indent), "    return _initPointerField(", listFactory, ", ", offset, ", size);\n",
                spaces(indent), "  }\n")
               )
-          ),
-
-
+          )
       };
     } else {
       KJ_UNREACHABLE;
