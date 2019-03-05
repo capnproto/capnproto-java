@@ -22,11 +22,9 @@ install:
 
 jdk:
   - oraclejdk8
-  - oraclejdk7
   - openjdk7
 script:
-  - make
-  - make addressbook
+  - sbt compile
   - sbt test
   - sbt doc
 
