@@ -41,6 +41,6 @@ public interface AllocatedArena extends Arena {
      *
      * @return the segments.
      */
-    List<GenericSegmentReader> getSegments();
+    List<? extends GenericSegmentReader> getSegments();
 
 }
