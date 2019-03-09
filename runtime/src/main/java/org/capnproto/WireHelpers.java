@@ -227,7 +227,7 @@ final class WireHelpers {
             for (int ii = 0; ii < count; ++ii) {
                 zeroObject(segment, pointerSection + ii);
             }
-            memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+            memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                    StructPointer.wordSize(tag) * Constants.BYTES_PER_WORD);
             break;
         }
@@ -239,7 +239,7 @@ final class WireHelpers {
             case ElementSize.TWO_BYTES:
             case ElementSize.FOUR_BYTES:
             case ElementSize.EIGHT_BYTES: {
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        roundBitsUpToWords(
                            ListPointer.elementCount(tag) *
                            ElementSize.dataBitsPerElement(ListPointer.elementSize(tag))) * Constants.BYTES_PER_WORD);
@@ -250,7 +250,7 @@ final class WireHelpers {
                 for (int ii = 0; ii < count; ++ii) {
                     zeroObject(segment, ptr + ii);
                 }
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        count * Constants.BYTES_PER_WORD);
                 break;
             }
@@ -272,7 +272,7 @@ final class WireHelpers {
                     }
                 }
 
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        (StructPointer.wordSize(elementTag) * count + Constants.POINTER_SIZE_IN_WORDS) * Constants.BYTES_PER_WORD);
                 break;
             }
@@ -455,7 +455,7 @@ final class WireHelpers {
             //#    out as it may contain secrets that the caller intends to remove from the new copy.
             //# 2) Zeros will be deflated by packing, making this dead memory almost-free if it ever
             //#    hits the wire.
-            memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, (byte)0,
+            memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
                    (oldDataSize + oldPointerCount * Constants.WORDS_PER_POINTER) * Constants.BYTES_PER_WORD);
 
             return factory.constructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
@@ -660,8 +660,7 @@ final class WireHelpers {
 
             //# Zero out old location. See explanation in getWritableStructPointer().
             //# Make sure to include the tag word.
-            memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
-                   (byte)0, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
+            memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
 
             return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                             elementCount,
@@ -739,8 +738,7 @@ final class WireHelpers {
                 }
 
                 //# Zero out old location. See explanation in getWritableStructPointer().
-                memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
-                       (byte)0, roundBitsUpToBytes(oldStep * elementCount));
+                memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, roundBitsUpToBytes(oldStep * elementCount));
 
                 return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
@@ -1010,11 +1008,24 @@ final class WireHelpers {
         }
     }
 
-    static void memset(ByteBuffer dstBuffer, int dstByteOffset, byte value, int length) {
-        // TODO we can probably do this faster
-        for (int ii = dstByteOffset; ii < dstByteOffset + length; ++ii) {
-            dstBuffer.put(ii, value);
+    private static final byte[] ERAZER = new byte[1024];
+    static void memClear(ByteBuffer dstBuffer, int dstByteOffset, int length) {
+        int pos=0;
+        // store the buffer pos
+        int position=dstBuffer.position();
+        // go to the start of the clear area
+        dstBuffer.position(dstByteOffset);
+        final int size = ERAZER.length;
+        while(length>pos+size){
+            // zero out in ERAZER steps
+            dstBuffer.put(ERAZER);
+            pos+=size;
         }
+        // zero the rest
+        dstBuffer.put(ERAZER, 0, length-pos);
+        
+        // reset the buffer pos just to be sure
+        dstBuffer.position(position);
     }
 
     static void memcpy(ByteBuffer dstBuffer, int dstByteOffset, ByteBuffer srcBuffer, int srcByteOffset, int length) {
