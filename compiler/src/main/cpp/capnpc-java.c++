@@ -812,12 +812,36 @@ private:
 
   }
 
+  kj::String createDoIfRequired(int indent,kj::StringPtr titleCase, kj::StringPtr type,  bool is, bool has){
+     if (!is && !has)
+        return kj::str();
+     return createDo(indent,titleCase,type,createCondition(titleCase,is,has));
+  }
+
+  kj::String createCondition (kj::StringPtr titleCase, bool is, bool has){
+      if (is&&has)
+         return kj::strTree("is",titleCase,"() && has",titleCase,"()").flatten();
+      else if (is)
+         return kj::strTree("is",titleCase,"()").flatten();
+      return kj::strTree("has",titleCase,"()").flatten();
+   }
+
+   kj::String createDo(int indent,kj::StringPtr titleCase, kj::StringPtr type, kj::StringPtr condition) {
+      return kj::strTree(
+         spaces(indent), "  public void do", titleCase, "(java.util.function.Consumer<",type,">consume) {\n",
+         spaces(indent), "    if(",condition,")\n",
+         spaces(indent), "       consume.accept( get", titleCase, "() );\n",
+         spaces(indent), "  }\n"
+      ).flatten();
+   }
+
   FieldText makeFieldText(kj::StringPtr scope, StructSchema::Field field, int indent) {
     auto proto = field.getProto();
     kj::String titleCase = toTitleCase(proto.getName());
 
     DiscriminantChecks unionDiscrim;
-    if (hasDiscriminantValue(proto)) {
+    bool isExists= hasDiscriminantValue(proto);
+    if (isExists) {
       unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
 
@@ -830,20 +854,22 @@ private:
         auto slots = getSortedSlots(schemaLoader.get(
             field.getProto().getGroup().getTypeId()).asStruct());
         return FieldText {
-          kj::strTree(
-            kj::mv(unionDiscrim.readerIsDef),
+            kj::strTree(
+               kj::mv(unionDiscrim.readerIsDef),
             spaces(indent), "  public ", titleCase, ".Reader get", titleCase, "() {\n",
             spaces(indent), "    return new ", scope, titleCase,
             ".Reader(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
             spaces(indent), "  }\n",
+            createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Reader").flatten(),isExists,false),
             "\n"),
 
             kj::strTree(
-              kj::mv(unionDiscrim.builderIsDef),
+               kj::mv(unionDiscrim.builderIsDef),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
               spaces(indent), "    return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
+              createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Builder").flatten(),isExists,false),
               spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
               unionDiscrim.set,
               KJ_MAP(slot, slots) {
@@ -865,8 +891,8 @@ private:
               "  return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
-              "\n")
-          };
+               "\n")
+         };
       }
     }
 
