@@ -29,6 +29,7 @@ import java.util.stream.StreamSupport;
 public final class TextList {
     public static final class Factory extends ListFactory<Builder, Reader> {
         Factory() {super (ElementSize.POINTER); }
+        @Override
         public final Reader constructReader(SegmentDataContainer segment,
                                             int ptr,
                                             int elementCount, int step,
@@ -37,6 +38,7 @@ public final class TextList {
             return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                 int ptr,
                                                 int elementCount, int step,
@@ -72,17 +74,21 @@ public final class TextList {
                 this.list = list;
             }
 
+            @Override
             public Text.Reader next() {
                 return this.list._getPointerElement(Text.factory, idx++);
             }
+            @Override
             public boolean hasNext() {
                 return idx < list.size();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Text.Reader> iterator() {
             return new Iterator(this);
         }
@@ -117,17 +123,21 @@ public final class TextList {
                 this.list = list;
             }
 
+            @Override
             public Text.Builder next() {
                 return this.list._getPointerElement(Text.factory, idx++);
             }
+            @Override
             public boolean hasNext() {
                 return this.idx < this.list.size();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Text.Builder> iterator() {
             return new Iterator(this);
         }

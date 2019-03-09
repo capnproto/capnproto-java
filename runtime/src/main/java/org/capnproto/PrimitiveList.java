@@ -28,13 +28,13 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.capnproto.Text.Reader;
 
 public class PrimitiveList {
     public static class Void {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.VOID); }
 
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -43,6 +43,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -86,6 +87,7 @@ public class PrimitiveList {
     public static class Boolean {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.BIT); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -94,6 +96,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -132,19 +135,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Boolean next() {
                     return get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Boolean> iterator() {
                 return new Iterator(this);
             }
@@ -177,6 +184,7 @@ public class PrimitiveList {
     public static class Byte {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.BYTE); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -185,6 +193,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -222,19 +231,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Byte next() {
                     return get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Byte> iterator() {
                 return new Iterator(this);
             }
@@ -267,6 +280,7 @@ public class PrimitiveList {
     public static class Short {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.TWO_BYTES); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -275,6 +289,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -314,19 +329,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Short next() {
                     return  get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Short> iterator() {
                 return new Iterator(this);
             }
@@ -364,6 +383,7 @@ public class PrimitiveList {
                 super(ElementSize.FOUR_BYTES);
             }
 
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                     int ptr,
                     int elementCount, int step,
@@ -372,6 +392,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                     int ptr,
                     int elementCount, int step,
@@ -460,6 +481,7 @@ public class PrimitiveList {
     public static class Float {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.FOUR_BYTES); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -468,6 +490,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -505,19 +528,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Float next() {
                     return get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Float> iterator() {
                 return new Iterator(this);
             }
@@ -551,6 +578,7 @@ public class PrimitiveList {
     public static class Long {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.EIGHT_BYTES); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -559,6 +587,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -596,19 +625,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Long next() {
                     return get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Long> iterator() {
                 return new Iterator(this);
             }
@@ -641,6 +674,7 @@ public class PrimitiveList {
     public static class Double {
         public static final class Factory extends ListFactory<Builder, Reader> {
             Factory() {super (ElementSize.EIGHT_BYTES); }
+            @Override
             public final Reader constructReader(SegmentDataContainer segment,
                                                   int ptr,
                                                   int elementCount, int step,
@@ -649,6 +683,7 @@ public class PrimitiveList {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
+            @Override
             public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                     int ptr,
                                                     int elementCount, int step,
@@ -686,19 +721,23 @@ public class PrimitiveList {
                     this.list = list;
                 }
 
+                @Override
                 public java.lang.Double next() {
                     return get(idx++);
                 }
 
+                @Override
                 public boolean hasNext() {
                     return idx < list.size();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             }
 
+            @Override
             public java.util.Iterator<java.lang.Double> iterator() {
                 return new Iterator(this);
             }

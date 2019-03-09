@@ -37,19 +37,21 @@ public final class ListList {
             this.factory = factory;
         }
 
+        @Override
         public final Reader<ElementReader> constructReader(SegmentDataContainer segment,
                                                              int ptr,
                                                              int elementCount, int step,
                                                              int structDataSize, short structPointerCount,
                                                              int nestingLimit) {
-            return new Reader<ElementReader>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+            return new Reader<>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder<ElementBuilder> constructBuilder(GenericSegmentBuilder segment,
                                                               int ptr,
                                                               int elementCount, int step,
                                                               int structDataSize, short structPointerCount) {
-            return new Builder<ElementBuilder>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            return new Builder<>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
     }
 
@@ -84,17 +86,21 @@ public final class ListList {
                 this.list = list;
             }
 
+            @Override
             public T next() {
                 return get(idx++);
             }
+            @Override
             public boolean hasNext() {
                 return idx < list.size();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
         }

@@ -45,7 +45,7 @@ public class ListReader {
         this.step = 0;
         this.structDataSize = 0;
         this.structPointerCount = 0;
-        this.nestingLimit = 0x7fffffff;
+        this.nestingLimit = 0x7fff_ffff;
     }
 
     public ListReader(SegmentDataContainer segment, int ptr,

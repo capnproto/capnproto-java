@@ -28,13 +28,16 @@ public final class Data {
                                       PointerFactory<Builder, Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
                                       SetPointerBuilder<Builder, Reader> {
+        @Override
         public final Reader fromPointerReaderBlobDefault(SegmentDataContainer segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
+        @Override
         public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return WireHelpers.readDataPointer(segment, pointer, null, 0, 0);
         }
+        @Override
         public final Builder fromPointerBuilderBlobDefault(GenericSegmentBuilder segment, int pointer,
                                                      java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableDataPointer(pointer,
@@ -43,16 +46,19 @@ public final class Data {
                                                       defaultOffset,
                                                       defaultSize);
         }
+        @Override
         public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
                                                       null, 0, 0);
         }
 
+        @Override
         public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initDataPointer(pointer, segment, size);
         }
 
+        @Override
         public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
             WireHelpers.setDataPointer(pointer, segment, value);
         }

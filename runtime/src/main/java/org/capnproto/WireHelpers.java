@@ -890,7 +890,7 @@ final class WireHelpers {
         long ref = segment.get(refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fffffff);
+                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fff_ffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -1137,7 +1137,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fffffff);
+                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fff_ffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;

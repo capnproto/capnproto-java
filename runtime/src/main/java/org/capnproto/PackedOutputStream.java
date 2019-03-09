@@ -22,8 +22,8 @@
 package org.capnproto;
 
 import java.io.IOException;
-import java.nio.channels.WritableByteChannel;
 import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 
 public final class PackedOutputStream implements WritableByteChannel {
     final BufferedOutputStream inner;
@@ -32,6 +32,7 @@ public final class PackedOutputStream implements WritableByteChannel {
         this.inner = output;
     }
 
+    @Override
     public int write(ByteBuffer inBuf) throws IOException {
         int length = inBuf.remaining();
         ByteBuffer out = this.inner.getWriteBuffer();
@@ -204,10 +205,12 @@ public final class PackedOutputStream implements WritableByteChannel {
         return length;
     }
 
+    @Override
     public void close() throws IOException {
         this.inner.close();
     }
 
+    @Override
     public boolean isOpen() {
         return this.inner.isOpen();
     }

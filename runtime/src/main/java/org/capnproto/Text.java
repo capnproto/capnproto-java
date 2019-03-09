@@ -30,15 +30,18 @@ public final class Text {
             PointerFactory<Builder, Reader>,
             SetPointerBuilder<Builder, Reader> {
 
+        @Override
         public final Reader fromPointerReaderBlobDefault(SegmentDataContainer segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                 int defaultOffset, int defaultSize) {
             return WireHelpers.readTextPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
 
+        @Override
         public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return WireHelpers.readTextPointer(segment, pointer, null, 0, 0);
         }
 
+        @Override
         public final Builder fromPointerBuilderBlobDefault(GenericSegmentBuilder segment, int pointer,
                 java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableTextPointer(pointer,
@@ -48,16 +51,19 @@ public final class Text {
                     defaultSize);
         }
 
+        @Override
         public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
             return WireHelpers.getWritableTextPointer(pointer,
                     segment,
                     null, 0, 0);
         }
 
+        @Override
         public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initTextPointer(pointer, segment, size);
         }
 
+        @Override
         public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
             WireHelpers.setTextPointer(pointer, segment, value);
         }

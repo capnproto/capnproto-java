@@ -35,6 +35,7 @@ public interface GenericSegmentReader extends SegmentDataContainer {
      *
      * @return the arena.
      */
+    @Override
     public AllocatedArena getArena();
 
 }

@@ -20,8 +20,8 @@
 // THE SOFTWARE.
 package org.capnproto;
 
-import java.util.ArrayList;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ReaderArena implements AllocatedArena {
@@ -33,20 +33,23 @@ public final class ReaderArena implements AllocatedArena {
 
     public ReaderArena(ByteBuffer[] segmentSlices, long traversalLimitInWords) {
         this.limit = traversalLimitInWords;
-        this.segments = new ArrayList<GenericSegmentReader>();
+        this.segments = new ArrayList<>();
         for (int ii = 0; ii < segmentSlices.length; ++ii) {
             this.segments.add(new SegmentReader(segmentSlices[ii], this));
         }
     }
 
+    @Override
     public List<GenericSegmentReader> getSegments() {
         return segments;
     }
 
+    @Override
     public GenericSegmentReader tryGetSegment(int id) {
         return segments.get(id);
     }
 
+    @Override
     public final void checkReadLimit(int numBytes) {
         if (numBytes > limit) {
             throw new DecodeException("Read limit exceeded.");

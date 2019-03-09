@@ -22,8 +22,8 @@
 package org.capnproto;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 public final class PackedInputStream implements ReadableByteChannel {
     final BufferedInputStream inner;
@@ -32,6 +32,7 @@ public final class PackedInputStream implements ReadableByteChannel {
         this.inner = input;
     }
 
+    @Override
     public int read(ByteBuffer outBuf) throws IOException {
 
         int len = outBuf.remaining();
@@ -139,10 +140,12 @@ public final class PackedInputStream implements ReadableByteChannel {
         }
     }
 
+    @Override
     public void close() throws IOException {
         inner.close();
     }
 
+    @Override
     public boolean isOpen() {
         return inner.isOpen();
     }

@@ -30,7 +30,7 @@ public final class ReaderOptions {
         this.nestingLimit = nestingLimit;
     }
 
-    final static long DEFAULT_TRAVERSAL_LIMIT_IN_WORDS = 8 * 1024 * 1024;
+    final static long DEFAULT_TRAVERSAL_LIMIT_IN_WORDS = 8 * 1_024 * 1_024;
     final static int DEFAULT_NESTING_LIMIT = 64;
 
     public static final ReaderOptions DEFAULT_READER_OPTIONS =

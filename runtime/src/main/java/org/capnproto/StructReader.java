@@ -41,7 +41,7 @@ public class StructReader {
         this.pointers = 0;
         this.dataSize = 0;
         this.pointerCount = 0;
-        this.nestingLimit = 0x7fffffff;
+        this.nestingLimit = 0x7fff_ffff;
     }
 
     public StructReader(SegmentDataContainer segment, int data,

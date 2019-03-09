@@ -28,6 +28,7 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
     SetPointerBuilder<Builder, Reader>,
     FromPointerReaderRefDefault<Reader>,
     StructReader.Factory<Reader> {
+    @Override
     public final Reader fromPointerReaderRefDefault(SegmentDataContainer segment, int pointer,
                                                     SegmentDataContainer defaultSegment, int defaultOffset,
                                                     int nestingLimit) {
@@ -37,22 +38,27 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
                                              defaultSegment, defaultOffset,
                                              nestingLimit);
     }
+    @Override
     public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
         return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
     }
+    @Override
     public final Builder fromPointerBuilderRefDefault(GenericSegmentBuilder segment, int pointer,
                                                       SegmentDataContainer defaultSegment, int defaultOffset) {
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
                                                     defaultSegment, defaultOffset);
     }
+    @Override
     public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
                                                     null, 0);
     }
+    @Override
     public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());
     }
 
+    @Override
     public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
         WireHelpers.setStructPointer(segment, pointer, value);
     }

@@ -32,6 +32,7 @@ public final class ArrayOutputStream implements BufferedOutputStream {
         this.buf = buf.duplicate();
     }
 
+    @Override
     public final int write(ByteBuffer src) throws IOException {
         int available = this.buf.remaining();
         int size = src.remaining();
@@ -42,17 +43,19 @@ public final class ArrayOutputStream implements BufferedOutputStream {
         return size;
     }
 
+    @Override
     public final ByteBuffer getWriteBuffer() {
         return this.buf;
     }
 
-    public final void close() throws IOException {
-        return;
-    }
+    @Override
+    public final void close() {}
 
+    @Override
     public final boolean isOpen() {
         return true;
     }
 
-    public final void flush() { }
+    @Override
+    public final void flush() {}
 }

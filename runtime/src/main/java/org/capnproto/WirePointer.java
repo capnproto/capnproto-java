@@ -34,7 +34,7 @@ final class WirePointer {
     }
 
     public static int offsetAndKind(long wirePointer) {
-        return (int)(wirePointer & 0xffffffff);
+        return (int)(wirePointer & 0xffff_ffff);
     }
 
     public static byte kind(long wirePointer) {
@@ -64,7 +64,7 @@ final class WirePointer {
         //# allocated immediately before this pointer, to distinguish
         //# it from null.
 
-        buffer.putInt(offset * 8, 0xfffffffc);
+        buffer.putInt(offset * 8, 0xffff_fffc);
     }
 
     public static void setOffsetAndKind(ByteBuffer buffer, int offset, int offsetAndKind) {

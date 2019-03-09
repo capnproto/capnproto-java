@@ -32,10 +32,12 @@ public class SegmentReader implements GenericSegmentReader {
         this.arena = arena;
     }
 
+    @Override
     public long get(int index) {
         return buffer.getLong(index * Constants.BYTES_PER_WORD);
     }
 
+    @Override
     public AllocatedArena getArena() {
         return arena;
     }

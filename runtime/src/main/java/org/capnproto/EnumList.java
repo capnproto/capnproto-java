@@ -42,20 +42,22 @@ public class EnumList {
             super(ElementSize.TWO_BYTES);
             this.values = values;
         }
+        @Override
         public final Reader<T> constructReader(SegmentDataContainer segment,
                                                int ptr,
                                                int elementCount, int step,
                                                int structDataSize, short structPointerCount,
                                                int nestingLimit) {
-            return new Reader<T>(values,
+            return new Reader<>(values,
                                  segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder<T> constructBuilder(GenericSegmentBuilder segment,
                                                  int ptr,
                                                  int elementCount, int step,
                                                  int structDataSize, short structPointerCount) {
-            return new Builder<T> (values, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            return new Builder<> (values, segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
     }
 
@@ -91,19 +93,23 @@ public class EnumList {
                 this.list = list;
             }
 
+            @Override
             public T next() {
                 return get(idx++);
             }
 
+            @Override
             public boolean hasNext() {
                 return idx < list.size();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
         }

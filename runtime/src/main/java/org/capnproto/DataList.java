@@ -33,6 +33,7 @@ public final class DataList {
             super(ElementSize.POINTER);
         }
 
+        @Override
         public final Reader constructReader(SegmentDataContainer segment,
                 int ptr,
                 int elementCount, int step,
@@ -41,6 +42,7 @@ public final class DataList {
             return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder constructBuilder(GenericSegmentBuilder segment,
                 int ptr,
                 int elementCount, int step,
@@ -79,19 +81,23 @@ public final class DataList {
                 this.list = list;
             }
 
+            @Override
             public Data.Reader next() {
                 return this.list._getPointerElement(Data.factory, idx++);
             }
 
+            @Override
             public boolean hasNext() {
                 return idx < list.size();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Data.Reader> iterator() {
             return new Iterator(this);
         }
@@ -128,19 +134,23 @@ public final class DataList {
                 this.list = list;
             }
 
+            @Override
             public Data.Builder next() {
                 return this.list._getPointerElement(Data.factory, idx++);
             }
 
+            @Override
             public boolean hasNext() {
                 return this.idx < this.list.size();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Data.Builder> iterator() {
             return new Iterator(this);
         }
