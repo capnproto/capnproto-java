@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>capnproto-java</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <groupId>paxel</groupId>
+    </parent>
+    <groupId>paxel</groupId>
+    <artifactId>capnproto-java-examples</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <version>2.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>CPJ-10-examples</name>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>capnproto-java-runtime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+
+        <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>make</executable>
+                    <!-- optional -->
+                    <workingDirectory>..</workingDirectory>
+                    <arguments>
+                        <argument>addressbook</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <description>Contains example code how the Java code can be used</description>
+</project>
