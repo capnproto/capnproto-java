@@ -812,6 +812,15 @@ private:
 
   }
 
+  kj::String asObject(kj::StringPtr primitive){
+     if(primitive == "int")
+        return kj::str("Integer");
+     if(primitive == "bool")
+        return kj::str("Boolean");
+     if (primitive == "org.capnproto.Void")
+        return kj::str(primitive);
+     return toTitleCase(primitive);
+  }
   kj::String createDoIfRequired(int indent,kj::StringPtr titleCase, kj::StringPtr type,  bool is, bool has){
      if (!is && !has)
         return kj::str();
@@ -1021,7 +1030,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            //createDoIfRequired(indent,titleCase,asObject(readerType),isExists,false),
+            createDoIfRequired(indent,titleCase,asObject(readerType),isExists,false),
             "\n"),
 
           kj::strTree(
@@ -1035,7 +1044,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            //createDoIfRequired(indent,titleCase,builderType,isExists,false),
+            createDoIfRequired(indent,titleCase,asObject(builderType),isExists,false),
 
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
