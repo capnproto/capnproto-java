@@ -30,7 +30,7 @@
                 <executions>
                     <execution>
                         <id>compile_capnp</id>
-                        <phase>test-compile</phase>
+                        <phase>validate</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
