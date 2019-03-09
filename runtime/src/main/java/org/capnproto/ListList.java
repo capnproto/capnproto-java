@@ -21,6 +21,11 @@
 
 package org.capnproto;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public final class ListList {
     public static final class Factory<ElementBuilder, ElementReader extends ListReader>
         extends ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
@@ -48,7 +53,7 @@ public final class ListList {
         }
     }
 
-    public static final class Reader<T> extends ListReader {
+    public static final class Reader<T> extends ListReader implements Iterable<T>{
         private final FromPointerReader<T> factory;
 
         public Reader(FromPointerReader<T> factory,
@@ -63,6 +68,35 @@ public final class ListList {
 
         public T get(int index) {
             return _getPointerElement(this.factory, index);
+        }
+
+        public Stream<T> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
+        }
+
+
+        public final class Iterator implements java.util.Iterator<T> {
+            public Reader list;
+            public int idx = 0;
+            public Iterator(Reader list) {
+                this.list = list;
+            }
+
+            public T next() {
+                return get(idx++);
+            }
+            public boolean hasNext() {
+                return idx < list.size();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        public java.util.Iterator<T> iterator() {
+            return new Iterator(this);
         }
     }
 

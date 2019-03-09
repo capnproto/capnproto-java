@@ -21,6 +21,15 @@
 
 package org.capnproto;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.capnproto.Text.Reader;
+
 public class PrimitiveList {
     public static class Void {
         public static final class Factory extends ListFactory<Builder, Reader> {
@@ -94,18 +103,52 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Boolean>{
+
             public Reader(SegmentDataContainer segment,
-                          int ptr,
-                          int elementCount, int step,
-                          int structDataSize, short structPointerCount,
-                          int nestingLimit) {
+                    int ptr,
+                    int elementCount, int step,
+                    int structDataSize, short structPointerCount,
+                    int nestingLimit) {
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
             public final boolean get(int index) {
                 return _getBooleanElement(index);
             }
+
+            public Stream<java.lang.Boolean> stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Boolean> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Boolean next() {
+                    return get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Boolean> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -151,7 +194,7 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Byte>{
             public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
@@ -163,6 +206,39 @@ public class PrimitiveList {
             public byte get(int index) {
                 return _getByteElement(index);
             }
+
+            public Stream<java.lang.Byte> stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Byte> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Byte next() {
+                    return get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Byte> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -209,7 +285,7 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Short>{
             public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
@@ -221,6 +297,40 @@ public class PrimitiveList {
             public short get(int index) {
                 return _getShortElement(index);
             }
+
+
+            public Stream<java.lang.Short> stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Short> {
+
+                public Short.Reader list;
+                public int idx = 0;
+
+                public Iterator(Short.Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Short next() {
+                    return  get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Short> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -247,38 +357,81 @@ public class PrimitiveList {
     }
 
     public static class Int {
+
         public static final class Factory extends ListFactory<Builder, Reader> {
-            Factory() {super (ElementSize.FOUR_BYTES); }
+
+            Factory() {
+                super(ElementSize.FOUR_BYTES);
+            }
+
             public final Reader constructReader(SegmentDataContainer segment,
-                                                  int ptr,
-                                                  int elementCount, int step,
-                                                  int structDataSize, short structPointerCount,
-                                                  int nestingLimit) {
+                    int ptr,
+                    int elementCount, int step,
+                    int structDataSize, short structPointerCount,
+                    int nestingLimit) {
                 return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
             public final Builder constructBuilder(GenericSegmentBuilder segment,
-                                                    int ptr,
-                                                    int elementCount, int step,
-                                                    int structDataSize, short structPointerCount) {
+                    int ptr,
+                    int elementCount, int step,
+                    int structDataSize, short structPointerCount) {
                 return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
             }
 
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<Integer> {
+
             public Reader(SegmentDataContainer segment,
-                          int ptr,
-                          int elementCount, int step,
-                          int structDataSize, short structPointerCount,
-                          int nestingLimit) {
+                    int ptr,
+                    int elementCount, int step,
+                    int structDataSize, short structPointerCount,
+                    int nestingLimit) {
                 super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             }
 
             public int get(int index) {
                 return _getIntElement(index);
             }
+
+            public IntStream stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false).mapToInt(Integer::intValue);
+            }
+
+            public final class Iterator implements java.util.Iterator<Integer> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                @Override
+                public Integer next() {
+                    return get(idx++);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            @Override
+            public java.util.Iterator<Integer> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -324,7 +477,7 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Float>{
             public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
@@ -336,6 +489,39 @@ public class PrimitiveList {
             public float get(int index) {
                 return _getFloatElement(index);
             }
+
+            public Stream<java.lang.Float> stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Float> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Float next() {
+                    return get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Float> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -382,7 +568,7 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Long> {
             public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
@@ -394,6 +580,39 @@ public class PrimitiveList {
             public long get(int index) {
                 return _getLongElement(index);
             }
+
+            public LongStream stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false).mapToLong(java.lang.Long::longValue);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Long> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Long next() {
+                    return get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Long> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -439,7 +658,7 @@ public class PrimitiveList {
         }
         public static final Factory factory = new Factory();
 
-        public static final class Reader extends ListReader {
+        public static final class Reader extends ListReader implements Iterable<java.lang.Double>{
             public Reader(SegmentDataContainer segment,
                           int ptr,
                           int elementCount, int step,
@@ -451,6 +670,39 @@ public class PrimitiveList {
             public double get(int index) {
                 return _getDoubleElement(index);
             }
+
+            public DoubleStream stream() {
+                return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                        Spliterator.SIZED & Spliterator.IMMUTABLE
+                ), false).mapToDouble(java.lang.Double::doubleValue);
+            }
+
+            public final class Iterator implements java.util.Iterator<java.lang.Double> {
+
+                public Reader list;
+                public int idx = 0;
+
+                public Iterator(Reader list) {
+                    this.list = list;
+                }
+
+                public java.lang.Double next() {
+                    return get(idx++);
+                }
+
+                public boolean hasNext() {
+                    return idx < list.size();
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            public java.util.Iterator<java.lang.Double> iterator() {
+                return new Iterator(this);
+            }
+
         }
 
         public static final class Builder extends ListBuilder {

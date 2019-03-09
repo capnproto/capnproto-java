@@ -21,6 +21,11 @@
 
 package org.capnproto;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public final class TextList {
     public static final class Factory extends ListFactory<Builder, Reader> {
         Factory() {super (ElementSize.POINTER); }
@@ -53,6 +58,12 @@ public final class TextList {
         public Text.Reader get(int index) {
             return _getPointerElement(Text.factory, index);
         }
+        public Stream<Text.Reader> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
+        }
+
 
         public final class Iterator implements java.util.Iterator<Text.Reader> {
             public Reader list;

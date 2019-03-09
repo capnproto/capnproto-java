@@ -18,36 +18,52 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public final class DataList {
+
     public static final class Factory extends ListFactory<Builder, Reader> {
-        Factory() {super (ElementSize.POINTER); }
+
+        Factory() {
+            super(ElementSize.POINTER);
+        }
+
         public final Reader constructReader(SegmentDataContainer segment,
-                                              int ptr,
-                                              int elementCount, int step,
-                                              int structDataSize, short structPointerCount,
-                                              int nestingLimit) {
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount,
+                int nestingLimit) {
             return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
         public final Builder constructBuilder(GenericSegmentBuilder segment,
-                                              int ptr,
-                                              int elementCount, int step,
-                                              int structDataSize, short structPointerCount) {
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount) {
             return new Builder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
     }
     public static final Factory factory = new Factory();
 
     public static final class Reader extends ListReader implements Iterable<Data.Reader> {
+
         public Reader(SegmentDataContainer segment,
-                      int ptr,
-                      int elementCount, int step,
-                      int structDataSize, short structPointerCount,
-                      int nestingLimit) {
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount,
+                int nestingLimit) {
             super(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+
+        public Stream<Data.Reader> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
         }
 
         public Data.Reader get(int index) {
@@ -55,8 +71,10 @@ public final class DataList {
         }
 
         public final class Iterator implements java.util.Iterator<Data.Reader> {
+
             public Reader list;
             public int idx = 0;
+
             public Iterator(Reader list) {
                 this.list = list;
             }
@@ -64,9 +82,11 @@ public final class DataList {
             public Data.Reader next() {
                 return this.list._getPointerElement(Data.factory, idx++);
             }
+
             public boolean hasNext() {
                 return idx < list.size();
             }
+
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -80,8 +100,8 @@ public final class DataList {
     public static final class Builder extends ListBuilder implements Iterable<Data.Builder> {
 
         public Builder(GenericSegmentBuilder segment, int ptr,
-                       int elementCount, int step,
-                       int structDataSize, short structPointerCount){
+                int elementCount, int step,
+                int structDataSize, short structPointerCount) {
             super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
         }
 
@@ -95,13 +115,15 @@ public final class DataList {
 
         public final Reader asReader() {
             return new Reader(this.segment, this.ptr, this.elementCount, this.step,
-                              this.structDataSize, this.structPointerCount,
-                              java.lang.Integer.MAX_VALUE);
+                    this.structDataSize, this.structPointerCount,
+                    java.lang.Integer.MAX_VALUE);
         }
 
         public final class Iterator implements java.util.Iterator<Data.Builder> {
+
             public Builder list;
             public int idx = 0;
+
             public Iterator(Builder list) {
                 this.list = list;
             }
@@ -109,9 +131,11 @@ public final class DataList {
             public Data.Builder next() {
                 return this.list._getPointerElement(Data.factory, idx++);
             }
+
             public boolean hasNext() {
                 return this.idx < this.list.size();
             }
+
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -120,7 +144,6 @@ public final class DataList {
         public java.util.Iterator<Data.Builder> iterator() {
             return new Iterator(this);
         }
-
 
     }
 

@@ -21,6 +21,11 @@
 
 package org.capnproto;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public class EnumList {
     static <T> T clampOrdinal(T values[], short ordinal) {
         int index = ordinal;
@@ -54,7 +59,7 @@ public class EnumList {
         }
     }
 
-    public static final class Reader<T extends java.lang.Enum> extends ListReader {
+    public static final class Reader<T extends java.lang.Enum> extends ListReader implements Iterable<T>{
         public final T values[];
 
         public Reader(T values[],
@@ -70,6 +75,39 @@ public class EnumList {
         public T get(int index) {
             return clampOrdinal(this.values, _getShortElement(index));
         }
+
+        public Stream<T> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
+        }
+
+        public final class Iterator implements java.util.Iterator<T> {
+
+            public Reader list;
+            public int idx = 0;
+
+            public Iterator(Reader list) {
+                this.list = list;
+            }
+
+            public T next() {
+                return get(idx++);
+            }
+
+            public boolean hasNext() {
+                return idx < list.size();
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        public java.util.Iterator<T> iterator() {
+            return new Iterator(this);
+        }
+
     }
 
     public static final class Builder<T extends java.lang.Enum> extends ListBuilder {
