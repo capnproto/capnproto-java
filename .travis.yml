@@ -22,6 +22,7 @@ install:
 
 jdk:
   - oraclejdk8
+  - openjdk8
 script:
   - sbt compile
   - sbt test
