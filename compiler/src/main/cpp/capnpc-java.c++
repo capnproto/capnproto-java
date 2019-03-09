@@ -1021,6 +1021,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
+            //createDoIfRequired(indent,titleCase,asObject(readerType),isExists,false),
             "\n"),
 
           kj::strTree(
@@ -1034,6 +1035,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
+            //createDoIfRequired(indent,titleCase,builderType,isExists,false),
 
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
@@ -1065,7 +1067,10 @@ private:
             spaces(indent), "  public ", readerType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
-            spaces(indent), "  }\n"),
+            spaces(indent), "  }\n",
+            createDoIfRequired(indent,titleCase,readerType,isExists,true)
+
+        ),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1077,6 +1082,7 @@ private:
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
+            createDoIfRequired(indent,titleCase,builderType,isExists,true),
 
             spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
             unionDiscrim.set,
@@ -1119,7 +1125,10 @@ private:
           unionDiscrim.check,
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ",", offset,",", defaultParams, ");\n",
-          spaces(indent), "  }\n", "\n"),
+          spaces(indent), "  }\n", 
+          createDoIfRequired(indent,titleCase,readerType,isExists,true),
+          "\n"
+        ),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
@@ -1128,6 +1137,7 @@ private:
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
+          createDoIfRequired(indent,titleCase,builderType,isExists,false),
 
           (field.getType().asStruct().getProto().getIsGeneric() ?
            kj::strTree(
@@ -1180,7 +1190,10 @@ private:
           " get", titleCase, "() {\n",
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
-          spaces(indent), "  }\n", "\n"),
+          spaces(indent), "  }\n", 
+          createDoIfRequired(indent,titleCase,readerType,isExists,true),
+          "\n"
+        ),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
@@ -1192,6 +1205,7 @@ private:
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
+          createDoIfRequired(indent,titleCase,builderType,isExists,true),
           spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _setPointerField(", factory, ", ", offset, ", value);\n",
@@ -1254,7 +1268,9 @@ private:
                spaces(indent), "  public final ", readerType,
                " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
-               spaces(indent), "  }\n"
+               spaces(indent), "  }\n",
+               createDoIfRequired(indent,titleCase,readerType,isExists,true)
+
                )
               ),
             "\n"),
@@ -1284,7 +1300,8 @@ private:
                spaces(indent), "  public final ", builderType,
                " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
-               spaces(indent), "  }\n"
+               spaces(indent), "  }\n",
+               createDoIfRequired(indent,titleCase,builderType,isExists,true)
                )
               ),
 
