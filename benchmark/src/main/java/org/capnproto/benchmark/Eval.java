@@ -18,17 +18,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto.benchmark;
 
-import org.capnproto.MessageBuilder;
-import org.capnproto.StructList;
-import org.capnproto.Text;
 import org.capnproto.benchmark.EvalSchema.*;
 
 public class Eval
-    extends TestCase<Expression.Factory, Expression.Builder, Expression.Reader,
-    EvaluationResult.Factory, EvaluationResult.Builder, EvaluationResult.Reader, Integer> {
+        extends TestCase<Expression.Factory, Expression.Builder, Expression.Reader, EvaluationResult.Factory, EvaluationResult.Builder, EvaluationResult.Reader, Integer> {
 
     static final Operation operations[] = Operation.values();
 
@@ -54,13 +49,18 @@ public class Eval
         }
 
         switch (exp.getOp()) {
-        case ADD: return left + right;
-        case SUBTRACT: return left - right;
-        case MULTIPLY: return left * right;
-        case DIVIDE: return Common.div(left, right);
-        case MODULUS: return Common.modulus(left, right);
-        default:
-            throw new Error("impossible");
+            case ADD:
+                return left + right;
+            case SUBTRACT:
+                return left - right;
+            case MULTIPLY:
+                return left * right;
+            case DIVIDE:
+                return Common.div(left, right);
+            case MODULUS:
+                return Common.modulus(left, right);
+            default:
+                throw new Error("impossible");
         }
     }
 
@@ -68,29 +68,34 @@ public class Eval
         int left = 0, right = 0;
 
         switch (exp.getLeft().which()) {
-        case VALUE:
-            left = exp.getLeft().getValue();
-            break;
-        case EXPRESSION:
-            left = evaluateExpression(exp.getLeft().getExpression());
+            case VALUE:
+                left = exp.getLeft().getValue();
+                break;
+            case EXPRESSION:
+                left = evaluateExpression(exp.getLeft().getExpression());
         }
 
         switch (exp.getRight().which()) {
-        case VALUE:
-            right = exp.getRight().getValue();
-            break;
-        case EXPRESSION:
-            right = evaluateExpression(exp.getRight().getExpression());
+            case VALUE:
+                right = exp.getRight().getValue();
+                break;
+            case EXPRESSION:
+                right = evaluateExpression(exp.getRight().getExpression());
         }
 
         switch (exp.getOp()) {
-        case ADD: return left + right;
-        case SUBTRACT: return left - right;
-        case MULTIPLY: return left * right;
-        case DIVIDE: return Common.div(left, right);
-        case MODULUS: return Common.modulus(left, right);
-        default:
-            throw new Error("impossible");
+            case ADD:
+                return left + right;
+            case SUBTRACT:
+                return left - right;
+            case MULTIPLY:
+                return left * right;
+            case DIVIDE:
+                return Common.div(left, right);
+            case MODULUS:
+                return Common.modulus(left, right);
+            default:
+                throw new Error("impossible");
         }
     }
 

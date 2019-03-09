@@ -11,6 +11,7 @@ addons:
     packages:
       - gcc
       - g++
+      - maven
 install:
   - curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
   - tar zxf capnproto-c++-0.5.3.tar.gz
@@ -27,4 +28,5 @@ script:
   - sbt compile
   - sbt test
   - sbt doc
+  - mvn clean install -P benchmark
 

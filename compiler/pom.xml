@@ -35,7 +35,6 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!--
                     <execution>
                         <id>compile_capnp</id>
                         <phase>test-compile</phase>
@@ -43,10 +42,9 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>build_schema</executable>
+                            <executable>${basedir}/build_schema</executable>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
         </plugins>

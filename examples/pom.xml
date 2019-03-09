@@ -21,7 +21,7 @@
     </dependencies>
 
 
-        <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -29,20 +29,16 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <phase>generate-resources</phase>
+                        <id>compile_capnp</id>
+                        <phase>test-compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <configuration>
+                            <executable>${basedir}/build_schema</executable>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>make</executable>
-                    <!-- optional -->
-                    <workingDirectory>..</workingDirectory>
-                    <arguments>
-                        <argument>addressbook</argument>
-                    </arguments>
-                </configuration>
             </plugin>
         </plugins>
     </build>
