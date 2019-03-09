@@ -77,7 +77,7 @@ class EncodingSuite extends FunSuite {
     TestUtil.checkTestMessage(allTypesReader.getStructField())
 
     val any = message.initRoot(AnyPointer.factory)
-    val segments = message.getSegmentsForOutput()
+    val segments = message.getArena().getSegmentsForOutput()
     for (segment <- segments) {
       for (jj <- 0 to segment.limit - 1) {
         segment.get(jj) should equal (0)
@@ -228,7 +228,7 @@ class EncodingSuite extends FunSuite {
     val message = new MessageBuilder(6)
     message.setRoot(oldFactory, oldVersion)
 
-    val segments = message.getSegmentsForOutput()
+    val segments = message.getArena().getSegmentsForOutput()
     segments.length should equal (1)
     segments(0).limit() should equal (6 * 8)
 
@@ -237,7 +237,7 @@ class EncodingSuite extends FunSuite {
     newVersion.get(0).getOld1() should equal (91)
     newVersion.get(0).getOld2().toString() should equal ("hello!!")
 
-    val segments1 = message.getSegmentsForOutput()
+    val segments1 = message.getArena().getSegmentsForOutput()
     segments(0).limit() should equal (6 * 8)
     for (ii <- 8 to (5 * 8) - 1) {
       // Check the the old list, including the tag, was zeroed.
@@ -590,7 +590,7 @@ class EncodingSuite extends FunSuite {
     val builder = new MessageBuilder()
     builder.initRoot(TestAnyPointer.factory).getAnyPointerField().initAs(PrimitiveList.Void.factory, 1 << 28)
 
-    val segments = builder.getSegmentsForOutput()
+    val segments = builder.getArena().getSegmentsForOutput()
     segments.length should equal (1)
 
     val reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS)
@@ -604,7 +604,7 @@ class EncodingSuite extends FunSuite {
     builder.initRoot(TestAnyPointer.factory).getAnyPointerField()
            .initAs(new StructList.Factory(TestEmptyStruct.factory), (1 << 29) - 1)
 
-    val segments = builder.getSegmentsForOutput()
+    val segments = builder.getArena().getSegmentsForOutput()
     segments.length should equal (1)
 
     val reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS)

@@ -77,14 +77,6 @@ public final class MessageBuilder {
     }
 
     /**
-     * @deprecated use {@link MessageBuilder#getArena()} instead.
-     */
-    @Deprecated
-    public final java.nio.ByteBuffer[] getSegmentsForOutput() {
-        return this.arena.getSegmentsForOutput();
-    }
-
-    /**
      * provide the {@link AllocatingArena} for output.
      *
      * @return the arena.
