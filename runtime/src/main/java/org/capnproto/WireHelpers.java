@@ -257,7 +257,7 @@ final class WireHelpers {
             case ElementSize.INLINE_COMPOSITE: {
                 long elementTag = segment.get(ptr);
                 if (WirePointer.kind(elementTag) != WirePointer.STRUCT) {
-                    throw new Error("Don't know how to handle non-STRUCT inline composite.");
+                    throw new CapnProtoException("Don't know how to handle non-STRUCT inline composite.");
                 }
                 int dataSize = StructPointer.dataSize(elementTag);
                 int pointerCount = StructPointer.ptrCount(elementTag);
@@ -280,9 +280,9 @@ final class WireHelpers {
             break;
         }
         case WirePointer.FAR:
-            throw new Error("Unexpected FAR pointer.");
+            throw new CapnProtoException("Unexpected FAR pointer.");
         case WirePointer.OTHER:
-            throw new Error("Unexpected OTHER pointer.");
+            throw new CapnProtoException("Unexpected OTHER pointer.");
         }
     }
 
@@ -411,7 +411,7 @@ final class WireHelpers {
             if (defaultSegment == null) {
                 return initStructPointer(factory, refOffset, segment, size);
             } else {
-                throw new Error("unimplemented");
+                throw new CapnProtoException("unimplemented");
             }
         }
         FollowBuilderFarsResult resolved = followBuilderFars(ref, target, segment);
@@ -525,7 +525,7 @@ final class WireHelpers {
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         }
 
         //# We must verify that the pointer has the right size. Unlike
@@ -551,7 +551,7 @@ final class WireHelpers {
             //# therefore never need to upgrade the data in this case,
             //# but we do need to validate that it is a valid upgrade
             //# from what we expected.
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         } else {
             int dataSize = ElementSize.dataBitsPerElement(oldSize);
             int pointerCount = ElementSize.pointersPerElement(oldSize);
@@ -581,7 +581,7 @@ final class WireHelpers {
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         }
 
         //# We must verify that the pointer has the right size and potentially upgrade it if not.
@@ -684,7 +684,7 @@ final class WireHelpers {
                 //# Upgrading to an inline composite list.
 
                 if (oldSize == ElementSize.BIT) {
-                    throw new Error("Found bit list where struct list was expected; " +
+                    throw new CapnProtoException("Found bit list where struct list was expected; " +
                                     "upgrading boolean lists to struct is no longer supported.");
                 }
 
@@ -931,7 +931,7 @@ final class WireHelpers {
                           dataSize, value.pointerCount);
 
         if (value.dataSize == 1) {
-            throw new Error("single bit case not handled");
+            throw new CapnProtoException("single bit case not handled");
         } else {
             memcpy(allocation.segment.getBuffer(), allocation.ptr * Constants.BYTES_PER_WORD,
                    value.segment.getBuffer(), value.data, value.dataSize / Constants.BITS_PER_BYTE);
@@ -970,7 +970,7 @@ final class WireHelpers {
                 case 32: elementSize = ElementSize.FOUR_BYTES; break;
                 case 64: elementSize = ElementSize.EIGHT_BYTES; break;
                 default:
-                    throw new Error("invalid list step size: " + value.step);
+                    throw new CapnProtoException("invalid list step size: " + value.step);
                 }
 
                 ListPointer.set(allocation.segment.getBuffer(), allocation.refOffset, elementSize, value.elementCount);
@@ -1120,9 +1120,9 @@ final class WireHelpers {
         case WirePointer.FAR :
             throw new DecodeException("Unexpected FAR pointer.");
         case WirePointer.OTHER :
-            throw new Error("copyPointer is unimplemented for OTHER pointers");
+            throw new CapnProtoException("copyPointer is unimplemented for OTHER pointers");
         }
-        throw new Error("unreachable");
+        throw new CapnProtoException("unreachable");
     }
 
     static <T> T readListPointer(ListReader.Factory<T> factory,
@@ -1146,7 +1146,7 @@ final class WireHelpers {
         }
 
         if (nestingLimit <= 0) {
-            throw new Error("nesting limit exceeded");
+            throw new CapnProtoException("nesting limit exceeded");
         }
 
         int refTarget = WirePointer.target(refOffset, ref);

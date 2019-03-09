@@ -96,7 +96,7 @@ public final class Text {
                 this.offset = 0;
                 this.size = bytes.length;
             } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
+                throw new CapnProtoException("UTF-8 is unsupported");
             }
         }
 
@@ -123,7 +123,7 @@ public final class Text {
             try {
                 return new String(bytes, "UTF-8");
             } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
+                throw new CapnProtoException("UTF-8 is unsupported");
             }
         }
 
@@ -166,7 +166,7 @@ public final class Text {
             try {
                 return new String(bytes, "UTF-8");
             } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
+                throw new CapnProtoException("UTF-8 is unsupported");
             }
         }
 
