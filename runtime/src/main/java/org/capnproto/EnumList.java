@@ -23,6 +23,7 @@ package org.capnproto;
 
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -112,6 +113,11 @@ public class EnumList {
         @Override
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
+        }
+
+        @Override
+        public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
         }
 
     }

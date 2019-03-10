@@ -137,6 +137,7 @@ public final class StructList {
             return new Iterator(this);
         }
 
+        @Override
         public String toString() {
             return stream().map(String::valueOf).collect(Collectors.joining(","));
         }

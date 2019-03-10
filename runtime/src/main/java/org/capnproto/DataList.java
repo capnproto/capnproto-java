@@ -22,6 +22,7 @@ package org.capnproto;
 
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -101,6 +102,12 @@ public final class DataList {
         public java.util.Iterator<Data.Reader> iterator() {
             return new Iterator(this);
         }
+
+        @Override
+        public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
+        }
+
     }
 
     public static final class Builder extends ListBuilder implements Iterable<Data.Builder> {

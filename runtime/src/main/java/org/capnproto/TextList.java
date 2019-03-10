@@ -23,6 +23,7 @@ package org.capnproto;
 
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -91,6 +92,11 @@ public final class TextList {
         @Override
         public java.util.Iterator<Text.Reader> iterator() {
             return new Iterator(this);
+        }
+
+        @Override
+         public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
         }
 
     }

@@ -23,8 +23,8 @@ package org.capnproto;
 
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -156,6 +156,11 @@ public class PrimitiveList {
                 return new Iterator(this);
             }
 
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -250,6 +255,11 @@ public class PrimitiveList {
             @Override
             public java.util.Iterator<java.lang.Byte> iterator() {
                 return new Iterator(this);
+            }
+
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
             }
 
         }
@@ -350,6 +360,11 @@ public class PrimitiveList {
                 return new Iterator(this);
             }
 
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -417,10 +432,10 @@ public class PrimitiveList {
                 return _getIntElement(index);
             }
 
-            public IntStream stream() {
+            public Stream<Integer> stream() {
                 return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
                         Spliterator.SIZED & Spliterator.IMMUTABLE
-                ), false).mapToInt(Integer::intValue);
+                ), false);
             }
 
             public final class Iterator implements java.util.Iterator<Integer> {
@@ -451,6 +466,11 @@ public class PrimitiveList {
             @Override
             public java.util.Iterator<Integer> iterator() {
                 return new Iterator(this);
+            }
+
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
             }
 
         }
@@ -549,6 +569,11 @@ public class PrimitiveList {
                 return new Iterator(this);
             }
 
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
+            }
+
         }
 
         public static final class Builder extends ListBuilder {
@@ -610,10 +635,10 @@ public class PrimitiveList {
                 return _getLongElement(index);
             }
 
-            public LongStream stream() {
+            public Stream<java.lang.Long> stream() {
                 return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
                         Spliterator.SIZED & Spliterator.IMMUTABLE
-                ), false).mapToLong(java.lang.Long::longValue);
+                ), false);
             }
 
             public final class Iterator implements java.util.Iterator<java.lang.Long> {
@@ -644,6 +669,11 @@ public class PrimitiveList {
             @Override
             public java.util.Iterator<java.lang.Long> iterator() {
                 return new Iterator(this);
+            }
+
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
             }
 
         }
@@ -706,10 +736,10 @@ public class PrimitiveList {
                 return _getDoubleElement(index);
             }
 
-            public DoubleStream stream() {
+            public Stream<java.lang.Double> stream() {
                 return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
                         Spliterator.SIZED & Spliterator.IMMUTABLE
-                ), false).mapToDouble(java.lang.Double::doubleValue);
+                ), false);
             }
 
             public final class Iterator implements java.util.Iterator<java.lang.Double> {
@@ -740,6 +770,11 @@ public class PrimitiveList {
             @Override
             public java.util.Iterator<java.lang.Double> iterator() {
                 return new Iterator(this);
+            }
+
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(","));
             }
 
         }
