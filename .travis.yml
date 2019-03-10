@@ -25,8 +25,5 @@ jdk:
   - oraclejdk8
   - openjdk8
 script:
-  - sbt compile
-  - sbt test
-  - sbt doc
   - mvn clean install -P benchmark
 
