@@ -30,7 +30,7 @@
                 <executions>
                     <execution>
                         <id>compile_capnp</id>
-                        <phase>test-compile</phase>
+                        <phase>validate</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -40,6 +40,23 @@
                     </execution>
                 </executions>
             </plugin>
+                        <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/src/main/generated</directory>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
