@@ -22,6 +22,7 @@ package org.capnproto;
 
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -135,6 +136,10 @@ public final class StructList {
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
         }
+
+        public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
+        }
     }
 
     public static final class Builder<T> extends ListBuilder implements Iterable<T> {
@@ -189,6 +194,16 @@ public final class StructList {
         @Override
         public java.util.Iterator<T> iterator() {
             return new Iterator(this);
+        }
+
+        public Stream<T> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
+        }
+
+        public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
         }
     }
 }

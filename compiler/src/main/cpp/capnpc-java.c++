@@ -706,7 +706,9 @@ private:
 
   struct FieldText {
     kj::StringTree readerMethodDecls;
+    kj::StringTree readerToString;
     kj::StringTree builderMethodDecls;
+    kj::StringTree builderToString;
   };
 
   enum class FieldKind {
@@ -843,13 +845,28 @@ private:
          spaces(indent), "  }\n"
       ).flatten();
    }
+   kj::StringTree createToString(int indent,kj::StringPtr titleCase, bool hasGet, bool hasDo){
+      if( hasDo)
+         return kj::strTree(spaces(indent),"       do",titleCase,"(v->s.append(\" ",titleCase,"={\").append(v).append(\"}\"));\n" );
+      if( hasGet)
+         return kj::strTree(spaces(indent),  "       s.append(\" ",titleCase,"={\").append(get",titleCase,"()).append(\"}\");\n");
+      return kj::strTree(spaces(indent),  "       /*",titleCase," has no easy way to access data */\n");
+   }
 
   FieldText makeFieldText(kj::StringPtr scope, StructSchema::Field field, int indent) {
     auto proto = field.getProto();
     kj::String titleCase = toTitleCase(proto.getName());
 
     DiscriminantChecks unionDiscrim;
-    bool isExists= hasDiscriminantValue(proto);
+    // unions require a "is".
+    bool isExists  = hasDiscriminantValue(proto);
+    // if there is a "is" then there will be a "do"
+    bool hasDo = isExists;
+    // some also have a "has" which needs to be tested in "do" too
+    bool hasExists = false;
+    // sometimes there is no "get". if there is no "get" and no "do", there is no "toString"
+    bool hasGet =true;
+
     if (isExists) {
       unionDiscrim = makeDiscriminantChecks(scope, proto.getName(), field.getContainingStruct(), indent + 1);
     }
@@ -862,6 +879,7 @@ private:
       case schema::Field::GROUP: {
         auto slots = getSortedSlots(schemaLoader.get(
             field.getProto().getGroup().getTypeId()).asStruct());
+        hasExists=false;
         return FieldText {
             kj::strTree(
                kj::mv(unionDiscrim.readerIsDef),
@@ -869,16 +887,16 @@ private:
             spaces(indent), "    return new ", scope, titleCase,
             ".Reader(segment, data, pointers, dataSize, pointerCount, nestingLimit);\n",
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Reader").flatten(),isExists,false),
+            createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Reader").flatten(),isExists,hasExists),
             "\n"),
-
+         createToString(indent,titleCase,hasGet,hasDo),
             kj::strTree(
                kj::mv(unionDiscrim.builderIsDef),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
               spaces(indent), "    return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
-              createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Builder").flatten(),isExists,false),
+              createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Builder").flatten(),isExists,hasExists),
               spaces(indent), "  public final ", titleCase, ".Builder init", titleCase, "() {\n",
               unionDiscrim.set,
               KJ_MAP(slot, slots) {
@@ -900,7 +918,8 @@ private:
               "  return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
-               "\n")
+               "\n"),
+         createToString(indent,titleCase,hasGet,hasDo)
          };
       }
     }
@@ -1018,6 +1037,8 @@ private:
     auto structSchema = field.getContainingStruct();
 
     if (kind == FieldKind::PRIMITIVE) {
+        hasExists=false;
+
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDef),
@@ -1030,8 +1051,9 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,asObject(readerType),isExists,false),
+            createDoIfRequired(indent,titleCase,asObject(readerType),isExists,hasExists),
             "\n"),
+         createToString(indent,titleCase,hasGet,hasDo),
 
           kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1044,7 +1066,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,asObject(builderType),isExists,false),
+            createDoIfRequired(indent,titleCase,asObject(builderType),isExists,hasExists),
 
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
@@ -1055,7 +1077,8 @@ private:
               kj::strTree(spaces(indent), "    _set",
                           toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            "\n")
+            "\n"),
+         createToString(indent,titleCase,hasGet,hasDo)
       };
 
     } else if (kind == FieldKind::INTERFACE) {
@@ -1065,6 +1088,7 @@ private:
 
       auto factoryArg = makeFactoryArg(field.getType());
 
+         hasExists=true;
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDef),
@@ -1077,9 +1101,10 @@ private:
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,readerType,isExists,true)
+            createDoIfRequired(indent,titleCase,readerType,isExists,hasExists)
 
         ),
+         createToString(indent,titleCase,hasGet,hasDo),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1091,7 +1116,7 @@ private:
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,builderType,isExists,true),
+            createDoIfRequired(indent,titleCase,builderType,isExists,hasExists),
 
             spaces(indent), "  public ", builderType, " init", titleCase, "() {\n",
             unionDiscrim.set,
@@ -1110,10 +1135,9 @@ private:
                          unionDiscrim.set,
                          spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
                          spaces(indent), "  }\n")),
-
-
             "\n"),
-      };
+          createToString(indent,titleCase,hasGet,hasDo)
+     };
 
     } else if (kind == FieldKind::STRUCT) {
       uint64_t typeId = field.getContainingStruct().getProto().getId();
@@ -1122,7 +1146,7 @@ private:
 
       auto typeParamVec = getTypeParameters(field.getContainingStruct());
       auto factoryArg = makeFactoryArg(field.getType());
-
+      hasExists=true;
       return FieldText {
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDef),
@@ -1135,18 +1159,24 @@ private:
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ",", offset,",", defaultParams, ");\n",
           spaces(indent), "  }\n", 
-          createDoIfRequired(indent,titleCase,readerType,isExists,true),
+          createDoIfRequired(indent,titleCase,readerType,isExists,hasExists),
           "\n"
         ),
+         createToString(indent,titleCase,hasGet,hasDo),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
+          // this 'has' was added by paxel, because it seamed strange that the reader can check, but the builder can't
+          spaces(indent), "  public boolean has", titleCase, "() {\n",
+          spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
+          spaces(indent), "  }\n",
+
           spaces(indent), "  public final ", builderType, " get", titleCase, "() {\n",
           unionDiscrim.check,
           spaces(indent), "    return ",
           "_getPointerField(", factoryArg, ", ", offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          createDoIfRequired(indent,titleCase,builderType,isExists,false),
+          createDoIfRequired(indent,titleCase,builderType,isExists,hasExists),
 
           (field.getType().asStruct().getProto().getIsGeneric() ?
            kj::strTree(
@@ -1175,6 +1205,8 @@ private:
           spaces(indent), "    return ",
           "_initPointerField(", factoryArg, ",",  offset, ", 0);\n",
           spaces(indent), "  }\n"),
+                          // reader has has, builder not :/
+         createToString(indent,titleCase,hasGet,false)
       };
 
     } else if (kind == FieldKind::BLOB) {
@@ -1187,6 +1219,7 @@ private:
       kj::String setterInputType = typeBody.which() == schema::Type::TEXT ? kj::str("String") : kj::str("byte []");
       kj::String factory = kj::str("org.capnproto.", kj::str(blobKind), ".factory");
 
+         hasExists=true;
       return FieldText {
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDef),
@@ -1200,9 +1233,10 @@ private:
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n", 
-          createDoIfRequired(indent,titleCase,readerType,isExists,true),
+          createDoIfRequired(indent,titleCase,readerType,isExists,hasExists),
           "\n"
         ),
+         createToString(indent,titleCase,hasGet,hasDo),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
@@ -1214,7 +1248,7 @@ private:
           spaces(indent), "    return _getPointerField(", factory, ", ",
           offset, ", ", defaultParams, ");\n",
           spaces(indent), "  }\n",
-          createDoIfRequired(indent,titleCase,builderType,isExists,true),
+          createDoIfRequired(indent,titleCase,builderType,isExists,hasExists),
           spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
           unionDiscrim.set,
           spaces(indent), "    _setPointerField(", factory, ", ", offset, ", value);\n",
@@ -1229,6 +1263,7 @@ private:
           unionDiscrim.set,
           spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
+         createToString(indent,titleCase,hasGet,hasDo)
       };
     } else if (kind == FieldKind::LIST) {
 
@@ -1250,7 +1285,10 @@ private:
           isGeneric = type.asStruct().getProto().getIsGeneric();
         }
       }
-
+      hasExists=true;
+      // the Generic call needs a factory. We can't provide it in toString
+      hasDo=!isGeneric;
+      hasGet=!isGeneric;
       return FieldText {
         kj::strTree(
             kj::mv(unionDiscrim.readerIsDef),
@@ -1278,11 +1316,11 @@ private:
                " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
                spaces(indent), "  }\n",
-               createDoIfRequired(indent,titleCase,readerType,isExists,true)
-
-               )
-              ),
+               createDoIfRequired(indent,titleCase,readerType,isExists,hasExists)
+             )
+            ),
             "\n"),
+         createToString(indent,titleCase,hasGet,hasDo),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1310,7 +1348,7 @@ private:
                " get", titleCase, "() {\n",
                spaces(indent), "    return _getPointerField(", listFactory, ", ", offset, ", ", defaultParams, ");\n",
                spaces(indent), "  }\n",
-               createDoIfRequired(indent,titleCase,builderType,isExists,true)
+               createDoIfRequired(indent,titleCase,builderType,isExists,hasExists)
                )
               ),
 
@@ -1362,8 +1400,7 @@ private:
                spaces(indent), "  }\n")
               )
           ),
-
-
+         createToString(indent,titleCase,hasDo,hasDo)
       };
     } else {
       KJ_UNREACHABLE;
@@ -1527,6 +1564,13 @@ private:
             return kj::strTree(spaces(indent), "      this.", p, "_Factory = ", p, "_Factory;\n");
           },
           spaces(indent+1), "  }\n",
+          spaces(indent), "    @Override\n",
+          spaces(indent), "    public String toString() {\n",
+          spaces(indent), "       StringBuilder s = new StringBuilder(\"",name," {\");\n",
+          KJ_MAP(f, fieldTexts) { return kj::mv(f.builderToString); },
+          spaces(indent), "       return s.append(\"}\").toString();\n",
+          spaces(indent), "    }\n",
+
           makeWhich(schema, indent+2),
           spaces(indent+1), "  public final ", readerTypeParams, "Reader", readerTypeParams, " asReader(",
           (!hasTypeParams ? kj::strTree() :
@@ -1559,10 +1603,18 @@ private:
             return kj::strTree(spaces(indent), "      this.", p, "_Factory = ", p, "_Factory;\n");
           },
           spaces(indent+1), "  }\n",
+
+          spaces(indent), "    @Override\n",
+          spaces(indent), "    public String toString() {\n",
+          spaces(indent), "       StringBuilder s = new StringBuilder(\"",name," {\");\n",
+          KJ_MAP(f, fieldTexts) { return kj::mv(f.readerToString); },
+          spaces(indent), "       return s.append(\"}\").toString();\n",
+          spaces(indent), "    }\n",
+
           "\n",
           makeWhich(schema, indent+2),
           KJ_MAP(f, fieldTexts) { return kj::mv(f.readerMethodDecls); },
-          spaces(indent+1), "}\n"
+          spaces(indent+1), "}\n",
           "\n"),
 
         structNode.getDiscriminantCount() == 0 ?

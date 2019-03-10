@@ -3,5 +3,5 @@ BIN_PATH=`dirname "$0"`
 cd $BIN_PATH
 
 mkdir -p src/test/generated
-capnp compile -I src/main/schema/  --src-prefix=src/test/schema/ -o../capnpc-java:src/test/generated src/test/schema/test.capnp src/test/schema/test-import.capnp
+capnp compile -I src/main/schema/  --src-prefix=src/test/schema/ -o../capnpc-java:src/test/generated src/test/schema/*.capnp
 
