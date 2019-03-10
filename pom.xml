@@ -18,16 +18,4 @@
         <module>benchmark</module>
     </modules>
 
-    <build>
-        <plugins>
-        </plugins>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${basedir}/src/main/generated</directory>
-            </resource>
-        </resources>
-    </build>
 </project>
