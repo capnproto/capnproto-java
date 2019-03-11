@@ -28,7 +28,7 @@ using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.examples");
 $Java.outerClassname("Zoo");
 
-struct Lion $Java.interface("org.capnproto.examples.Cat, org.capnproto.exapmples.Named") {
+struct Lion $Java.interface("org.capnproto.examples.Cat, org.capnproto.examples.Named") {
   id @0 :UInt32;
   name @1 :Text;
 }

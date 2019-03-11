@@ -2,5 +2,5 @@ package org.capnproto.examples;
 
 public interface Named {
 
-    String getName();
+    org.capnproto.Text.Reader getName();
 }
