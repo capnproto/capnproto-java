@@ -99,7 +99,6 @@ public class CreateObjectsJmh {
         MessageBuilder builder = new MessageBuilder();
         final DataSchema.Message.Builder initRoot = builder.initRoot(DataSchema.Message.factory);
         initRoot.initLeft().setValue(new byte[100_000]);
-        initRoot.getLeft();
     }
 
     public static void main(String[] args) throws RunnerException {
