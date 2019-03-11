@@ -12,7 +12,22 @@ public class UniverseTest {
     @Test
     public void test() {
         withLocation();
-        assertThat(loc.toString(), is("Location { X={203} Y={345} Z={10424} SolarSystem={SolarSystem { Sun={Sun { Meta={MetaData { Radius={0} Weight={0} Temperature={0}}}}} Planets={Planet { Name={Earth} Meta={MetaData { Radius={20000} Weight={2424} Temperature={20}}} Moons={Moon { Name={Luna} Meta={MetaData { Radius={0} Weight={0} Temperature={0}}}}}},Planet { Name={Mars} Meta={MetaData { Radius={0} Weight={0} Temperature={0}}}}}}}}"));
+        assertThat(loc.toString(), is("Location {"
+                + " X={203} Y={345} Z={10424} SolarSystem={"
+                + "SolarSystem {"
+                + " Sun={Sun {"
+                + " Meta={"
+                + "MetaData {"
+                + " Radius={0} Weight={0} Temperature={0}}"
+                + "}}} "
+                + "Planets="
+                + "{Planet { "
+                + "Name={Earth} Meta={"
+                + "MetaData { Radius={20000} Weight={2424} Temperature={20}}} "
+                + "Moons={Moon { Name={Luna} Meta={MetaData { Radius={0} Weight={0} Temperature={0}}}}}}"
+                + ","
+                + "Planet { Name={Mars} Meta={MetaData { Radius={0} Weight={0} Temperature={0}}}}}}}"
+                + "}"));
     }
 
     private void withLocation() {

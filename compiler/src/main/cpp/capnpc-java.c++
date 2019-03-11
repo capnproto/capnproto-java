@@ -1203,8 +1203,7 @@ private:
           spaces(indent), "    return ",
           "_initPointerField(", factoryArg, ",",  offset, ", 0);\n",
           spaces(indent), "  }\n"),
-                          // reader has has, builder not :/
-         createToString(indent,titleCase,hasGet,false)
+         createToString(indent,titleCase,hasGet,hasExists||isExists)
       };
 
     } else if (kind == FieldKind::BLOB) {
