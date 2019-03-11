@@ -925,6 +925,7 @@ private:
     auto slot = proto.getSlot();
 
     FieldKind kind = FieldKind::PRIMITIVE;
+    kj::String consumerType;
     kj::String ownedType;
     kj::String builderType = typeName(field.getType(), kj::str("Builder")).flatten();
     kj::String readerType = typeName(field.getType(), kj::str("Reader")).flatten();
@@ -937,29 +938,32 @@ private:
     switch (typeBody.which()) {
       case schema::Type::VOID:
         kind = FieldKind::PRIMITIVE;
+        consumerType=kj::str("org.capnproto.Void");
         break;
 
-#define HANDLE_PRIMITIVE(discrim, typeName, javaTypeName, defaultName, suffix) \
+#define HANDLE_PRIMITIVE(discrim, typeName, javaTypeName, javaObjectName, defaultName, suffix) \
       case schema::Type::discrim: \
         kind = FieldKind::PRIMITIVE; \
+        consumerType = kj::str(#javaObjectName); \
         if (defaultBody.get##defaultName() != 0) { \
           defaultMask = kj::str("(", #javaTypeName, ")", kj::implicitCast< typeName>(defaultBody.get##defaultName()), #suffix); \
         } \
         break;
 
-        HANDLE_PRIMITIVE(BOOL, bool, boolean, Bool, );
-        HANDLE_PRIMITIVE(INT8 , ::int8_t , byte, Int8 , );
-        HANDLE_PRIMITIVE(INT16, ::int16_t, short, Int16, );
-        HANDLE_PRIMITIVE(INT32, ::int32_t, int, Int32, );
-        HANDLE_PRIMITIVE(INT64, ::int64_t, long, Int64, L);
-        HANDLE_PRIMITIVE(UINT8 , ::int8_t , byte, Uint8 , );
-        HANDLE_PRIMITIVE(UINT16, ::int16_t, short, Uint16, );
-        HANDLE_PRIMITIVE(UINT32, ::int32_t, int, Uint32, );
-        HANDLE_PRIMITIVE(UINT64, ::int64_t, long, Uint64, L);
+        HANDLE_PRIMITIVE(BOOL, bool, boolean, Boolean, Bool, );
+        HANDLE_PRIMITIVE(INT8 , ::int8_t , byte, Byte, Int8 , );
+        HANDLE_PRIMITIVE(INT16, ::int16_t, short, Short, Int16, );
+        HANDLE_PRIMITIVE(INT32, ::int32_t, int, Integer, Int32, );
+        HANDLE_PRIMITIVE(INT64, ::int64_t, long, Long, Int64, L);
+        HANDLE_PRIMITIVE(UINT8 , ::int8_t , byte, Byte, Uint8 , );
+        HANDLE_PRIMITIVE(UINT16, ::int16_t, short, Short, Uint16, );
+        HANDLE_PRIMITIVE(UINT32, ::int32_t, int, Integer, Uint32, );
+        HANDLE_PRIMITIVE(UINT64, ::int64_t, long, Long, Uint64, L);
 #undef HANDLE_PRIMITIVE
 
       case schema::Type::FLOAT32:
         kind = FieldKind::PRIMITIVE;
+        consumerType = kj::str("Float");
         if (defaultBody.getFloat32() != 0) {
           int32_t mask;
           float value = defaultBody.getFloat32();
@@ -971,6 +975,7 @@ private:
 
       case schema::Type::FLOAT64:
         kind = FieldKind::PRIMITIVE;
+        consumerType = kj::str("Double");
         if (defaultBody.getFloat64() != 0) {
           int64_t mask;
           double value = defaultBody.getFloat64();
@@ -997,6 +1002,8 @@ private:
 
       case schema::Type::ENUM:
         kind = FieldKind::PRIMITIVE;
+        // enum is a class in java and has a correct type, but will be handled by primitive
+        consumerType = kj::str(readerType);
         if (defaultBody.getEnum() != 0) {
           defaultMask = kj::str("(short)", defaultBody.getEnum());
         }
@@ -1049,7 +1056,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(readerType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,asObject(readerType),isExists,hasExists),
+            createDoIfRequired(indent,titleCase,consumerType,isExists,hasExists),
             "\n"),
          createToString(indent,titleCase,hasGet,hasExists||isExists),
 
@@ -1064,7 +1071,7 @@ private:
               kj::strTree(spaces(indent), "    return org.capnproto.Void.VOID;\n") :
               kj::strTree(spaces(indent), "    return _get",toTitleCase(builderType),"Field(", offset, defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
-            createDoIfRequired(indent,titleCase,asObject(builderType),isExists,hasExists),
+            createDoIfRequired(indent,titleCase,consumerType,isExists,hasExists),
 
             spaces(indent), "  public final void set", titleCase, "(", readerType, " value) {\n",
             unionDiscrim.set,
