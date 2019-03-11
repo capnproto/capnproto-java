@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2015 Sandstorm Development Group, Inc. and contributors
+# Copyright (c) 2013-2014 Sandstorm Development Group, Inc. and contributors
 # Licensed under the MIT License:
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,14 +19,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-@0xc5f1af96651f70ea;
+@0x810b25f5834cbba4;
 
-annotation package @0x9ee4c8f803b3b596 (file) : Text;
-# Name of the package, such as "org.example.foo", in which the generated code will reside.
+using Cxx = import "/capnp/c++.capnp";
+$Cxx.namespace("addressbook");
 
-annotation outerClassname @0x9b066bb4881f7cd3 (file) : Text;
-# Name of the outer class that will wrap the generated code.
+using Java = import "/capnp/java.capnp";
+$Java.package("org.capnproto.examples");
+$Java.outerClassname("Zoo");
 
-annotation interface @0x9bdeadb48beefcd3 (struct) : Text;
-# map an external interface to a struct.
-# The given text xxx is added with as 'implements xxx' so also multiple interfaces are supported.
+struct Lion $Java.interface("org.capnproto.examples.Cat, org.capnproto.exapmples.Named") {
+  id @0 :UInt32;
+  name @1 :Text;
+}
+struct Bear $Java.interface("org.capnproto.examples.Named"){
+  id @0 :UInt32;
+  name @1 :Text;
+}
+struct Tiger $Java.interface("org.capnproto.examples.Cat, org.capnproto.examples.Named") {
+  id @0 :UInt32;
+  name @1 :Text;
+}
