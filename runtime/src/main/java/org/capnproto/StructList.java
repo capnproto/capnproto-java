@@ -20,6 +20,7 @@
 // THE SOFTWARE.
 package org.capnproto;
 
+import java.util.Collection;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
@@ -83,7 +84,7 @@ public final class StructList {
         }
     }
 
-    public static final class Reader<T> extends ListReader implements Iterable<T> {
+    public static final class Reader<T> extends ListReader implements Collection<T> {
 
         public final StructReader.Factory<T> factory;
 
@@ -105,6 +106,61 @@ public final class StructList {
 
         public T get(int index) {
             return _getStructElement(factory, index);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return elementCount==0;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return stream().anyMatch(o::equals);
+        }
+
+        @Override
+        public Object[] toArray() {
+            return stream().collect(Collectors.toList()).toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            return stream().collect(Collectors.toList()).toArray(a);
+        }
+
+        @Override
+        public boolean add(T e) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return stream().collect(Collectors.toList()).containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("This collection is immutable");
         }
 
         public final class Iterator implements java.util.Iterator<T> {
