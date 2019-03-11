@@ -860,8 +860,6 @@ private:
     DiscriminantChecks unionDiscrim;
     // unions require a "is".
     bool isExists  = hasDiscriminantValue(proto);
-    // if there is a "is" then there will be a "do"
-    bool hasDo = isExists;
     // some also have a "has" which needs to be tested in "do" too
     bool hasExists = false;
     // sometimes there is no "get". if there is no "get" and no "do", there is no "toString"
@@ -889,7 +887,7 @@ private:
             spaces(indent), "  }\n",
             createDoIfRequired(indent,titleCase,kj::strTree(scope,titleCase,".Reader").flatten(),isExists,hasExists),
             "\n"),
-         createToString(indent,titleCase,hasGet,hasDo),
+         createToString(indent,titleCase,hasGet,hasExists||isExists),
             kj::strTree(
                kj::mv(unionDiscrim.builderIsDef),
               spaces(indent), "  public final ", titleCase, ".Builder get", titleCase, "() {\n",
@@ -919,7 +917,7 @@ private:
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
                "\n"),
-         createToString(indent,titleCase,hasGet,hasDo)
+         createToString(indent,titleCase,hasGet,hasExists||isExists)
          };
       }
     }
@@ -1053,7 +1051,7 @@ private:
             spaces(indent), "  }\n",
             createDoIfRequired(indent,titleCase,asObject(readerType),isExists,hasExists),
             "\n"),
-         createToString(indent,titleCase,hasGet,hasDo),
+         createToString(indent,titleCase,hasGet,hasExists||isExists),
 
           kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1078,7 +1076,7 @@ private:
                           toTitleCase(builderType), "Field(", offset, ", value", defaultMaskParam, ");\n"))),
             spaces(indent), "  }\n",
             "\n"),
-         createToString(indent,titleCase,hasGet,hasDo)
+         createToString(indent,titleCase,hasGet,hasExists||isExists)
       };
 
     } else if (kind == FieldKind::INTERFACE) {
@@ -1104,7 +1102,7 @@ private:
             createDoIfRequired(indent,titleCase,readerType,isExists,hasExists)
 
         ),
-         createToString(indent,titleCase,hasGet,hasDo),
+         createToString(indent,titleCase,hasGet,hasExists||isExists),
 
         kj::strTree(
             kj::mv(unionDiscrim.builderIsDef),
@@ -1136,7 +1134,7 @@ private:
                          spaces(indent), "    _setPointerField(factory, ", offset, ", value);\n",
                          spaces(indent), "  }\n")),
             "\n"),
-          createToString(indent,titleCase,hasGet,hasDo)
+          createToString(indent,titleCase,hasGet,hasExists||isExists)
      };
 
     } else if (kind == FieldKind::STRUCT) {
@@ -1162,7 +1160,7 @@ private:
           createDoIfRequired(indent,titleCase,readerType,isExists,hasExists),
           "\n"
         ),
-         createToString(indent,titleCase,hasGet,hasDo),
+         createToString(indent,titleCase,hasGet,hasExists||isExists),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
@@ -1236,7 +1234,7 @@ private:
           createDoIfRequired(indent,titleCase,readerType,isExists,hasExists),
           "\n"
         ),
-         createToString(indent,titleCase,hasGet,hasDo),
+         createToString(indent,titleCase,hasGet,hasExists||isExists),
 
         kj::strTree(
           kj::mv(unionDiscrim.builderIsDef),
@@ -1263,7 +1261,7 @@ private:
           unionDiscrim.set,
           spaces(indent), "    return _initPointerField(", factory, ", ", offset, ", size);\n",
           spaces(indent), "  }\n"),
-         createToString(indent,titleCase,hasGet,hasDo)
+         createToString(indent,titleCase,hasGet,hasExists||isExists)
       };
     } else if (kind == FieldKind::LIST) {
 
@@ -1287,7 +1285,7 @@ private:
       }
       hasExists=true;
       // the Generic call needs a factory. We can't provide it in toString
-      hasDo=!isGeneric;
+      bool hasDo =!isGeneric;
       hasGet=!isGeneric;
       return FieldText {
         kj::strTree(
@@ -1400,7 +1398,7 @@ private:
                spaces(indent), "  }\n")
               )
           ),
-         createToString(indent,titleCase,hasDo,hasDo)
+         createToString(indent,titleCase,hasGet,hasDo)
       };
     } else {
       KJ_UNREACHABLE;
