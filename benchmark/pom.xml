@@ -19,6 +19,13 @@
             <artifactId>capnproto-java-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.21</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -26,6 +33,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

@@ -26,6 +26,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -57,7 +58,7 @@
                     </execution>
                 </executions>
             </plugin>
-                        <plugin>
+            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
