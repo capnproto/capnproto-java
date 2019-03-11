@@ -769,7 +769,7 @@ class EncodingSuite extends FunSuite {
 
   test("Import") {
     val builder = new MessageBuilder()
-    val root = builder.initRoot(org.capnproto.testimport.TestImport.Foo.factory)
+    val root = builder.initRoot(org.capnproto.test.TestImport.Foo.factory)
     val field = root.initImportedStruct()
     TestUtil.initTestMessage(field)
     TestUtil.checkTestMessage(field)

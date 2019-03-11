@@ -1,5 +1,5 @@
 using Java = import "/capnp/java.capnp";
-$Java.package("org.capnproto.amazing");
+$Java.package("org.capnproto.test");
 $Java.outerClassname("MessageJava");
 
 @0xf29153d00f1006e9;
