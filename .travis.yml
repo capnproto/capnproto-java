@@ -25,5 +25,6 @@ jdk:
   - oraclejdk8
   - openjdk8
 script:
-  - mvn clean install -P benchmark
+  - mvn clean install
+  - mvn clean install -P benchmark -pl benchmark
 

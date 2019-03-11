@@ -4,5 +4,5 @@ cd $BIN_PATH
 
 
 mkdir -p src/main/generated
-capnp compile -I ../compiler/src/main/schema/  --src-prefix=src/main/schema/ -o../capnpc-java:src/main/generated src/main/schema/eval.capnp src/main/schema/carsales.capnp src/main/schema/catrank.capnp
+capnp compile -I ../compiler/src/main/schema/  --src-prefix=src/main/schema/ -o../capnpc-java:src/main/generated src/main/schema/*.capnp
 

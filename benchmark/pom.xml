@@ -24,8 +24,14 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>1.21</version>
+            <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.21</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -90,6 +96,7 @@
             <id>benchmark</id>
             <build>
                 <plugins>
+                    <!--
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -107,8 +114,32 @@
                             </execution>
                         </executions>
                     </plugin>
-                </plugins>
+                    -->
 
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-benchmarks</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <classpath/>
+                                        <argument>org.openjdk.jmh.Main</argument>
+                                        <argument>.*</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>
