@@ -63,7 +63,8 @@ namespace {
 
 static constexpr uint64_t OUTER_CLASSNAME_ANNOTATION_ID = 0x9b066bb4881f7cd3ull;
 static constexpr uint64_t PACKAGE_ANNOTATION_ID = 0x9ee4c8f803b3b596ull;
-static constexpr uint64_t INTERFACE_ANNOTATION_ID = 0x9bdeadb48beefcd3;
+static constexpr uint64_t READER_INTERFACE_ANNOTATION_ID = 0x9bdeadb48beefcd3;
+static constexpr uint64_t BUILDER_INTERFACE_ANNOTATION_ID = 0x9bcafe48babe1337;
 
 static constexpr const char* FIELD_SIZE_NAMES[] = {
   "VOID", "BIT", "BYTE", "TWO_BYTES", "FOUR_BYTES", "EIGHT_BYTES", "POINTER", "INLINE_COMPOSITE"
@@ -268,10 +269,20 @@ private:
     return kj::mv(result);
   }
 
-   kj::String getInterface(Schema schema){
+   kj::String getReaderInterface(Schema schema){
     auto node = schema.getProto();
       for (auto annotation: node.getAnnotations()) {
-         if (annotation.getId() == INTERFACE_ANNOTATION_ID){
+         if (annotation.getId() == READER_INTERFACE_ANNOTATION_ID){
+            return kj::strTree(" implements ",annotation.getValue().getText()).flatten();
+         }
+      }
+      return kj::str();
+   }
+
+   kj::String getBuilderInterface(Schema schema){
+    auto node = schema.getProto();
+      for (auto annotation: node.getAnnotations()) {
+         if (annotation.getId() == BUILDER_INTERFACE_ANNOTATION_ID){
             return kj::strTree(" implements ",annotation.getValue().getText()).flatten();
          }
       }
@@ -1454,7 +1465,8 @@ private:
   StructText makeStructText(kj::StringPtr scope, kj::StringPtr name, StructSchema schema,
                             kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
     auto proto = schema.getProto();
-    auto interface = getInterface(schema);
+    auto readerInterface = getReaderInterface(schema);
+    auto builderInterface = getBuilderInterface(schema);
     auto fullName = kj::str(scope, name);
     auto subScope = kj::str(fullName, ".");
     auto fieldTexts = KJ_MAP(f, schema.getFields()) { return makeFieldText(subScope, f, indent + 1); };
@@ -1565,7 +1577,7 @@ private:
            spaces(indent), "    new org.capnproto.StructList.Factory<Builder, Reader>(factory);\n")),
 
         kj::strTree(
-          spaces(indent+1), "public static final class Builder", builderTypeParams, " extends org.capnproto.StructBuilder "/*,interface*/," {\n",
+          spaces(indent+1), "public static final class Builder", builderTypeParams, " extends org.capnproto.StructBuilder ",builderInterface," {\n",
           kj::strTree(KJ_MAP(p, typeParamVec) {
               return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ?> ", p, "_Factory;\n");
             }),
@@ -1604,7 +1616,7 @@ private:
           "\n"),
 
         kj::strTree(
-          spaces(indent+1), "public static final class Reader", readerTypeParams, " extends org.capnproto.StructReader ",interface," {\n",
+          spaces(indent+1), "public static final class Reader", readerTypeParams, " extends org.capnproto.StructReader ",readerInterface," {\n",
           KJ_MAP(p, typeParamVec) {
               return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory;\n");
             },

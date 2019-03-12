@@ -28,15 +28,25 @@ using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.examples");
 $Java.outerClassname("Zoo");
 
-struct Lion $Java.interface("org.capnproto.examples.Cat, org.capnproto.examples.Named") {
+
+struct Lion
+$Java.readerInterface("org.capnproto.examples.Cat, org.capnproto.examples.Named<org.capnproto.Text.Reader>")
+$Java.builderInterface("org.capnproto.examples.Cat, org.capnproto.examples.Named<org.capnproto.Text.Builder>")
+{
   id @0 :UInt32;
   name @1 :Text;
 }
-struct Bear $Java.interface("org.capnproto.examples.Named"){
-  id @0 :UInt32;
+
+struct Bear
+$Java.readerInterface("org.capnproto.examples.Named<org.capnproto.Text.Reader>")
+$Java.builderInterface("org.capnproto.examples.Named<org.capnproto.Text.Builder>")
+{  id @0 :UInt32;
   name @1 :Text;
 }
-struct Tiger $Java.interface("org.capnproto.examples.Cat, org.capnproto.examples.Named") {
-  id @0 :UInt32;
+
+struct Tiger
+$Java.readerInterface("org.capnproto.examples.Cat, org.capnproto.examples.Named<org.capnproto.Text.Reader>")
+$Java.builderInterface("org.capnproto.examples.Cat, org.capnproto.examples.Named<org.capnproto.Text.Builder>")
+{  id @0 :UInt32;
   name @1 :Text;
 }

@@ -1,6 +1,6 @@
 package org.capnproto.examples;
 
-public interface Named {
+public interface Named<T> {
 
-    org.capnproto.Text.Reader getName();
+    T getName();
 }
