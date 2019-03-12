@@ -32,10 +32,11 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
 
     public BufferedInputStreamWrapper(ReadableByteChannel chan) {
         this.inner = chan;
-        this.buf = ByteBuffer.allocate(8192);
+        this.buf = ByteBuffer.allocate(8_192);
         this.buf.limit(0);
     }
 
+    @Override
     public final int read(ByteBuffer dst) throws IOException {
         int numBytes = dst.remaining();
         if (numBytes < this.buf.remaining()) {
@@ -77,6 +78,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
         }
     }
 
+    @Override
     public final ByteBuffer getReadBuffer() throws IOException {
         if (this.buf.remaining() == 0) {
             this.buf.clear();
@@ -87,10 +89,12 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
         return this.buf;
     }
 
+    @Override
     public final void close() throws IOException {
         this.inner.close();
     }
 
+    @Override
     public final boolean isOpen() {
         return this.inner.isOpen();
     }
@@ -100,7 +104,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
         while (numRead < minBytes) {
             int res = reader.read(buf);
             if (res < 0) {
-                throw new Error("premature EOF");
+                throw new CapnProtoException("premature EOF at "+numRead+" of "+minBytes);
             }
             numRead += res;
         }

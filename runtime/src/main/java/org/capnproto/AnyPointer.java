@@ -23,12 +23,15 @@ package org.capnproto;
 
 public final class AnyPointer {
     public static final class Factory implements PointerFactory<Builder, Reader> {
+        @Override
         public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return new Reader(segment, pointer, nestingLimit);
         }
+        @Override
         public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
             return new Builder(segment, pointer);
         }
+        @Override
         public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int elementCount) {
             Builder result = new Builder(segment, pointer);
             result.clear();
@@ -92,7 +95,7 @@ public final class AnyPointer {
 
         public final void clear() {
             WireHelpers.zeroObject(this.segment, this.pointer);
-            this.segment.getBuffer().putLong(this.pointer * 8, 0L);
+            this.segment.getBuffer().putLong(this.pointer * Constants.BYTES_PER_WORD, 0L);
         }
     }
 

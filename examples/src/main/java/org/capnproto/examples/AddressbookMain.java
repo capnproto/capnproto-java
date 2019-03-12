@@ -18,7 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto.examples;
 
 import java.io.FileOutputStream;
@@ -58,48 +57,43 @@ public class AddressbookMain {
         bob.getEmployment().setUnemployed(org.capnproto.Void.VOID);
 
         org.capnproto.SerializePacked.writeToUnbuffered(
-            (new FileOutputStream(FileDescriptor.out)).getChannel(),
-            message);
+                (new FileOutputStream(FileDescriptor.out)).getChannel(),
+                message);
     }
 
     public static void printAddressBook() throws java.io.IOException {
-        org.capnproto.MessageReader message =
-            org.capnproto.SerializePacked.readFromUnbuffered(
-                (new FileInputStream(FileDescriptor.in)).getChannel());
+        org.capnproto.MessageReader message = org.capnproto.SerializePacked.readFromUnbuffered(
+                (new FileInputStream(FileDescriptor.in)).getChannel()
+        );
+
         AddressBook.Reader addressbook = message.getRoot(AddressBook.factory);
-        for(Person.Reader person : addressbook.getPeople()) {
+
+        addressbook.getPeople().stream().forEach((Person.Reader person) -> {
             System.out.println(person.getName() + ": " + person.getEmail());
 
-            for (Person.PhoneNumber.Reader phone : person.getPhones()) {
-                String typeName = "UNKNOWN";
-                switch (phone.getType()) {
-                case MOBILE :
-                    typeName = "mobile"; break;
-                case HOME :
-                    typeName = "home"; break;
-                case WORK :
-                    typeName = "work"; break;
-                }
-                System.out.println("  " + typeName + " phone: " + phone.getNumber());
-            }
+            person.getPhones().stream().forEach((Person.PhoneNumber.Reader phone) -> {
+                phone.doNumber(number -> System.out.println("  " + nameType(phone) + " phone: " + number));
+            });
 
             Person.Employment.Reader employment = person.getEmployment();
-            switch (employment.which()) {
-            case UNEMPLOYED :
-                System.out.println("  unemployed");
-                break;
-            case EMPLOYER :
-                System.out.println("  employer: " + employment.getEmployer());
-                break;
-            case SCHOOL :
-                System.out.println("  student at: " + employment.getSchool());
-                break;
-            case SELF_EMPLOYED:
-                System.out.println("  self-employed");
-                break;
-            default :
-                break;
-            }
+            // only one of the following will actually be called
+            employment.doEmployer(x -> System.out.println("  employer: " + employment.getEmployer()));
+            employment.doUnemployed(x -> System.out.println("  unemployed"));
+            employment.doSelfEmployed(x -> System.out.println("  self-employed"));
+            employment.doUnemployed(x -> System.out.println("  student at: " + employment.getSchool()));
+        });
+    }
+
+    private static String nameType(Person.PhoneNumber.Reader phone) {
+        switch (phone.getType()) {
+            case MOBILE:
+                return "mobile";
+            case HOME:
+                return "home";
+            case WORK:
+                return "work";
+            default:
+                return "UNKNOWN";
         }
     }
 
@@ -119,7 +113,7 @@ public class AddressbookMain {
                 usage();
             }
         } catch (java.io.IOException e) {
-            System.out.println("io exception: "  + e);
+            System.out.println("io exception: " + e);
         }
     }
 }

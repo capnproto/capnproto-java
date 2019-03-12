@@ -18,24 +18,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto.benchmark;
 
-import org.capnproto.MessageBuilder;
 import org.capnproto.StructList;
 import org.capnproto.Text;
 import org.capnproto.benchmark.CatRankSchema.*;
 
 public class CatRank
-    extends TestCase<SearchResultList.Factory, SearchResultList.Builder, SearchResultList.Reader,
-    SearchResultList.Factory, SearchResultList.Builder, SearchResultList.Reader, Integer> {
+        extends TestCase<SearchResultList.Factory, SearchResultList.Builder, SearchResultList.Reader, SearchResultList.Factory, SearchResultList.Builder, SearchResultList.Reader, Integer> {
 
     static class ScoredResult implements Comparable<ScoredResult> {
+
         public double score;
         public SearchResult.Reader result;
 
         public ScoredResult(double score, SearchResult.Reader result) {
-            this.score = score; this.result = result;
+            this.score = score;
+            this.result = result;
         }
 
         // decreasing order
@@ -48,7 +47,6 @@ public class CatRank
         }
     }
 
-
     static final Text.Reader URL_PREFIX = new Text.Reader("http://example.com");
 
     public Integer setupRequest(Common.FastRand rng, SearchResultList.Builder request) {
@@ -58,7 +56,7 @@ public class CatRank
         StructList.Builder<SearchResult.Builder> list = request.initResults(count);
         for (int i = 0; i < list.size(); ++i) {
             SearchResult.Builder result = list.get(i);
-            result.setScore(1000.0 - (double)i);
+            result.setScore(1000.0 - (double) i);
             int urlSize = rng.nextLessThan(100);
 
             int urlPrefixLength = URL_PREFIX.size();
@@ -82,8 +80,12 @@ public class CatRank
             for (int j = 0; j < prefix; ++j) {
                 snippet.append(Common.WORDS[rng.nextLessThan(Common.WORDS.length)]);
             }
-            if (isCat) { snippet.append("cat "); }
-            if (isDog) { snippet.append("dog "); }
+            if (isCat) {
+                snippet.append("cat ");
+            }
+            if (isDog) {
+                snippet.append("dog ");
+            }
 
             int suffix = rng.nextLessThan(20);
             for (int j = 0; j < suffix; ++j) {

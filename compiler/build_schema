@@ -1,0 +1,7 @@
+#!/bin/bash
+BIN_PATH=`dirname "$0"`
+cd $BIN_PATH
+
+mkdir -p src/test/generated/org/captnproto/test
+capnp compile -I src/main/schema/  --src-prefix=src/test/schema/ -o../capnpc-java:src/test/generated/org/captnproto/test src/test/schema/*.capnp
+

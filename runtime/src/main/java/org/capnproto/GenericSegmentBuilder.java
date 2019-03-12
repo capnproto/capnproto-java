@@ -59,6 +59,7 @@ public interface GenericSegmentBuilder extends SegmentDataContainer {
      *
      * @return the arena.
      */
+    @Override
     AllocatingArena getArena();
 
     /**

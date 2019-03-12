@@ -32,9 +32,10 @@ public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
 
     public BufferedOutputStreamWrapper(WritableByteChannel w) {
         this.inner = w;
-        this.buf = ByteBuffer.allocate(8192);
+        this.buf = ByteBuffer.allocate(8_192);
     }
 
+    @Override
     public final int write(ByteBuffer src) throws IOException {
         int available = this.buf.remaining();
         int size = src.remaining();
@@ -73,18 +74,22 @@ public final class BufferedOutputStreamWrapper implements BufferedOutputStream {
         return size;
     }
 
+    @Override
     public final ByteBuffer getWriteBuffer() {
         return this.buf;
     }
 
+    @Override
     public final void close() throws IOException {
         this.inner.close();
     }
 
+    @Override
     public final boolean isOpen() {
         return this.inner.isOpen();
     }
 
+    @Override
     public final void flush() throws IOException {
         int pos = this.buf.position();
         this.buf.rewind();

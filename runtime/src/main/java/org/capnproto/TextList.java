@@ -21,9 +21,17 @@
 
 package org.capnproto;
 
+import java.util.Collection;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public final class TextList {
     public static final class Factory extends ListFactory<Builder, Reader> {
         Factory() {super (ElementSize.POINTER); }
+        @Override
         public final Reader constructReader(SegmentDataContainer segment,
                                             int ptr,
                                             int elementCount, int step,
@@ -32,6 +40,7 @@ public final class TextList {
             return new Reader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder constructBuilder(GenericSegmentBuilder segment,
                                                 int ptr,
                                                 int elementCount, int step,
@@ -41,7 +50,7 @@ public final class TextList {
     }
     public static final Factory factory = new Factory();
 
-    public static final class Reader extends ListReader implements Iterable<Text.Reader> {
+    public static final class Reader extends ListReader implements Collection<Text.Reader> {
         public Reader(SegmentDataContainer segment,
                       int ptr,
                       int elementCount, int step,
@@ -54,6 +63,69 @@ public final class TextList {
             return _getPointerElement(Text.factory, index);
         }
 
+        @Override
+        public boolean isEmpty() {
+            return elementCount==0;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return stream().anyMatch(o::equals);
+        }
+
+        @Override
+        public Object[] toArray() {
+            return stream().collect(Collectors.toList()).toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            return stream().collect(Collectors.toList()).toArray(a);
+        }
+
+        @Override
+        public boolean add(Text.Reader e) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return stream().collect(Collectors.toList()).containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends Text.Reader> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("This collection is immutable");
+        }
+
+
+        public Stream<Text.Reader> stream() {
+            return StreamSupport.stream(Spliterators.spliterator(this.iterator(), elementCount,
+                    Spliterator.SIZED & Spliterator.IMMUTABLE
+            ), false);
+        }
+
+
         public final class Iterator implements java.util.Iterator<Text.Reader> {
             public Reader list;
             public int idx = 0;
@@ -61,19 +133,28 @@ public final class TextList {
                 this.list = list;
             }
 
+            @Override
             public Text.Reader next() {
                 return this.list._getPointerElement(Text.factory, idx++);
             }
+            @Override
             public boolean hasNext() {
                 return idx < list.size();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Text.Reader> iterator() {
             return new Iterator(this);
+        }
+
+        @Override
+         public String toString() {
+            return stream().map(String::valueOf).collect(Collectors.joining(","));
         }
 
     }
@@ -106,17 +187,21 @@ public final class TextList {
                 this.list = list;
             }
 
+            @Override
             public Text.Builder next() {
                 return this.list._getPointerElement(Text.factory, idx++);
             }
+            @Override
             public boolean hasNext() {
                 return this.idx < this.list.size();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
         }
 
+        @Override
         public java.util.Iterator<Text.Builder> iterator() {
             return new Iterator(this);
         }

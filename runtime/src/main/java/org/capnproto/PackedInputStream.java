@@ -22,8 +22,8 @@
 package org.capnproto;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 public final class PackedInputStream implements ReadableByteChannel {
     final BufferedInputStream inner;
@@ -32,13 +32,14 @@ public final class PackedInputStream implements ReadableByteChannel {
         this.inner = input;
     }
 
+    @Override
     public int read(ByteBuffer outBuf) throws IOException {
 
         int len = outBuf.remaining();
         if (len == 0) { return 0; }
 
         if (len % 8 != 0) {
-            throw new Error("PackedInputStream reads must be word-aligned");
+            throw new CapnProtoException("PackedInputStream reads must be word-aligned");
         }
 
         int outPtr = outBuf.position();
@@ -91,13 +92,13 @@ public final class PackedInputStream implements ReadableByteChannel {
 
             if (tag == 0) {
                 if (inBuf.remaining() == 0) {
-                    throw new Error("Should always have non-empty buffer here.");
+                    throw new CapnProtoException("Should always have non-empty buffer here.");
                 }
 
                 int runLength = (0xff & (int)inBuf.get()) * 8;
 
                 if (runLength > outEnd - outPtr) {
-                    throw new Error("Packed input did not end cleanly on a segment boundary");
+                    throw new CapnProtoException("Packed input did not end cleanly on a segment boundary");
                 }
 
                 for (int i = 0; i < runLength; ++i) {
@@ -139,10 +140,12 @@ public final class PackedInputStream implements ReadableByteChannel {
         }
     }
 
+    @Override
     public void close() throws IOException {
         inner.close();
     }
 
+    @Override
     public boolean isOpen() {
         return inner.isOpen();
     }

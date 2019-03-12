@@ -53,10 +53,10 @@ public final class MessageBuilder {
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
             if (location == GenericSegmentBuilder.FAILED_ALLOCATION) {
-                throw new Error("could not allocate root pointer");
+                throw new CapnProtoException("could not allocate root pointer");
             }
             if (location != 0) {
-                throw new Error("First allocated word of new segment was not at offset 0");
+                throw new CapnProtoException("First allocated word of new segment was not at offset 0");
             }
             return new AnyPointer.Builder(rootSegment, location);
         } else {
@@ -74,14 +74,6 @@ public final class MessageBuilder {
 
     public <T> T initRoot(FromPointerBuilder<T> factory) {
         return this.getRootInternal().initAs(factory);
-    }
-
-    /**
-     * @deprecated use {@link MessageBuilder#getArena()} instead.
-     */
-    @Deprecated
-    public final java.nio.ByteBuffer[] getSegmentsForOutput() {
-        return this.arena.getSegmentsForOutput();
     }
 
     /**

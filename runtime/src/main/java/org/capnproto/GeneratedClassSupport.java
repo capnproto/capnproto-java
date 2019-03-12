@@ -18,17 +18,19 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
+import java.io.UnsupportedEncodingException;
+
 public final class GeneratedClassSupport {
+
     public static GenericSegmentReader decodeRawBytes(String s) {
         try {
             java.nio.ByteBuffer buffer = java.nio.ByteBuffer.wrap(s.getBytes("ISO_8859-1")).asReadOnlyBuffer();
             buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-            return new SegmentReader(buffer, new ReaderArena(new java.nio.ByteBuffer[0], 0x7fffffffffffffffL));
-        } catch (Exception e) {
-            throw new Error("could not decode raw bytes from String");
+            return new SegmentReader(buffer, new ReaderArena(new java.nio.ByteBuffer[0], 0x7fff_ffff_ffff_ffffL));
+        } catch (UnsupportedEncodingException e) {
+            throw new CapnProtoException("could not decode raw bytes from String", e);
         }
     }
 }

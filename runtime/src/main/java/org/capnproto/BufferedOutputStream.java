@@ -18,13 +18,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
 public interface BufferedOutputStream extends WritableByteChannel {
-    public ByteBuffer getWriteBuffer();
-    public void flush() throws java.io.IOException;
+
+    ByteBuffer getWriteBuffer();
+
+    void flush() throws java.io.IOException;
 }

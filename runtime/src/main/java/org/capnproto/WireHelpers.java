@@ -227,7 +227,7 @@ final class WireHelpers {
             for (int ii = 0; ii < count; ++ii) {
                 zeroObject(segment, pointerSection + ii);
             }
-            memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+            memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                    StructPointer.wordSize(tag) * Constants.BYTES_PER_WORD);
             break;
         }
@@ -239,7 +239,7 @@ final class WireHelpers {
             case ElementSize.TWO_BYTES:
             case ElementSize.FOUR_BYTES:
             case ElementSize.EIGHT_BYTES: {
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        roundBitsUpToWords(
                            ListPointer.elementCount(tag) *
                            ElementSize.dataBitsPerElement(ListPointer.elementSize(tag))) * Constants.BYTES_PER_WORD);
@@ -250,14 +250,14 @@ final class WireHelpers {
                 for (int ii = 0; ii < count; ++ii) {
                     zeroObject(segment, ptr + ii);
                 }
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        count * Constants.BYTES_PER_WORD);
                 break;
             }
             case ElementSize.INLINE_COMPOSITE: {
                 long elementTag = segment.get(ptr);
                 if (WirePointer.kind(elementTag) != WirePointer.STRUCT) {
-                    throw new Error("Don't know how to handle non-STRUCT inline composite.");
+                    throw new CapnProtoException("Don't know how to handle non-STRUCT inline composite.");
                 }
                 int dataSize = StructPointer.dataSize(elementTag);
                 int pointerCount = StructPointer.ptrCount(elementTag);
@@ -272,7 +272,7 @@ final class WireHelpers {
                     }
                 }
 
-                memset(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD, (byte)0,
+                memClear(segment.getBuffer(), ptr * Constants.BYTES_PER_WORD,
                        (StructPointer.wordSize(elementTag) * count + Constants.POINTER_SIZE_IN_WORDS) * Constants.BYTES_PER_WORD);
                 break;
             }
@@ -280,9 +280,9 @@ final class WireHelpers {
             break;
         }
         case WirePointer.FAR:
-            throw new Error("Unexpected FAR pointer.");
+            throw new CapnProtoException("Unexpected FAR pointer.");
         case WirePointer.OTHER:
-            throw new Error("Unexpected OTHER pointer.");
+            throw new CapnProtoException("Unexpected OTHER pointer.");
         }
     }
 
@@ -411,7 +411,7 @@ final class WireHelpers {
             if (defaultSegment == null) {
                 return initStructPointer(factory, refOffset, segment, size);
             } else {
-                throw new Error("unimplemented");
+                throw new CapnProtoException("unimplemented");
             }
         }
         FollowBuilderFarsResult resolved = followBuilderFars(ref, target, segment);
@@ -455,7 +455,7 @@ final class WireHelpers {
             //#    out as it may contain secrets that the caller intends to remove from the new copy.
             //# 2) Zeros will be deflated by packing, making this dead memory almost-free if it ever
             //#    hits the wire.
-            memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, (byte)0,
+            memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
                    (oldDataSize + oldPointerCount * Constants.WORDS_PER_POINTER) * Constants.BYTES_PER_WORD);
 
             return factory.constructBuilder(allocation.segment, allocation.ptr * Constants.BYTES_PER_WORD,
@@ -525,7 +525,7 @@ final class WireHelpers {
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         }
 
         //# We must verify that the pointer has the right size. Unlike
@@ -551,7 +551,7 @@ final class WireHelpers {
             //# therefore never need to upgrade the data in this case,
             //# but we do need to validate that it is a valid upgrade
             //# from what we expected.
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         } else {
             int dataSize = ElementSize.dataBitsPerElement(oldSize);
             int pointerCount = ElementSize.pointersPerElement(oldSize);
@@ -581,7 +581,7 @@ final class WireHelpers {
         int origRefTarget = WirePointer.target(origRefOffset, origRef);
 
         if (WirePointer.isNull(origRef)) {
-            throw new Error("unimplemented");
+            throw new CapnProtoException("unimplemented");
         }
 
         //# We must verify that the pointer has the right size and potentially upgrade it if not.
@@ -660,8 +660,7 @@ final class WireHelpers {
 
             //# Zero out old location. See explanation in getWritableStructPointer().
             //# Make sure to include the tag word.
-            memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
-                   (byte)0, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
+            memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
 
             return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                             elementCount,
@@ -684,7 +683,7 @@ final class WireHelpers {
                 //# Upgrading to an inline composite list.
 
                 if (oldSize == ElementSize.BIT) {
-                    throw new Error("Found bit list where struct list was expected; " +
+                    throw new CapnProtoException("Found bit list where struct list was expected; " +
                                     "upgrading boolean lists to struct is no longer supported.");
                 }
 
@@ -739,8 +738,7 @@ final class WireHelpers {
                 }
 
                 //# Zero out old location. See explanation in getWritableStructPointer().
-                memset(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD,
-                       (byte)0, roundBitsUpToBytes(oldStep * elementCount));
+                memClear(resolved.segment.getBuffer(), resolved.ptr * Constants.BYTES_PER_WORD, roundBitsUpToBytes(oldStep * elementCount));
 
                 return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
@@ -890,7 +888,7 @@ final class WireHelpers {
         long ref = segment.get(refOffset);
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fffffff);
+                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fff_ffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -931,7 +929,7 @@ final class WireHelpers {
                           dataSize, value.pointerCount);
 
         if (value.dataSize == 1) {
-            throw new Error("single bit case not handled");
+            throw new CapnProtoException("single bit case not handled");
         } else {
             memcpy(allocation.segment.getBuffer(), allocation.ptr * Constants.BYTES_PER_WORD,
                    value.segment.getBuffer(), value.data, value.dataSize / Constants.BITS_PER_BYTE);
@@ -970,7 +968,7 @@ final class WireHelpers {
                 case 32: elementSize = ElementSize.FOUR_BYTES; break;
                 case 64: elementSize = ElementSize.EIGHT_BYTES; break;
                 default:
-                    throw new Error("invalid list step size: " + value.step);
+                    throw new CapnProtoException("invalid list step size: " + value.step);
                 }
 
                 ListPointer.set(allocation.segment.getBuffer(), allocation.refOffset, elementSize, value.elementCount);
@@ -1010,11 +1008,24 @@ final class WireHelpers {
         }
     }
 
-    static void memset(ByteBuffer dstBuffer, int dstByteOffset, byte value, int length) {
-        // TODO we can probably do this faster
-        for (int ii = dstByteOffset; ii < dstByteOffset + length; ++ii) {
-            dstBuffer.put(ii, value);
+    private static final byte[] ERAZER = new byte[1024];
+    static void memClear(ByteBuffer dstBuffer, int dstByteOffset, int length) {
+        int pos=0;
+        // store the buffer pos
+        int position=dstBuffer.position();
+        // go to the start of the clear area
+        dstBuffer.position(dstByteOffset);
+        final int size = ERAZER.length;
+        while(length>pos+size){
+            // zero out in ERAZER steps
+            dstBuffer.put(ERAZER);
+            pos+=size;
         }
+        // zero the rest
+        dstBuffer.put(ERAZER, 0, length-pos);
+        
+        // reset the buffer pos just to be sure
+        dstBuffer.position(position);
     }
 
     static void memcpy(ByteBuffer dstBuffer, int dstByteOffset, ByteBuffer srcBuffer, int srcByteOffset, int length) {
@@ -1120,9 +1131,9 @@ final class WireHelpers {
         case WirePointer.FAR :
             throw new DecodeException("Unexpected FAR pointer.");
         case WirePointer.OTHER :
-            throw new Error("copyPointer is unimplemented for OTHER pointers");
+            throw new CapnProtoException("copyPointer is unimplemented for OTHER pointers");
         }
-        throw new Error("unreachable");
+        throw new CapnProtoException("unreachable");
     }
 
     static <T> T readListPointer(ListReader.Factory<T> factory,
@@ -1137,7 +1148,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fffffff);
+                return factory.constructReader(GenericSegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fff_ffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -1146,7 +1157,7 @@ final class WireHelpers {
         }
 
         if (nestingLimit <= 0) {
-            throw new Error("nesting limit exceeded");
+            throw new CapnProtoException("nesting limit exceeded");
         }
 
         int refTarget = WirePointer.target(refOffset, ref);

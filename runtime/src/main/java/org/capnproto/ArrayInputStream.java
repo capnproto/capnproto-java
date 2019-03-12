@@ -23,7 +23,6 @@ package org.capnproto;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
 public final class ArrayInputStream implements BufferedInputStream {
 
@@ -33,6 +32,7 @@ public final class ArrayInputStream implements BufferedInputStream {
         this.buf = buf.asReadOnlyBuffer();
     }
 
+    @Override
     public final int read(ByteBuffer dst) throws IOException {
         int available = this.buf.remaining();
         int size = java.lang.Math.min(dst.remaining(), available);
@@ -49,14 +49,16 @@ public final class ArrayInputStream implements BufferedInputStream {
         return size;
     }
 
+    @Override
     public final ByteBuffer getReadBuffer() {
         return this.buf;
     }
 
-    public final void close() throws IOException {
-        return;
+    @Override
+    public final void close() {
     }
 
+    @Override
     public final boolean isOpen() {
         return true;
     }

@@ -32,7 +32,7 @@ public final class BuilderArena implements AllocatingArena {
         GROW_HEURISTICALLY
     }
 
-    public static final int SUGGESTED_FIRST_SEGMENT_WORDS = 1024;
+    public static final int SUGGESTED_FIRST_SEGMENT_WORDS = 1_024;
     public static final AllocationStrategy SUGGESTED_ALLOCATION_STRATEGY
             = AllocationStrategy.GROW_HEURISTICALLY;
 
@@ -42,7 +42,7 @@ public final class BuilderArena implements AllocatingArena {
     public final AllocationStrategy allocationStrategy;
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
-        this.segments = new ArrayList<GenericSegmentBuilder>();
+        this.segments = new ArrayList<>();
         this.nextSize = firstSegmentSizeWords;
         this.allocationStrategy = allocationStrategy;
         GenericSegmentBuilder segment0 = new SegmentBuilder(
@@ -51,14 +51,17 @@ public final class BuilderArena implements AllocatingArena {
         this.segments.add(segment0);
     }
 
+    @Override
     public List<GenericSegmentBuilder> getSegments() {
         return segments;
     }
 
+    @Override
     public final GenericSegmentBuilder tryGetSegment(int id) {
         return this.segments.get(id);
     }
 
+    @Override
     public final void checkReadLimit(int numBytes) {
     }
 
@@ -75,6 +78,7 @@ public final class BuilderArena implements AllocatingArena {
         }
     }
 
+    @Override
     public AllocateResult allocate(int amount) {
 
         int len = this.segments.size();
@@ -107,6 +111,7 @@ public final class BuilderArena implements AllocatingArena {
         return new AllocateResult(newSegment, newSegment.allocate(amount));
     }
 
+    @Override
     public final ByteBuffer[] getSegmentsForOutput() {
         ByteBuffer[] result = new ByteBuffer[this.segments.size()];
         for (int ii = 0; ii < this.segments.size(); ++ii) {

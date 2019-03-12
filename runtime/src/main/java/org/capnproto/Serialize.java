@@ -22,10 +22,10 @@
 package org.capnproto;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 
 public final class Serialize {
@@ -69,7 +69,7 @@ public final class Serialize {
         }
 
         // in words
-        ArrayList<Integer> moreSizes = new ArrayList<Integer>();
+        ArrayList<Integer> moreSizes = new ArrayList<>();
 
         if (segmentCount > 1) {
             ByteBuffer moreSizesRaw = makeByteBuffer(4 * (segmentCount & ~1));

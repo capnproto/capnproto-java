@@ -18,41 +18,51 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.nio.ByteBuffer;
 
 public final class Data {
+
     public static final class Factory implements FromPointerReaderBlobDefault<Reader>,
-                                      PointerFactory<Builder, Reader>,
-                                      FromPointerBuilderBlobDefault<Builder>,
-                                      SetPointerBuilder<Builder, Reader> {
+            PointerFactory<Builder, Reader>,
+            FromPointerBuilderBlobDefault<Builder>,
+            SetPointerBuilder<Builder, Reader> {
+
+        @Override
         public final Reader fromPointerReaderBlobDefault(SegmentDataContainer segment, int pointer, java.nio.ByteBuffer defaultBuffer,
-                                                   int defaultOffset, int defaultSize) {
+                int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
+
+        @Override
         public final Reader fromPointerReader(SegmentDataContainer segment, int pointer, int nestingLimit) {
             return WireHelpers.readDataPointer(segment, pointer, null, 0, 0);
         }
+
+        @Override
         public final Builder fromPointerBuilderBlobDefault(GenericSegmentBuilder segment, int pointer,
-                                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+                java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableDataPointer(pointer,
-                                                      segment,
-                                                      defaultBuffer,
-                                                      defaultOffset,
-                                                      defaultSize);
-        }
-        public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
-            return WireHelpers.getWritableDataPointer(pointer,
-                                                      segment,
-                                                      null, 0, 0);
+                    segment,
+                    defaultBuffer,
+                    defaultOffset,
+                    defaultSize);
         }
 
+        @Override
+        public final Builder fromPointerBuilder(GenericSegmentBuilder segment, int pointer) {
+            return WireHelpers.getWritableDataPointer(pointer,
+                    segment,
+                    null, 0, 0);
+        }
+
+        @Override
         public final Builder initFromPointerBuilder(GenericSegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initDataPointer(pointer, segment, size);
         }
 
+        @Override
         public final void setPointerBuilder(GenericSegmentBuilder segment, int pointer, Reader value) {
             WireHelpers.setDataPointer(pointer, segment, value);
         }
@@ -60,6 +70,7 @@ public final class Data {
     public static final Factory factory = new Factory();
 
     public static final class Reader {
+
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes
@@ -101,9 +112,16 @@ public final class Data {
             dup.get(result, 0, this.size);
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "Data{" + "buffer=" + buffer + '}';
+        }
+
     }
 
     public static final class Builder {
+
         public final ByteBuffer buffer;
         public final int offset; // in bytes
         public final int size; // in bytes
@@ -134,6 +152,10 @@ public final class Data {
             dup.position(this.offset);
             dup.get(result, 0, this.size);
             return result;
+        }
+        @Override
+        public String toString() {
+            return "Data{" + "buffer=" + buffer + '}';
         }
     }
 }
