@@ -22,8 +22,8 @@ install:
 
 jdk:
   - oraclejdk8
-  - oraclejdk7
   - openjdk7
+  - openjdk8
 script:
   - make
   - make addressbook
