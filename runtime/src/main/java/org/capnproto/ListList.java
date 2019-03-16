@@ -32,6 +32,7 @@ public final class ListList {
             this.factory = factory;
         }
 
+        @Override
         public final Reader<ElementReader> constructReader(SegmentReader segment,
                                                              int ptr,
                                                              int elementCount, int step,
@@ -40,6 +41,7 @@ public final class ListList {
             return new Reader<ElementReader>(factory, segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
         }
 
+        @Override
         public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
                                                               int ptr,
                                                               int elementCount, int step,

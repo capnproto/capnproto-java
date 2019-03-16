@@ -39,10 +39,12 @@ public final class ReaderArena implements Arena {
         }
     }
 
+    @Override
     public SegmentReader tryGetSegment(int id) {
         return segments.get(id);
     }
 
+    @Override
     public final void checkReadLimit(int numBytes) {
         if (numBytes > limit) {
             throw new DecodeException("Read limit exceeded.");

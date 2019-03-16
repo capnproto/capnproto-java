@@ -33,6 +33,7 @@ public final class ArrayInputStream implements BufferedInputStream {
         this.buf = buf.asReadOnlyBuffer();
     }
 
+    @Override
     public final int read(ByteBuffer dst) throws IOException {
         int available = this.buf.remaining();
         int size = java.lang.Math.min(dst.remaining(), available);
@@ -49,14 +50,17 @@ public final class ArrayInputStream implements BufferedInputStream {
         return size;
     }
 
+    @Override
     public final ByteBuffer getReadBuffer() {
         return this.buf;
     }
 
+    @Override
     public final void close() throws IOException {
         return;
     }
 
+    @Override
     public final boolean isOpen() {
         return true;
     }

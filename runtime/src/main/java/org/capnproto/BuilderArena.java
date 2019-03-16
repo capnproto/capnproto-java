@@ -52,6 +52,7 @@ public final class BuilderArena implements Arena {
         this.segments.add(segment0);
     }
 
+    @Override
     public final SegmentReader tryGetSegment(int id) {
         return this.segments.get(id);
     }
@@ -59,6 +60,7 @@ public final class BuilderArena implements Arena {
         return this.segments.get(id);
     }
 
+    @Override
     public final void checkReadLimit(int numBytes) { }
 
     public static class AllocateResult {

@@ -28,31 +28,44 @@ public final class Data {
                                       PointerFactory<Builder, Reader>,
                                       FromPointerBuilderBlobDefault<Builder>,
                                       SetPointerBuilder<Builder, Reader> {
+        @Override
         public final Reader fromPointerReaderBlobDefault(SegmentReader segment, int pointer, java.nio.ByteBuffer defaultBuffer,
                                                    int defaultOffset, int defaultSize) {
             return WireHelpers.readDataPointer(segment, pointer, defaultBuffer, defaultOffset, defaultSize);
         }
+
+        @Override
         public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
             return WireHelpers.readDataPointer(segment, pointer, null, 0, 0);
         }
-        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
-                                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+
+        @Override
+        public final Builder fromPointerBuilderBlobDefault(
+            SegmentBuilder segment,
+            int pointer,
+            java.nio.ByteBuffer defaultBuffer,
+            int defaultOffset,
+            int defaultSize) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
                                                       defaultBuffer,
                                                       defaultOffset,
                                                       defaultSize);
         }
+
+        @Override
         public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
                                                       null, 0, 0);
         }
 
+        @Override
         public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
             return WireHelpers.initDataPointer(pointer, segment, size);
         }
 
+        @Override
         public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
             WireHelpers.setDataPointer(pointer, segment, value);
         }
