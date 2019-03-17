@@ -26,7 +26,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public final class BuilderArena implements Arena {
-
     public enum AllocationStrategy {
         FIXED_SIZE,
         GROW_HEURISTICALLY
@@ -37,19 +36,20 @@ public final class BuilderArena implements Arena {
         AllocationStrategy.GROW_HEURISTICALLY;
 
     public final ArrayList<SegmentBuilder> segments;
-
-    public int nextSize;
-    public final AllocationStrategy allocationStrategy;
-
+    private Allocator allocator;
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
         this.segments = new ArrayList<SegmentBuilder>();
-        this.nextSize = firstSegmentSizeWords;
-        this.allocationStrategy = allocationStrategy;
-        SegmentBuilder segment0 = new SegmentBuilder(
-            ByteBuffer.allocate(firstSegmentSizeWords * Constants.BYTES_PER_WORD), this);
-        segment0.buffer.order(ByteOrder.LITTLE_ENDIAN);
-        this.segments.add(segment0);
+        {
+            DefaultAllocator allocator = new DefaultAllocator(allocationStrategy);
+            allocator.setNextAllocationSizeBytes(firstSegmentSizeWords * Constants.BYTES_PER_WORD);
+            this.allocator = allocator;
+        }
+    }
+
+    public BuilderArena(Allocator allocator) {
+        this.segments = new ArrayList<SegmentBuilder>();
+        this.allocator = allocator;
     }
 
     @Override
@@ -76,31 +76,18 @@ public final class BuilderArena implements Arena {
     }
 
     public AllocateResult allocate(int amount) {
-
         int len = this.segments.size();
+
         // we allocate the first segment in the constructor.
-
-        int result = this.segments.get(len - 1).allocate(amount);
-        if (result != SegmentBuilder.FAILED_ALLOCATION) {
-            return new AllocateResult(this.segments.get(len - 1), result);
+        if (len > 0) {
+            int result = this.segments.get(len - 1).allocate(amount);
+            if (result != SegmentBuilder.FAILED_ALLOCATION) {
+                return new AllocateResult(this.segments.get(len - 1), result);
+            }
         }
-
-        // allocate_owned_memory
-
-        int size = Math.max(amount, this.nextSize);
         SegmentBuilder newSegment = new SegmentBuilder(
-            ByteBuffer.allocate(size * Constants.BYTES_PER_WORD),
+            this.allocator.allocateSegment(amount * Constants.BYTES_PER_WORD),
             this);
-
-        switch (this.allocationStrategy) {
-        case GROW_HEURISTICALLY:
-            this.nextSize += size;
-            break;
-        default:
-            break;
-        }
-
-        // --------
 
         newSegment.buffer.order(ByteOrder.LITTLE_ENDIAN);
         newSegment.id = len;

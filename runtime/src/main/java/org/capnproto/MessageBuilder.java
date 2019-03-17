@@ -40,7 +40,14 @@ public final class MessageBuilder {
                                       allocationStrategy);
     }
 
+    public MessageBuilder(Allocator allocator) {
+        this.arena = new BuilderArena(allocator);
+    }
+
     private AnyPointer.Builder getRootInternal() {
+        if (this.arena.segments.isEmpty()) {
+            this.arena.allocate(1);
+        }
         SegmentBuilder rootSegment = this.arena.segments.get(0);
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
