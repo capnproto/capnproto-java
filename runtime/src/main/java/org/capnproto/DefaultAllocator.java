@@ -7,7 +7,7 @@ import org.capnproto.BuilderArena.AllocationStrategy;
 class DefaultAllocator implements Allocator {
 
     // (minimum) number of bytes in the next allocation
-    private int nextSize = 0;
+    private int nextSize = BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS;
 
     public enum ByteBufferAllocationStyle {
         REGULAR,
@@ -53,9 +53,6 @@ class DefaultAllocator implements Allocator {
                 this.nextSize += size;
                 break;
             case FIXED_SIZE:
-                if (nextSize == 0) {
-                    nextSize = size;
-                }
                 break;
         }
 
