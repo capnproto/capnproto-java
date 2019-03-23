@@ -197,4 +197,63 @@ public class StructBuilder {
     protected final <Builder, Reader> void _setPointerField(SetPointerBuilder<Builder, Reader> factory, int index, Reader value) {
         factory.setPointerBuilder(this.segment, this.pointers + index, value);
     }
+
+    protected final void _copyContentFrom(StructReader other) {
+        // Determine the amount of data the builders have in common.
+        int sharedDataSize = java.lang.Math.min(this.dataSize, other.dataSize);
+        int sharedPointerCount = java.lang.Math.min(this.pointerCount, other.pointerCount);
+
+        if (other.segment == this.segment &&
+            ((sharedDataSize > 0 && other.data == this.data) ||
+             (sharedPointerCount > 0 && other.pointers == this.pointers))) {
+            // At least one of the section pointers is pointing to ourself. Verify that the other is too
+            // (but ignore empty sections).
+            if ((sharedDataSize == 0 || other.data == this.data) &&
+                (sharedPointerCount == 0 || other.pointers == this.pointers)) {
+                throw new Error("Only one of the section pointers is pointing to ourself");
+            }
+
+            // So `other` appears to be a reader for this same struct. No copying is needed.
+            return;
+        }
+
+        if (this.dataSize > sharedDataSize) {
+            // Since the target is larger than the source, make sure to zero out the extra bits that the
+            // source doesn't have.
+            if (this.dataSize == 1) {
+                this._setBooleanField(0, false);
+            } else {
+                int unshared = this.data + sharedDataSize / Constants.BITS_PER_BYTE;
+                WireHelpers.memset(this.segment.buffer,
+                                   unshared,
+                                   (byte)0,
+                                   (this.dataSize - sharedDataSize) / Constants.BITS_PER_BYTE);
+            }
+        }
+
+        // Copy over the shared part.
+        if (sharedDataSize == 1) {
+            this._setBooleanField(0, other._getBooleanField(0));
+        } else {
+            WireHelpers.memcpy(this.segment.buffer,
+                               this.data,
+                               other.segment.buffer,
+                               other.data,
+                               sharedDataSize / Constants.BITS_PER_BYTE);
+        }
+
+        // Zero out all pointers in the target.
+        for (int ii = 0; ii < this.pointerCount; ++ii) {
+            WireHelpers.zeroObject(this.segment, this.pointers + ii);
+        }
+        this.segment.buffer.putLong(this.pointers * Constants.BYTES_PER_WORD, 0);
+
+        for (int ii = 0; ii < sharedPointerCount; ++ii) {
+            WireHelpers.copyPointer(this.segment,
+                                    this.pointers + ii,
+                                    other.segment,
+                                    other.pointers + ii,
+                                    other.nestingLimit);
+        }
+    }
 }

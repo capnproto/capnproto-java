@@ -817,6 +817,30 @@ class EncodingSuite extends FunSuite {
     }
   }
 
+  test("setWithCaveats") {
+    val builder = new MessageBuilder()
+    val root = builder.initRoot(TestAllTypes.factory)
+    val list = root.initStructList(2)
+
+    {
+      val message1 = new MessageBuilder()
+      val root1 = message1.initRoot(TestAllTypes.factory)
+      root1.setInt8Field(11)
+      list.setWithCaveats(TestAllTypes.factory, 0, root1.asReader())
+    }
+
+    {
+      val message2 = new MessageBuilder()
+      val root2 = message2.initRoot(TestAllTypes.factory)
+      TestUtil.initTestMessage(root2)
+      list.setWithCaveats(TestAllTypes.factory, 1, root2.asReader())
+    }
+
+    val listReader = list.asReader(TestAllTypes.factory)
+    listReader.get(0).getInt8Field() should equal (11)
+    TestUtil.checkTestMessage(listReader.get(1))
+  }
+
   // to debug, do this:
   //Serialize.write((new java.io.FileOutputStream("/Users/dwrensha/Desktop/test.dat")).getChannel(),
   //                 message)
