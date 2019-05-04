@@ -43,15 +43,26 @@ public abstract class TestCase<RequestFactory extends
     public abstract void handleRequest(RequestReader request, ResponseBuilder response);
     public abstract boolean checkResponse(ResponseReader response, Expectation expected);
 
+    static final int SCRATCH_SIZE = 128 * 1024;
+    ByteBuffer requestScratchSpace = ByteBuffer.allocate(SCRATCH_SIZE * 8);
+    ByteBuffer responseScratchSpace = ByteBuffer.allocate(SCRATCH_SIZE * 8);
+
+    public MessageBuilder newMessageBuilder(boolean useScratchSpace, ByteBuffer scratchSpace) {
+        if (useScratchSpace) {
+            return new MessageBuilder(scratchSpace);
+        } else {
+            return new MessageBuilder();
+        }
+    }
 
     public void passByObject(RequestFactory requestFactory, ResponseFactory responseFactory,
-                             Compression compression, long iters) {
+                             boolean reuse, Compression compression, long iters) {
 
         Common.FastRand rng = new Common.FastRand();
 
         for (int i = 0; i < iters; ++i) {
-            MessageBuilder requestMessage = new MessageBuilder();
-            MessageBuilder responseMessage = new MessageBuilder();
+            MessageBuilder requestMessage = newMessageBuilder(reuse, requestScratchSpace);
+            MessageBuilder responseMessage = newMessageBuilder(reuse, responseScratchSpace);
             RequestBuilder request = requestMessage.initRoot(requestFactory);
             Expectation expected = this.setupRequest(rng, request);
             ResponseBuilder response = responseMessage.initRoot(responseFactory);
@@ -59,21 +70,23 @@ public abstract class TestCase<RequestFactory extends
             if (!this.checkResponse(responseFactory.asReader(response), expected)) {
                 System.out.println("mismatch!");
             }
+            if (reuse) {
+                requestMessage.clearFirstSegment();
+                responseMessage.clearFirstSegment();
+            }
         }
     }
 
-    static final int SCRATCH_SIZE = 128 * 1024;
-
     public void passByBytes(RequestFactory requestFactory, ResponseFactory responseFactory,
-                            Compression compression, long iters) throws IOException {
+                            boolean reuse, Compression compression, long iters) throws IOException {
 
         ByteBuffer requestBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
         ByteBuffer responseBytes = ByteBuffer.allocate(SCRATCH_SIZE * 8);
         Common.FastRand rng = new Common.FastRand();
 
         for (int i = 0; i < iters; ++i) {
-            MessageBuilder requestMessage = new MessageBuilder();
-            MessageBuilder responseMessage = new MessageBuilder();
+            MessageBuilder requestMessage = newMessageBuilder(reuse, requestScratchSpace);
+            MessageBuilder responseMessage = newMessageBuilder(reuse, responseScratchSpace);
             RequestBuilder request = requestMessage.initRoot(requestFactory);
             Expectation expected = this.setupRequest(rng, request);
             ResponseBuilder response = responseMessage.initRoot(responseFactory);
@@ -101,18 +114,23 @@ public abstract class TestCase<RequestFactory extends
                     throw new Error("incorrect response");
                 }
             }
+
+            if (reuse) {
+                requestMessage.clearFirstSegment();
+                responseMessage.clearFirstSegment();
+            }
         }
     }
 
     public void syncServer(RequestFactory requestFactory, ResponseFactory responseFactory,
-                           Compression compression, long iters) throws IOException {
+                           boolean reuse, Compression compression, long iters) throws IOException {
         org.capnproto.BufferedOutputStreamWrapper outBuffered =
             new org.capnproto.BufferedOutputStreamWrapper((new FileOutputStream(FileDescriptor.out)).getChannel());
         org.capnproto.BufferedInputStreamWrapper inBuffered =
             new org.capnproto.BufferedInputStreamWrapper((new FileInputStream(FileDescriptor.in)).getChannel());
 
         for (int ii = 0; ii < iters; ++ii) {
-            MessageBuilder responseMessage = new MessageBuilder();
+            MessageBuilder responseMessage = newMessageBuilder(reuse, responseScratchSpace);
             {
                 ResponseBuilder response = responseMessage.initRoot(responseFactory);
                 MessageReader messageReader = compression.newBufferedReader(inBuffered);
@@ -120,11 +138,14 @@ public abstract class TestCase<RequestFactory extends
                 this.handleRequest(request, response);
             }
             compression.writeBuffered(outBuffered, responseMessage);
+            if (reuse) {
+                responseMessage.clearFirstSegment();
+            }
         }
     }
 
     public void syncClient(RequestFactory requestFactory, ResponseFactory responseFactory,
-                           Compression compression, long iters) throws IOException {
+                           boolean reuse, Compression compression, long iters) throws IOException {
         Common.FastRand rng = new Common.FastRand();
         org.capnproto.BufferedOutputStreamWrapper outBuffered =
             new org.capnproto.BufferedOutputStreamWrapper((new FileOutputStream(FileDescriptor.out)).getChannel());
@@ -132,7 +153,7 @@ public abstract class TestCase<RequestFactory extends
             new org.capnproto.BufferedInputStreamWrapper((new FileInputStream(FileDescriptor.in)).getChannel());
 
         for (int ii = 0; ii < iters; ++ii) {
-            MessageBuilder requestMessage = new MessageBuilder();
+            MessageBuilder requestMessage = newMessageBuilder(reuse, requestScratchSpace);
             RequestBuilder request = requestMessage.initRoot(requestFactory);
             Expectation expected = this.setupRequest(rng, request);
 
@@ -141,6 +162,9 @@ public abstract class TestCase<RequestFactory extends
             ResponseReader response = messageReader.getRoot(responseFactory);
             if (!this.checkResponse(response, expected)) {
                 throw new Error("incorrect response");
+            }
+            if (reuse) {
+                requestMessage.clearFirstSegment();
             }
         }
     }
@@ -153,7 +177,14 @@ public abstract class TestCase<RequestFactory extends
         }
 
         String mode = args[0];
-        String reuse = args[1];
+        boolean reuse = false;
+        if (args[1].equals("reuse")) {
+            reuse = true;
+        } else if (args[1].equals("no-reuse")) {
+            reuse = false;
+        } else {
+            throw new Error("REUSE must be either 'reuse' or 'no-reuse'.");
+        }
         Compression compression = null;
         if (args[2].equals("packed")) {
             compression = Compression.PACKED;
@@ -166,13 +197,13 @@ public abstract class TestCase<RequestFactory extends
 
         try {
             if (mode.equals("object")) {
-                passByObject(requestFactory, responseFactory, compression, iters);
+                passByObject(requestFactory, responseFactory, reuse, compression, iters);
             } else if (mode.equals("bytes")) {
-                passByBytes(requestFactory, responseFactory, compression, iters);
+                passByBytes(requestFactory, responseFactory, reuse, compression, iters);
             } else if (mode.equals("client")) {
-                syncClient(requestFactory, responseFactory, compression, iters);
+                syncClient(requestFactory, responseFactory, reuse, compression, iters);
             } else if (mode.equals("server")) {
-                syncServer(requestFactory, responseFactory, compression, iters);
+                syncServer(requestFactory, responseFactory, reuse, compression, iters);
             } else {
                 System.out.println("unrecognized mode: " + mode);
             }

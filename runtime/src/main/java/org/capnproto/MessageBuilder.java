@@ -60,6 +60,18 @@ public final class MessageBuilder {
         this.arena = new BuilderArena(allocator, firstSegment);
     }
 
+    /**
+     * Like the previous constructor, but uses a DefaultAllocator.
+     *
+     * You MUST ensure that firstSegment contains only zeroes before calling this method.
+     * If you are reusing firstSegment from another message, then it suffices to call
+     * clearFirstSegment() on that message.
+     */
+    public MessageBuilder(java.nio.ByteBuffer firstSegment) {
+        this.arena = new BuilderArena(new DefaultAllocator(), firstSegment);
+    }
+
+
     private AnyPointer.Builder getRootInternal() {
         if (this.arena.segments.isEmpty()) {
             this.arena.allocate(1);
