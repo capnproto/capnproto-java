@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.capnproto.BuilderArena.AllocationStrategy;
 
-class DefaultAllocator implements Allocator {
+public class DefaultAllocator implements Allocator {
 
     // (minimum) number of bytes in the next allocation
     private int nextSize = BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS;
@@ -17,6 +17,8 @@ class DefaultAllocator implements Allocator {
 
     public AllocationStrategy allocationStrategy =
         AllocationStrategy.GROW_HEURISTICALLY;
+
+    public DefaultAllocator() {}
 
     public DefaultAllocator(AllocationStrategy allocationStrategy) {
         this.allocationStrategy = allocationStrategy;
