@@ -52,6 +52,18 @@ public final class BuilderArena implements Arena {
         this.allocator = allocator;
     }
 
+    public BuilderArena(Allocator allocator, ByteBuffer firstSegment) {
+        this.segments = new ArrayList<SegmentBuilder>();
+        SegmentBuilder newSegment = new SegmentBuilder(
+            firstSegment,
+            this);
+        newSegment.buffer.order(ByteOrder.LITTLE_ENDIAN);
+        newSegment.id = 0;
+        this.segments.add(newSegment);
+
+        this.allocator = allocator;
+    }
+
     @Override
     public final SegmentReader tryGetSegment(int id) {
         return this.segments.get(id);

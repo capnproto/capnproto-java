@@ -72,4 +72,11 @@ public final class SegmentBuilder extends SegmentReader {
     public final void put(int index, long value) {
         buffer.putLong(index * Constants.BYTES_PER_WORD, value);
     }
+
+    public final void clear() {
+        for (int ii = 0; ii <  this.pos; ++ii) {
+            this.put(ii, 0);
+        }
+        this.pos = 0;
+    }
 }

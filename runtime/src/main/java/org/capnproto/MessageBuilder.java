@@ -40,8 +40,24 @@ public final class MessageBuilder {
                                       allocationStrategy);
     }
 
+    /**
+     * Constructs a new MessageBuilder from an Allocator.
+     */
     public MessageBuilder(Allocator allocator) {
         this.arena = new BuilderArena(allocator);
+    }
+
+    /**
+     * Constructs a new MessageBuilder from an Allocator and a given first segment buffer.
+     * This is useful for reusing the first segment buffer between messages, to avoid
+     * repeated allocations.
+     *
+     * You MUST ensure that firstSegment contains only zeroes before calling this method.
+     * If you are reusing firstSegment from another message, then it suffices to call
+     * clearFirstSegment() on that message.
+     */
+    public MessageBuilder(Allocator allocator, java.nio.ByteBuffer firstSegment) {
+        this.arena = new BuilderArena(allocator, firstSegment);
     }
 
     private AnyPointer.Builder getRootInternal() {
@@ -77,5 +93,16 @@ public final class MessageBuilder {
 
     public final java.nio.ByteBuffer[] getSegmentsForOutput() {
         return this.arena.getSegmentsForOutput();
+    }
+
+    /**
+     * Sets the first segment buffer to contain all zeros so that it can be reused in
+     * another message. (See the MessageBuilder(Allocator, ByteBuffer) constructor above.)
+     *
+     * After calling this method, the message will be corrupted. Therefore, you need to make
+     * sure to write the message (via getSegmentsForOutput()) before calling this.
+     */
+    public final void clearFirstSegment() {
+        this.arena.segments.get(0).clear();
     }
 }
