@@ -1,4 +1,4 @@
-dist: trusty
+dist: bionic
 sudo: false
 language: java
 env:
@@ -9,8 +9,8 @@ env:
 addons:
   apt:
     packages:
-      - gcc
-      - g++
+      - gcc-6
+      - g++-6
 install:
   - curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
   - tar zxf capnproto-c++-0.5.3.tar.gz
