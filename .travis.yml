@@ -8,14 +8,17 @@ env:
     - export PKG_CONFIG_PATH="$HOME/lib/pkgconfig"
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - gcc
-      - g++
+      - gcc-7
+      - g++-7
+
 install:
-  - curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
-  - tar zxf capnproto-c++-0.5.3.tar.gz
-  - cd capnproto-c++-0.5.3
-  - ./configure --prefix=$HOME
+  - curl -O https://capnproto.org/capnproto-c++-0.7.0.tar.gz
+  - tar zxf capnproto-c++-0.7.0.tar.gz
+  - cd capnproto-c++-0.7.0
+  - ./configure --prefix=$HOME CC=gcc-7 CXX=g++-7
   - make -j3
   - make install
   - cd ../
@@ -25,8 +28,8 @@ jdk:
   - openjdk7
   - openjdk8
 script:
-  - make
-  - make addressbook
+  - make CC=gcc-7 CXX=g++-7
+  - make CC=gcc-7 CXX=g++-7 addressbook
   - sbt test
   - sbt doc
 
