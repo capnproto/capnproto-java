@@ -25,7 +25,6 @@ install:
 
 jdk:
   - oraclejdk8
-  - openjdk7
   - openjdk8
 script:
   - make CC=gcc-7 CXX=g++-7
