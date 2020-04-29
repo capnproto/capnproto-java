@@ -28,7 +28,7 @@ public final class GeneratedClassSupport {
             buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
             return new SegmentReader(buffer, new ReaderArena(new java.nio.ByteBuffer[0], 0x7fffffffffffffffL));
         } catch (Exception e) {
-            throw new Error("could not decode raw bytes from String");
+            throw new DecodeException("could not decode raw bytes from String");
         }
     }
 }

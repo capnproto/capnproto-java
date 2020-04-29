@@ -38,7 +38,7 @@ public final class PackedInputStream implements ReadableByteChannel {
         if (len == 0) { return 0; }
 
         if (len % 8 != 0) {
-            throw new Error("PackedInputStream reads must be word-aligned");
+            throw new DecodeException("PackedInputStream reads must be word-aligned");
         }
 
         int outPtr = outBuf.position();
@@ -91,13 +91,13 @@ public final class PackedInputStream implements ReadableByteChannel {
 
             if (tag == 0) {
                 if (inBuf.remaining() == 0) {
-                    throw new Error("Should always have non-empty buffer here.");
+                    throw new DecodeException("Should always have non-empty buffer here.");
                 }
 
                 int runLength = (0xff & (int)inBuf.get()) * 8;
 
                 if (runLength > outEnd - outPtr) {
-                    throw new Error("Packed input did not end cleanly on a segment boundary");
+                    throw new DecodeException("Packed input did not end cleanly on a segment boundary");
                 }
 
                 for (int i = 0; i < runLength; ++i) {

@@ -22,6 +22,7 @@
 package org.capnproto;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public final class Text {
     public static final class Factory implements
@@ -88,14 +89,10 @@ public final class Text {
         }
 
         public Reader(String value) {
-            try {
-                byte[] bytes = value.getBytes("UTF-8");
-                this.buffer = ByteBuffer.wrap(bytes);
-                this.offset = 0;
-                this.size = bytes.length;
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
-            }
+            byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+            this.buffer = ByteBuffer.wrap(bytes);
+            this.offset = 0;
+            this.size = bytes.length;
         }
 
         public final int size() {
@@ -118,11 +115,7 @@ public final class Text {
             dup.position(this.offset);
             dup.get(bytes, 0, this.size);
 
-            try {
-                return new String(bytes, "UTF-8");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
-            }
+            return new String(bytes, StandardCharsets.UTF_8);
         }
 
     }
@@ -160,11 +153,7 @@ public final class Text {
             dup.position(this.offset);
             dup.get(bytes, 0, this.size);
 
-            try {
-                return new String(bytes, "UTF-8");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new Error("UTF-8 is unsupported");
-            }
+            return new String(bytes, StandardCharsets.UTF_8);
         }
 
     }

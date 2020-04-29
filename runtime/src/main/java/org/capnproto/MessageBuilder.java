@@ -80,10 +80,10 @@ public final class MessageBuilder {
         if (rootSegment.currentSize() == 0) {
             int location = rootSegment.allocate(1);
             if (location == SegmentBuilder.FAILED_ALLOCATION) {
-                throw new Error("could not allocate root pointer");
+                throw new RuntimeException("could not allocate root pointer");
             }
             if (location != 0) {
-                throw new Error("First allocated word of new segment was not at offset 0");
+                throw new RuntimeException("First allocated word of new segment was not at offset 0");
             }
             return new AnyPointer.Builder(rootSegment, location);
         } else {
