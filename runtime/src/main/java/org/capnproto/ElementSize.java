@@ -41,7 +41,7 @@ public final class ElementSize {
         case EIGHT_BYTES: return 64;
         case POINTER: return 0;
         case INLINE_COMPOSITE: return 0;
-        default : throw new Error("impossible field size: " + size);
+        default : throw new IllegalArgumentException("impossible field size: " + size);
         }
     }
 

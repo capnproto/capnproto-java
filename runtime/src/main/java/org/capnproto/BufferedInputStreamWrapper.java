@@ -100,7 +100,7 @@ public final class BufferedInputStreamWrapper implements BufferedInputStream {
         while (numRead < minBytes) {
             int res = reader.read(buf);
             if (res < 0) {
-                throw new Error("premature EOF");
+                throw new DecodeException("premature EOF");
             }
             numRead += res;
         }

@@ -210,7 +210,7 @@ public class StructBuilder {
             // (but ignore empty sections).
             if ((sharedDataSize == 0 || other.data == this.data) &&
                 (sharedPointerCount == 0 || other.pointers == this.pointers)) {
-                throw new Error("Only one of the section pointers is pointing to ourself");
+                throw new RuntimeException("Only one of the section pointers is pointing to ourself");
             }
 
             // So `other` appears to be a reader for this same struct. No copying is needed.
