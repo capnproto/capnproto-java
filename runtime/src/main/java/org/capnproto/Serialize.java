@@ -42,8 +42,9 @@ public final class Serialize {
             int r = bc.read(buffer);
             if (r < 0) {
                 throw new IOException("premature EOF");
+            } else if (r == 0) {
+                throw new IOException("Read zero bytes. Is the channel in non-blocking mode?");
             }
-            // TODO check for r == 0 ?.
         }
     }
 
