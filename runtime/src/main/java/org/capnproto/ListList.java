@@ -89,10 +89,10 @@ public final class ListList {
 
         // TODO: rework generics so that we don't need this factory parameter
         public final <U extends ListReader> Reader<U> asReader(ListFactory<T, U> factor) {
-            return new Reader(factor,
-                              this.segment, this.ptr, this.elementCount, this.step,
-                              this.structDataSize, this.structPointerCount,
-                              java.lang.Integer.MAX_VALUE);
+            return new Reader<U>(factor,
+                                 this.segment, this.ptr, this.elementCount, this.step,
+                                 this.structDataSize, this.structPointerCount,
+                                 java.lang.Integer.MAX_VALUE);
         }
     }
 }

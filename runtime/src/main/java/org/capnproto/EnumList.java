@@ -93,10 +93,10 @@ public class EnumList {
         }
 
         public final Reader<T> asReader() {
-            return new Reader(this.values,
-                              this.segment, this.ptr, this.elementCount, this.step,
-                              this.structDataSize, this.structPointerCount,
-                              java.lang.Integer.MAX_VALUE);
+            return new Reader<T>(this.values,
+                                 this.segment, this.ptr, this.elementCount, this.step,
+                                 this.structDataSize, this.structPointerCount,
+                                 java.lang.Integer.MAX_VALUE);
         }
     }
 }

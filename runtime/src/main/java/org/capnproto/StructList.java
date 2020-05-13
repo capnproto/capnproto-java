@@ -149,10 +149,10 @@ public final class StructList {
          * TODO: rework generics, so that we don't need this factory parameter
          */
         public final <U extends StructReader> Reader<U> asReader(StructFactory<T, U> factory) {
-            return new Reader(factory,
-                              this.segment, this.ptr, this.elementCount, this.step,
-                              this.structDataSize, this.structPointerCount,
-                              java.lang.Integer.MAX_VALUE);
+            return new Reader<U>(factory,
+                                 this.segment, this.ptr, this.elementCount, this.step,
+                                 this.structDataSize, this.structPointerCount,
+                                 java.lang.Integer.MAX_VALUE);
         }
 
         public final class Iterator implements java.util.Iterator<T> {
