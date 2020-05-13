@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.capnproto</groupId>
+    <artifactId>compiler</artifactId>
+    <packaging>jar</packaging>
+    <description>schema compiler plugin for java</description>
+    <version>0.1.4</version>
+    <name>capnpc-java</name>
+    <organization>
+        <name>org.capnproto</name>
+    </organization>
+    <url>https://capnproto.org/</url>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>git@github.com:capnproto/capnproto-java.git</url>
+        <connection>scm:git@github.com:capnproto/capnproto-java.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <id>dwrensha</id>
+            <name>David Renshaw</name>
+            <url>https://github.com/dwrensha</url>
+        </developer>
+    </developers>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.capnproto</groupId>
+          <artifactId>runtime</artifactId>
+          <version>0.1.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+      <plugins>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>generate-test-sources</id>
+              <phase>generate-test-sources</phase>
+              <configuration>
+                <target>
+                  <mkdir dir="src/test/generated"/>
+                  <exec executable="capnp" failonerror="true">
+                    <arg value="compile"/>
+                    <arg value="-I"/>
+                    <arg value="src/main/schema/"/>
+                    <arg value="--src-prefix=src/test/schema/"/>
+                    <arg value="-o../capnpc-java:src/test/generated"/>
+                    <arg value="src/test/schema/test.capnp"/>
+                  <arg value="src/test/schema/test-import.capnp"/>
+                  </exec>
+                </target>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <execution>
+              <id>add-generated-test-sources</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>src/test/generated</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+</project>

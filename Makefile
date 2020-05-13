@@ -28,8 +28,3 @@ MINGW_CXX=i686-w64-mingw32-g++
 MINGW_FLAGS=-O2 -DNDEBUG -I/usr/local/include -std=c++14 -static -static-libgcc -static-libstdc++
 capnpc-java.exe : $(CAPNPC_JAVA_SOURCES)
 	$(MINGW_CXX) $(MINGW_FLAGS) $(CAPNPC_JAVA_SOURCES) $(MINGW_LIBS) -o capnpc-java.exe
-
-addressbook : capnpc-java
-	PWD=pwd
-	mkdir -p examples/src/main/generated
-	capnp compile -I$(PWD)/compiler/src/main/schema --src-prefix=examples/src/main/schema -o./capnpc-java:examples/src/main/generated examples/src/main/schema/addressbook.capnp

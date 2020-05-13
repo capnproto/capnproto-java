@@ -19,27 +19,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.capnproto
+package org.capnproto;
 
-import java.nio.ByteBuffer
-import org.scalatest.FunSuite
-import org.scalatest.Matchers._
+import org.junit.Assert;
+import org.junit.Test;
 
-class ArrayInputStreamSuite extends FunSuite {
-  test("EmptyArray") {
-    val stream = new ArrayInputStream(ByteBuffer.allocate(0))
-    val dst = ByteBuffer.allocate(10)
+import java.nio.ByteBuffer;
+
+public class ArrayInputStreamTest {
+  @Test
+  public void testEmptyArray() throws java.io.IOException {
+    ArrayInputStream stream = new ArrayInputStream(ByteBuffer.allocate(0));
+    ByteBuffer dst = ByteBuffer.allocate(10);
 
     // read() should return -1 at the end of the stream
     // https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html
-    stream.read(dst) should equal (-1)
+    Assert.assertEquals(stream.read(dst), -1);
   }
 
-  test("Request more bytes than are present") {
-    val oneByte: Array[Byte] = Array(42)
-    val stream = new ArrayInputStream(ByteBuffer.wrap(oneByte))
-    val dst = ByteBuffer.allocate(10)
-    stream.read(dst) should equal (1)
-    stream.read(dst) should equal (-1) // end of stream
+  @Test
+  public void testRequestMoreBytesThanArePresent() throws java.io.IOException {
+    byte[] oneByte = new byte[]{42};
+    ArrayInputStream stream = new ArrayInputStream(ByteBuffer.wrap(oneByte));
+    ByteBuffer dst = ByteBuffer.allocate(10);
+    Assert.assertEquals(stream.read(dst), 1);
+    Assert.assertEquals(stream.read(dst), -1); // end of stream
   }
 }

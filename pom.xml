@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.capnproto</groupId>
+    <artifactId>capnproto-java</artifactId>
+    <packaging>pom</packaging>
+    <version>0.1.4</version>
+    <name>Cap'n Proto for Java</name>
+    <url>https://capnproto.org/</url>
+    <modules>
+      <module>runtime</module>
+      <module>compiler</module>
+      <module>examples</module>
+      <module>benchmark</module>
+    </modules>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>git@github.com:capnproto/capnproto-java.git</url>
+        <connection>scm:git@github.com:capnproto/capnproto-java.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <id>dwrensha</id>
+            <name>David Renshaw</name>
+            <url>https://github.com/dwrensha</url>
+        </developer>
+    </developers>
+</project>
