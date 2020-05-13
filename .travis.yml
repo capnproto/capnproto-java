@@ -28,7 +28,6 @@ jdk:
   - openjdk8
 script:
   - make CC=gcc-7 CXX=g++-7
-  - make CC=gcc-7 CXX=g++-7 addressbook
-  - sbt test
-  - sbt doc
+  - mvn compile
+  - mvn test
 
