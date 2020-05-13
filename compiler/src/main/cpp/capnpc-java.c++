@@ -1552,26 +1552,26 @@ private:
     auto upperCase = toUpperCase(name);
 
     switch (type.which()) {
-      case schema::Value::VOID:
-      case schema::Value::BOOL:
-      case schema::Value::INT8:
-      case schema::Value::INT16:
-      case schema::Value::INT32:
-      case schema::Value::INT64:
-      case schema::Value::UINT8:
-      case schema::Value::UINT16:
-      case schema::Value::UINT32:
-      case schema::Value::UINT64:
-      case schema::Value::FLOAT32:
-      case schema::Value::FLOAT64:
-      case schema::Value::ENUM:
+      case schema::Type::VOID:
+      case schema::Type::BOOL:
+      case schema::Type::INT8:
+      case schema::Type::INT16:
+      case schema::Type::INT32:
+      case schema::Type::INT64:
+      case schema::Type::UINT8:
+      case schema::Type::UINT16:
+      case schema::Type::UINT32:
+      case schema::Type::UINT64:
+      case schema::Type::FLOAT32:
+      case schema::Type::FLOAT64:
+      case schema::Type::ENUM:
         return ConstText {
           false,
             kj::strTree(spaces(indent), "public static final ", typeName_, ' ', upperCase, " = ",
                         literalValue(constProto.getType(), constProto.getValue()), ";\n")
         };
 
-      case schema::Value::TEXT: {
+      case schema::Type::TEXT: {
         return ConstText {
           true,
           kj::strTree(spaces(indent),
@@ -1582,7 +1582,7 @@ private:
         };
       }
 
-      case schema::Value::DATA: {
+      case schema::Type::DATA: {
         return ConstText {
           true,
           kj::strTree(spaces(indent),
@@ -1593,7 +1593,7 @@ private:
         };
       }
 
-      case schema::Value::STRUCT: {
+      case schema::Type::STRUCT: {
         return ConstText {
           true,
             kj::strTree(spaces(indent),
@@ -1605,7 +1605,7 @@ private:
         };
       }
 
-      case schema::Value::LIST: {
+      case schema::Type::LIST: {
         return ConstText {
           true,
           kj::strTree(
@@ -1618,8 +1618,8 @@ private:
         };
       }
 
-      case schema::Value::ANY_POINTER:
-      case schema::Value::INTERFACE:
+      case schema::Type::ANY_POINTER:
+      case schema::Type::INTERFACE:
         return ConstText { false, kj::strTree() };
     }
 
