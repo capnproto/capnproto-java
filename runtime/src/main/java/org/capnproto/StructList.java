@@ -22,6 +22,11 @@
 package org.capnproto;
 
 public final class StructList {
+    public static final <ElementBuilder extends StructBuilder, ElementReader extends StructReader> Factory<ElementBuilder, ElementReader>
+        newFactory(StructFactory<ElementBuilder, ElementReader> factory) {
+        return new Factory<ElementBuilder, ElementReader>(factory);
+    }
+
     public static final class Factory<ElementBuilder extends StructBuilder, ElementReader extends StructReader>
         extends ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
 

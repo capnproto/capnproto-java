@@ -204,9 +204,7 @@ public class EncodingTest {
       segment.order(java.nio.ByteOrder.LITTLE_ENDIAN);
       MessageReader messageReader = new MessageReader(new ByteBuffer[]{segment}, ReaderOptions.DEFAULT_READER_OPTIONS);
 
-      StructList.Factory<Test.TestOldVersion.Builder, Test.TestOldVersion.Reader> oldFactory =
-        new StructList.Factory(Test.TestOldVersion.factory);
-      StructList.Reader<Test.TestOldVersion.Reader> oldVersion = messageReader.getRoot(oldFactory);
+      StructList.Reader<Test.TestOldVersion.Reader> oldVersion = messageReader.getRoot(StructList.newFactory(Test.TestOldVersion.factory));
 
       Assert.assertEquals(oldVersion.size(), 1);
       Assert.assertEquals(oldVersion.get(0).getOld1(), 91);
@@ -215,15 +213,14 @@ public class EncodingTest {
       // Make the first segment exactly large enough to fit the original message.
       // This leaves no room for a far pointer landing pad in the first segment.
       MessageBuilder message = new MessageBuilder(6);
-      message.setRoot(oldFactory, oldVersion);
+      message.setRoot(StructList.newFactory(Test.TestOldVersion.factory), oldVersion);
 
       ByteBuffer[] segments = message.getSegmentsForOutput();
       Assert.assertEquals(segments.length, 1);
       Assert.assertEquals(segments[0].limit(), 6 * 8);
 
-      StructList.Factory<Test.TestNewVersion.Builder, Test.TestNewVersion.Reader> newFactory =
-        new StructList.Factory(Test.TestNewVersion.factory);
-      StructList.Builder<Test.TestNewVersion.Builder> newVersion = message.getRoot(newFactory);
+      StructList.Builder<Test.TestNewVersion.Builder> newVersion =
+        message.getRoot(new StructList.Factory<Test.TestNewVersion.Builder, Test.TestNewVersion.Reader>(Test.TestNewVersion.factory));
       Assert.assertEquals(newVersion.size(), 1);
       Assert.assertEquals(newVersion.get(0).getOld1(), 91);
       Assert.assertEquals(newVersion.get(0).getOld2().toString(), "hello!!");
@@ -318,7 +315,7 @@ public class EncodingTest {
       structList2.get(2).setInt16Field((short)4444);
 
       ListList.Reader<StructList.Reader<Test.TestAllTypes.Reader>> structListListReader =
-        structListList.asReader(new StructList.Factory(Test.TestAllTypes.factory));
+        structListList.asReader(StructList.newFactory(Test.TestAllTypes.factory));
       Assert.assertEquals(structListListReader.size(), 3);
       StructList.Reader<Test.TestAllTypes.Reader> structList0Reader = structListListReader.get(0);
       Assert.assertEquals(structList0Reader.size(), 1);
@@ -334,9 +331,9 @@ public class EncodingTest {
     @org.junit.Test
     public void testGenerics() {
         MessageBuilder message = new MessageBuilder();
-        Test.TestGenerics.Factory factory = Test.TestGenerics.newFactory(Test.TestAllTypes.factory, Text.factory);
 
-        Test.TestGenerics.Builder<Test.TestAllTypes.Builder, Text.Builder> root = (Test.TestGenerics.Builder<Test.TestAllTypes.Builder, Text.Builder>) message.initRoot(factory);
+        Test.TestGenerics.Builder<Test.TestAllTypes.Builder, Text.Builder> root =
+            (Test.TestGenerics.Builder<Test.TestAllTypes.Builder, Text.Builder>) message.initRoot(Test.TestGenerics.newFactory(Test.TestAllTypes.factory, Text.factory));
         TestUtil.initTestMessage(root.getFoo());
         root.getDub().setFoo(Text.factory, new Text.Reader("Hello"));
 
@@ -349,7 +346,8 @@ public class EncodingTest {
         boolList.set(1, true);
 
         TestUtil.checkTestMessage(root.getFoo());
-        Test.TestGenerics.Reader<Test.TestAllTypes.Reader, Text.Reader> rootReader = root.asReader(factory);
+        Test.TestGenerics.Reader<Test.TestAllTypes.Reader, Text.Reader> rootReader =
+            root.asReader(Test.TestGenerics.newFactory(Test.TestAllTypes.factory, Text.factory));
         TestUtil.checkTestMessage(rootReader.getFoo());
         Test.TestGenerics.Builder<Text.Builder, PrimitiveList.Byte.Builder> dubReader = root.getDub();
         Assert.assertEquals(dubReader.getFoo().toString(), "Hello");
@@ -570,7 +568,7 @@ public class EncodingTest {
         MessageReader message = new MessageReader(new ByteBuffer[]{segment}, ReaderOptions.DEFAULT_READER_OPTIONS);
 
         Test.TestAnyPointer.Reader root = message.getRoot(Test.TestAnyPointer.factory);
-        root.getAnyPointerField().getAs(new StructList.Factory(Test.TestAllTypes.factory));
+        root.getAnyPointerField().getAs(StructList.newFactory(Test.TestAllTypes.factory));
     }
 
     @org.junit.Test(expected=DecodeException.class)
@@ -599,21 +597,21 @@ public class EncodingTest {
 
         MessageReader reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
         Test.TestAnyPointer.Reader root = reader.getRoot(Test.TestAnyPointer.factory);
-        root.getAnyPointerField().getAs(new StructList.Factory(Test.TestAllTypes.factory));
+        root.getAnyPointerField().getAs(StructList.newFactory(Test.TestAllTypes.factory));
     }
 
     @org.junit.Test(expected=DecodeException.class)
     public void testEmptyStructListAmplification() {
         MessageBuilder builder = new MessageBuilder();
         builder.initRoot(Test.TestAnyPointer.factory).getAnyPointerField()
-                .initAs(new StructList.Factory(Test.TestEmptyStruct.factory), (1 << 29) - 1);
+                .initAs(StructList.newFactory(Test.TestEmptyStruct.factory), (1 << 29) - 1);
 
         ByteBuffer[] segments = builder.getSegmentsForOutput();
         Assert.assertEquals(1, segments.length);
 
         MessageReader reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
         Test.TestAnyPointer.Reader root = reader.getRoot(Test.TestAnyPointer.factory);
-        root.getAnyPointerField().getAs(new StructList.Factory(Test.TestAllTypes.factory));
+        root.getAnyPointerField().getAs(StructList.newFactory(Test.TestAllTypes.factory));
     }
 
     @org.junit.Test
@@ -777,11 +775,11 @@ public class EncodingTest {
     public void testGenericMap() {
       MessageBuilder builder = new MessageBuilder();
       Test.GenericMap.Factory<Text.Builder, Text.Reader, Test.TestAllTypes.Builder, Test.TestAllTypes.Reader> mapFactory
-        = new Test.GenericMap.Factory(Text.factory, Test.TestAllTypes.factory);
+        = Test.GenericMap.newFactory(Text.factory, Test.TestAllTypes.factory);
 
       StructList.Factory<Test.GenericMap.Entry.Builder<Text.Builder, Test.TestAllTypes.Builder>,
                          Test.GenericMap.Entry.Reader<Text.Reader, Test.TestAllTypes.Reader>> entryFactory
-        = new StructList.Factory(new Test.GenericMap.Entry.Factory(Text.factory, Test.TestAllTypes.factory));
+        = StructList.newFactory(Test.GenericMap.Entry.newFactory(Text.factory, Test.TestAllTypes.factory));
 
       Test.GenericMap.Builder<Text.Builder, Test.TestAllTypes.Builder> root = builder.initRoot(mapFactory);
 
