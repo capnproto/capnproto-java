@@ -1,6 +1,7 @@
 #! /bin/bash
 
 set -x
+set -e
 shopt -s expand_aliases
 
 rm -f fifo;
