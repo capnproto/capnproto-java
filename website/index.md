@@ -39,7 +39,8 @@ but we have not embarked on that project yet.
 
 You will need to [install](http://capnproto.org/install.html) the
 latest release of the Cap'n Proto schema compiler.
-Then, running `make` should build `capnpc-java`.
+Then, running `make` in the root directory of the capnproto-java repository
+should build `capnpc-java`.
 
 On Windows, you can instead
 grab a prebuilt win32 executable from here:
@@ -63,10 +64,10 @@ You might find useful [this Maven Plugin](https://github.com/expretio/capnp-mave
 The runtime is available on
 [The Central Repository](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.capnproto%22).
 
-We use [sbt](http://scala-sbt.org) for building and testing the Java code.
-Running `sbt compile` at the top-level directory should build
+We use [maven](https://maven.apache.org/) for building and testing the Java code.
+Running `mvn compile` at the top-level directory should build
 `org.capnproto` and `org.capnproto.examples`.
-Running `sbt test` should run the test suite.
+Running `mvn test` should run the test suite.
 
 ## Example
 
