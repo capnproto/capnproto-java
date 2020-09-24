@@ -7,6 +7,8 @@ CAPNP_PREFIX=$(shell dirname $(shell which capnp))/..
 CAPNP_CXX_FLAGS=-I $(CAPNP_PREFIX)/include -L $(CAPNP_PREFIX)/lib -lkj -lcapnp
 endif
 
+PREFIX ?= /usr/local
+
 CXX=g++
 CXX_FLAGS=-std=c++14 $(CAPNP_CXX_FLAGS)
 
@@ -22,6 +24,11 @@ clean :
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
 	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -o capnpc-java
 
+install:
+	mkdir -p ${PREFIX}/bin
+	mkdir -p ${PREFIX}/include/capnp/
+	cp capnpc-java ${PREFIX}/bin
+	cp compiler/src/main/schema/capnp/java.capnp ${PREFIX}/include/capnp/
 
 MINGW_LIBS=~/src/capnproto/c++/build-mingw/.libs/libcapnp.a ~/src/capnproto/c++/build-mingw/.libs/libkj.a
 MINGW_CXX=i686-w64-mingw32-g++
