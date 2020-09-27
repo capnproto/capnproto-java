@@ -21,7 +21,7 @@
 
 package org.capnproto;
 
-public abstract class StructFactory<Builder, Reader extends StructReader>
+public abstract class StructFactory<Builder extends StructBuilder, Reader extends StructReader>
     implements PointerFactory<Builder, Reader>,
     FromPointerBuilderRefDefault<Builder>,
     StructBuilder.Factory<Builder>,
@@ -40,6 +40,12 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
     public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
         return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
     }
+
+    public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+        var result = fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
+        result.capTable = capTable;
+        return result;
+    }
     public final Builder fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
                                                       SegmentReader defaultSegment, int defaultOffset) {
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
@@ -48,6 +54,11 @@ public abstract class StructFactory<Builder, Reader extends StructReader>
     public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
         return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
                                                     null, 0);
+    }
+    public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+        var result = fromPointerBuilder(segment, pointer);
+        result.capTable = capTable;
+        return result;
     }
     public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
         return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());

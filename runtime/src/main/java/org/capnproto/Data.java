@@ -40,6 +40,11 @@ public final class Data {
         }
 
         @Override
+        public Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            return fromPointerReader(segment, pointer, nestingLimit);
+        }
+
+        @Override
         public final Builder fromPointerBuilderBlobDefault(
             SegmentBuilder segment,
             int pointer,
@@ -58,6 +63,11 @@ public final class Data {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
                                                       null, 0, 0);
+        }
+
+        @Override
+        public Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+            return fromPointerBuilder(segment, pointer);
         }
 
         @Override

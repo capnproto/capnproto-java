@@ -34,6 +34,7 @@ public class StructReader {
     protected final int dataSize; // in bits
     protected final short pointerCount;
     protected final int nestingLimit;
+    protected CapTableReader capTable;
 
     public StructReader() {
         this.segment = SegmentReader.EMPTY;
@@ -53,6 +54,12 @@ public class StructReader {
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
         this.nestingLimit = nestingLimit;
+    }
+
+    final StructReader imbue(CapTableReader capTable) {
+        var result = new StructReader(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+        result.capTable = capTable;
+        return result;
     }
 
     protected final boolean _getBooleanField(int offset) {
@@ -157,6 +164,7 @@ public class StructReader {
     protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return factory.fromPointerReader(this.segment,
+                                             this.capTable,
                                              this.pointers + ptrIndex,
                                              this.nestingLimit);
         } else {
@@ -200,5 +208,4 @@ public class StructReader {
                                                         defaultSize);
         }
     }
-
 }
