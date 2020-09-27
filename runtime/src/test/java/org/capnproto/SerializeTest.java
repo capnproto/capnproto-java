@@ -21,7 +21,14 @@
 
 package org.capnproto;
 
+import java.io.IOException;
+import java.net.SocketOptions;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,6 +69,50 @@ public class SerializeTest {
     {
       MessageReader messageReader = Serialize.read(ByteBuffer.wrap(exampleBytes));
       checkSegmentContents(exampleSegmentCount, messageReader.arena);
+    }
+
+    // read via AsyncChannel
+    expectSerializesToAsync(exampleSegmentCount, exampleBytes);
+  }
+
+  private void expectSerializesToAsync(int exampleSegmentCount, byte[] exampleBytes) throws IOException {
+    var done =  new CompletableFuture<java.lang.Void>();
+    var server = AsynchronousServerSocketChannel.open();
+    server.bind(null);
+    server.accept(null, new CompletionHandler<AsynchronousSocketChannel, Object>() {
+      @Override
+      public void completed(AsynchronousSocketChannel socket, Object attachment) {
+        socket.write(ByteBuffer.wrap(exampleBytes), null, new CompletionHandler<Integer, Object>() {
+          @Override
+          public void completed(Integer result, Object attachment) {
+            done.complete(null);
+          }
+
+          @Override
+          public void failed(Throwable exc, Object attachment) {
+            done.completeExceptionally(exc);
+          }
+        });
+      }
+
+      @Override
+      public void failed(Throwable exc, Object attachment) {
+        done.completeExceptionally(exc);
+      }
+    });
+
+    var socket = AsynchronousSocketChannel.open();
+    try {
+      socket.connect(server.getLocalAddress()).get();
+      var messageReader = Serialize.readAsync(socket).get();
+      checkSegmentContents(exampleSegmentCount, messageReader.arena);
+      done.get();
+    }
+    catch (InterruptedException exc) {
+      Assert.fail(exc.getMessage());
+    }
+    catch (ExecutionException exc) {
+      Assert.fail(exc.getMessage());
     }
   }
 
