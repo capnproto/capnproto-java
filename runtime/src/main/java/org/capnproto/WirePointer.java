@@ -85,4 +85,8 @@ final class WirePointer {
     public static int upper32Bits(long wirePointer) {
         return (int)(wirePointer >>> 32);
     }
+
+    public static void setCap(ByteBuffer buffer, int offset, int cap) {
+        WirePointer.setOffsetAndKind(buffer, offset, (cap << 2) | OTHER);
+    }
 }
