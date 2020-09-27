@@ -28,6 +28,11 @@
             <name>David Renshaw</name>
             <url>https://github.com/dwrensha</url>
         </developer>
+        <developer>
+            <id>vaci</id>
+            <name>Vaci Koblizek</name>
+            <url>https://github.com/vaci</url>
+        </developer>
     </developers>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,6 +65,8 @@
           <version>3.3</version>
           <configuration>
             <compilerArgument>-Xlint:unchecked</compilerArgument>
+              <source>10</source>
+              <target>10</target>
           </configuration>
         </plugin>
       </plugins>
