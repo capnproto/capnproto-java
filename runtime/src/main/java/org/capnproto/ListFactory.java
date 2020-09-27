@@ -21,7 +21,7 @@
 
 package org.capnproto;
 
-public abstract class ListFactory<Builder, Reader extends ListReader>
+public abstract class ListFactory<Builder extends ListBuilder, Reader extends ListReader>
     implements ListBuilder.Factory<Builder>,
     FromPointerBuilderRefDefault<Builder>,
     SetPointerBuilder<Builder, Reader>,
@@ -44,6 +44,12 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                            nestingLimit);
     }
 
+    public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+        var result = fromPointerReader(segment, pointer, nestingLimit);
+        result.capTable = capTable;
+        return result;
+    }
+
     public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
         return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
     }
@@ -64,6 +70,12 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
                                                   segment,
                                                   this.elementSize,
                                                   null, 0);
+    }
+
+    public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+        var result = fromPointerBuilder(segment, pointer);
+        result.capTable = capTable;
+        return result;
     }
 
     public Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {

@@ -33,6 +33,7 @@ public class StructBuilder {
     protected final int pointers; // word offset of pointer section
     protected final int dataSize; // in bits
     protected final short pointerCount;
+    protected CapTableBuilder capTable;
 
     public StructBuilder(SegmentBuilder segment, int data,
                          int pointers, int dataSize, short pointerCount) {
@@ -41,6 +42,12 @@ public class StructBuilder {
         this.pointers = pointers;
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
+    }
+
+    StructBuilder imbue(CapTableBuilder capTable) {
+        var result = new StructBuilder(this.segment, this.data, this.pointers, this.dataSize, this.pointerCount);
+        result.capTable = capTable;
+        return result;
     }
 
     protected final boolean _getBooleanField(int offset) {

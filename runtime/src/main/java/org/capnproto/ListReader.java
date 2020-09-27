@@ -37,6 +37,7 @@ public class ListReader {
     final int structDataSize; // in bits
     final short structPointerCount;
     final int nestingLimit;
+    CapTableReader capTable;
 
     public ListReader() {
         this.segment = null;
@@ -60,6 +61,12 @@ public class ListReader {
         this.structPointerCount = structPointerCount;
         this.nestingLimit = nestingLimit;
 
+    }
+
+    ListReader imbue(CapTableReader capTable) {
+        var result = new ListReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        result.capTable = capTable;
+        return result;
     }
 
     public int size() {
@@ -109,6 +116,7 @@ public class ListReader {
 
     protected <T> T _getPointerElement(FromPointerReader<T> factory, int index) {
         return factory.fromPointerReader(this.segment,
+                                         this.capTable,
                                          (this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
                                          this.nestingLimit);
     }

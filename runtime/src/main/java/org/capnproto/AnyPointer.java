@@ -26,8 +26,18 @@ public final class AnyPointer {
         public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
             return new Reader(segment, pointer, nestingLimit);
         }
+        public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            var result = new Reader(segment, pointer, nestingLimit);
+            result.capTable = capTable;
+            return result;
+        }
         public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
             return new Builder(segment, pointer);
+        }
+        public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+            var result = new Builder(segment, pointer);
+            result.capTable = capTable;
+            return result;
         }
         public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
             Builder result = new Builder(segment, pointer);
@@ -41,6 +51,7 @@ public final class AnyPointer {
         final SegmentReader segment;
         final int pointer; // offset in words
         final int nestingLimit;
+        CapTableReader capTable;
 
         public Reader(SegmentReader segment, int pointer, int nestingLimit) {
             this.segment = segment;
@@ -48,22 +59,35 @@ public final class AnyPointer {
             this.nestingLimit = nestingLimit;
         }
 
+        final Reader imbue(CapTableReader capTable) {
+            var result = new Reader(segment, pointer, nestingLimit);
+            result.capTable = capTable;
+            return result;
+        }
+
         public final boolean isNull() {
             return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
-            return factory.fromPointerReader(this.segment, this.pointer, this.nestingLimit);
+            return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
     }
 
     public static final class Builder {
         final SegmentBuilder segment;
         final int pointer;
+        CapTableBuilder capTable;
 
         public Builder(SegmentBuilder segment, int pointer) {
             this.segment = segment;
             this.pointer = pointer;
+        }
+
+        final Builder imbue(CapTableBuilder capTable) {
+            var result = new Builder(segment, pointer);
+            result.capTable = capTable;
+            return result;
         }
 
         public final boolean isNull() {

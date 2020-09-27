@@ -34,6 +34,7 @@ public class ListBuilder {
     final int step; // in bits
     final int structDataSize; // in bits
     final short structPointerCount;
+    CapTableBuilder capTable;
 
     public ListBuilder(SegmentBuilder segment, int ptr,
                        int elementCount, int step,
