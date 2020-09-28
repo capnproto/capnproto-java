@@ -116,6 +116,38 @@ final class RpcState {
     }
 
     void handleUnimplemented(RpcProtocol.Message.Reader message) {
+        switch (message.which()) {
+            case RESOLVE:
+                var resolve = message.getResolve();
+                switch (resolve.which()) {
+                    case CAP:
+                        var cap = resolve.getCap();
+                        switch (cap.which()) {
+                            case NONE:
+                                break;
+                            case SENDER_HOSTED:
+                                releaseExport(cap.getSenderHosted(), 1);
+                                break;
+                            case SENDER_PROMISE:
+                                releaseExport(cap.getSenderPromise(), 1);
+                                break;
+                            case RECEIVER_ANSWER:
+                                break;
+                            case RECEIVER_HOSTED:
+                                break;
+                            case THIRD_PARTY_HOSTED:
+                                releaseExport(cap.getThirdPartyHosted().getVineId(), 1);
+                                break;
+                        }
+                        break;
+                    case EXCEPTION:
+                        break;
+                }
+                break;
+            default:
+                // Peer unimplemented
+                break;
+        }
     }
 
     void handleAbort(RpcProtocol.Exception.Reader abort) {
@@ -304,6 +336,24 @@ final class RpcState {
 
             // TODO disconnect?
         });
+    }
+
+
+    void releaseExport(int exportId, int refcount) {
+        var export = exports.find(exportId);
+        assert export != null;
+        if (export == null) {
+            return;
+        }
+        assert export.refcount <= refcount;
+        if (export.refcount <= refcount) {
+            return;
+        }
+        export.refcount -= refcount;
+        if (export.refcount == 0) {
+            exportsByCap.remove(exportId, export.clientHook);
+            exports.erase(exportId, export);
+        }
     }
 
     ClientHook getInnermostClient(ClientHook client) {
