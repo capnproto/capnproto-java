@@ -5,10 +5,12 @@ import java.util.concurrent.CompletableFuture;
 public class Request<Params, Results> {
 
     private final AnyPointer.Builder params;
-    private final RequestHook hook;
+    private final FromPointerReader<Results> results;
+    private RequestHook hook;
 
-    Request(AnyPointer.Builder params, RequestHook hook) {
+    Request(AnyPointer.Builder params, FromPointerReader<Results> results, RequestHook hook) {
         this.params = params;
+        this.results = results;
         this.hook = hook;
     }
 
@@ -17,7 +19,11 @@ public class Request<Params, Results> {
     }
 
     CompletableFuture<Results> send() {
-        return null;
+        var typelessPromise = hook.send();
+        hook = null; // prevent reuse
+        return typelessPromise.getResponse().thenApply(response -> {
+            return response.getAs(results);
+        });
     }
 
     static <T, U> Request<T, U> newBrokenRequest(Throwable exc) {
@@ -36,7 +42,7 @@ public class Request<Params, Results> {
         };
 
         var root = message.getRoot(AnyPointer.factory);
-        return new Request<T, U>(root, hook);
+        return new Request<T, U>(root, null, hook);
     }
 }
 
