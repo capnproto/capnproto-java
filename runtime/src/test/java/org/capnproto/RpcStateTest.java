@@ -54,13 +54,15 @@ public class RpcStateTest {
     }
 
     TestConnection connection;
+    Capability.Client bootstrapInterface;
     RpcState rpc;
     final Queue<OutgoingRpcMessage> sent = new ArrayDeque<>();
 
     @Before
     public void setUp() throws Exception {
         connection = new TestConnection();
-        rpc = new RpcState(connection);
+        bootstrapInterface = new Capability.Client(ClientHook.newNullCap());
+        rpc = new RpcState(connection, bootstrapInterface);
     }
 
     @After
@@ -84,6 +86,20 @@ public class RpcStateTest {
 
     @Test
     public void handleBootstrap() {
+        var msg = new TestMessage();
+        var bootstrap = msg.builder.getRoot(RpcProtocol.Message.factory).initBootstrap();
+        bootstrap.setQuestionId(0);
+        rpc.handleMessage(msg);
+        Assert.assertFalse(sent.isEmpty());
+        var reply = sent.remove();
+        var rpcMsg = reply.getBody().getAs(RpcProtocol.Message.factory);
+        Assert.assertEquals(rpcMsg.which(),  RpcProtocol.Message.Which.RETURN);
+        var ret = rpcMsg.getReturn();
+        Assert.assertEquals(ret.getAnswerId(), 0);
+        Assert.assertEquals(ret.which(), RpcProtocol.Return.Which.RESULTS);
+        var results = ret.getResults();
+        Assert.assertEquals(results.getCapTable().size(), 1); // got a capability!
+        Assert.assertTrue(results.hasContent());
     }
 
     @Test
