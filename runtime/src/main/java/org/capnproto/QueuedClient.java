@@ -27,7 +27,7 @@ class QueuedClient implements ClientHook {
     public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
         var hook = new Capability.LocalRequest(interfaceId, methodId, this);
         var root = hook.message.getRoot(AnyPointer.factory);
-        return new Request<>(root, hook);
+        return new Request<>(root, AnyPointer.factory, hook);
     }
 
     @Override
