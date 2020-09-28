@@ -9,8 +9,6 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.*;
-
 public class RpcStateTest {
 
     class TestMessage implements IncomingRpcMessage {
@@ -73,7 +71,7 @@ public class RpcStateTest {
     }
 
     @Test
-    public void handleUnimplemented() {
+    public void handleUnimplemented() throws RpcException {
         var msg = new TestMessage();
         msg.builder.getRoot(RpcProtocol.Message.factory).initUnimplemented();
         rpc.handleMessage(msg);
@@ -82,10 +80,14 @@ public class RpcStateTest {
 
     @Test
     public void handleAbort() {
+        var msg = new TestMessage();
+        var builder = msg.builder.getRoot(RpcProtocol.Message.factory);
+        RpcException.fromException(RpcException.failed("Test abort"), builder.initAbort());
+        Assert.assertThrows(RpcException.class, () -> rpc.handleMessage(msg));
     }
 
     @Test
-    public void handleBootstrap() {
+    public void handleBootstrap() throws RpcException {
         var msg = new TestMessage();
         var bootstrap = msg.builder.getRoot(RpcProtocol.Message.factory).initBootstrap();
         bootstrap.setQuestionId(0);
