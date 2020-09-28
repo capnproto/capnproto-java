@@ -6,5 +6,7 @@ public interface IncomingRpcMessage {
 
     AnyPointer.Reader getBody();
 
-    List<Integer> getAttachedFds();
+    default List<Integer> getAttachedFds() {
+        return List.of();
+    }
 }

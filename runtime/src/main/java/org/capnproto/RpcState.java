@@ -83,7 +83,13 @@ final class RpcState {
     };
 
     private final HashMap<ClientHook, Integer> exportsByCap = new HashMap<>();
-    
+    private final VatNetwork.Connection connection;
+
+
+    RpcState(VatNetwork.Connection connection) {
+        this.connection = connection;
+    }
+
     void handleMessage(IncomingRpcMessage message) {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
         
