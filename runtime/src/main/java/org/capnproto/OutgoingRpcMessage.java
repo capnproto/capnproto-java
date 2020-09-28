@@ -6,7 +6,8 @@ public interface OutgoingRpcMessage {
 
     AnyPointer.Builder getBody();
 
-    void setFds(List<Integer> fds);
+    default void setFds(List<Integer> fds) {
+    }
 
     void send();
 
