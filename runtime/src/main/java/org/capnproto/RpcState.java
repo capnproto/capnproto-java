@@ -83,6 +83,64 @@ final class RpcState {
     };
 
     private final HashMap<ClientHook, Integer> exportsByCap = new HashMap<>();
+    
+    void handleMessage(IncomingRpcMessage message) {
+        var reader = message.getBody().getAs(RpcProtocol.Message.factory);
+        
+        switch (reader.which()) {
+            case UNIMPLEMENTED:
+                handleUnimplemented(reader.getUnimplemented());
+                break;
+            case ABORT:
+                handleAbort(reader.getAbort());
+                break;
+            case BOOTSTRAP:
+                handleBootstrap(message, reader.getBootstrap());
+                break;
+            case CALL:
+                handleCall(message, reader.getCall());
+                return;
+            case RETURN:
+                handleReturn(message, reader.getReturn());
+                break;
+            case FINISH:
+                handleFinish(reader.getFinish());
+                break;
+            case RESOLVE:
+                handleResolve(message, reader.getResolve());
+                break;
+            case DISEMBARGO:
+                handleDisembargo(reader.getDisembargo());
+                break;
+            default:
+                // TODO send unimplemented response
+                break;
+        }
+    }
+
+    void handleUnimplemented(RpcProtocol.Message.Reader message) {
+    }
+
+    void handleAbort(RpcProtocol.Exception.Reader abort) {
+    }
+
+    void handleBootstrap(IncomingRpcMessage message, RpcProtocol.Bootstrap.Reader bootstrap) {
+    }
+
+    void handleCall(IncomingRpcMessage message, RpcProtocol.Call.Reader call) {
+    }
+
+    void handleReturn(IncomingRpcMessage message, RpcProtocol.Return.Reader callReturn) {
+    }
+
+    void handleFinish(RpcProtocol.Finish.Reader finish) {
+    }
+
+    void handleResolve(IncomingRpcMessage message, RpcProtocol.Resolve.Reader resolve) {
+    }
+
+    void handleDisembargo(RpcProtocol.Disembargo.Reader disembargo) {
+    }
 
     interface RpcResponse extends ResponseHook {
         AnyPointer.Reader getResults();
@@ -185,4 +243,6 @@ final class RpcState {
             return null;
         }
     }
+
+
 }
