@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, rpc ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, rpc ]
 
 jobs:
   build:
@@ -21,4 +21,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file runtime/pom.xml
