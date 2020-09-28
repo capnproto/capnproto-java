@@ -110,6 +110,10 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.pointer, reader);
         }
 
+        public final void setAsCapability(Capability.Client cap) {
+            WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.hook);
+        }
+
         public final Reader asReader() {
             return new Reader(segment, pointer, java.lang.Integer.MAX_VALUE);
         }
