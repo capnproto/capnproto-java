@@ -8,9 +8,24 @@ public class TwoPartyVatNetwork implements VatNetwork, VatNetwork.Connection {
 
     private CompletableFuture<?> writeCompleted = CompletableFuture.completedFuture(null);
     private final AsynchronousByteChannel channel;
+    private final RpcTwoPartyProtocol.Side side;
+    private final MessageBuilder peerVatId = new MessageBuilder(4);
 
-    public TwoPartyVatNetwork(AsynchronousByteChannel channel) {
+    public TwoPartyVatNetwork(AsynchronousByteChannel channel, RpcTwoPartyProtocol.Side side) {
         this.channel = channel;
+        this.side = side;
+        this.peerVatId.initRoot(RpcTwoPartyProtocol.VatId.factory).setSide(
+                side == RpcTwoPartyProtocol.Side.CLIENT
+                        ? RpcTwoPartyProtocol.Side.SERVER
+                        : RpcTwoPartyProtocol.Side.CLIENT);
+    }
+
+    public RpcTwoPartyProtocol.Side getSide() {
+        return side;
+    }
+
+    public RpcTwoPartyProtocol.VatId.Reader getPeerVatId() {
+        return peerVatId.getRoot(RpcTwoPartyProtocol.VatId.factory).asReader();
     }
 
     @Override
