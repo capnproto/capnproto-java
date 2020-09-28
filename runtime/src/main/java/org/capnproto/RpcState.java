@@ -1,7 +1,8 @@
 package org.capnproto;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 final class RpcState {
 
@@ -45,6 +46,43 @@ final class RpcState {
     final static class Embargo {
         CompletableFuture<java.lang.Void> fulfiller;
     }
+
+    private final ExportTable<Export> exports = new ExportTable<Export>() {
+        @Override
+        protected Export newExportable() {
+            return new Export();
+        }
+    };
+
+    private final ExportTable<Question> questions = new ExportTable<Question>() {
+        @Override
+        protected Question newExportable() {
+            return new Question();
+        }
+    };
+
+    private final ImportTable<Answer> answers = new ImportTable<Answer>() {
+        @Override
+        protected Answer newImportable() {
+            return new Answer();
+        }
+    };
+
+    private final ImportTable<Import> imports = new ImportTable<Import>() {
+        @Override
+        protected Import newImportable() {
+            return new Import();
+        }
+    };
+
+    private final ExportTable<Embargo> embargos = new ExportTable<Embargo>() {
+        @Override
+        protected Embargo newExportable() {
+            return new Embargo();
+        }
+    };
+
+    private final HashMap<ClientHook, Integer> exportsByCap = new HashMap<>();
 
     interface RpcResponse extends ResponseHook {
         AnyPointer.Reader getResults();
