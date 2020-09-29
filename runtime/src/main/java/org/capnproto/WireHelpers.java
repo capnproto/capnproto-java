@@ -1332,16 +1332,16 @@ final class WireHelpers {
         long ref = segment.get(refOffset);
 
         if (WirePointer.isNull(ref)) {
-            return ClientHook.newNullCap();
+            return Capability.newNullCap();
         }
 
         if (WirePointer.kind(ref) != WirePointer.OTHER) {
-            return ClientHook.newBrokenCap("Calling capability extracted from a non-capability pointer.");
+            return Capability.newBrokenCap("Calling capability extracted from a non-capability pointer.");
         }
 
         var cap = capTable.extractCap(WirePointer.upper32Bits(ref));
         if (cap == null) {
-            return ClientHook.newBrokenCap("Calling invalid capability pointer.");
+            return Capability.newBrokenCap("Calling invalid capability pointer.");
         }
         return cap;
     }

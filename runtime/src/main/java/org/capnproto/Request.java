@@ -4,25 +4,29 @@ import java.util.concurrent.CompletableFuture;
 
 public class Request<Params, Results> {
 
-    final AnyPointer.Builder params;
-    private final FromPointerReader<Results> results;
+    AnyPointer.Builder params;
+    private final FromPointerBuilder<Params> paramsBuilder;
+    private final FromPointerReader<Results> resultsReader;
     RequestHook hook;
 
-    Request(AnyPointer.Builder params, FromPointerReader<Results> results, RequestHook hook) {
+    Request(FromPointerBuilder<Params> paramsBuilder,
+            FromPointerReader<Results> resultsReader,
+            AnyPointer.Builder params, RequestHook hook) {
+        this.paramsBuilder = paramsBuilder;
+        this.resultsReader = resultsReader;
         this.params = params;
-        this.results = results;
         this.hook = hook;
     }
 
-    AnyPointer.Builder params() {
-        return params;
+    Params params() {
+        return params.getAs(paramsBuilder);
     }
 
     CompletableFuture<Results> send() {
         var typelessPromise = hook.send();
         hook = null; // prevent reuse
         return typelessPromise.getResponse().thenApply(response -> {
-            return response.getAs(results);
+            return response.getAs(resultsReader);
         });
     }
 
@@ -42,7 +46,17 @@ public class Request<Params, Results> {
         };
 
         var root = message.getRoot(AnyPointer.factory);
-        return new Request<T, U>(root, null, hook);
+        return new Request<T, U>(null, null, root, hook);
+    }
+
+    static Request<AnyPointer.Builder, AnyPointer.Reader> newTypelessRequest(AnyPointer.Builder root, RequestHook hook) {
+        return new Request<>(AnyPointer.factory, AnyPointer.factory, root, hook);
+    }
+
+    static <Params, Results> Request<Params, Results> fromTypeless(FromPointerBuilder<Params> params,
+                                                                   FromPointerReader<Results> results,
+                                                                   Request<AnyPointer.Builder, AnyPointer.Reader> typeless) {
+        return new Request<>(params, results, typeless.params(), typeless.hook);
     }
 }
 

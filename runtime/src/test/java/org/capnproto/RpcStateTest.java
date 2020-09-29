@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class RpcStateTest {
 
@@ -23,6 +25,7 @@ public class RpcStateTest {
 
     class TestConnection implements VatNetwork.Connection {
 
+        Executor executor = Executors.newSingleThreadExecutor();
         @Override
         public OutgoingRpcMessage newOutgoingMessage(int firstSegmentWordSize) {
             var message = new MessageBuilder();
@@ -59,7 +62,7 @@ public class RpcStateTest {
     @Before
     public void setUp() throws Exception {
         connection = new TestConnection();
-        bootstrapInterface = new Capability.Client(ClientHook.newNullCap());
+        bootstrapInterface = new Capability.Client(Capability.newNullCap());
         rpc = new RpcState(connection, bootstrapInterface);
     }
 
