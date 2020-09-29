@@ -18,7 +18,7 @@ class QueuedClient implements ClientHook {
         this.setResolutionOp = promise.thenAccept(inner -> {
             this.redirect = inner;
         }).exceptionally(exc -> {
-            this.redirect = ClientHook.newBrokenCap(exc);
+            this.redirect = Capability.newBrokenCap(exc);
             return null;
         });
     }
@@ -27,7 +27,7 @@ class QueuedClient implements ClientHook {
     public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
         var hook = new Capability.LocalRequest(interfaceId, methodId, this);
         var root = hook.message.getRoot(AnyPointer.factory);
-        return new Request<>(root, AnyPointer.factory, hook);
+        return new Request<>(AnyPointer.factory, AnyPointer.factory, root, hook);
     }
 
     @Override

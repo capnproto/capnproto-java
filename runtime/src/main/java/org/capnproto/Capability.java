@@ -25,7 +25,7 @@ public final class Capability {
         }
 
         public Client(Throwable exc) {
-            this(ClientHook.newBrokenCap(exc));
+            this(newBrokenCap(exc));
         }
 
         public ClientHook getHook() {
@@ -46,11 +46,15 @@ public final class Capability {
                                             FromPointerReader<U> reader,
                                             long interfaceId, short methodId) {
             var request = hook.newCall(interfaceId, methodId);
-            return new Request<T, U> (request.params, reader, request.hook);
+            return new Request<T, U> (builder, reader, request.params, request.hook);
         }
 
         public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
             return hook.newCall(interfaceId, methodId);
+        }
+
+        private static ClientHook makeLocalClient(Capability.Server server) {
+            return server.makeLocalClient();
         }
     }
 
@@ -79,7 +83,7 @@ public final class Capability {
             public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
                 var hook = new LocalRequest(interfaceId, methodId, this);
                 var root = hook.message.getRoot(AnyPointer.factory);
-                return new Request<>(root, AnyPointer.factory, hook);
+                return new Request<>(AnyPointer.factory, AnyPointer.factory, root, hook);
             }
 
             @Override
@@ -99,9 +103,11 @@ public final class Capability {
                     return new LocalPipeline(ctx);
                 });
 
-                pipelinePromise = ctx.onTailCall().applyToEither(pipelinePromise, pipeline -> {
-                    return pipeline;
-                });
+                var tailCall = ctx.onTailCall();
+                // TODO implement tailCall
+                if (tailCall != null) {
+                    pipelinePromise = tailCall.applyToEither(pipelinePromise, pipeline -> pipeline);
+                }
 
                 return new VoidPromiseAndPipeline(forked, new QueuedPipeline(pipelinePromise));
             }
@@ -116,11 +122,11 @@ public final class Capability {
                 return BRAND;
             }
 
-            CompletableFuture<java.lang.Void> callInternal(long interfaceId, short methodId, CallContextHook context) {
+            CompletableFuture<?> callInternal(long interfaceId, short methodId, CallContextHook context) {
                 var result = dispatchCall(
                         interfaceId,
                         methodId,
-                        new CallContext(AnyPointer.factory, AnyPointer.factory, context));
+                        new CallContext<>(AnyPointer.factory, AnyPointer.factory, context));
                 if (result.streaming) {
                     // TODO streaming
                     return null;
@@ -141,11 +147,11 @@ public final class Capability {
             }
         }
 
-        public final class DispatchCallResult {
-            private final CompletableFuture<java.lang.Void> promise;
+        final class DispatchCallResult {
+            private final CompletableFuture<?> promise;
             private final boolean streaming;
 
-            public DispatchCallResult(CompletableFuture<java.lang.Void> promise) {
+            public DispatchCallResult(CompletableFuture<?> promise) {
                 this.promise = promise;
                 this.streaming = false;
             }
@@ -155,7 +161,7 @@ public final class Capability {
                 this.streaming = false;
             }
 
-            DispatchCallResult(CompletableFuture<java.lang.Void> promise, boolean isStreaming) {
+            DispatchCallResult(CompletableFuture<?> promise, boolean isStreaming) {
                 this.promise = promise;
                 this.streaming = isStreaming;
             }
@@ -201,8 +207,12 @@ public final class Capability {
         }
     }
 
-    static ClientHook newLocalPromiseClient(CompletableFuture<ClientHook> promise) {
+    public static ClientHook newLocalPromiseClient(CompletableFuture<ClientHook> promise) {
         return new QueuedClient(promise);
+    }
+
+    public static PipelineHook newLocalPromisePipeline(CompletableFuture<PipelineHook> promise) {
+        return new QueuedPipeline(promise);
     }
 
     static class LocalRequest implements RequestHook {
@@ -315,4 +325,49 @@ public final class Capability {
             return null;
         }
     }
+
+    public static ClientHook newBrokenCap(String reason) {
+        return newBrokenClient(reason, false, ClientHook.BROKEN_CAPABILITY_BRAND);
+    }
+
+    public static ClientHook newBrokenCap(Throwable exc) {
+        return newBrokenClient(exc, false, ClientHook.BROKEN_CAPABILITY_BRAND);
+    }
+
+    public static ClientHook newNullCap() {
+        return newBrokenClient(new RuntimeException("Called null capability"), true, ClientHook.NULL_CAPABILITY_BRAND);
+    }
+
+    static private ClientHook newBrokenClient(String reason, boolean resolved, Object brand) {
+        return newBrokenClient(new RuntimeException(reason), resolved, brand);
+    }
+
+    static private ClientHook newBrokenClient(Throwable exc, boolean resolved, Object brand) {
+        return new ClientHook() {
+            @Override
+            public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+                return Request.newBrokenRequest(exc);
+            }
+
+            @Override
+            public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
+                return new VoidPromiseAndPipeline(CompletableFuture.failedFuture(exc), null);
+            }
+
+            @Override
+            public CompletableFuture<ClientHook> whenMoreResolved() {
+                if (resolved) {
+                    return null;
+                } else {
+                    return CompletableFuture.failedFuture(exc);
+                }
+            }
+
+            @Override
+            public Object getBrand() {
+                return brand;
+            }
+        };
+    }
+
 }

@@ -73,12 +73,19 @@ public final class AnyPointer {
             return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
 
+        public final Capability.Client getAsCapability() {
+            return new Capability.Client(
+                    WireHelpers.readCapabilityPointer(this.segment, capTable, this.pointer, 0));
+        }
+
         public final ClientHook getPipelinedCap(PipelineOp[] ops) {
             for (var op: ops) {
                 switch (op.type) {
                     case NOOP:
                         break;
                     case GET_POINTER_FIELD:
+                        var index = op.pointerIndex;
+                        // TODO getpointerfield
                         break;
                 }
             }

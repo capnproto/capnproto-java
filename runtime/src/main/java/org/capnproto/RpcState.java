@@ -3,15 +3,20 @@ package org.capnproto;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Consumer;
 
 final class RpcState {
 
     static final class Question {
+        final int id;
         List<Integer> paramExports;
         boolean isAwaitingReturn = false;
         boolean isTailCall = false;
         boolean skipFinish = false;
+
+        Question(int id) {
+            this.id = id;
+        }
+
         CompletableFuture<RpcResponse> response = new CompletableFuture<>();
 
         void reject(Throwable exc) {
@@ -32,9 +37,14 @@ final class RpcState {
     }
 
     static final class Export {
+        final int id;
         int refcount;
         ClientHook clientHook;
         CompletionStage<?> resolveOp;
+
+        Export(int id) {
+            this.id = id;
+        }
     }
 
     static final class Import {
@@ -45,11 +55,27 @@ final class RpcState {
     }
 
     final static class Embargo {
-        CompletableFuture<java.lang.Void> fulfiller;
+        final int id;
+        CompletableFuture<?> disembargo;
+
+        Embargo(int id) {
+            this.id = id;
+        }
     }
 
-    private final ExportTable<Export> exports = new ExportTable<Export>();
-    private final ExportTable<Question> questions = new ExportTable<Question>();
+    private final ExportTable<Export> exports = new ExportTable<Export>() {
+        @Override
+        Export newExportable(int id) {
+            return new Export(id);
+        }
+    };
+
+    private final ExportTable<Question> questions = new ExportTable<Question>() {
+        @Override
+        Question newExportable(int id) {
+            return new Question(id);
+        }
+    };
 
     private final ImportTable<Answer> answers = new ImportTable<Answer>() {
         @Override
@@ -65,25 +91,95 @@ final class RpcState {
         }
     };
 
-    private final ExportTable<Embargo> embargos = new ExportTable<Embargo>();
+    private final ExportTable<Embargo> embargos = new ExportTable<Embargo>() {
+        @Override
+        Embargo newExportable(int id) {
+            return new Embargo(id);
+        }
+    };
 
     private final HashMap<ClientHook, Integer> exportsByCap = new HashMap<>();
     private final VatNetwork.Connection connection;
     private final Capability.Client bootstrapInterface;
     private Throwable disconnected = null;
+    private CompletableFuture<?> messageReady = CompletableFuture.completedFuture(null);
 
     RpcState(VatNetwork.Connection connection, Capability.Client bootstrapInterface) {
         this.connection = connection;
         this.bootstrapInterface = bootstrapInterface;
     }
 
-    boolean isDisconnected() {
+    final boolean isDisconnected() {
         return this.disconnected != null;
     }
 
-    void handleMessage(IncomingRpcMessage message) throws RpcException {
+    final boolean isConnected() {
+        return !isDisconnected();
+    }
+
+    ClientHook restore() {
+        var question = questions.next();
+        question.isAwaitingReturn = true;
+        question.paramExports = List.of();
+        var message = connection.newOutgoingMessage(64);
+        var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
+        builder.setQuestionId(question.id);
+        message.send();
+        var pipeline = new RpcPipeline(question);
+        return pipeline.getPipelinedCap(new PipelineOp[0]);
+    }
+
+    // run message loop once
+    final CompletableFuture<?> runOnce() {
+
+        if (isDisconnected()) {
+            return CompletableFuture.failedFuture(disconnected);
+        }
+
+        if (!messageReady.isDone()) {
+            return messageReady;
+        }
+
+        messageReady = connection.receiveIncomingMessage().thenAccept(message -> {
+                try {
+                    handleMessage(message);
+                }
+                catch (Exception exc) {
+                    this.disconnected = exc;
+                }
+        }).exceptionally(exc -> {
+            this.disconnected = exc;
+            return null;
+        });
+
+        return messageReady;
+    }
+
+    // run message loop until promise is completed
+    public final <T> CompletableFuture<T> messageLoop(CompletableFuture<T> done) {
+        if (done.isDone()) {
+            return done;
+        }
+
+        if (isDisconnected()) {
+            done.completeExceptionally(disconnected);
+            return done;
+        }
+
+        return connection.receiveIncomingMessage().thenCompose(message -> {
+            try {
+                handleMessage(message);
+            }
+            catch (Exception exc) {
+                done.completeExceptionally(exc);
+            }
+            return messageLoop(done);
+        });
+    }
+
+    synchronized void handleMessage(IncomingRpcMessage message) throws RpcException {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
-        
+        System.out.println(reader.which());
         switch (reader.which()) {
             case UNIMPLEMENTED:
                 handleUnimplemented(reader.getUnimplemented());
@@ -194,7 +290,7 @@ final class RpcState {
         answer.resultExports = writeDescriptors(capTableArray, payload, fds);
         answer.pipeline = ops -> ops.length == 0
                 ? capHook
-                : ClientHook.newBrokenCap("Invalid pipeline transform.");
+                : Capability.newBrokenCap("Invalid pipeline transform.");
 
         response.send();
 
@@ -204,9 +300,148 @@ final class RpcState {
     }
 
     void handleCall(IncomingRpcMessage message, RpcProtocol.Call.Reader call) {
+        var cap = getMessageTarget(call.getTarget());
+        if (cap == null) {
+            return;
+        }
+
+        boolean redirectResults;
+        switch (call.getSendResultsTo().which()) {
+            case CALLER:
+                redirectResults = false;
+                break;
+            case YOURSELF:
+                redirectResults = true;
+                break;
+            default:
+                assert false: "Unsupported 'Call.sendResultsTo'.";
+                return;
+        }
+
+        var payload = call.getParams();
+        var capTableArray = receiveCaps(payload.getCapTable(), message.getAttachedFds());
+        var answerId = call.getQuestionId();
+        var cancel = new CompletableFuture<java.lang.Void>();
+        var context = new RpcCallContext(
+                answerId, message, capTableArray,
+                payload.getContent(), redirectResults, cancel,
+                call.getInterfaceId(), call.getMethodId());
+
+        {
+            var answer = answers.put(answerId);
+            assert !answer.active : "questionId is already in use";
+            if (answer.active) {
+                return;
+            }
+
+            answer.active = true;
+            answer.callContext = context;
+        }
+
+        var pap = startCall(call.getInterfaceId(), call.getMethodId(), cap, context);
+        {
+            var answer = answers.find(answerId);
+            assert answer != null;
+            answer.pipeline = pap.pipeline;
+
+            if (redirectResults) {
+                answer.redirectedResults = pap.promise.thenApply(x -> {
+                    return context.consumeRedirectedResponse();
+                });
+                // TODO cancellation deferral
+            }
+            else {
+                pap.promise.thenAccept(x -> {
+                    context.sendReturn();
+                }).exceptionally(exc -> {
+                    context.sendErrorReturn(exc);
+                    // TODO wait on the cancellation...
+                    return null;
+                });
+            }
+        }
+    }
+
+    private ClientHook.VoidPromiseAndPipeline startCall(long interfaceId, short methodId, ClientHook cap, RpcCallContext context) {
+        // TODO gateways...?
+        return cap.call(interfaceId, methodId, context);
     }
 
     void handleReturn(IncomingRpcMessage message, RpcProtocol.Return.Reader callReturn) {
+        var exportsToRelease = new ArrayList<Integer>();
+
+        var question = questions.find(callReturn.getAnswerId());
+        assert question != null : "Invalid question ID in Return message.";
+        if (question == null) {
+            return;
+        }
+
+        assert question.isAwaitingReturn: "Duplicate Return";
+        if (!question.isAwaitingReturn) {
+            return;
+        }
+
+        question.isAwaitingReturn = false;
+        if (callReturn.getReleaseParamCaps()) {
+            exportsToRelease.addAll(question.paramExports);
+            question.paramExports = List.of();
+        }
+
+        assert !callReturn.isTakeFromOtherQuestion(): "Not implemented";
+        if (callReturn.isTakeFromOtherQuestion()) {
+            // TODO process isTakeFromOtherQuestion...
+            return;
+        }
+
+        switch (callReturn.which()) {
+            case RESULTS:
+                if (question.isTailCall) {
+                    // TODO resultsSentElsewhere
+                    return;
+                }
+                var payload = callReturn.getResults();
+                var capTable = receiveCaps(payload.getCapTable(), message.getAttachedFds());
+                var response = new RpcResponseImpl(question, message, capTable, payload.getContent());
+                question.answer(response);
+                break;
+            case EXCEPTION:
+                assert !question.isTailCall : "Tail call `Return` must set `resultsSentElsewhere`, not `exception`.";
+                if (question.isTailCall) {
+                    return;
+                }
+                question.reject(RpcException.toException(callReturn.getException()));
+                break;
+            case CANCELED:
+                assert false : "Return message falsely claims call was canceled.";
+                break;
+            case RESULTS_SENT_ELSEWHERE:
+                assert question.isTailCall : "`Return` had `resultsSentElsewhere` but this was not a tail call.";
+                if (!question.isTailCall) {
+                    return;
+                }
+                // Tail calls are fulfilled with a null pointer.
+                question.answer(() -> null);
+                break;
+
+            case TAKE_FROM_OTHER_QUESTION:
+                var other = callReturn.getTakeFromOtherQuestion();
+                var answer = answers.find(other);
+                assert answer != null : "`Return.takeFromOtherQuestion` had invalid answer ID.";
+                if (answer == null) {
+                    return;
+                }
+                assert answer.redirectedResults != null : "`Return.takeFromOtherQuestion` referenced a call that did not use `sendResultsTo.yourself`.";
+                if (answer.redirectedResults == null) {
+                    return;
+                }
+                question.response = answer.redirectedResults;
+                answer.redirectedResults = null;
+                break;
+            default:
+                assert false : "Unknown 'Return' type.";
+                return;
+        }
+
     }
 
     void handleFinish(RpcProtocol.Finish.Reader finish) {
@@ -217,7 +452,6 @@ final class RpcState {
 
     void handleDisembargo(RpcProtocol.Disembargo.Reader disembargo) {
     }
-
 
     private List<Integer> writeDescriptors(ClientHook[] capTable, RpcProtocol.Payload.Builder payload, List<Integer> fds) {
         if (capTable.length == 0) {
@@ -271,21 +505,20 @@ final class RpcState {
         }
 
         // This is the first time we've seen this capability.
-        var export = new Export();
+        var export = exports.next();
         export.refcount = 1;
         export.clientHook = inner;
-        exportId = exports.next(export);
 
         var wrapped = inner.whenMoreResolved();
         if (wrapped != null) {
             // This is a promise.  Arrange for the `Resolve` message to be sent later.
-            export.resolveOp = resolveExportedPromise(exportId, wrapped);
-            descriptor.setSenderPromise(exportId);
+            export.resolveOp = resolveExportedPromise(export.id, wrapped);
+            descriptor.setSenderPromise(export.id);
         }
         else {
-            descriptor.setSenderHosted(exportId);
+            descriptor.setSenderHosted(export.id);
         }
-        return exportId;
+        return export.id;
     }
 
     CompletionStage<?> resolveExportedPromise(int exportId, CompletionStage<ClientHook> promise) {
@@ -394,7 +627,7 @@ final class RpcState {
             case RECEIVER_HOSTED:
                 var exp = exports.find(descriptor.getReceiverHosted());
                 if (exp == null) {
-                    return ClientHook.newBrokenCap("invalid 'receiverHosted' export ID");
+                    return Capability.newBrokenCap("invalid 'receiverHosted' export ID");
                 }
                 if (exp.clientHook.getBrand() == this) {
                     // TODO Tribble 4-way race!
@@ -409,12 +642,12 @@ final class RpcState {
                 var ops = PipelineOp.ToPipelineOps(promisedAnswer);
 
                 if (answer == null || !answer.active || answer.pipeline == null || ops == null) {
-                    return ClientHook.newBrokenCap("invalid 'receiverAnswer'");
+                    return Capability.newBrokenCap("invalid 'receiverAnswer'");
                 }
 
                 var result = answer.pipeline.getPipelinedCap(ops);
                 if (result == null) {
-                    return ClientHook.newBrokenCap("Unrecognised pipeline ops");
+                    return Capability.newBrokenCap("Unrecognised pipeline ops");
                 }
 
                 if (result.getBrand() == this) {
@@ -425,13 +658,12 @@ final class RpcState {
                 return result;
 
             case THIRD_PARTY_HOSTED:
-                return ClientHook.newBrokenCap("Third party caps not supported");
+                return Capability.newBrokenCap("Third party caps not supported");
 
             default:
-                return ClientHook.newBrokenCap("unknown CapDescriptor type");
+                return Capability.newBrokenCap("unknown CapDescriptor type");
         }
     }
-
 
     private ClientHook importCap(int importId, boolean isPromise, Integer fd) {
         // Receive a new import.
@@ -467,6 +699,39 @@ final class RpcState {
                 : cap;
     }
 
+    ClientHook getMessageTarget(RpcProtocol.MessageTarget.Reader target) {
+        switch (target.which()) {
+            case IMPORTED_CAP:
+                var exp = exports.find(target.getImportedCap());
+                assert exp != null: "Message target is not a current export ID.";
+                return exp != null ? exp.clientHook : null;
+
+            case PROMISED_ANSWER:
+                var promisedAnswer = target.getPromisedAnswer();
+                var base = answers.find(promisedAnswer.getQuestionId());
+                assert base != null && base.active: "PromisedAnswer.questionId is not a current question.";
+                if (base == null || !base.active) {
+                    return null;
+                }
+
+                var pipeline = base.pipeline;
+                if (pipeline == null) {
+                    pipeline = PipelineHook.newBrokenPipeline(
+                            RpcException.failed("Pipeline call on a request that returned no capabilities or was already closed."));
+                }
+
+                var ops = PipelineOp.ToPipelineOps(promisedAnswer);
+                if (ops == null) {
+                    return null;
+                }
+                return pipeline.getPipelinedCap(ops);
+
+            default:
+                assert false: "Unknown message target type. " + target.which();
+                return null;
+        }
+    }
+
     ClientHook getInnermostClient(ClientHook client) {
         for (;;) {
             var inner = client.getResolved();
@@ -489,6 +754,79 @@ final class RpcState {
         AnyPointer.Reader getResults();
     }
 
+    interface RpcServerResponse {
+        AnyPointer.Builder getResultsBuilder();
+    }
+
+    static class RpcResponseImpl implements RpcResponse {
+        private final Question question;
+        private final IncomingRpcMessage message;
+        private final AnyPointer.Reader results;
+
+        RpcResponseImpl(Question question,
+                        IncomingRpcMessage message,
+                        List<ClientHook> capTable,
+                        AnyPointer.Reader results) {
+            this.question = question;
+            this.message = message;
+            this.results = results.imbue(new ReaderCapabilityTable(capTable));
+        }
+
+        public AnyPointer.Reader getResults() {
+            return results;
+        }
+    }
+
+    class RpcServerResponseImpl implements RpcServerResponse {
+
+        final OutgoingRpcMessage message;
+        final RpcProtocol.Payload.Builder payload;
+        final BuilderCapabilityTable capTable = new BuilderCapabilityTable();
+
+        RpcServerResponseImpl(OutgoingRpcMessage message, RpcProtocol.Payload.Builder payload) {
+            this.message = message;
+            this.payload = payload;
+        }
+
+        @Override
+        public AnyPointer.Builder getResultsBuilder() {
+            return payload.getContent().imbue(capTable);
+        }
+
+        List<Integer> send() {
+            var capTable = this.capTable.getTable();
+            var fds = List.<Integer>of();
+            var exports = writeDescriptors(capTable, payload, fds);
+            // TODO process FDs
+            message.setFds(fds);
+
+            for (int ii = 0; ii < capTable.length; ++ii) {
+                var slot = capTable[ii];
+                if (slot != null) {
+                    capTable[ii] = getInnermostClient(slot);
+                }
+            }
+
+            message.send();
+            return exports;
+        }
+    }
+
+    private static class LocallyRedirectedRpcResponse implements RpcServerResponse, RpcResponse {
+
+        private final MessageBuilder message = new MessageBuilder();
+
+        @Override
+        public AnyPointer.Builder getResultsBuilder() {
+            return message.getRoot(AnyPointer.factory);
+        }
+
+        @Override
+        public AnyPointer.Reader getResults() {
+            return getResultsBuilder().asReader();
+        }
+    }
+
     class RpcCallContext implements CallContextHook {
 
         final int answerId;
@@ -500,9 +838,13 @@ final class RpcState {
         final AnyPointer.Reader params;
 
         // response
-        RpcResponse response;
+        RpcServerResponse response;
         RpcProtocol.Return.Builder returnMessage;
         boolean redirectResults = false;
+        boolean responseSent = false;
+
+        boolean cancelRequested = false;
+        boolean cancelAllowed = false;
 
         final CompletableFuture<java.lang.Void> cancelled;
 
@@ -531,7 +873,20 @@ final class RpcState {
 
         @Override
         public AnyPointer.Builder getResults() {
-            return null;
+            if (response != null) {
+                return response.getResultsBuilder();
+            }
+
+            if (redirectResults || isDisconnected()) {
+                response = new LocallyRedirectedRpcResponse();
+            }
+            else {
+                var message = connection.newOutgoingMessage(1024);
+                returnMessage = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
+                response = new RpcServerResponseImpl(message, returnMessage.getResults());
+            }
+
+            return response.getResultsBuilder();
         }
 
         @Override
@@ -552,6 +907,147 @@ final class RpcState {
         public ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request) {
             return null;
         }
+
+        RpcResponse consumeRedirectedResponse() {
+                assert this.redirectResults;
+
+                if (this.response == null) {
+                    getResults(); // force initialization of response
+                }
+
+                return ((LocallyRedirectedRpcResponse)this.response);
+            }
+
+        void sendReturn() {
+            assert !redirectResults;
+
+            if (!this.cancelRequested && isDisconnected()) {
+                assert false: "Cancellation should have been requested on disconnect.";
+                return;
+            }
+
+            if (this.response == null) {
+                getResults(); // force initialization
+            }
+
+            this.returnMessage.setAnswerId(this.answerId);
+            this.returnMessage.setReleaseParamCaps(false);
+
+            List<Integer> exports;
+            try {
+                exports = ((RpcServerResponseImpl)response).send();
+            }
+            catch (Throwable exc) {
+                this.responseSent = false;
+                sendErrorReturn(exc);
+            }
+        }
+
+        void sendErrorReturn(Throwable exc) {
+            assert !redirectResults;
+
+            if (!isFirstResponder()) {
+                return;
+            }
+
+            if (isConnected()) {
+                var message = connection.newOutgoingMessage(1024);
+                var builder = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
+                builder.setAnswerId(this.answerId);
+                builder.setReleaseParamCaps(false);
+                RpcException.fromException(exc, builder.initException());
+                message.send();
+            }
+
+            cleanupAnswerTable(null, false);
+        }
+
+        boolean isFirstResponder() {
+            if (this.responseSent) {
+                return false;
+            }
+            this.responseSent = true;
+            return true;
+        }
+
+        void cleanupAnswerTable(List<Integer> resultExports, boolean shouldFreePipeline) {
+            if (this.cancelRequested) {
+                assert resultExports.size() == 0;
+                answers.erase(this.answerId);
+                return;
+            }
+            else {
+                var answer = answers.find(answerId);
+                answer.callContext = null;
+                answer.resultExports = resultExports;
+
+                if (shouldFreePipeline) {
+                    assert resultExports.size() == 0;
+                    answer.pipeline = null;
+                }
+            }
+        }
+    }
+
+    enum PipelineState {
+        WAITING, RESOLVED, BROKEN
+    }
+
+    class RpcPipeline implements PipelineHook {
+
+        private final Question question;
+        private PipelineState state = PipelineState.WAITING;
+        private RpcResponse resolved;
+        private Throwable broken;
+
+        final HashMap<List<PipelineOp>, ClientHook> clientMap = new HashMap<>();
+        final CompletionStage<RpcResponse> redirectLater;
+        final CompletionStage<java.lang.Void> resolveSelf;
+
+        RpcPipeline(Question question,
+                    CompletionStage<RpcResponse> redirectLater) {
+            this.question = question;
+            this.redirectLater = redirectLater;
+            this.resolveSelf = this.redirectLater
+                    .thenAccept(response -> {
+                        this.state = PipelineState.RESOLVED;
+                        this.resolved = response;
+                    })
+                    .exceptionally(exc -> {
+                        this.state = PipelineState.BROKEN;
+                        this.broken = exc;
+                        return null;
+                    });
+        }
+
+        RpcPipeline(Question question) {
+            // never resolves
+            this.question = question;
+            this.redirectLater = null;
+            this.resolveSelf = null;
+        }
+
+        @Override
+        public ClientHook getPipelinedCap(PipelineOp[] ops) {
+            // TODO avoid conversion to/from ArrayList?
+            var key = new ArrayList<>(Arrays.<PipelineOp>asList(ops));
+            var hook = this.clientMap.computeIfAbsent(key, k -> {
+                switch (state) {
+                    case WAITING:
+                        if (redirectLater != null) {
+                            // TODO implement redirect
+                            assert false: "redirection not implemented";
+                            return null;
+                        }
+                        return new PipelineClient(question, ops);
+                    case RESOLVED:
+                        return resolved.getResults().getPipelinedCap(ops);
+                    default:
+                        return Capability.newBrokenCap(broken);
+                }
+            });
+            return hook;
+        }
     }
 
     abstract class RpcClient implements ClientHook {
@@ -566,11 +1062,128 @@ final class RpcState {
 
         @Override
         public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
-            return null;
+            return newCallNoIntercept(interfaceId, methodId);
         }
 
         @Override
         public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
+            return null;
+        }
+
+        public VoidPromiseAndPipeline callNoIntercept(long interfaceId, short methodId, CallContextHook context) {
+            var params = context.getParams();
+            var request = newCallNoIntercept(interfaceId, methodId);
+            var x = request.params;
+            context.allowCancellation();
+            return context.directTailCall(request.hook);
+        }
+
+        private Request<AnyPointer.Builder, AnyPointer.Reader> newCallNoIntercept(long interfaceId, short methodId) {
+            if (isDisconnected()) {
+                return Request.newBrokenRequest(disconnected);
+            }
+
+            var request = new RpcRequest(this);
+            var callBuilder = request.getCall();
+            callBuilder.setInterfaceId(interfaceId);
+            callBuilder.setMethodId(methodId);
+            var root = request.getRoot();
+            return Request.newTypelessRequest(root, request);
+        }
+    }
+
+    class RpcRequest implements RequestHook {
+
+        final RpcClient target;
+        final OutgoingRpcMessage message;
+        final BuilderCapabilityTable capTable = new BuilderCapabilityTable();
+        final RpcProtocol.Call.Builder callBuilder;
+        final AnyPointer.Builder paramsBuilder;
+
+        RpcRequest(RpcClient target) {
+            this.target = target;
+            this.message = connection.newOutgoingMessage(1024);
+            this.callBuilder = message.getBody().getAs(RpcProtocol.Message.factory).initCall();
+            this.paramsBuilder = callBuilder.getParams().getContent();
+        }
+
+        AnyPointer.Builder getRoot() {
+            return this.paramsBuilder;
+        }
+        RpcProtocol.Call.Builder getCall() {
+            return this.callBuilder;
+        }
+
+        @Override
+        public RemotePromise<AnyPointer.Reader> send() {
+            if (isDisconnected()) {
+                return new RemotePromise<>(CompletableFuture.failedFuture(disconnected), null);
+            }
+
+            var redirect = this.target.writeTarget(this.callBuilder.getTarget());
+            if (redirect != null) {
+                var replacement = redirect.newCall(
+                        this.callBuilder.getInterfaceId(), this.callBuilder.getMethodId());
+                replacement.params = paramsBuilder;
+                return replacement.hook.send();
+            }
+
+            var question = sendInternal(false);
+
+            // The pipeline must get notified of resolution before the app does to maintain ordering.
+            var pipeline = new RpcPipeline(question, question.response);
+
+            // drive the message loop until the question is answered
+            var appPromise = messageLoop(question.response).thenApply(response -> {
+                var results = response.getResults();
+                return new Response(results, response);
+            });
+
+            return new RemotePromise<>(appPromise, pipeline);
+        }
+
+        Question sendInternal(boolean isTailCall) {
+            // TODO refactor
+            var fds = List.<Integer>of();
+            var exports = writeDescriptors(capTable.getTable(), callBuilder.getParams(), fds);
+            message.setFds(fds);
+            var question = questions.next();
+            question.isAwaitingReturn = true;
+            question.isTailCall = isTailCall;
+            question.paramExports = exports;
+
+            callBuilder.setQuestionId(question.id);
+            if (isTailCall) {
+                callBuilder.getSendResultsTo().getYourself();
+            }
+            try {
+                message.send();
+            } catch (Exception exc) {
+                question.isAwaitingReturn = false;
+                question.skipFinish = true;
+                question.reject(exc);
+            }
+            return question;
+        }
+
+        @Override
+        public Object getBrand() {
+            return RpcState.this;
+        }
+
+        final class TailInfo {
+            int questionId;
+            CompletableFuture<java.lang.Void> promise;
+            PipelineHook pipeline;
+        }
+
+        TailInfo tailSend() {
+            if (isDisconnected()) {
+                // Disconnected; fall back to a regular send() which will fail appropriately.
+                return null;
+            }
+
+            // TODO implement tail-calls
             return null;
         }
     }
@@ -715,14 +1328,13 @@ final class RpcState {
                     assert redirect == null;
                 }
 
-                var embargo = new Embargo();
-                var embargoId = embargos.next(embargo);
-                disembargo.getContext().setSenderLoopback(embargoId);
+                var embargo = embargos.next();
+                disembargo.getContext().setSenderLoopback(embargo.id);
 
-                embargo.fulfiller = new CompletableFuture<>();
+                embargo.disembargo = new CompletableFuture<>();
 
                 final ClientHook finalReplacement = replacement;
-                var embargoPromise = embargo.fulfiller.thenApply(x -> {
+                var embargoPromise = embargo.disembargo.thenApply(x -> {
                     return finalReplacement;
                 });
 
@@ -766,4 +1378,40 @@ final class RpcState {
         }
     }
 
+    class PipelineClient extends RpcClient {
+
+        private final Question question;
+        private final PipelineOp[] ops;
+
+        PipelineClient(Question question, PipelineOp[] ops) {
+            this.question = question;
+            this.ops = ops;
+        }
+
+        @Override
+        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
+            return null;
+        }
+
+        @Override
+        public CompletableFuture<ClientHook> whenMoreResolved() {
+            return null;
+        }
+
+        @Override
+        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
+            var promisedAnswer = descriptor.initReceiverAnswer();
+            promisedAnswer.setQuestionId(question.id);
+            PipelineOp.FromPipelineOps(ops, promisedAnswer);
+            return null;
+        }
+
+        @Override
+        public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
+            var builder = target.initPromisedAnswer();
+            builder.setQuestionId(question.id);
+            PipelineOp.FromPipelineOps(ops, builder);
+            return null;
+        }
+    }
 }

@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 public class CallContext<Params, Results> {
 
     final CallContextHook hook;
-    final FromPointerReader<Params> params;
-    final FromPointerBuilder<Results> results;
+    private final FromPointerReader<Params> params;
+    private final FromPointerBuilder<Results> results;
 
     CallContext(FromPointerReader<Params> params,
                 FromPointerBuilder<Results> results,

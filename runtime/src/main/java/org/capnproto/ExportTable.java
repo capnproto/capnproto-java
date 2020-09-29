@@ -6,11 +6,13 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-class ExportTable<T> implements Iterable<T> {
+abstract class ExportTable<T> implements Iterable<T> {
 
     final HashMap<Integer, T> slots = new HashMap<>();
     final Queue<Integer> freeIds = new PriorityQueue<>();
     int max = 0;
+
+    abstract T newExportable(int id);
 
     public T find(int id) {
         return slots.get(id);
@@ -26,17 +28,12 @@ class ExportTable<T> implements Iterable<T> {
         }
     }
 
-    public int next(T value) {
-        if (freeIds.isEmpty()) {
-            var id = max;
-            max++;
-            slots.put(id, value);
-            return id;
-        } else {
-            var id = freeIds.remove();
-            slots.put(id, value);
-            return id;
-        }
+    public T next() {
+        int id = freeIds.isEmpty() ? max++ : freeIds.remove();
+        var value = newExportable(id);
+        var prev = slots.put(id, value);
+        assert prev == null;
+        return value;
     }
 
     @Override
