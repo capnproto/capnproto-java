@@ -4,9 +4,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class Request<Params, Results> {
 
-    private final AnyPointer.Builder params;
+    final AnyPointer.Builder params;
     private final FromPointerReader<Results> results;
-    private RequestHook hook;
+    RequestHook hook;
 
     Request(AnyPointer.Builder params, FromPointerReader<Results> results, RequestHook hook) {
         this.params = params;

@@ -8,8 +8,196 @@ public final class Capability {
 
         final ClientHook hook;
 
+        public Client() {
+            this.hook = null;
+        }
+
         public Client(ClientHook hook) {
             this.hook = hook;
+        }
+
+        public Client(Server server) {
+            this(server.makeLocalClient());
+        }
+
+        public Client(CompletableFuture<ClientHook> promise) {
+            this(Capability.newLocalPromiseClient(promise));
+        }
+
+        public Client(Throwable exc) {
+            this(ClientHook.newBrokenCap(exc));
+        }
+
+        public ClientHook getHook() {
+            return this.hook;
+        }
+
+        CompletableFuture<?> whenResolved() {
+            return hook.whenResolved();
+        }
+
+        Request<AnyPointer.Builder, AnyPointer.Reader> typelessRequest(
+                long interfaceId,
+                short methodId) {
+            return hook.newCall(interfaceId, methodId);
+        }
+
+        public <T, U> Request<T, U> newCall(FromPointerBuilder<T> builder,
+                                            FromPointerReader<U> reader,
+                                            long interfaceId, short methodId) {
+            var request = hook.newCall(interfaceId, methodId);
+            return new Request<T, U> (request.params, reader, request.hook);
+        }
+
+        public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+            return hook.newCall(interfaceId, methodId);
+        }
+    }
+
+    public abstract static class Server {
+
+        private static final Object BRAND = new Object();
+        ClientHook hook;
+
+        public ClientHook makeLocalClient() {
+            return new LocalClient();
+        }
+
+        private final class LocalClient implements ClientHook {
+
+            CompletableFuture<java.lang.Void> resolveTask;
+            ClientHook resolved;
+            boolean blocked = false;
+            Exception brokenException;
+
+            LocalClient() {
+                Server.this.hook = this;
+                startResolveTask();
+            }
+
+            @Override
+            public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+                var hook = new LocalRequest(interfaceId, methodId, this);
+                var root = hook.message.getRoot(AnyPointer.factory);
+                return new Request<>(root, AnyPointer.factory, hook);
+            }
+
+            @Override
+            public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
+                assert !blocked: "Blocked condition not implemented";
+                if (blocked) {
+                    // TODO implement blocked behaviour
+                    return null;
+                }
+
+                // TODO re-visit promises
+                var promise = callInternal(interfaceId, methodId, ctx);
+                var forked = promise.copy();
+
+                CompletableFuture<PipelineHook> pipelinePromise = promise.thenApply(x -> {
+                    ctx.releaseParams();
+                    return new LocalPipeline(ctx);
+                });
+
+                pipelinePromise = ctx.onTailCall().applyToEither(pipelinePromise, pipeline -> {
+                    return pipeline;
+                });
+
+                return new VoidPromiseAndPipeline(forked, new QueuedPipeline(pipelinePromise));
+            }
+
+            @Override
+            public CompletableFuture<java.lang.Void> whenResolved() {
+                return null;
+            }
+
+            @Override
+            public Object getBrand() {
+                return BRAND;
+            }
+
+            CompletableFuture<java.lang.Void> callInternal(long interfaceId, short methodId, CallContextHook context) {
+                var result = dispatchCall(
+                        interfaceId,
+                        methodId,
+                        new CallContext(AnyPointer.factory, AnyPointer.factory, context));
+                if (result.streaming) {
+                    // TODO streaming
+                    return null;
+                }
+                else {
+                    return result.promise;
+                }
+            }
+
+            void startResolveTask() {
+                var resolver = Server.this.shortenPath();
+                if (resolver == null) {
+                    return;
+                }
+                this.resolveTask = resolver.thenAccept(client -> {
+                    this.resolved = client.getHook();
+                });
+            }
+        }
+
+        public final class DispatchCallResult {
+            private final CompletableFuture<java.lang.Void> promise;
+            private final boolean streaming;
+
+            public DispatchCallResult(CompletableFuture<java.lang.Void> promise) {
+                this.promise = promise;
+                this.streaming = false;
+            }
+
+            DispatchCallResult(Throwable exc) {
+                this.promise = CompletableFuture.failedFuture(exc);
+                this.streaming = false;
+            }
+
+            DispatchCallResult(CompletableFuture<java.lang.Void> promise, boolean isStreaming) {
+                this.promise = promise;
+                this.streaming = isStreaming;
+            }
+
+            public CompletableFuture<?> getPromise() {
+                return promise;
+            }
+
+            public boolean isStreaming() {
+                return streaming;
+            }
+        }
+
+        public CompletableFuture<Client> shortenPath() {
+            return null;
+        }
+
+        protected Client thisCap() {
+            return new Client(hook);
+        }
+
+        protected final <Params, Results> CallContext<Params, Results> internalGetTypedContext(
+                FromPointerReader<Params> paramsFactory,
+                FromPointerBuilder<Results> resultsFactory,
+                CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
+            return new CallContext<>(paramsFactory, resultsFactory, typeless.hook);
+        }
+
+        public abstract DispatchCallResult dispatchCall(long interfaceId, short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
+
+        protected DispatchCallResult internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
+            return new DispatchCallResult(RpcException.unimplemented(
+                    "Method not implemented. " + actualInterfaceName + " " + requestedTypeId));
+        }
+        protected DispatchCallResult internalUnimplemented(String interfaceName, long typeId, short methodId) {
+            return new DispatchCallResult(RpcException.unimplemented(
+                    "Method not implemented. " + interfaceName + " " + typeId + " " + methodId));
+        }
+
+        protected DispatchCallResult internalUnimplemented(String interfaceName, String methodName, long typeId, short methodId) {
+            return new DispatchCallResult(RpcException.unimplemented(
+                    "Method not implemented. " + interfaceName + " " + typeId + " " + methodName + " " + methodId));
         }
     }
 
@@ -46,6 +234,21 @@ public final class Capability {
         @Override
         public Object getBrand() {
             return null;
+        }
+    }
+
+    static final class LocalPipeline implements PipelineHook {
+        final CallContextHook context;
+        final AnyPointer.Reader results;
+
+        public LocalPipeline(CallContextHook context) {
+            this.context = context;
+            this.results = context.getResults().asReader();
+        }
+
+        @Override
+        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+            return this.results.getPipelinedCap(ops);
         }
     }
 
