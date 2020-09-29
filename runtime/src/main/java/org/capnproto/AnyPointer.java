@@ -72,6 +72,19 @@ public final class AnyPointer {
         public final <T> T getAs(FromPointerReader<T> factory) {
             return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
+
+        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+            for (var op: ops) {
+                switch (op.type) {
+                    case NOOP:
+                        break;
+                    case GET_POINTER_FIELD:
+                        break;
+                }
+            }
+            // TODO implement getPipelinedCap
+            return null;
+        }
     }
 
     public static final class Builder {
