@@ -448,6 +448,41 @@ final class RpcState {
     }
 
     void handleResolve(IncomingRpcMessage message, RpcProtocol.Resolve.Reader resolve) {
+
+        ClientHook replacement = null;
+        Throwable exc = null;
+
+        switch (resolve.which()) {
+            case CAP:
+                replacement = receiveCap(resolve.getCap(), message.getAttachedFds());
+                break;
+            case EXCEPTION:
+                exc = new RuntimeException(resolve.getException().getReason().toString());
+                break;
+            default:
+                assert false;
+                return;
+        }
+
+        var imp = imports.find(resolve.getPromiseId());
+        if (imp == null) {
+            return;
+        }
+
+        var fulfiller = imp.promise;
+        if (fulfiller != null) {
+            if (exc != null) {
+                fulfiller.completeExceptionally(exc);
+            }
+            else {
+                fulfiller.complete(replacement);
+            }
+        }
+        else if (imp.importClient != null) {
+            // It appears this is a valid entry on the import table, but was not expected to be a
+            // promise.
+            assert false;
+        }
     }
 
     void handleDisembargo(RpcProtocol.Disembargo.Reader disembargo) {
