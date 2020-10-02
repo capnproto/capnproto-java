@@ -1108,9 +1108,13 @@ final class RpcState {
         public VoidPromiseAndPipeline callNoIntercept(long interfaceId, short methodId, CallContextHook context) {
             var params = context.getParams();
             var request = newCallNoIntercept(interfaceId, methodId);
-            var x = request.params;
             context.allowCancellation();
             return context.directTailCall(request.hook);
+        }
+
+        @Override
+        public final Object getBrand() {
+            return RpcState.this;
         }
 
         private Request<AnyPointer.Builder, AnyPointer.Reader> newCallNoIntercept(long interfaceId, short methodId) {
@@ -1139,7 +1143,7 @@ final class RpcState {
             this.target = target;
             this.message = connection.newOutgoingMessage(1024);
             this.callBuilder = message.getBody().getAs(RpcProtocol.Message.factory).initCall();
-            this.paramsBuilder = callBuilder.getParams().getContent();
+            this.paramsBuilder = callBuilder.getParams().getContent().imbue(this.capTable);
         }
 
         AnyPointer.Builder getRoot() {
@@ -1168,8 +1172,7 @@ final class RpcState {
             // The pipeline must get notified of resolution before the app does to maintain ordering.
             var pipeline = new RpcPipeline(question, question.response);
 
-            // drive the message loop until the question is answered
-            var appPromise = messageLoop(question.response).thenApply(response -> {
+            var appPromise = question.response.thenApply(response -> {
                 var results = response.getResults();
                 return new Response(results, response);
             });
@@ -1202,7 +1205,7 @@ final class RpcState {
         }
 
         @Override
-        public Object getBrand() {
+        public final Object getBrand() {
             return RpcState.this;
         }
 
