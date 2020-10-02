@@ -54,114 +54,114 @@ public final class RpcProtocol {
       public final boolean isUnimplemented() {
         return which() == Message.Which.UNIMPLEMENTED;
       }
-      public final RpcProtocol.Message.Builder getUnimplemented() {
+      public final org.capnproto.RpcProtocol.Message.Builder getUnimplemented() {
         assert which() == Message.Which.UNIMPLEMENTED:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Message.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Message.factory, 0, null, 0);
       }
-      public final void setUnimplemented(RpcProtocol.Message.Reader value) {
+      public final void setUnimplemented(org.capnproto.RpcProtocol.Message.Reader value) {
         _setShortField(0, (short)Message.Which.UNIMPLEMENTED.ordinal());
-        _setPointerField(RpcProtocol.Message.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Message.factory,0, value);
       }
-      public final RpcProtocol.Message.Builder initUnimplemented() {
+      public final org.capnproto.RpcProtocol.Message.Builder initUnimplemented() {
         _setShortField(0, (short)Message.Which.UNIMPLEMENTED.ordinal());
-        return _initPointerField(RpcProtocol.Message.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Message.factory,0, 0);
       }
       public final boolean isAbort() {
         return which() == Message.Which.ABORT;
       }
-      public final RpcProtocol.Exception.Builder getAbort() {
+      public final org.capnproto.RpcProtocol.Exception.Builder getAbort() {
         assert which() == Message.Which.ABORT:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory, 0, null, 0);
       }
-      public final void setAbort(RpcProtocol.Exception.Reader value) {
+      public final void setAbort(org.capnproto.RpcProtocol.Exception.Reader value) {
         _setShortField(0, (short)Message.Which.ABORT.ordinal());
-        _setPointerField(RpcProtocol.Exception.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Exception.factory,0, value);
       }
-      public final RpcProtocol.Exception.Builder initAbort() {
+      public final org.capnproto.RpcProtocol.Exception.Builder initAbort() {
         _setShortField(0, (short)Message.Which.ABORT.ordinal());
-        return _initPointerField(RpcProtocol.Exception.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Exception.factory,0, 0);
       }
       public final boolean isCall() {
         return which() == Message.Which.CALL;
       }
-      public final RpcProtocol.Call.Builder getCall() {
+      public final org.capnproto.RpcProtocol.Call.Builder getCall() {
         assert which() == Message.Which.CALL:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Call.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Call.factory, 0, null, 0);
       }
-      public final void setCall(RpcProtocol.Call.Reader value) {
+      public final void setCall(org.capnproto.RpcProtocol.Call.Reader value) {
         _setShortField(0, (short)Message.Which.CALL.ordinal());
-        _setPointerField(RpcProtocol.Call.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Call.factory,0, value);
       }
-      public final RpcProtocol.Call.Builder initCall() {
+      public final org.capnproto.RpcProtocol.Call.Builder initCall() {
         _setShortField(0, (short)Message.Which.CALL.ordinal());
-        return _initPointerField(RpcProtocol.Call.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Call.factory,0, 0);
       }
       public final boolean isReturn() {
         return which() == Message.Which.RETURN;
       }
-      public final RpcProtocol.Return.Builder getReturn() {
+      public final org.capnproto.RpcProtocol.Return.Builder getReturn() {
         assert which() == Message.Which.RETURN:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Return.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Return.factory, 0, null, 0);
       }
-      public final void setReturn(RpcProtocol.Return.Reader value) {
+      public final void setReturn(org.capnproto.RpcProtocol.Return.Reader value) {
         _setShortField(0, (short)Message.Which.RETURN.ordinal());
-        _setPointerField(RpcProtocol.Return.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Return.factory,0, value);
       }
-      public final RpcProtocol.Return.Builder initReturn() {
+      public final org.capnproto.RpcProtocol.Return.Builder initReturn() {
         _setShortField(0, (short)Message.Which.RETURN.ordinal());
-        return _initPointerField(RpcProtocol.Return.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Return.factory,0, 0);
       }
       public final boolean isFinish() {
         return which() == Message.Which.FINISH;
       }
-      public final RpcProtocol.Finish.Builder getFinish() {
+      public final org.capnproto.RpcProtocol.Finish.Builder getFinish() {
         assert which() == Message.Which.FINISH:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Finish.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Finish.factory, 0, null, 0);
       }
-      public final void setFinish(RpcProtocol.Finish.Reader value) {
+      public final void setFinish(org.capnproto.RpcProtocol.Finish.Reader value) {
         _setShortField(0, (short)Message.Which.FINISH.ordinal());
-        _setPointerField(RpcProtocol.Finish.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Finish.factory,0, value);
       }
-      public final RpcProtocol.Finish.Builder initFinish() {
+      public final org.capnproto.RpcProtocol.Finish.Builder initFinish() {
         _setShortField(0, (short)Message.Which.FINISH.ordinal());
-        return _initPointerField(RpcProtocol.Finish.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Finish.factory,0, 0);
       }
       public final boolean isResolve() {
         return which() == Message.Which.RESOLVE;
       }
-      public final RpcProtocol.Resolve.Builder getResolve() {
+      public final org.capnproto.RpcProtocol.Resolve.Builder getResolve() {
         assert which() == Message.Which.RESOLVE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Resolve.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Resolve.factory, 0, null, 0);
       }
-      public final void setResolve(RpcProtocol.Resolve.Reader value) {
+      public final void setResolve(org.capnproto.RpcProtocol.Resolve.Reader value) {
         _setShortField(0, (short)Message.Which.RESOLVE.ordinal());
-        _setPointerField(RpcProtocol.Resolve.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Resolve.factory,0, value);
       }
-      public final RpcProtocol.Resolve.Builder initResolve() {
+      public final org.capnproto.RpcProtocol.Resolve.Builder initResolve() {
         _setShortField(0, (short)Message.Which.RESOLVE.ordinal());
-        return _initPointerField(RpcProtocol.Resolve.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Resolve.factory,0, 0);
       }
       public final boolean isRelease() {
         return which() == Message.Which.RELEASE;
       }
-      public final RpcProtocol.Release.Builder getRelease() {
+      public final org.capnproto.RpcProtocol.Release.Builder getRelease() {
         assert which() == Message.Which.RELEASE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Release.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Release.factory, 0, null, 0);
       }
-      public final void setRelease(RpcProtocol.Release.Reader value) {
+      public final void setRelease(org.capnproto.RpcProtocol.Release.Reader value) {
         _setShortField(0, (short)Message.Which.RELEASE.ordinal());
-        _setPointerField(RpcProtocol.Release.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Release.factory,0, value);
       }
-      public final RpcProtocol.Release.Builder initRelease() {
+      public final org.capnproto.RpcProtocol.Release.Builder initRelease() {
         _setShortField(0, (short)Message.Which.RELEASE.ordinal());
-        return _initPointerField(RpcProtocol.Release.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Release.factory,0, 0);
       }
       public final boolean isObsoleteSave() {
         return which() == Message.Which.OBSOLETE_SAVE;
@@ -186,18 +186,18 @@ public final class RpcProtocol {
       public final boolean isBootstrap() {
         return which() == Message.Which.BOOTSTRAP;
       }
-      public final RpcProtocol.Bootstrap.Builder getBootstrap() {
+      public final org.capnproto.RpcProtocol.Bootstrap.Builder getBootstrap() {
         assert which() == Message.Which.BOOTSTRAP:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Bootstrap.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Bootstrap.factory, 0, null, 0);
       }
-      public final void setBootstrap(RpcProtocol.Bootstrap.Reader value) {
+      public final void setBootstrap(org.capnproto.RpcProtocol.Bootstrap.Reader value) {
         _setShortField(0, (short)Message.Which.BOOTSTRAP.ordinal());
-        _setPointerField(RpcProtocol.Bootstrap.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Bootstrap.factory,0, value);
       }
-      public final RpcProtocol.Bootstrap.Builder initBootstrap() {
+      public final org.capnproto.RpcProtocol.Bootstrap.Builder initBootstrap() {
         _setShortField(0, (short)Message.Which.BOOTSTRAP.ordinal());
-        return _initPointerField(RpcProtocol.Bootstrap.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Bootstrap.factory,0, 0);
       }
       public final boolean isObsoleteDelete() {
         return which() == Message.Which.OBSOLETE_DELETE;
@@ -222,66 +222,66 @@ public final class RpcProtocol {
       public final boolean isProvide() {
         return which() == Message.Which.PROVIDE;
       }
-      public final RpcProtocol.Provide.Builder getProvide() {
+      public final org.capnproto.RpcProtocol.Provide.Builder getProvide() {
         assert which() == Message.Which.PROVIDE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Provide.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Provide.factory, 0, null, 0);
       }
-      public final void setProvide(RpcProtocol.Provide.Reader value) {
+      public final void setProvide(org.capnproto.RpcProtocol.Provide.Reader value) {
         _setShortField(0, (short)Message.Which.PROVIDE.ordinal());
-        _setPointerField(RpcProtocol.Provide.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Provide.factory,0, value);
       }
-      public final RpcProtocol.Provide.Builder initProvide() {
+      public final org.capnproto.RpcProtocol.Provide.Builder initProvide() {
         _setShortField(0, (short)Message.Which.PROVIDE.ordinal());
-        return _initPointerField(RpcProtocol.Provide.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Provide.factory,0, 0);
       }
       public final boolean isAccept() {
         return which() == Message.Which.ACCEPT;
       }
-      public final RpcProtocol.Accept.Builder getAccept() {
+      public final org.capnproto.RpcProtocol.Accept.Builder getAccept() {
         assert which() == Message.Which.ACCEPT:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Accept.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Accept.factory, 0, null, 0);
       }
-      public final void setAccept(RpcProtocol.Accept.Reader value) {
+      public final void setAccept(org.capnproto.RpcProtocol.Accept.Reader value) {
         _setShortField(0, (short)Message.Which.ACCEPT.ordinal());
-        _setPointerField(RpcProtocol.Accept.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Accept.factory,0, value);
       }
-      public final RpcProtocol.Accept.Builder initAccept() {
+      public final org.capnproto.RpcProtocol.Accept.Builder initAccept() {
         _setShortField(0, (short)Message.Which.ACCEPT.ordinal());
-        return _initPointerField(RpcProtocol.Accept.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Accept.factory,0, 0);
       }
       public final boolean isJoin() {
         return which() == Message.Which.JOIN;
       }
-      public final RpcProtocol.Join.Builder getJoin() {
+      public final org.capnproto.RpcProtocol.Join.Builder getJoin() {
         assert which() == Message.Which.JOIN:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Join.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Join.factory, 0, null, 0);
       }
-      public final void setJoin(RpcProtocol.Join.Reader value) {
+      public final void setJoin(org.capnproto.RpcProtocol.Join.Reader value) {
         _setShortField(0, (short)Message.Which.JOIN.ordinal());
-        _setPointerField(RpcProtocol.Join.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Join.factory,0, value);
       }
-      public final RpcProtocol.Join.Builder initJoin() {
+      public final org.capnproto.RpcProtocol.Join.Builder initJoin() {
         _setShortField(0, (short)Message.Which.JOIN.ordinal());
-        return _initPointerField(RpcProtocol.Join.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Join.factory,0, 0);
       }
       public final boolean isDisembargo() {
         return which() == Message.Which.DISEMBARGO;
       }
-      public final RpcProtocol.Disembargo.Builder getDisembargo() {
+      public final org.capnproto.RpcProtocol.Disembargo.Builder getDisembargo() {
         assert which() == Message.Which.DISEMBARGO:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Disembargo.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Disembargo.factory, 0, null, 0);
       }
-      public final void setDisembargo(RpcProtocol.Disembargo.Reader value) {
+      public final void setDisembargo(org.capnproto.RpcProtocol.Disembargo.Reader value) {
         _setShortField(0, (short)Message.Which.DISEMBARGO.ordinal());
-        _setPointerField(RpcProtocol.Disembargo.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Disembargo.factory,0, value);
       }
-      public final RpcProtocol.Disembargo.Builder initDisembargo() {
+      public final org.capnproto.RpcProtocol.Disembargo.Builder initDisembargo() {
         _setShortField(0, (short)Message.Which.DISEMBARGO.ordinal());
-        return _initPointerField(RpcProtocol.Disembargo.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Disembargo.factory,0, 0);
       }
     }
 
@@ -315,10 +315,10 @@ public final class RpcProtocol {
       public boolean hasUnimplemented() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Message.Reader getUnimplemented() {
+      public org.capnproto.RpcProtocol.Message.Reader getUnimplemented() {
         assert which() == Message.Which.UNIMPLEMENTED:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Message.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Message.factory,0,null, 0);
       }
 
       public final boolean isAbort() {
@@ -327,10 +327,10 @@ public final class RpcProtocol {
       public boolean hasAbort() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Exception.Reader getAbort() {
+      public org.capnproto.RpcProtocol.Exception.Reader getAbort() {
         assert which() == Message.Which.ABORT:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory,0,null, 0);
       }
 
       public final boolean isCall() {
@@ -339,10 +339,10 @@ public final class RpcProtocol {
       public boolean hasCall() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Call.Reader getCall() {
+      public org.capnproto.RpcProtocol.Call.Reader getCall() {
         assert which() == Message.Which.CALL:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Call.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Call.factory,0,null, 0);
       }
 
       public final boolean isReturn() {
@@ -351,10 +351,10 @@ public final class RpcProtocol {
       public boolean hasReturn() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Return.Reader getReturn() {
+      public org.capnproto.RpcProtocol.Return.Reader getReturn() {
         assert which() == Message.Which.RETURN:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Return.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Return.factory,0,null, 0);
       }
 
       public final boolean isFinish() {
@@ -363,10 +363,10 @@ public final class RpcProtocol {
       public boolean hasFinish() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Finish.Reader getFinish() {
+      public org.capnproto.RpcProtocol.Finish.Reader getFinish() {
         assert which() == Message.Which.FINISH:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Finish.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Finish.factory,0,null, 0);
       }
 
       public final boolean isResolve() {
@@ -375,10 +375,10 @@ public final class RpcProtocol {
       public boolean hasResolve() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Resolve.Reader getResolve() {
+      public org.capnproto.RpcProtocol.Resolve.Reader getResolve() {
         assert which() == Message.Which.RESOLVE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Resolve.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Resolve.factory,0,null, 0);
       }
 
       public final boolean isRelease() {
@@ -387,10 +387,10 @@ public final class RpcProtocol {
       public boolean hasRelease() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Release.Reader getRelease() {
+      public org.capnproto.RpcProtocol.Release.Reader getRelease() {
         assert which() == Message.Which.RELEASE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Release.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Release.factory,0,null, 0);
       }
 
       public final boolean isObsoleteSave() {
@@ -411,10 +411,10 @@ public final class RpcProtocol {
       public boolean hasBootstrap() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Bootstrap.Reader getBootstrap() {
+      public org.capnproto.RpcProtocol.Bootstrap.Reader getBootstrap() {
         assert which() == Message.Which.BOOTSTRAP:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Bootstrap.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Bootstrap.factory,0,null, 0);
       }
 
       public final boolean isObsoleteDelete() {
@@ -435,10 +435,10 @@ public final class RpcProtocol {
       public boolean hasProvide() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Provide.Reader getProvide() {
+      public org.capnproto.RpcProtocol.Provide.Reader getProvide() {
         assert which() == Message.Which.PROVIDE:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Provide.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Provide.factory,0,null, 0);
       }
 
       public final boolean isAccept() {
@@ -447,10 +447,10 @@ public final class RpcProtocol {
       public boolean hasAccept() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Accept.Reader getAccept() {
+      public org.capnproto.RpcProtocol.Accept.Reader getAccept() {
         assert which() == Message.Which.ACCEPT:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Accept.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Accept.factory,0,null, 0);
       }
 
       public final boolean isJoin() {
@@ -459,10 +459,10 @@ public final class RpcProtocol {
       public boolean hasJoin() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Join.Reader getJoin() {
+      public org.capnproto.RpcProtocol.Join.Reader getJoin() {
         assert which() == Message.Which.JOIN:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Join.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Join.factory,0,null, 0);
       }
 
       public final boolean isDisembargo() {
@@ -471,10 +471,10 @@ public final class RpcProtocol {
       public boolean hasDisembargo() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Disembargo.Reader getDisembargo() {
+      public org.capnproto.RpcProtocol.Disembargo.Reader getDisembargo() {
         assert which() == Message.Which.DISEMBARGO:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Disembargo.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Disembargo.factory,0,null, 0);
       }
 
     }
@@ -604,14 +604,14 @@ public final class RpcProtocol {
         _setIntField(0, value);
       }
 
-      public final RpcProtocol.MessageTarget.Builder getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory, 0, null, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory, 0, null, 0);
       }
-      public final void setTarget(RpcProtocol.MessageTarget.Reader value) {
-        _setPointerField(RpcProtocol.MessageTarget.factory,0, value);
+      public final void setTarget(org.capnproto.RpcProtocol.MessageTarget.Reader value) {
+        _setPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, value);
       }
-      public final RpcProtocol.MessageTarget.Builder initTarget() {
-        return _initPointerField(RpcProtocol.MessageTarget.factory,0, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder initTarget() {
+        return _initPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, 0);
       }
       public final long getInterfaceId() {
         return _getLongField(1);
@@ -627,14 +627,14 @@ public final class RpcProtocol {
         _setShortField(2, value);
       }
 
-      public final RpcProtocol.Payload.Builder getParams() {
-        return _getPointerField(RpcProtocol.Payload.factory, 1, null, 0);
+      public final org.capnproto.RpcProtocol.Payload.Builder getParams() {
+        return _getPointerField(org.capnproto.RpcProtocol.Payload.factory, 1, null, 0);
       }
-      public final void setParams(RpcProtocol.Payload.Reader value) {
-        _setPointerField(RpcProtocol.Payload.factory,1, value);
+      public final void setParams(org.capnproto.RpcProtocol.Payload.Reader value) {
+        _setPointerField(org.capnproto.RpcProtocol.Payload.factory,1, value);
       }
-      public final RpcProtocol.Payload.Builder initParams() {
-        return _initPointerField(RpcProtocol.Payload.factory,1, 0);
+      public final org.capnproto.RpcProtocol.Payload.Builder initParams() {
+        return _initPointerField(org.capnproto.RpcProtocol.Payload.factory,1, 0);
       }
       public final SendResultsTo.Builder getSendResultsTo() {
         return new Call.SendResultsTo.Builder(segment, data, pointers, dataSize, pointerCount);
@@ -666,8 +666,8 @@ public final class RpcProtocol {
       public boolean hasTarget() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.MessageTarget.Reader getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory,0,null, 0);
+      public org.capnproto.RpcProtocol.MessageTarget.Reader getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0,null, 0);
       }
 
       public final long getInterfaceId() {
@@ -681,8 +681,8 @@ public final class RpcProtocol {
       public boolean hasParams() {
         return !_pointerFieldIsNull(1);
       }
-      public RpcProtocol.Payload.Reader getParams() {
-        return _getPointerField(RpcProtocol.Payload.factory,1,null, 0);
+      public org.capnproto.RpcProtocol.Payload.Reader getParams() {
+        return _getPointerField(org.capnproto.RpcProtocol.Payload.factory,1,null, 0);
       }
 
       public SendResultsTo.Reader getSendResultsTo() {
@@ -890,34 +890,34 @@ public final class RpcProtocol {
       public final boolean isResults() {
         return which() == Return.Which.RESULTS;
       }
-      public final RpcProtocol.Payload.Builder getResults() {
+      public final org.capnproto.RpcProtocol.Payload.Builder getResults() {
         assert which() == Return.Which.RESULTS:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Payload.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Payload.factory, 0, null, 0);
       }
-      public final void setResults(RpcProtocol.Payload.Reader value) {
+      public final void setResults(org.capnproto.RpcProtocol.Payload.Reader value) {
         _setShortField(3, (short)Return.Which.RESULTS.ordinal());
-        _setPointerField(RpcProtocol.Payload.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Payload.factory,0, value);
       }
-      public final RpcProtocol.Payload.Builder initResults() {
+      public final org.capnproto.RpcProtocol.Payload.Builder initResults() {
         _setShortField(3, (short)Return.Which.RESULTS.ordinal());
-        return _initPointerField(RpcProtocol.Payload.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Payload.factory,0, 0);
       }
       public final boolean isException() {
         return which() == Return.Which.EXCEPTION;
       }
-      public final RpcProtocol.Exception.Builder getException() {
+      public final org.capnproto.RpcProtocol.Exception.Builder getException() {
         assert which() == Return.Which.EXCEPTION:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory, 0, null, 0);
       }
-      public final void setException(RpcProtocol.Exception.Reader value) {
+      public final void setException(org.capnproto.RpcProtocol.Exception.Reader value) {
         _setShortField(3, (short)Return.Which.EXCEPTION.ordinal());
-        _setPointerField(RpcProtocol.Exception.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Exception.factory,0, value);
       }
-      public final RpcProtocol.Exception.Builder initException() {
+      public final org.capnproto.RpcProtocol.Exception.Builder initException() {
         _setShortField(3, (short)Return.Which.EXCEPTION.ordinal());
-        return _initPointerField(RpcProtocol.Exception.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Exception.factory,0, 0);
       }
       public final boolean isCanceled() {
         return which() == Return.Which.CANCELED;
@@ -1008,10 +1008,10 @@ public final class RpcProtocol {
       public boolean hasResults() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Payload.Reader getResults() {
+      public org.capnproto.RpcProtocol.Payload.Reader getResults() {
         assert which() == Return.Which.RESULTS:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Payload.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Payload.factory,0,null, 0);
       }
 
       public final boolean isException() {
@@ -1020,10 +1020,10 @@ public final class RpcProtocol {
       public boolean hasException() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Exception.Reader getException() {
+      public org.capnproto.RpcProtocol.Exception.Reader getException() {
         assert which() == Return.Which.EXCEPTION:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory,0,null, 0);
       }
 
       public final boolean isCanceled() {
@@ -1186,34 +1186,34 @@ public final class RpcProtocol {
       public final boolean isCap() {
         return which() == Resolve.Which.CAP;
       }
-      public final RpcProtocol.CapDescriptor.Builder getCap() {
+      public final org.capnproto.RpcProtocol.CapDescriptor.Builder getCap() {
         assert which() == Resolve.Which.CAP:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.CapDescriptor.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.CapDescriptor.factory, 0, null, 0);
       }
-      public final void setCap(RpcProtocol.CapDescriptor.Reader value) {
+      public final void setCap(org.capnproto.RpcProtocol.CapDescriptor.Reader value) {
         _setShortField(2, (short)Resolve.Which.CAP.ordinal());
-        _setPointerField(RpcProtocol.CapDescriptor.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.CapDescriptor.factory,0, value);
       }
-      public final RpcProtocol.CapDescriptor.Builder initCap() {
+      public final org.capnproto.RpcProtocol.CapDescriptor.Builder initCap() {
         _setShortField(2, (short)Resolve.Which.CAP.ordinal());
-        return _initPointerField(RpcProtocol.CapDescriptor.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.CapDescriptor.factory,0, 0);
       }
       public final boolean isException() {
         return which() == Resolve.Which.EXCEPTION;
       }
-      public final RpcProtocol.Exception.Builder getException() {
+      public final org.capnproto.RpcProtocol.Exception.Builder getException() {
         assert which() == Resolve.Which.EXCEPTION:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory, 0, null, 0);
       }
-      public final void setException(RpcProtocol.Exception.Reader value) {
+      public final void setException(org.capnproto.RpcProtocol.Exception.Reader value) {
         _setShortField(2, (short)Resolve.Which.EXCEPTION.ordinal());
-        _setPointerField(RpcProtocol.Exception.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.Exception.factory,0, value);
       }
-      public final RpcProtocol.Exception.Builder initException() {
+      public final org.capnproto.RpcProtocol.Exception.Builder initException() {
         _setShortField(2, (short)Resolve.Which.EXCEPTION.ordinal());
-        return _initPointerField(RpcProtocol.Exception.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.Exception.factory,0, 0);
       }
     }
 
@@ -1239,10 +1239,10 @@ public final class RpcProtocol {
       public boolean hasCap() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.CapDescriptor.Reader getCap() {
+      public org.capnproto.RpcProtocol.CapDescriptor.Reader getCap() {
         assert which() == Resolve.Which.CAP:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.CapDescriptor.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.CapDescriptor.factory,0,null, 0);
       }
 
       public final boolean isException() {
@@ -1251,10 +1251,10 @@ public final class RpcProtocol {
       public boolean hasException() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.Exception.Reader getException() {
+      public org.capnproto.RpcProtocol.Exception.Reader getException() {
         assert which() == Resolve.Which.EXCEPTION:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.Exception.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.Exception.factory,0,null, 0);
       }
 
     }
@@ -1357,14 +1357,14 @@ public final class RpcProtocol {
       public final Reader asReader() {
         return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);
       }
-      public final RpcProtocol.MessageTarget.Builder getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory, 0, null, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory, 0, null, 0);
       }
-      public final void setTarget(RpcProtocol.MessageTarget.Reader value) {
-        _setPointerField(RpcProtocol.MessageTarget.factory,0, value);
+      public final void setTarget(org.capnproto.RpcProtocol.MessageTarget.Reader value) {
+        _setPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, value);
       }
-      public final RpcProtocol.MessageTarget.Builder initTarget() {
-        return _initPointerField(RpcProtocol.MessageTarget.factory,0, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder initTarget() {
+        return _initPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, 0);
       }
       public final Context.Builder getContext() {
         return new Disembargo.Context.Builder(segment, data, pointers, dataSize, pointerCount);
@@ -1385,8 +1385,8 @@ public final class RpcProtocol {
       public boolean hasTarget() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.MessageTarget.Reader getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory,0,null, 0);
+      public org.capnproto.RpcProtocol.MessageTarget.Reader getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0,null, 0);
       }
 
       public Context.Reader getContext() {
@@ -1585,14 +1585,14 @@ public final class RpcProtocol {
         _setIntField(0, value);
       }
 
-      public final RpcProtocol.MessageTarget.Builder getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory, 0, null, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory, 0, null, 0);
       }
-      public final void setTarget(RpcProtocol.MessageTarget.Reader value) {
-        _setPointerField(RpcProtocol.MessageTarget.factory,0, value);
+      public final void setTarget(org.capnproto.RpcProtocol.MessageTarget.Reader value) {
+        _setPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, value);
       }
-      public final RpcProtocol.MessageTarget.Builder initTarget() {
-        return _initPointerField(RpcProtocol.MessageTarget.factory,0, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder initTarget() {
+        return _initPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, 0);
       }
       public final boolean hasRecipient() {
         return !_pointerFieldIsNull(1);
@@ -1621,8 +1621,8 @@ public final class RpcProtocol {
       public boolean hasTarget() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.MessageTarget.Reader getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory,0,null, 0);
+      public org.capnproto.RpcProtocol.MessageTarget.Reader getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0,null, 0);
       }
 
       public boolean hasRecipient() {
@@ -1752,14 +1752,14 @@ public final class RpcProtocol {
         _setIntField(0, value);
       }
 
-      public final RpcProtocol.MessageTarget.Builder getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory, 0, null, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory, 0, null, 0);
       }
-      public final void setTarget(RpcProtocol.MessageTarget.Reader value) {
-        _setPointerField(RpcProtocol.MessageTarget.factory,0, value);
+      public final void setTarget(org.capnproto.RpcProtocol.MessageTarget.Reader value) {
+        _setPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, value);
       }
-      public final RpcProtocol.MessageTarget.Builder initTarget() {
-        return _initPointerField(RpcProtocol.MessageTarget.factory,0, 0);
+      public final org.capnproto.RpcProtocol.MessageTarget.Builder initTarget() {
+        return _initPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0, 0);
       }
       public final boolean hasKeyPart() {
         return !_pointerFieldIsNull(1);
@@ -1788,8 +1788,8 @@ public final class RpcProtocol {
       public boolean hasTarget() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.MessageTarget.Reader getTarget() {
-        return _getPointerField(RpcProtocol.MessageTarget.factory,0,null, 0);
+      public org.capnproto.RpcProtocol.MessageTarget.Reader getTarget() {
+        return _getPointerField(org.capnproto.RpcProtocol.MessageTarget.factory,0,null, 0);
       }
 
       public boolean hasKeyPart() {
@@ -1854,18 +1854,18 @@ public final class RpcProtocol {
       public final boolean isPromisedAnswer() {
         return which() == MessageTarget.Which.PROMISED_ANSWER;
       }
-      public final RpcProtocol.PromisedAnswer.Builder getPromisedAnswer() {
+      public final org.capnproto.RpcProtocol.PromisedAnswer.Builder getPromisedAnswer() {
         assert which() == MessageTarget.Which.PROMISED_ANSWER:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.PromisedAnswer.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory, 0, null, 0);
       }
-      public final void setPromisedAnswer(RpcProtocol.PromisedAnswer.Reader value) {
+      public final void setPromisedAnswer(org.capnproto.RpcProtocol.PromisedAnswer.Reader value) {
         _setShortField(2, (short)MessageTarget.Which.PROMISED_ANSWER.ordinal());
-        _setPointerField(RpcProtocol.PromisedAnswer.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0, value);
       }
-      public final RpcProtocol.PromisedAnswer.Builder initPromisedAnswer() {
+      public final org.capnproto.RpcProtocol.PromisedAnswer.Builder initPromisedAnswer() {
         _setShortField(2, (short)MessageTarget.Which.PROMISED_ANSWER.ordinal());
-        return _initPointerField(RpcProtocol.PromisedAnswer.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0, 0);
       }
     }
 
@@ -1896,10 +1896,10 @@ public final class RpcProtocol {
       public boolean hasPromisedAnswer() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.PromisedAnswer.Reader getPromisedAnswer() {
+      public org.capnproto.RpcProtocol.PromisedAnswer.Reader getPromisedAnswer() {
         assert which() == MessageTarget.Which.PROMISED_ANSWER:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.PromisedAnswer.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0,null, 0);
       }
 
     }
@@ -1956,14 +1956,14 @@ public final class RpcProtocol {
       public final boolean hasCapTable() {
         return !_pointerFieldIsNull(1);
       }
-      public final org.capnproto.StructList.Builder<RpcProtocol.CapDescriptor.Builder> getCapTable() {
-        return _getPointerField(RpcProtocol.CapDescriptor.listFactory, 1, null, 0);
+      public final org.capnproto.StructList.Builder<org.capnproto.RpcProtocol.CapDescriptor.Builder> getCapTable() {
+        return _getPointerField(org.capnproto.RpcProtocol.CapDescriptor.listFactory, 1, null, 0);
       }
-      public final void setCapTable(org.capnproto.StructList.Reader<RpcProtocol.CapDescriptor.Reader> value) {
-        _setPointerField(RpcProtocol.CapDescriptor.listFactory, 1, value);
+      public final void setCapTable(org.capnproto.StructList.Reader<org.capnproto.RpcProtocol.CapDescriptor.Reader> value) {
+        _setPointerField(org.capnproto.RpcProtocol.CapDescriptor.listFactory, 1, value);
       }
-      public final org.capnproto.StructList.Builder<RpcProtocol.CapDescriptor.Builder> initCapTable(int size) {
-        return _initPointerField(RpcProtocol.CapDescriptor.listFactory, 1, size);
+      public final org.capnproto.StructList.Builder<org.capnproto.RpcProtocol.CapDescriptor.Builder> initCapTable(int size) {
+        return _initPointerField(org.capnproto.RpcProtocol.CapDescriptor.listFactory, 1, size);
       }
     }
 
@@ -1981,8 +1981,8 @@ public final class RpcProtocol {
       public final boolean hasCapTable() {
         return !_pointerFieldIsNull(1);
       }
-      public final org.capnproto.StructList.Reader<RpcProtocol.CapDescriptor.Reader> getCapTable() {
-        return _getPointerField(RpcProtocol.CapDescriptor.listFactory, 1, null, 0);
+      public final org.capnproto.StructList.Reader<org.capnproto.RpcProtocol.CapDescriptor.Reader> getCapTable() {
+        return _getPointerField(org.capnproto.RpcProtocol.CapDescriptor.listFactory, 1, null, 0);
       }
 
     }
@@ -2083,34 +2083,34 @@ public final class RpcProtocol {
       public final boolean isReceiverAnswer() {
         return which() == CapDescriptor.Which.RECEIVER_ANSWER;
       }
-      public final RpcProtocol.PromisedAnswer.Builder getReceiverAnswer() {
+      public final org.capnproto.RpcProtocol.PromisedAnswer.Builder getReceiverAnswer() {
         assert which() == CapDescriptor.Which.RECEIVER_ANSWER:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.PromisedAnswer.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory, 0, null, 0);
       }
-      public final void setReceiverAnswer(RpcProtocol.PromisedAnswer.Reader value) {
+      public final void setReceiverAnswer(org.capnproto.RpcProtocol.PromisedAnswer.Reader value) {
         _setShortField(0, (short)CapDescriptor.Which.RECEIVER_ANSWER.ordinal());
-        _setPointerField(RpcProtocol.PromisedAnswer.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0, value);
       }
-      public final RpcProtocol.PromisedAnswer.Builder initReceiverAnswer() {
+      public final org.capnproto.RpcProtocol.PromisedAnswer.Builder initReceiverAnswer() {
         _setShortField(0, (short)CapDescriptor.Which.RECEIVER_ANSWER.ordinal());
-        return _initPointerField(RpcProtocol.PromisedAnswer.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0, 0);
       }
       public final boolean isThirdPartyHosted() {
         return which() == CapDescriptor.Which.THIRD_PARTY_HOSTED;
       }
-      public final RpcProtocol.ThirdPartyCapDescriptor.Builder getThirdPartyHosted() {
+      public final org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.Builder getThirdPartyHosted() {
         assert which() == CapDescriptor.Which.THIRD_PARTY_HOSTED:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.ThirdPartyCapDescriptor.factory, 0, null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.factory, 0, null, 0);
       }
-      public final void setThirdPartyHosted(RpcProtocol.ThirdPartyCapDescriptor.Reader value) {
+      public final void setThirdPartyHosted(org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.Reader value) {
         _setShortField(0, (short)CapDescriptor.Which.THIRD_PARTY_HOSTED.ordinal());
-        _setPointerField(RpcProtocol.ThirdPartyCapDescriptor.factory,0, value);
+        _setPointerField(org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.factory,0, value);
       }
-      public final RpcProtocol.ThirdPartyCapDescriptor.Builder initThirdPartyHosted() {
+      public final org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.Builder initThirdPartyHosted() {
         _setShortField(0, (short)CapDescriptor.Which.THIRD_PARTY_HOSTED.ordinal());
-        return _initPointerField(RpcProtocol.ThirdPartyCapDescriptor.factory,0, 0);
+        return _initPointerField(org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.factory,0, 0);
       }
       public final byte getAttachedFd() {
         return _getByteField(2, (byte)-1);
@@ -2179,10 +2179,10 @@ public final class RpcProtocol {
       public boolean hasReceiverAnswer() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.PromisedAnswer.Reader getReceiverAnswer() {
+      public org.capnproto.RpcProtocol.PromisedAnswer.Reader getReceiverAnswer() {
         assert which() == CapDescriptor.Which.RECEIVER_ANSWER:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.PromisedAnswer.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.factory,0,null, 0);
       }
 
       public final boolean isThirdPartyHosted() {
@@ -2191,10 +2191,10 @@ public final class RpcProtocol {
       public boolean hasThirdPartyHosted() {
         return !_pointerFieldIsNull(0);
       }
-      public RpcProtocol.ThirdPartyCapDescriptor.Reader getThirdPartyHosted() {
+      public org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.Reader getThirdPartyHosted() {
         assert which() == CapDescriptor.Which.THIRD_PARTY_HOSTED:
                     "Must check which() before get()ing a union member.";
-        return _getPointerField(RpcProtocol.ThirdPartyCapDescriptor.factory,0,null, 0);
+        return _getPointerField(org.capnproto.RpcProtocol.ThirdPartyCapDescriptor.factory,0,null, 0);
       }
 
       public final byte getAttachedFd() {
@@ -2253,14 +2253,14 @@ public final class RpcProtocol {
       public final boolean hasTransform() {
         return !_pointerFieldIsNull(0);
       }
-      public final org.capnproto.StructList.Builder<RpcProtocol.PromisedAnswer.Op.Builder> getTransform() {
-        return _getPointerField(RpcProtocol.PromisedAnswer.Op.listFactory, 0, null, 0);
+      public final org.capnproto.StructList.Builder<org.capnproto.RpcProtocol.PromisedAnswer.Op.Builder> getTransform() {
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.Op.listFactory, 0, null, 0);
       }
-      public final void setTransform(org.capnproto.StructList.Reader<RpcProtocol.PromisedAnswer.Op.Reader> value) {
-        _setPointerField(RpcProtocol.PromisedAnswer.Op.listFactory, 0, value);
+      public final void setTransform(org.capnproto.StructList.Reader<org.capnproto.RpcProtocol.PromisedAnswer.Op.Reader> value) {
+        _setPointerField(org.capnproto.RpcProtocol.PromisedAnswer.Op.listFactory, 0, value);
       }
-      public final org.capnproto.StructList.Builder<RpcProtocol.PromisedAnswer.Op.Builder> initTransform(int size) {
-        return _initPointerField(RpcProtocol.PromisedAnswer.Op.listFactory, 0, size);
+      public final org.capnproto.StructList.Builder<org.capnproto.RpcProtocol.PromisedAnswer.Op.Builder> initTransform(int size) {
+        return _initPointerField(org.capnproto.RpcProtocol.PromisedAnswer.Op.listFactory, 0, size);
       }
     }
 
@@ -2276,8 +2276,8 @@ public final class RpcProtocol {
       public final boolean hasTransform() {
         return !_pointerFieldIsNull(0);
       }
-      public final org.capnproto.StructList.Reader<RpcProtocol.PromisedAnswer.Op.Reader> getTransform() {
-        return _getPointerField(RpcProtocol.PromisedAnswer.Op.listFactory, 0, null, 0);
+      public final org.capnproto.StructList.Reader<org.capnproto.RpcProtocol.PromisedAnswer.Op.Reader> getTransform() {
+        return _getPointerField(org.capnproto.RpcProtocol.PromisedAnswer.Op.listFactory, 0, null, 0);
       }
 
     }
@@ -2514,16 +2514,16 @@ public final class RpcProtocol {
         _setShortField(1, value);
       }
 
-      public final RpcProtocol.Exception.Type getType() {
+      public final org.capnproto.RpcProtocol.Exception.Type getType() {
         switch(_getShortField(2)) {
-          case 0 : return RpcProtocol.Exception.Type.FAILED;
-          case 1 : return RpcProtocol.Exception.Type.OVERLOADED;
-          case 2 : return RpcProtocol.Exception.Type.DISCONNECTED;
-          case 3 : return RpcProtocol.Exception.Type.UNIMPLEMENTED;
-          default: return RpcProtocol.Exception.Type._NOT_IN_SCHEMA;
+          case 0 : return org.capnproto.RpcProtocol.Exception.Type.FAILED;
+          case 1 : return org.capnproto.RpcProtocol.Exception.Type.OVERLOADED;
+          case 2 : return org.capnproto.RpcProtocol.Exception.Type.DISCONNECTED;
+          case 3 : return org.capnproto.RpcProtocol.Exception.Type.UNIMPLEMENTED;
+          default: return org.capnproto.RpcProtocol.Exception.Type._NOT_IN_SCHEMA;
         }
       }
-      public final void setType(RpcProtocol.Exception.Type value) {
+      public final void setType(org.capnproto.RpcProtocol.Exception.Type value) {
         _setShortField(2, (short)value.ordinal());
       }
 
@@ -2549,13 +2549,13 @@ public final class RpcProtocol {
         return _getShortField(1);
       }
 
-      public final RpcProtocol.Exception.Type getType() {
+      public final org.capnproto.RpcProtocol.Exception.Type getType() {
         switch(_getShortField(2)) {
-          case 0 : return RpcProtocol.Exception.Type.FAILED;
-          case 1 : return RpcProtocol.Exception.Type.OVERLOADED;
-          case 2 : return RpcProtocol.Exception.Type.DISCONNECTED;
-          case 3 : return RpcProtocol.Exception.Type.UNIMPLEMENTED;
-          default: return RpcProtocol.Exception.Type._NOT_IN_SCHEMA;
+          case 0 : return org.capnproto.RpcProtocol.Exception.Type.FAILED;
+          case 1 : return org.capnproto.RpcProtocol.Exception.Type.OVERLOADED;
+          case 2 : return org.capnproto.RpcProtocol.Exception.Type.DISCONNECTED;
+          case 3 : return org.capnproto.RpcProtocol.Exception.Type.UNIMPLEMENTED;
+          default: return org.capnproto.RpcProtocol.Exception.Type._NOT_IN_SCHEMA;
         }
       }
 
@@ -2578,19 +2578,23 @@ public static final org.capnproto.SegmentReader b_91b79f1f808db032 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0032\u00b0\u008d\u0080\u001f\u009f\u00b7\u0091" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u000e\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00c2\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00b2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u0017\u0003\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0017\u0003\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u004d\u0065\u0073\u0073\u0061\u0067\u0065\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u004d\u0065" +
+   "\u0073\u0073\u0061\u0067\u0065\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0038\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
@@ -2812,20 +2816,23 @@ public static final org.capnproto.SegmentReader b_e94ccf8031176ec4 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00c4\u006e\u0017\u0031\u0080\u00cf\u004c\u00e9" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00d2\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00c2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0042\u006f\u006f\u0074\u0073\u0074\u0072\u0061" +
-   "\u0070\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0042\u006f" +
+   "\u006f\u0074\u0073\u0074\u0072\u0061\u0070\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -2865,19 +2872,23 @@ public static final org.capnproto.SegmentReader b_836a53ce789d4cd4 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00d4\u004c\u009d\u0078\u00ce\u0053\u006a\u0083" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0003\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0003\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0003\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00aa\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u009a\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u008f\u0001\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u008f\u0001\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0043\u0061\u006c\u006c\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0043\u0061" +
+   "\u006c\u006c\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u001c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -2988,21 +2999,25 @@ public static final org.capnproto.SegmentReader b_dae8b0f61aab5f99 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0099\u005f\u00ab\u001a\u00f6\u00b0\u00e8\u00da" +
-   "\u0015\u0000\u0000\u0000\u0001\u0000\u0003\u0000" +
+   "\u0033\u0000\u0000\u0000\u0001\u0000\u0003\u0000" +
    "\u00d4\u004c\u009d\u0078\u00ce\u0053\u006a\u0083" +
    "\u0003\u0000\u0007\u0000\u0001\u0000\u0003\u0000" +
    "\u0003\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u001a\u0001\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\n\u0002\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0043\u0061\u006c\u006c\u002e\u0073\u0065\u006e" +
-   "\u0064\u0052\u0065\u0073\u0075\u006c\u0074\u0073" +
-   "\u0054\u006f\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0043\u0061" +
+   "\u006c\u006c\u002e\u0073\u0065\u006e\u0064\u0052" +
+   "\u0065\u0073\u0075\u006c\u0074\u0073\u0054\u006f" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u000c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0001\u0000\u0005\u0000\u0000\u0000" +
@@ -3055,19 +3070,23 @@ public static final org.capnproto.SegmentReader b_9e19b28d3db3573a =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u003a\u0057\u00b3\u003d\u008d\u00b2\u0019\u009e" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0002\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0002\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0006\u0000" +
    "\u0003\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00ba\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00aa\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u00c7\u0001\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u00c7\u0001\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0052\u0065\u0074\u0075\u0072\u006e\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0052\u0065" +
+   "\u0074\u0075\u0072\u006e\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0020\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3205,19 +3224,23 @@ public static final org.capnproto.SegmentReader b_d37d2eb2c2f80e63 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0063\u000e\u00f8\u00c2\u00b2\u002e\u007d\u00d3" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0000\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00ba\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00aa\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0046\u0069\u006e\u0069\u0073\u0068\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0046\u0069" +
+   "\u006e\u0069\u0073\u0068\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3257,19 +3280,23 @@ public static final org.capnproto.SegmentReader b_bbc29655fa89086e =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u006e\u0008\u0089\u00fa\u0055\u0096\u00c2\u00bb" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0002\u0000" +
    "\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00c2\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00b2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0052\u0065\u0073\u006f\u006c\u0076\u0065\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0052\u0065" +
+   "\u0073\u006f\u006c\u0076\u0065\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u000c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3323,19 +3350,23 @@ public static final org.capnproto.SegmentReader b_ad1a6c0d7dd07497 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0097\u0074\u00d0\u007d\r\u006c\u001a\u00ad" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0000\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00c2\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00b2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0052\u0065\u006c\u0065\u0061\u0073\u0065\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0052\u0065" +
+   "\u006c\u0065\u0061\u0073\u0065\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3373,20 +3404,24 @@ public static final org.capnproto.SegmentReader b_f964368b0fbd3711 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0011\u0037\u00bd\u000f\u008b\u0036\u0064\u00f9" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00da\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00ca\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0044\u0069\u0073\u0065\u006d\u0062\u0061\u0072" +
-   "\u0067\u006f\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0044\u0069" +
+   "\u0073\u0065\u006d\u0062\u0061\u0072\u0067\u006f" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3416,21 +3451,25 @@ public static final org.capnproto.SegmentReader b_d562b4df655bdd4d =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u004d\u00dd\u005b\u0065\u00df\u00b4\u0062\u00d5" +
-   "\u001b\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u0039\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0011\u0037\u00bd\u000f\u008b\u0036\u0064\u00f9" +
    "\u0001\u0000\u0007\u0000\u0001\u0000\u0004\u0000" +
    "\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u001a\u0001\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\n\u0002\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u00e7\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u00e7\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0044\u0069\u0073\u0065\u006d\u0062\u0061\u0072" +
-   "\u0067\u006f\u002e\u0063\u006f\u006e\u0074\u0065" +
-   "\u0078\u0074\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0044\u0069" +
+   "\u0073\u0065\u006d\u0062\u0061\u0072\u0067\u006f" +
+   "\u002e\u0063\u006f\u006e\u0074\u0065\u0078\u0074" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0010\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0001\u0000\u0001\u0000\u0000\u0000" +
@@ -3499,19 +3538,23 @@ public static final org.capnproto.SegmentReader b_9c6a046bfbc1ac5a =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u005a\u00ac\u00c1\u00fb\u006b\u0004\u006a\u009c" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0002\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00c2\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00b2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0050\u0072\u006f\u0076\u0069\u0064\u0065\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0050\u0072" +
+   "\u006f\u0076\u0069\u0064\u0065\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u000c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3565,19 +3608,23 @@ public static final org.capnproto.SegmentReader b_d4c9b56290554016 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0016\u0040\u0055\u0090\u0062\u00b5\u00c9\u00d4" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00ba\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00aa\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0041\u0063\u0063\u0065\u0070\u0074\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0041\u0063" +
+   "\u0063\u0065\u0070\u0074\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u000c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3631,19 +3678,23 @@ public static final org.capnproto.SegmentReader b_fbe1980490e001af =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00af\u0001\u00e0\u0090\u0004\u0098\u00e1\u00fb" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0002\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00aa\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u009a\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u00af\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u004a\u006f\u0069\u006e\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u004a\u006f" +
+   "\u0069\u006e\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u000c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3696,20 +3747,24 @@ public static final org.capnproto.SegmentReader b_95bc14545813fbc1 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00c1\u00fb\u0013\u0058\u0054\u0014\u00bc\u0095" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0002\u0000" +
    "\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00f2\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00e2\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u004d\u0065\u0073\u0073\u0061\u0067\u0065\u0054" +
-   "\u0061\u0072\u0067\u0065\u0074\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u004d\u0065" +
+   "\u0073\u0073\u0061\u0067\u0065\u0054\u0061\u0072" +
+   "\u0067\u0065\u0074\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
@@ -3748,19 +3803,23 @@ public static final org.capnproto.SegmentReader b_9a0e61223d96743b =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u003b\u0074\u0096\u003d\"\u0061\u000e\u009a" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0000\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0000\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0002\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00c2\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00b2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0019\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0050\u0061\u0079\u006c\u006f\u0061\u0064\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0050\u0061" +
+   "\u0079\u006c\u006f\u0061\u0064\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -3802,20 +3861,24 @@ public static final org.capnproto.SegmentReader b_8523ddc40b86b8b0 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00b0\u00b8\u0086\u000b\u00c4\u00dd\u0023\u0085" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0006\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00f2\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00e2\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u008f\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u008f\u0001\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0043\u0061\u0070\u0044\u0065\u0073\u0063\u0072" +
-   "\u0069\u0070\u0074\u006f\u0072\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0043\u0061" +
+   "\u0070\u0044\u0065\u0073\u0063\u0072\u0069\u0070" +
+   "\u0074\u006f\u0072\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u001c\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
@@ -3934,20 +3997,24 @@ public static final org.capnproto.SegmentReader b_d800b1d6cd6f1ca0 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u00a0\u001c\u006f\u00cd\u00d6\u00b1\u0000\u00d8" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00fa\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0017\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00ea\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0017\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0029\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0039\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0050\u0072\u006f\u006d\u0069\u0073\u0065\u0064" +
-   "\u0041\u006e\u0073\u0077\u0065\u0072\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0050\u0072" +
+   "\u006f\u006d\u0069\u0073\u0065\u0064\u0041\u006e" +
+   "\u0073\u0077\u0065\u0072\u0000\u0000\u0000\u0000" +
    "\u0004\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0081\u0090\u0056\u0015\u0044\u0094\u0016\u00f3" +
    "\u0001\u0000\u0000\u0000\u001a\u0000\u0000\u0000" +
@@ -3993,21 +4060,24 @@ public static final org.capnproto.SegmentReader b_f316944415569081 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0081\u0090\u0056\u0015\u0044\u0094\u0016\u00f3" +
-   "\u001f\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u003d\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u00a0\u001c\u006f\u00cd\u00d6\u00b1\u0000\u00d8" +
    "\u0000\u0000\u0007\u0000\u0000\u0000\u0002\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u0012\u0001\u0000\u0000" +
-   "\u0025\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u0002\u0002\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0050\u0072\u006f\u006d\u0069\u0073\u0065\u0064" +
-   "\u0041\u006e\u0073\u0077\u0065\u0072\u002e\u004f" +
-   "\u0070\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0050\u0072" +
+   "\u006f\u006d\u0069\u0073\u0065\u0064\u0041\u006e" +
+   "\u0073\u0077\u0065\u0072\u002e\u004f\u0070\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u00ff\u00ff\u0000\u0000\u0000\u0000" +
@@ -4045,21 +4115,25 @@ public static final org.capnproto.SegmentReader b_d37007fde1f0027d =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u007d\u0002\u00f0\u00e1\u00fd\u0007\u0070\u00d3" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u0042\u0001\u0000\u0000" +
-   "\u0025\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u0032\u0002\u0000\u0000" +
+   "\u0035\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0077\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0054\u0068\u0069\u0072\u0064\u0050\u0061\u0072" +
-   "\u0074\u0079\u0043\u0061\u0070\u0044\u0065\u0073" +
-   "\u0063\u0072\u0069\u0070\u0074\u006f\u0072\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0054\u0068" +
+   "\u0069\u0072\u0064\u0050\u0061\u0072\u0074\u0079" +
+   "\u0043\u0061\u0070\u0044\u0065\u0073\u0063\u0072" +
+   "\u0069\u0070\u0074\u006f\u0072\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0008\u0000\u0000\u0000\u0003\u0000\u0004\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
@@ -4096,20 +4170,23 @@ public static final org.capnproto.SegmentReader b_d625b7063acf691a =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u001a\u0069\u00cf\u003a\u0006\u00b7\u0025\u00d6" +
-   "\u0010\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u002e\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0050\u00a2\u0052\u0025\u001b\u0098\u0012\u00b3" +
    "\u0001\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00d2\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0017\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00c2\u0001\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0017\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0029\u0000\u0000\u0000\u00e7\u0000\u0000\u0000" +
+   "\u0035\u0000\u0000\u0000\u00e7\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0045\u0078\u0063\u0065\u0070\u0074\u0069\u006f" +
-   "\u006e\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0045\u0078" +
+   "\u0063\u0065\u0070\u0074\u0069\u006f\u006e\u0000" +
    "\u0004\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0058\u00bd\u004c\u003f\u00e2\u0096\u008c\u00b2" +
    "\u0001\u0000\u0000\u0000\u002a\u0000\u0000\u0000" +
@@ -4183,20 +4260,24 @@ public static final org.capnproto.SegmentReader b_b28c96e23f4cbd58 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
    "\u0058\u00bd\u004c\u003f\u00e2\u0096\u008c\u00b2" +
-   "\u001a\u0000\u0000\u0000\u0002\u0000\u0000\u0000" +
+   "\u0038\u0000\u0000\u0000\u0002\u0000\u0000\u0000" +
    "\u001a\u0069\u00cf\u003a\u0006\u00b7\u0025\u00d6" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0015\u0000\u0000\u0000\u00fa\u0000\u0000\u0000" +
-   "\u0021\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00ea\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u001d\u0000\u0000\u0000\u0067\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0067\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u0063\u0061\u0070\u006e\u0070\u002f\u0072\u0070" +
-   "\u0063\u002e\u0063\u0061\u0070\u006e\u0070\u003a" +
-   "\u0045\u0078\u0063\u0065\u0070\u0074\u0069\u006f" +
-   "\u006e\u002e\u0054\u0079\u0070\u0065\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u006d\u0061\u0069\u006e" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0072\u0070\u0063\u002e" +
+   "\u0063\u0061\u0070\u006e\u0070\u003a\u0045\u0078" +
+   "\u0063\u0065\u0070\u0074\u0069\u006f\u006e\u002e" +
+   "\u0054\u0079\u0070\u0065\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
    "\u0010\u0000\u0000\u0000\u0001\u0000\u0002\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
