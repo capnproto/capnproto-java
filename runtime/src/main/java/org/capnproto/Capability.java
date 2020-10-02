@@ -4,6 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 public final class Capability {
 
+    static abstract class BuilderContext {
+        CapTableBuilder capTable;
+    }
+
+    static class ReaderContext {
+        CapTableReader capTable;
+    }
+
     public static class Client {
 
         final ClientHook hook;
@@ -17,7 +25,7 @@ public final class Capability {
         }
 
         public Client(Server server) {
-            this(server.makeLocalClient());
+            this(makeLocalClient(server));
         }
 
         public Client(CompletableFuture<ClientHook> promise) {
@@ -28,8 +36,8 @@ public final class Capability {
             this(newBrokenCap(exc));
         }
 
-        public ClientHook getHook() {
-            return this.hook;
+        private static ClientHook makeLocalClient(Server server) {
+            return server.makeLocalClient();
         }
 
         CompletableFuture<?> whenResolved() {
@@ -42,37 +50,29 @@ public final class Capability {
             return hook.newCall(interfaceId, methodId);
         }
 
-        public <T, U> Request<T, U> newCall(FromPointerBuilder<T> builder,
+        protected <T, U> Request<T, U> newCall(FromPointerBuilder<T> builder,
                                             FromPointerReader<U> reader,
                                             long interfaceId, short methodId) {
             var request = hook.newCall(interfaceId, methodId);
             return new Request<T, U> (builder, reader, request.params, request.hook);
-        }
-
-        public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
-            return hook.newCall(interfaceId, methodId);
-        }
-
-        private static ClientHook makeLocalClient(Capability.Server server) {
-            return server.makeLocalClient();
         }
     }
 
     public abstract static class Server {
 
         private static final Object BRAND = new Object();
-        ClientHook hook;
+        private ClientHook hook;
 
-        public ClientHook makeLocalClient() {
+        ClientHook makeLocalClient() {
             return new LocalClient();
         }
 
         private final class LocalClient implements ClientHook {
 
-            CompletableFuture<java.lang.Void> resolveTask;
-            ClientHook resolved;
-            boolean blocked = false;
-            Exception brokenException;
+            private CompletableFuture<java.lang.Void> resolveTask;
+            private ClientHook resolved;
+            private boolean blocked = false;
+            private Exception brokenException;
 
             LocalClient() {
                 Server.this.hook = this;
@@ -142,12 +142,12 @@ public final class Capability {
                     return;
                 }
                 this.resolveTask = resolver.thenAccept(client -> {
-                    this.resolved = client.getHook();
+                    this.resolved = client.hook;
                 });
             }
         }
 
-        final class DispatchCallResult {
+        public static final class DispatchCallResult {
             private final CompletableFuture<?> promise;
             private final boolean streaming;
 
@@ -180,7 +180,7 @@ public final class Capability {
         }
 
         protected Client thisCap() {
-            return new Client(hook);
+            return new Client(this.hook);
         }
 
         protected final <Params, Results> CallContext<Params, Results> internalGetTypedContext(
@@ -190,12 +190,14 @@ public final class Capability {
             return new CallContext<>(paramsFactory, resultsFactory, typeless.hook);
         }
 
-        public abstract DispatchCallResult dispatchCall(long interfaceId, short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
+        public abstract DispatchCallResult dispatchCall(long interfaceId, short methodId,
+                                                        CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
 
         protected DispatchCallResult internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
             return new DispatchCallResult(RpcException.unimplemented(
                     "Method not implemented. " + actualInterfaceName + " " + requestedTypeId));
         }
+
         protected DispatchCallResult internalUnimplemented(String interfaceName, long typeId, short methodId) {
             return new DispatchCallResult(RpcException.unimplemented(
                     "Method not implemented. " + interfaceName + " " + typeId + " " + methodId));
