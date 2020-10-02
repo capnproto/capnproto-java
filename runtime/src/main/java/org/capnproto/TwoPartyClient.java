@@ -1,6 +1,7 @@
 package org.capnproto;
 
 import java.nio.channels.AsynchronousByteChannel;
+import java.util.concurrent.CompletableFuture;
 
 public class TwoPartyClient {
 
@@ -29,5 +30,9 @@ public class TwoPartyClient {
                 ? RpcTwoPartyProtocol.Side.SERVER
                 : RpcTwoPartyProtocol.Side.CLIENT);
         return rpcSystem.bootstrap(vatId.asReader());
+    }
+
+    public synchronized CompletableFuture<?> runOnce() {
+        return this.rpcSystem.runOnce();
     }
 }
