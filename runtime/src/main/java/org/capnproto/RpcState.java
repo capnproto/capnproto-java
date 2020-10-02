@@ -991,17 +991,16 @@ final class RpcState {
 
         @Override
         public AnyPointer.Builder getResults() {
-            if (response != null) {
-                return response.getResultsBuilder();
-            }
+            if (response == null) {
 
-            if (redirectResults || isDisconnected()) {
-                response = new LocallyRedirectedRpcResponse();
-            }
-            else {
-                var message = connection.newOutgoingMessage(1024);
-                returnMessage = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
-                response = new RpcServerResponseImpl(message, returnMessage.getResults());
+                if (redirectResults || isDisconnected()) {
+                    response = new LocallyRedirectedRpcResponse();
+                }
+                else {
+                    var message = connection.newOutgoingMessage(1024);
+                    returnMessage = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
+                    response = new RpcServerResponseImpl(message, returnMessage.getResults());
+                }
             }
 
             return response.getResultsBuilder();
