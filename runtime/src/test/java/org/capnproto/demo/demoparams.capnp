@@ -18,6 +18,8 @@ struct TestParams1 {
 
 struct TestResults1 {
    result0 @0 :AnyPointer;
+   result1 @1 :AnyPointer;
+   result2 @2 :AnyPointer;
 }
 
 

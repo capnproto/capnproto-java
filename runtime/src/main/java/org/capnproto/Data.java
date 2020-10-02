@@ -40,44 +40,41 @@ public final class Data {
         }
 
         @Override
-        public Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
-            return fromPointerReader(segment, pointer, nestingLimit);
+        public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            return WireHelpers.readDataPointer(segment, pointer, null, 0, 0);
         }
 
         @Override
         public final Builder fromPointerBuilderBlobDefault(
             SegmentBuilder segment,
+            CapTableBuilder capTable,
             int pointer,
             java.nio.ByteBuffer defaultBuffer,
             int defaultOffset,
             int defaultSize) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
+                                                      capTable,
                                                       defaultBuffer,
                                                       defaultOffset,
                                                       defaultSize);
         }
-
         @Override
-        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
             return WireHelpers.getWritableDataPointer(pointer,
                                                       segment,
+                                                      capTable,
                                                       null, 0, 0);
         }
 
         @Override
-        public Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
-            return fromPointerBuilder(segment, pointer);
+        public final Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int size) {
+            return WireHelpers.initDataPointer(pointer, segment, capTable, size);
         }
 
         @Override
-        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
-            return WireHelpers.initDataPointer(pointer, segment, size);
-        }
-
-        @Override
-        public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
-            WireHelpers.setDataPointer(pointer, segment, value);
+        public final void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+            WireHelpers.setDataPointer(pointer, segment, capTable, value);
         }
     }
     public static final Factory factory = new Factory();

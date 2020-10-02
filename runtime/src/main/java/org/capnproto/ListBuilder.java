@@ -21,11 +21,22 @@
 
 package org.capnproto;
 
-public class ListBuilder {
+import java.util.List;
+
+public class ListBuilder extends Capability.BuilderContext {
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount);
+        default T constructBuilder(SegmentBuilder segment, CapTableBuilder capTable, int ptr,
+                           int elementCount, int step,
+                           int structDataSize, short structPointerCount) {
+            var result = constructBuilder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            if (result instanceof Capability.BuilderContext) {
+                ((Capability.BuilderContext) result).capTable = capTable;
+            }
+            return result;
+        }
     }
 
     final SegmentBuilder segment;
@@ -34,7 +45,6 @@ public class ListBuilder {
     final int step; // in bits
     final int structDataSize; // in bits
     final short structPointerCount;
-    CapTableBuilder capTable;
 
     public ListBuilder(SegmentBuilder segment, int ptr,
                        int elementCount, int step,
@@ -120,6 +130,7 @@ public class ListBuilder {
         int structPointers = (structData + (this.structDataSize / 8)) / 8;
 
         return factory.constructBuilder(this.segment,
+                                        this.capTable,
                                         structData,
                                         structPointers,
                                         this.structDataSize,
@@ -129,18 +140,21 @@ public class ListBuilder {
     protected final <T> T _getPointerElement(FromPointerBuilder<T> factory, int index) {
         return factory.fromPointerBuilder(
             this.segment,
+            this.capTable,
             (this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD);
     }
 
     protected final <T> T _initPointerElement(FromPointerBuilder<T> factory, int index, int elementCount) {
         return factory.initFromPointerBuilder(
             this.segment,
+            this.capTable,
             (this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
             elementCount);
     }
 
     protected final <Builder, Reader> void _setPointerElement(SetPointerBuilder<Builder, Reader> factory, int index, Reader value) {
         factory.setPointerBuilder(this.segment,
+                                  this.capTable,
                                   (this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
                                   value);
     }

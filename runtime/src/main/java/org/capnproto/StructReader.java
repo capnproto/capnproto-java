@@ -21,11 +21,20 @@
 
 package org.capnproto;
 
-public class StructReader {
+public class StructReader extends Capability.ReaderContext {
     public interface Factory<T> {
-        abstract T constructReader(SegmentReader segment, int data, int pointers,
+        T constructReader(SegmentReader segment, int data, int pointers,
                                    int dataSize, short pointerCount,
                                    int nestingLimit);
+        default T constructReader(SegmentReader segment, CapTableReader capTable, int data, int pointers,
+                          int dataSize, short pointerCount,
+                          int nestingLimit) {
+            var result = constructReader(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+            if (result instanceof Capability.ReaderContext) {
+                ((Capability.ReaderContext) result).capTable = capTable;
+            }
+            return result;
+        }
     }
 
     protected final SegmentReader segment;
@@ -34,7 +43,6 @@ public class StructReader {
     protected final int dataSize; // in bits
     protected final short pointerCount;
     protected final int nestingLimit;
-    protected CapTableReader capTable;
 
     public StructReader() {
         this.segment = SegmentReader.EMPTY;
@@ -169,6 +177,7 @@ public class StructReader {
                                              this.nestingLimit);
         } else {
             return factory.fromPointerReader(SegmentReader.EMPTY,
+                                             this.capTable,
                                              0,
                                              this.nestingLimit);
         }
@@ -179,12 +188,14 @@ public class StructReader {
                                            SegmentReader defaultSegment, int defaultOffset) {
         if (ptrIndex < this.pointerCount) {
             return factory.fromPointerReaderRefDefault(this.segment,
+                                                       this.capTable,
                                                        this.pointers + ptrIndex,
                                                        defaultSegment,
                                                        defaultOffset,
                                                        this.nestingLimit);
         } else {
             return factory.fromPointerReaderRefDefault(SegmentReader.EMPTY,
+                                                       this.capTable,
                                                        0,
                                                        defaultSegment,
                                                        defaultOffset,

@@ -28,44 +28,35 @@ public abstract class StructFactory<Builder extends StructBuilder, Reader extend
     SetPointerBuilder<Builder, Reader>,
     FromPointerReaderRefDefault<Reader>,
     StructReader.Factory<Reader> {
-    public final Reader fromPointerReaderRefDefault(SegmentReader segment, int pointer,
+    public final Reader fromPointerReaderRefDefault(SegmentReader segment, CapTableReader capTable, int pointer,
                                                     SegmentReader defaultSegment, int defaultOffset,
                                                     int nestingLimit) {
         return WireHelpers.readStructPointer(this,
                                              segment,
+                                             capTable,
                                              pointer,
                                              defaultSegment, defaultOffset,
                                              nestingLimit);
     }
-    public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
-        return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
-    }
 
     public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
-        var result = fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
-        result.capTable = capTable;
-        return result;
+        return fromPointerReaderRefDefault(segment, capTable, pointer, null, 0, nestingLimit);
     }
-    public final Builder fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
+    public final Builder fromPointerBuilderRefDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                                       SegmentReader defaultSegment, int defaultOffset) {
-        return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
+        return WireHelpers.getWritableStructPointer(this, pointer, segment, capTable, this.structSize(),
                                                     defaultSegment, defaultOffset);
     }
-    public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
-        return WireHelpers.getWritableStructPointer(this, pointer, segment, this.structSize(),
-                                                    null, 0);
-    }
     public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
-        var result = fromPointerBuilder(segment, pointer);
-        result.capTable = capTable;
-        return result;
+        return WireHelpers.getWritableStructPointer(this, pointer, segment, capTable, this.structSize(),
+                null, 0);
     }
-    public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
-        return WireHelpers.initStructPointer(this, pointer, segment, this.structSize());
+    public final Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
+        return WireHelpers.initStructPointer(this, pointer, segment, capTable, this.structSize());
     }
 
-    public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
-        WireHelpers.setStructPointer(segment, pointer, value);
+    public final void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+        WireHelpers.setStructPointer(segment, capTable, pointer, value);
     }
 
     public abstract Reader asReader(Builder builder);

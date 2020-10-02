@@ -22,5 +22,5 @@
 package org.capnproto;
 
 public interface SetPointerBuilder<Builder, Reader> {
-    void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value);
+    void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value);
 }

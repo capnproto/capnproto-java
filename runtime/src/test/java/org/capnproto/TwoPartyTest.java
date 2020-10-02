@@ -22,7 +22,7 @@ class TestCap0 {
 
         public Client(ClientHook hook) { super(hook); }
 
-        public Client(Capability.Client cap) { super(cap.getHook()); }
+        public Client(Capability.Client cap) { super(cap.hook); }
 
         public Client(Capability.Server server) { super(server); }
 
@@ -85,7 +85,7 @@ class TestCap1 {
 
         public Client(ClientHook hook) { super(hook); }
 
-        public Client(Capability.Client cap) { super(cap.getHook()); }
+        public Client(Capability.Client cap) { super(cap.hook); }
 
         public Client(Capability.Server server) { super(server); }
     }
@@ -111,7 +111,8 @@ class TestCap1 {
 
 class TestCap0Impl extends TestCap0.Server {
 
-    final TestCap1.Client testCap1 = new TestCap1.Client(new TestCap1Impl());
+    final TestCap1.Client testCap1a = new TestCap1.Client(new TestCap1Impl());
+    final TestCap1.Client testCap1b = new TestCap1.Client(new TestCap1Impl());
 
     public CompletableFuture<?> testMethod0(TestCap0.Server.TestMethod0Context ctx) {
         var params = ctx.getParams();
@@ -124,7 +125,11 @@ class TestCap0Impl extends TestCap0.Server {
         var params = ctx.getParams();
         var results = ctx.getResults();
         var res0 = results.getResult0();
-        res0.setAsCapability(testCap1);
+        res0.setAsCapability(testCap1a);
+        var res1 = results.getResult1();
+        res1.setAsCapability(testCap1b);
+        var res2 = results.getResult2();
+        res2.setAsCapability(testCap1b);
         return CompletableFuture.completedFuture(null);
     }
 }
@@ -195,12 +200,19 @@ public class TwoPartyTest {
         var params = request.params();
         var resultsPromise = request.send();
         while (!resultsPromise.isDone()) {
-            CompletableFuture.anyOf(resultsPromise, server.runOnce()).join();
+            CompletableFuture.anyOf(resultsPromise, server.runOnce(), client.runOnce()).join();
         }
         Assert.assertTrue(resultsPromise.isDone());
         var results = resultsPromise.get();
-        var any = results.getResult0();
-        var cap1 = any.getAsCapability();
+        var cap0 = results.getResult0().getAsCapability();
+        Assert.assertFalse(cap0.hook.isNull());
+        Assert.assertFalse(cap0.hook.isError());
+        var cap1 = results.getResult1().getAsCapability();
+        Assert.assertFalse(cap1.hook.isNull());
+        Assert.assertFalse(cap1.hook.isError());
+        var cap2 = results.getResult2().getAsCapability();
+        Assert.assertFalse(cap2.hook.isNull());
+        Assert.assertFalse(cap2.hook.isError());
     }
 
     @Test

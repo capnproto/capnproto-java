@@ -21,10 +21,18 @@
 
 package org.capnproto;
 
-public class StructBuilder {
+public class StructBuilder extends Capability.BuilderContext {
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int data, int pointers, int dataSize,
                            short pointerCount);
+        default T constructBuilder(SegmentBuilder segment, CapTableBuilder capTable, int data, int pointers, int dataSize,
+                           short pointerCount) {
+            var result = constructBuilder(segment, data, pointers, dataSize, pointerCount);
+            if (result instanceof Capability.BuilderContext) {
+                ((Capability.BuilderContext) result).capTable = capTable;
+            }
+            return result;
+        }
         StructSize structSize();
     }
 
@@ -33,7 +41,6 @@ public class StructBuilder {
     protected final int pointers; // word offset of pointer section
     protected final int dataSize; // in bits
     protected final short pointerCount;
-    protected CapTableBuilder capTable;
 
     public StructBuilder(SegmentBuilder segment, int data,
                          int pointers, int dataSize, short pointerCount) {
@@ -42,12 +49,6 @@ public class StructBuilder {
         this.pointers = pointers;
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
-    }
-
-    StructBuilder imbue(CapTableBuilder capTable) {
-        var result = new StructBuilder(this.segment, this.data, this.pointers, this.dataSize, this.pointerCount);
-        result.capTable = capTable;
-        return result;
     }
 
     protected final boolean _getBooleanField(int offset) {
@@ -179,30 +180,30 @@ public class StructBuilder {
 
     protected final void _clearPointerField(int ptrIndex) {
         int pointer = this.pointers + ptrIndex;
-        WireHelpers.zeroObject(this.segment, pointer);
+        WireHelpers.zeroObject(this.segment, this.capTable, pointer);
         this.segment.buffer.putLong(pointer * 8, 0L);
     }
 
     protected final <T> T _getPointerField(FromPointerBuilder<T> factory, int index) {
-        return factory.fromPointerBuilder(this.segment, this.pointers + index);
+        return factory.fromPointerBuilder(this.segment, this.capTable, this.pointers + index);
     }
 
     protected final <T> T _getPointerField(FromPointerBuilderRefDefault<T> factory, int index,
                                            SegmentReader defaultSegment, int defaultOffset) {
-        return factory.fromPointerBuilderRefDefault(this.segment, this.pointers + index, defaultSegment, defaultOffset);
+        return factory.fromPointerBuilderRefDefault(this.segment, this.capTable, this.pointers + index, defaultSegment, defaultOffset);
     }
 
     protected final <T> T _getPointerField(FromPointerBuilderBlobDefault<T> factory, int index,
                                            java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
-        return factory.fromPointerBuilderBlobDefault(this.segment, this.pointers + index, defaultBuffer, defaultOffset, defaultSize);
+        return factory.fromPointerBuilderBlobDefault(this.segment, this.capTable, this.pointers + index, defaultBuffer, defaultOffset, defaultSize);
     }
 
     protected final <T> T _initPointerField(FromPointerBuilder<T> factory, int index, int elementCount) {
-        return factory.initFromPointerBuilder(this.segment, this.pointers + index, elementCount);
+        return factory.initFromPointerBuilder(this.segment, this.capTable, this.pointers + index, elementCount);
     }
 
     protected final <Builder, Reader> void _setPointerField(SetPointerBuilder<Builder, Reader> factory, int index, Reader value) {
-        factory.setPointerBuilder(this.segment, this.pointers + index, value);
+        factory.setPointerBuilder(this.segment, this.capTable, this.pointers + index, value);
     }
 
     protected final void _copyContentFrom(StructReader other) {
@@ -251,14 +252,16 @@ public class StructBuilder {
 
         // Zero out all pointers in the target.
         for (int ii = 0; ii < this.pointerCount; ++ii) {
-            WireHelpers.zeroObject(this.segment, this.pointers + ii);
+            WireHelpers.zeroObject(this.segment, this.capTable, this.pointers + ii);
         }
         this.segment.buffer.putLong(this.pointers * Constants.BYTES_PER_WORD, 0);
 
         for (int ii = 0; ii < sharedPointerCount; ++ii) {
             WireHelpers.copyPointer(this.segment,
+                                    this.capTable,
                                     this.pointers + ii,
                                     other.segment,
+                                    other.capTable,
                                     other.pointers + ii,
                                     other.nestingLimit);
         }

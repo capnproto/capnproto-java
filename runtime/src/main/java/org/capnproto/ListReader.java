@@ -21,13 +21,22 @@
 
 package org.capnproto;
 
-public class ListReader {
+public class ListReader extends Capability.ReaderContext {
     public interface Factory<T> {
         T constructReader(SegmentReader segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
                           int nestingLimit);
+        default T constructReader(SegmentBuilder segment, CapTableReader capTable, int ptr,
+                                   int elementCount, int step,
+                                   int structDataSize, short structPointerCount, int nestingLimit) {
+            var result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+            if (result instanceof Capability.ReaderContext) {
+                ((Capability.ReaderContext) result).capTable = capTable;
+            }
+            return result;
+        }
     }
 
     final SegmentReader segment;
@@ -37,7 +46,6 @@ public class ListReader {
     final int structDataSize; // in bits
     final short structPointerCount;
     final int nestingLimit;
-    CapTableReader capTable;
 
     public ListReader() {
         this.segment = null;
@@ -60,7 +68,6 @@ public class ListReader {
         this.structDataSize = structDataSize;
         this.structPointerCount = structPointerCount;
         this.nestingLimit = nestingLimit;
-
     }
 
     ListReader imbue(CapTableReader capTable) {

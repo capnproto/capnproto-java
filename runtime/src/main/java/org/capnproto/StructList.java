@@ -56,9 +56,10 @@ public final class StructList {
         }
 
         @Override
-        public final Builder<ElementBuilder> fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
+        public final Builder<ElementBuilder> fromPointerBuilderRefDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                                                           SegmentReader defaultSegment, int defaultOffset) {
             return WireHelpers.getWritableStructListPointer(this,
+                                                            capTable,
                                                             pointer,
                                                             segment,
                                                             factory.structSize(),
@@ -67,8 +68,9 @@ public final class StructList {
         }
 
         @Override
-        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder<ElementBuilder> fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
                      return WireHelpers.getWritableStructListPointer(this,
+                                                                     capTable,
                                                                      pointer,
                                                                      segment,
                                                                      factory.structSize(),
@@ -76,9 +78,9 @@ public final class StructList {
         }
 
         @Override
-        public final Builder<ElementBuilder> initFromPointerBuilder(SegmentBuilder segment, int pointer,
+        public final Builder<ElementBuilder> initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                                                     int elementCount) {
-            return WireHelpers.initStructListPointer(this, pointer, segment, elementCount, factory.structSize());
+            return WireHelpers.initStructListPointer(this, capTable, pointer, segment, elementCount, factory.structSize());
         }
     }
 

@@ -25,7 +25,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
 
-        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, 0x7fffffff);
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), null,0, null, 0, 0x7fffffff);
 
         Assert.assertEquals(reader._getLongField(0), 0xefcdab8967452301L);
         Assert.assertEquals(reader._getLongField(1), 0L);
