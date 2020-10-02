@@ -486,8 +486,67 @@ final class RpcState {
     }
 
     void handleDisembargo(RpcProtocol.Disembargo.Reader disembargo) {
-    }
+        var ctx = disembargo.getContext();
+        switch (ctx.which()) {
+            case SENDER_LOOPBACK:
+                var target = getMessageTarget(disembargo.getTarget());
+                if (target == null) {
+                    // Exception already reported.
+                    return;
+                }
+                for (; ; ) {
+                    var resolved = target.getResolved();
+                    if (resolved == null) {
+                        break;
+                    }
+                    target = resolved;
+                }
 
+                assert target.getBrand() == RpcState.this : "'Disembargo' of type 'senderLoopback' sent to an object that does not point back to the sender.";
+                if (target.getBrand() != this) {
+                    return;
+                }
+
+                var embargoId = ctx.getSenderLoopback();
+
+                // TODO run this later...
+                if (isDisconnected()) {
+                    return;
+                }
+
+                var rpcTarget = (RpcClient) target;
+                var message = connection.newOutgoingMessage(1024);
+                var builder = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
+                var redirect = rpcTarget.writeTarget(builder.initTarget());
+                // Disembargoes should only be sent to capabilities that were previously the subject of
+                // a `Resolve` message.  But `writeTarget` only ever returns non-null when called on
+                // a PromiseClient.  The code which sends `Resolve` and `Return` should have replaced
+                // any promise with a direct node in order to solve the Tribble 4-way race condition.
+                // See the documentation of Disembargo in rpc.capnp for more.
+                if (redirect == null) {
+                    assert false: "'Disembargo' of type 'senderLoopback' sent to an object that does not appear to have been the subject of a previous 'Resolve' message.";
+                    return;
+                }
+                builder.getContext().setReceiverLoopback(embargoId);
+                message.send();
+                break;
+
+            case RECEIVER_LOOPBACK:
+                var embargo = embargos.find(ctx.getReceiverLoopback());
+                if (embargo == null) {
+                    assert false: "Invalid embargo ID in 'Disembargo.context.receiverLoopback'.";
+                    return;
+                }
+                assert embargo.disembargo != null;
+                embargo.disembargo.complete(null);
+                embargos.erase(ctx.getReceiverLoopback(), embargo);
+                break;
+
+            default:
+                assert false: "Unimplemented Disembargo type. " + ctx.which();
+                return;
+        }
+    }
     private List<Integer> writeDescriptors(ClientHook[] capTable, RpcProtocol.Payload.Builder payload, List<Integer> fds) {
         if (capTable.length == 0) {
             return List.of();
