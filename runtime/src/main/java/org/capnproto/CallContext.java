@@ -8,7 +8,7 @@ public class CallContext<Params, Results> {
     private final FromPointerReader<Params> params;
     private final FromPointerBuilder<Results> results;
 
-    CallContext(FromPointerReader<Params> params,
+    public CallContext(FromPointerReader<Params> params,
                 FromPointerBuilder<Results> results,
                 CallContextHook hook) {
         this.hook = hook;
