@@ -199,6 +199,10 @@ private:
   bool hasInterfaces = false;
 
   kj::StringTree javaFullName(Schema schema) {
+    return javaFullName(schema, nullptr);
+  }
+
+  kj::StringTree javaFullName(Schema schema, kj::Maybe<InterfaceSchema::Method> method) {
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
@@ -1022,8 +1026,41 @@ private:
       };
 
     } else if (kind == FieldKind::INTERFACE) {
-      KJ_FAIL_REQUIRE("interfaces unimplemented");
 
+      auto factoryArg = makeFactoryArg(schema::Type::ANY_POINTER);
+      auto capType = typeName(field.getType(), kj::str("Client")).flatten();
+
+      return FieldText {
+        kj::strTree(
+            kj::mv(unionDiscrim.readerIsDef),
+            spaces(indent), "  public boolean has", titleCase, "() {\n",
+            unionDiscrim.has,
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
+            unionDiscrim.check,
+            spaces(indent), "    return new ", capType, "(_getPointerField(", factoryArg, ", ", offset, ").getAsCap());\n",
+            spaces(indent), "  }\n"),
+
+        kj::strTree(
+            kj::mv(unionDiscrim.builderIsDef),
+            spaces(indent), "  public final boolean has", titleCase, "() {\n",
+            spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
+            unionDiscrim.check,
+            spaces(indent), "    return new ", capType, "(\n",
+            spaces(indent), "      _getPointerField(", factoryArg, ", ", offset, ").getAsCap());\n",
+            spaces(indent), "  }\n",
+
+            spaces(indent), "  public void set", titleCase, "(", capType, " value) {\n",
+            unionDiscrim.set,
+            spaces(indent), "    _initPointerField(", factoryArg, ", ", offset, ", 0).setAsCap(value);\n",
+            spaces(indent), "  }\n",
+            "\n")
+          };
     } else if (kind == FieldKind::ANY_POINTER) {
 
       auto factoryArg = makeFactoryArg(field.getType());
@@ -1535,7 +1572,130 @@ private:
         kj::strTree()
         };
   }
+  // -----------------------------------------------------------------
 
+  struct InterfaceText {
+    kj::StringTree outerTypeDef;
+    kj::StringTree clientServerDefs;
+  };
+
+  InterfaceText makeInterfaceText(kj::StringPtr scope, kj::StringPtr name, InterfaceSchema schema,
+                                  kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
+    auto fullName = kj::str(scope, name);
+    auto methods = KJ_MAP(m, schema.getMethods()) {
+      return makeMethodText(fullName, m);
+    };
+
+    auto proto = schema.getProto();
+    auto hexId = kj::hex(proto.getId());
+
+    auto typeName = javaFullName(schema);
+
+    return InterfaceText {
+      kj::strTree(
+          spaces(indent), "public static class ", name, "{\n",
+          spaces(indent), "\n",
+          spaces(indent), "  public static class Client extends org.capnproto.Capability.Client {\n",
+          spaces(indent), "    public Client() {}\n",
+          spaces(indent), "    public Client(org.capnproto.ClientHook hook) { super(hook); }\n",
+          spaces(indent), "    public Client(org.capnproto.Capability.Client cap) { super(cap.getHook()); }\n",
+          spaces(indent), "    public Client(Server server) { super(server); }\n",
+          spaces(indent), "    public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {\n",
+          spaces(indent), "      super(promise);\n",
+          spaces(indent), "    }\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public static abstract class Server extends org.capnproto.Capability.Server {\n",
+          spaces(indent), "    protected org.capnproto.DispatchCallResult dispatchCall(\n",
+          spaces(indent), "        long interfaceId, short methodId,\n",
+          spaces(indent), "        org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {\n",
+          spaces(indent), "      if (interfaceId == 0x", hexId, "L) {\n",
+          spaces(indent), "        return dispatchCallInternal(methodId, context);\n",
+          spaces(indent), "      }\n",
+          spaces(indent), "      return org.capnproto.Capability.Server.result(\n",
+          spaces(indent), "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", interfaceId));\n",
+          spaces(indent), "    }\n",
+          spaces(indent), "\n",
+          spaces(indent), "    protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {\n",
+          spaces(indent), "      switch (methodId) {\n",
+          KJ_MAP(m, methods) { return kj::mv(m.dispatchCase); },
+          spaces(indent), "      default:\n",
+          spaces(indent), "        return org.capnproto.Capability.Server.result(\n",
+          spaces(indent), "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", 0x", hexId, "L, methodId));\n",
+          spaces(indent), "      }\n",
+          spaces(indent), "    }\n\n",
+          KJ_MAP(m, methods) { return kj::mv(m.sourceDefs); },
+          spaces(indent), "  }\n",
+          spaces(indent), "\n",
+          KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
+          spaces(indent), "\n",
+          spaces(indent), "}\n",
+          spaces(indent), "\n")
+        };
+  }
+
+  // -----------------------------------------------------------------
+
+  struct MethodText {
+    kj::StringTree sourceDefs;
+    kj::StringTree dispatchCase;
+  };
+
+  MethodText makeMethodText(kj::StringPtr interfaceName, InterfaceSchema::Method method) {
+    auto proto = method.getProto();
+    auto name = proto.getName();
+    auto titleCase = toTitleCase(name);
+    auto paramSchema = method.getParamType();
+    auto resultSchema = method.getResultType();
+    auto identifierName = safeIdentifier(name);
+
+    auto paramProto = paramSchema.getProto();
+    auto resultProto = resultSchema.getProto();
+
+    bool isStreaming = method.isStreaming();
+
+    auto interfaceTypeName = javaFullName(method.getContainingInterface());
+
+    kj::String paramType = (paramProto.getScopeId() == 0)
+      ? kj::str(interfaceTypeName, "Params")
+      : kj::str(javaFullName(paramSchema, method));
+
+    kj::String resultType = (resultProto.getScopeId() == 0)
+      ? kj::str(interfaceTypeName, "Results")
+      : kj::str(javaFullName(resultSchema, method));
+
+    auto interfaceProto = method.getContainingInterface().getProto();
+    uint64_t interfaceId = interfaceProto.getId();
+    auto interfaceIdHex = kj::hex(interfaceId);
+    uint16_t methodId = method.getIndex();
+
+    auto requestMethodImpl = kj::strTree(
+        isStreaming ? kj::strTree("org.capnproto.StreamingRequest<", paramType, ">")
+                    : kj::strTree("org.capnproto.Request<", paramType, ", ", resultType, ">"),
+        name, "Request() {\n",
+        isStreaming
+            ? kj::strTree("  return newStreamingCall<", paramType, ">(\n")
+            : kj::strTree("  return newCall<", paramType, ", ", resultType, ">(\n"),
+        "      0x", interfaceIdHex, "L, ", methodId, ");\n"
+        "}\n");
+
+    return MethodText {
+
+      kj::strTree(
+          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.CallContext<", titleCase, "Params.Reader, ", titleCase, "Results.Builder> context) {\n"
+          "        return  org.capnproto.Capability.Server.internalUnimplemented(\n"
+          "          \"", interfaceProto.getDisplayName(), "\", \"", name, "\",\n"
+          "          0x", interfaceIdHex, "L, (short)", methodId, ");\n"
+          "      }\n\n"),
+
+      kj::strTree(
+          "        case ", methodId, ":\n",
+          "          return org.capnproto.Capability.Server.",
+          isStreaming ? "streamResult" : "result", "(\n",
+          "            this.", identifierName, "(org.capnproto.Capability.Server.typedContext(\n"
+          "              ", paramType, ".factory,\n",
+          "              ", resultType, ".factory, context)));\n")
+    };
+  }
 
   // -----------------------------------------------------------------
 
@@ -1668,7 +1828,24 @@ private:
         }
       }
     } else if (proto.isInterface()) {
-      KJ_FAIL_REQUIRE("interfaces not implemented");
+      for (auto method: proto.getInterface().getMethods()) {
+         {
+           Schema params = schemaLoader.getUnbound(method.getParamStructType());
+           auto paramsProto = schemaLoader.getUnbound(method.getParamStructType()).getProto();
+           if (paramsProto.getScopeId() == 0) {
+             nestedTexts.add(makeNodeText(subScope,
+                 toTitleCase(kj::str(method.getName(), "Params")), params, indent + 1));
+           }
+         }
+         {
+           Schema results = schemaLoader.getUnbound(method.getResultStructType());
+           auto resultsProto = schemaLoader.getUnbound(method.getResultStructType()).getProto();
+           if (resultsProto.getScopeId() == 0) {
+             nestedTexts.add(makeNodeText(subScope,
+                 toTitleCase(kj::str(method.getName(), "Results")), results, indent + 1));
+           }
+         }
+       }
     }
 
     // Convert the encoded schema to a literal byte array.
@@ -1834,7 +2011,16 @@ private:
 
       case schema::Node::INTERFACE: {
         hasInterfaces = true;
-        KJ_FAIL_REQUIRE("unimplemented");
+        auto interfaceText =
+          makeInterfaceText(scope, name, schema.asInterface(), kj::mv(nestedTypeDecls), indent);
+
+         return NodeTextNoSchema {
+           kj::mv(interfaceText.outerTypeDef),
+           kj::mv(interfaceText.clientServerDefs),
+             kj::strTree(),
+             kj::strTree(),
+             kj::strTree()
+         };
       }
 
       case schema::Node::CONST: {
