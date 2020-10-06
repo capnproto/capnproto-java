@@ -4,11 +4,11 @@ import java.util.concurrent.CompletableFuture;
 
 public final class Capability {
 
-    static abstract class BuilderContext {
+    public static abstract class BuilderContext {
         CapTableBuilder capTable;
     }
 
-    static class ReaderContext {
+    public static class ReaderContext {
         CapTableReader capTable;
     }
 
@@ -34,6 +34,10 @@ public final class Capability {
 
         public Client(Throwable exc) {
             this(newBrokenCap(exc));
+        }
+
+        public ClientHook getHook() {
+            return this.hook;
         }
 
         private static ClientHook makeLocalClient(Server server) {
@@ -127,12 +131,12 @@ public final class Capability {
                         interfaceId,
                         methodId,
                         new CallContext<>(AnyPointer.factory, AnyPointer.factory, context));
-                if (result.streaming) {
+                if (result.isStreaming()) {
                     // TODO streaming
                     return null;
                 }
                 else {
-                    return result.promise;
+                    return result.getPromise();
                 }
             }
 
@@ -147,34 +151,6 @@ public final class Capability {
             }
         }
 
-        public static final class DispatchCallResult {
-            private final CompletableFuture<?> promise;
-            private final boolean streaming;
-
-            public DispatchCallResult(CompletableFuture<?> promise) {
-                this.promise = promise;
-                this.streaming = false;
-            }
-
-            DispatchCallResult(Throwable exc) {
-                this.promise = CompletableFuture.failedFuture(exc);
-                this.streaming = false;
-            }
-
-            DispatchCallResult(CompletableFuture<?> promise, boolean isStreaming) {
-                this.promise = promise;
-                this.streaming = isStreaming;
-            }
-
-            public CompletableFuture<?> getPromise() {
-                return promise;
-            }
-
-            public boolean isStreaming() {
-                return streaming;
-            }
-        }
-
         public CompletableFuture<Client> shortenPath() {
             return null;
         }
@@ -183,28 +159,43 @@ public final class Capability {
             return new Client(this.hook);
         }
 
-        protected final <Params, Results> CallContext<Params, Results> internalGetTypedContext(
+        protected static <Params, Results> CallContext<Params, Results> typedContext(
                 FromPointerReader<Params> paramsFactory,
                 FromPointerBuilder<Results> resultsFactory,
                 CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
             return new CallContext<>(paramsFactory, resultsFactory, typeless.hook);
         }
 
-        public abstract DispatchCallResult dispatchCall(long interfaceId, short methodId,
-                                                        CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
+        protected abstract DispatchCallResult dispatchCall(
+                long interfaceId, short methodId,
+                CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
 
-        protected DispatchCallResult internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
-            return new DispatchCallResult(RpcException.unimplemented(
+        protected static DispatchCallResult streamResult(CompletableFuture<?> result) {
+            // For streaming calls, we need to add an evalNow() here so that exceptions thrown
+            // directly from the call can propagate to later calls. If we don't capture the
+            // exception properly then the caller will never find out that this is a streaming
+            // call (indicated by the boolean in the return value) so won't know to propagate
+            // the exception.
+            // TODO the above comment...
+            return new DispatchCallResult(result, true);
+        }
+
+        protected static DispatchCallResult result(CompletableFuture<?> result) {
+            return new DispatchCallResult(result, false);
+        }
+
+        protected static CompletableFuture<?> internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
+            return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + actualInterfaceName + " " + requestedTypeId));
         }
 
-        protected DispatchCallResult internalUnimplemented(String interfaceName, long typeId, short methodId) {
-            return new DispatchCallResult(RpcException.unimplemented(
+        protected static CompletableFuture<?> internalUnimplemented(String interfaceName, long typeId, short methodId) {
+            return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + interfaceName + " " + typeId + " " + methodId));
         }
 
-        protected DispatchCallResult internalUnimplemented(String interfaceName, String methodName, long typeId, short methodId) {
-            return new DispatchCallResult(RpcException.unimplemented(
+        protected static CompletableFuture<?> internalUnimplemented(String interfaceName, String methodName, long typeId, short methodId) {
+            return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + interfaceName + " " + typeId + " " + methodName + " " + methodId));
         }
     }

@@ -1,5 +1,5 @@
 package org.capnproto;
 
-interface CapTableReader {
+public interface CapTableReader {
     ClientHook extractCap(int index);
 }

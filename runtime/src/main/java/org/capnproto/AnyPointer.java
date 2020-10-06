@@ -69,7 +69,7 @@ public final class AnyPointer {
             return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
 
-        public final Capability.Client getAsCapability() {
+        public final Capability.Client getAsCap() {
             return new Capability.Client(
                     WireHelpers.readCapabilityPointer(this.segment, capTable, this.pointer, 0));
         }
@@ -129,7 +129,12 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
         }
 
-        public final void setAsCapability(Capability.Client cap) {
+        public final Capability.Client getAsCap() {
+            return new Capability.Client(
+                    WireHelpers.readCapabilityPointer(this.segment, capTable, this.pointer, 0));
+        }
+
+        public final void setAsCap(Capability.Client cap) {
             WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.hook);
         }
 
