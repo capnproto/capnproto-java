@@ -1355,7 +1355,7 @@ final class WireHelpers {
             zeroPointerAndFars(segment, refOffset);
         }
         else if (capTable != null) {
-            WirePointer.setCap(segment.buffer, refOffset, capTable.injectCap(cap));
+            WirePointer.setCapability(segment.buffer, refOffset, capTable.injectCap(cap));
         }
         else {
             assert false: "Cannot set capability pointer without capTable";

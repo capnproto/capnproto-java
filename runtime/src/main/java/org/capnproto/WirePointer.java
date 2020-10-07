@@ -91,7 +91,7 @@ final class WirePointer {
         return offsetAndKind(wirePointer) == OTHER;
     }
 
-    public static void setCap(ByteBuffer buffer, int offset, int cap) {
+    public static void setCapability(ByteBuffer buffer, int offset, int cap) {
         setOffsetAndKind(buffer, offset, OTHER);
         buffer.putInt(offset*8 + 4, cap);
     }

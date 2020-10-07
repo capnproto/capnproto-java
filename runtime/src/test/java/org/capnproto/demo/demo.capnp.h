@@ -103,7 +103,7 @@ struct Struct0 {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(b1af51b6aef0e7bc, 6, 3)
+    CAPNP_DECLARE_STRUCT_HEADER(b1af51b6aef0e7bc, 1, 0)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -172,7 +172,7 @@ struct Iface1::Struct1 {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(800ca862fbfddd38, 6, 3)
+    CAPNP_DECLARE_STRUCT_HEADER(800ca862fbfddd38, 1, 1)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -582,31 +582,6 @@ public:
 
   inline bool getF0() const;
 
-  inline  ::uint16_t getF1() const;
-
-  inline  ::int16_t getF2() const;
-
-  inline  ::uint32_t getF3() const;
-
-  inline  ::int32_t getF4() const;
-
-  inline  ::uint64_t getF5() const;
-
-  inline  ::int64_t getF6() const;
-
-  inline float getF7() const;
-
-  inline double getF8() const;
-
-  inline bool hasF9() const;
-  inline  ::capnp::Text::Reader getF9() const;
-
-  inline bool hasF10() const;
-  inline  ::capnp::Data::Reader getF10() const;
-
-  inline bool hasF11() const;
-  inline ::capnp::AnyPointer::Reader getF11() const;
-
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -637,48 +612,6 @@ public:
 
   inline bool getF0();
   inline void setF0(bool value);
-
-  inline  ::uint16_t getF1();
-  inline void setF1( ::uint16_t value);
-
-  inline  ::int16_t getF2();
-  inline void setF2( ::int16_t value);
-
-  inline  ::uint32_t getF3();
-  inline void setF3( ::uint32_t value);
-
-  inline  ::int32_t getF4();
-  inline void setF4( ::int32_t value);
-
-  inline  ::uint64_t getF5();
-  inline void setF5( ::uint64_t value);
-
-  inline  ::int64_t getF6();
-  inline void setF6( ::int64_t value);
-
-  inline float getF7();
-  inline void setF7(float value);
-
-  inline double getF8();
-  inline void setF8(double value);
-
-  inline bool hasF9();
-  inline  ::capnp::Text::Builder getF9();
-  inline void setF9( ::capnp::Text::Reader value);
-  inline  ::capnp::Text::Builder initF9(unsigned int size);
-  inline void adoptF9(::capnp::Orphan< ::capnp::Text>&& value);
-  inline ::capnp::Orphan< ::capnp::Text> disownF9();
-
-  inline bool hasF10();
-  inline  ::capnp::Data::Builder getF10();
-  inline void setF10( ::capnp::Data::Reader value);
-  inline  ::capnp::Data::Builder initF10(unsigned int size);
-  inline void adoptF10(::capnp::Orphan< ::capnp::Data>&& value);
-  inline ::capnp::Orphan< ::capnp::Data> disownF10();
-
-  inline bool hasF11();
-  inline ::capnp::AnyPointer::Builder getF11();
-  inline ::capnp::AnyPointer::Builder initF11();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -924,30 +857,8 @@ public:
 
   inline bool getF0() const;
 
-  inline  ::uint16_t getF1() const;
-
-  inline  ::int16_t getF2() const;
-
-  inline  ::uint32_t getF3() const;
-
-  inline  ::int32_t getF4() const;
-
-  inline  ::uint64_t getF5() const;
-
-  inline  ::int64_t getF6() const;
-
-  inline float getF7() const;
-
-  inline double getF8() const;
-
-  inline bool hasF9() const;
-  inline  ::capnp::Text::Reader getF9() const;
-
-  inline bool hasF10() const;
-  inline  ::capnp::Data::Reader getF10() const;
-
-  inline bool hasF11() const;
-  inline ::capnp::AnyPointer::Reader getF11() const;
+  inline bool hasF1() const;
+  inline ::capnp::AnyPointer::Reader getF1() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -980,47 +891,9 @@ public:
   inline bool getF0();
   inline void setF0(bool value);
 
-  inline  ::uint16_t getF1();
-  inline void setF1( ::uint16_t value);
-
-  inline  ::int16_t getF2();
-  inline void setF2( ::int16_t value);
-
-  inline  ::uint32_t getF3();
-  inline void setF3( ::uint32_t value);
-
-  inline  ::int32_t getF4();
-  inline void setF4( ::int32_t value);
-
-  inline  ::uint64_t getF5();
-  inline void setF5( ::uint64_t value);
-
-  inline  ::int64_t getF6();
-  inline void setF6( ::int64_t value);
-
-  inline float getF7();
-  inline void setF7(float value);
-
-  inline double getF8();
-  inline void setF8(double value);
-
-  inline bool hasF9();
-  inline  ::capnp::Text::Builder getF9();
-  inline void setF9( ::capnp::Text::Reader value);
-  inline  ::capnp::Text::Builder initF9(unsigned int size);
-  inline void adoptF9(::capnp::Orphan< ::capnp::Text>&& value);
-  inline ::capnp::Orphan< ::capnp::Text> disownF9();
-
-  inline bool hasF10();
-  inline  ::capnp::Data::Builder getF10();
-  inline void setF10( ::capnp::Data::Reader value);
-  inline  ::capnp::Data::Builder initF10(unsigned int size);
-  inline void adoptF10(::capnp::Orphan< ::capnp::Data>&& value);
-  inline ::capnp::Orphan< ::capnp::Data> disownF10();
-
-  inline bool hasF11();
-  inline ::capnp::AnyPointer::Builder getF11();
-  inline ::capnp::AnyPointer::Builder initF11();
+  inline bool hasF1();
+  inline ::capnp::AnyPointer::Builder getF1();
+  inline ::capnp::AnyPointer::Builder initF1();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1505,209 +1378,6 @@ inline void Struct0::Builder::setF0(bool value) {
       ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::uint16_t Struct0::Reader::getF1() const {
-  return _reader.getDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint16_t Struct0::Builder::getF1() {
-  return _builder.getDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF1( ::uint16_t value) {
-  _builder.setDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int16_t Struct0::Reader::getF2() const {
-  return _reader.getDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int16_t Struct0::Builder::getF2() {
-  return _builder.getDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF2( ::int16_t value) {
-  _builder.setDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::uint32_t Struct0::Reader::getF3() const {
-  return _reader.getDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint32_t Struct0::Builder::getF3() {
-  return _builder.getDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF3( ::uint32_t value) {
-  _builder.setDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int32_t Struct0::Reader::getF4() const {
-  return _reader.getDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int32_t Struct0::Builder::getF4() {
-  return _builder.getDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF4( ::int32_t value) {
-  _builder.setDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::uint64_t Struct0::Reader::getF5() const {
-  return _reader.getDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint64_t Struct0::Builder::getF5() {
-  return _builder.getDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF5( ::uint64_t value) {
-  _builder.setDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int64_t Struct0::Reader::getF6() const {
-  return _reader.getDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int64_t Struct0::Builder::getF6() {
-  return _builder.getDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF6( ::int64_t value) {
-  _builder.setDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
-}
-
-inline float Struct0::Reader::getF7() const {
-  return _reader.getDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
-}
-
-inline float Struct0::Builder::getF7() {
-  return _builder.getDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF7(float value) {
-  _builder.setDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS, value);
-}
-
-inline double Struct0::Reader::getF8() const {
-  return _reader.getDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
-}
-
-inline double Struct0::Builder::getF8() {
-  return _builder.getDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
-}
-inline void Struct0::Builder::setF8(double value) {
-  _builder.setDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS, value);
-}
-
-inline bool Struct0::Reader::hasF9() const {
-  return !_reader.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
-}
-inline bool Struct0::Builder::hasF9() {
-  return !_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
-}
-inline  ::capnp::Text::Reader Struct0::Reader::getF9() const {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-inline  ::capnp::Text::Builder Struct0::Builder::getF9() {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-inline void Struct0::Builder::setF9( ::capnp::Text::Reader value) {
-  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
-}
-inline  ::capnp::Text::Builder Struct0::Builder::initF9(unsigned int size) {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
-}
-inline void Struct0::Builder::adoptF9(
-    ::capnp::Orphan< ::capnp::Text>&& value) {
-  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
-}
-inline ::capnp::Orphan< ::capnp::Text> Struct0::Builder::disownF9() {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-
-inline bool Struct0::Reader::hasF10() const {
-  return !_reader.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
-}
-inline bool Struct0::Builder::hasF10() {
-  return !_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
-}
-inline  ::capnp::Data::Reader Struct0::Reader::getF10() const {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::get(_reader.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-inline  ::capnp::Data::Builder Struct0::Builder::getF10() {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::get(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-inline void Struct0::Builder::setF10( ::capnp::Data::Reader value) {
-  ::capnp::_::PointerHelpers< ::capnp::Data>::set(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), value);
-}
-inline  ::capnp::Data::Builder Struct0::Builder::initF10(unsigned int size) {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::init(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), size);
-}
-inline void Struct0::Builder::adoptF10(
-    ::capnp::Orphan< ::capnp::Data>&& value) {
-  ::capnp::_::PointerHelpers< ::capnp::Data>::adopt(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), kj::mv(value));
-}
-inline ::capnp::Orphan< ::capnp::Data> Struct0::Builder::disownF10() {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::disown(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-
-inline bool Struct0::Reader::hasF11() const {
-  return !_reader.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
-}
-inline bool Struct0::Builder::hasF11() {
-  return !_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
-}
-inline ::capnp::AnyPointer::Reader Struct0::Reader::getF11() const {
-  return ::capnp::AnyPointer::Reader(_reader.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
-}
-inline ::capnp::AnyPointer::Builder Struct0::Builder::getF11() {
-  return ::capnp::AnyPointer::Builder(_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
-}
-inline ::capnp::AnyPointer::Builder Struct0::Builder::initF11() {
-  auto result = ::capnp::AnyPointer::Builder(_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
-  result.clear();
-  return result;
-}
-
 #if !CAPNP_LITE
 inline Iface0::Client::Client(decltype(nullptr))
     : ::capnp::Capability::Client(nullptr) {}
@@ -1832,205 +1502,25 @@ inline void Iface1::Struct1::Builder::setF0(bool value) {
       ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::uint16_t Iface1::Struct1::Reader::getF1() const {
-  return _reader.getDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint16_t Iface1::Struct1::Builder::getF1() {
-  return _builder.getDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF1( ::uint16_t value) {
-  _builder.setDataField< ::uint16_t>(
-      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int16_t Iface1::Struct1::Reader::getF2() const {
-  return _reader.getDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int16_t Iface1::Struct1::Builder::getF2() {
-  return _builder.getDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF2( ::int16_t value) {
-  _builder.setDataField< ::int16_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::uint32_t Iface1::Struct1::Reader::getF3() const {
-  return _reader.getDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint32_t Iface1::Struct1::Builder::getF3() {
-  return _builder.getDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF3( ::uint32_t value) {
-  _builder.setDataField< ::uint32_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int32_t Iface1::Struct1::Reader::getF4() const {
-  return _reader.getDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int32_t Iface1::Struct1::Builder::getF4() {
-  return _builder.getDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF4( ::int32_t value) {
-  _builder.setDataField< ::int32_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::uint64_t Iface1::Struct1::Reader::getF5() const {
-  return _reader.getDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-
-inline  ::uint64_t Iface1::Struct1::Builder::getF5() {
-  return _builder.getDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF5( ::uint64_t value) {
-  _builder.setDataField< ::uint64_t>(
-      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int64_t Iface1::Struct1::Reader::getF6() const {
-  return _reader.getDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-
-inline  ::int64_t Iface1::Struct1::Builder::getF6() {
-  return _builder.getDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF6( ::int64_t value) {
-  _builder.setDataField< ::int64_t>(
-      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
-}
-
-inline float Iface1::Struct1::Reader::getF7() const {
-  return _reader.getDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
-}
-
-inline float Iface1::Struct1::Builder::getF7() {
-  return _builder.getDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF7(float value) {
-  _builder.setDataField<float>(
-      ::capnp::bounded<8>() * ::capnp::ELEMENTS, value);
-}
-
-inline double Iface1::Struct1::Reader::getF8() const {
-  return _reader.getDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
-}
-
-inline double Iface1::Struct1::Builder::getF8() {
-  return _builder.getDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
-}
-inline void Iface1::Struct1::Builder::setF8(double value) {
-  _builder.setDataField<double>(
-      ::capnp::bounded<5>() * ::capnp::ELEMENTS, value);
-}
-
-inline bool Iface1::Struct1::Reader::hasF9() const {
+inline bool Iface1::Struct1::Reader::hasF1() const {
   return !_reader.getPointerField(
       ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
 }
-inline bool Iface1::Struct1::Builder::hasF9() {
+inline bool Iface1::Struct1::Builder::hasF1() {
   return !_builder.getPointerField(
       ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
 }
-inline  ::capnp::Text::Reader Iface1::Struct1::Reader::getF9() const {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-inline  ::capnp::Text::Builder Iface1::Struct1::Builder::getF9() {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-inline void Iface1::Struct1::Builder::setF9( ::capnp::Text::Reader value) {
-  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
-}
-inline  ::capnp::Text::Builder Iface1::Struct1::Builder::initF9(unsigned int size) {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
-}
-inline void Iface1::Struct1::Builder::adoptF9(
-    ::capnp::Orphan< ::capnp::Text>&& value) {
-  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
-}
-inline ::capnp::Orphan< ::capnp::Text> Iface1::Struct1::Builder::disownF9() {
-  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
-      ::capnp::bounded<0>() * ::capnp::POINTERS));
-}
-
-inline bool Iface1::Struct1::Reader::hasF10() const {
-  return !_reader.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
-}
-inline bool Iface1::Struct1::Builder::hasF10() {
-  return !_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
-}
-inline  ::capnp::Data::Reader Iface1::Struct1::Reader::getF10() const {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::get(_reader.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-inline  ::capnp::Data::Builder Iface1::Struct1::Builder::getF10() {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::get(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-inline void Iface1::Struct1::Builder::setF10( ::capnp::Data::Reader value) {
-  ::capnp::_::PointerHelpers< ::capnp::Data>::set(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), value);
-}
-inline  ::capnp::Data::Builder Iface1::Struct1::Builder::initF10(unsigned int size) {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::init(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), size);
-}
-inline void Iface1::Struct1::Builder::adoptF10(
-    ::capnp::Orphan< ::capnp::Data>&& value) {
-  ::capnp::_::PointerHelpers< ::capnp::Data>::adopt(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS), kj::mv(value));
-}
-inline ::capnp::Orphan< ::capnp::Data> Iface1::Struct1::Builder::disownF10() {
-  return ::capnp::_::PointerHelpers< ::capnp::Data>::disown(_builder.getPointerField(
-      ::capnp::bounded<1>() * ::capnp::POINTERS));
-}
-
-inline bool Iface1::Struct1::Reader::hasF11() const {
-  return !_reader.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
-}
-inline bool Iface1::Struct1::Builder::hasF11() {
-  return !_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
-}
-inline ::capnp::AnyPointer::Reader Iface1::Struct1::Reader::getF11() const {
+inline ::capnp::AnyPointer::Reader Iface1::Struct1::Reader::getF1() const {
   return ::capnp::AnyPointer::Reader(_reader.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
 }
-inline ::capnp::AnyPointer::Builder Iface1::Struct1::Builder::getF11() {
+inline ::capnp::AnyPointer::Builder Iface1::Struct1::Builder::getF1() {
   return ::capnp::AnyPointer::Builder(_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
 }
-inline ::capnp::AnyPointer::Builder Iface1::Struct1::Builder::initF11() {
+inline ::capnp::AnyPointer::Builder Iface1::Struct1::Builder::initF1() {
   auto result = ::capnp::AnyPointer::Builder(_builder.getPointerField(
-      ::capnp::bounded<2>() * ::capnp::POINTERS));
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
   result.clear();
   return result;
 }

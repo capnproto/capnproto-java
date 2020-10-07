@@ -24,17 +24,6 @@ struct TestResults1 {
 
 struct Struct0 {
     f0  @0  :Bool;
-    f1  @1  :UInt16;
-    f2  @2  :Int16;
-    f3  @3  :UInt32;
-    f4  @4  :Int32;
-    f5  @5  :UInt64;
-    f6  @6  :Int64;
-    f7  @7  :Float32;
-    f8  @8  :Float64;
-    f9  @9  :Text;
-    f10 @10 :Data;
-    f11 @11 :AnyPointer;
 }
 
 interface Iface0 {
@@ -49,22 +38,11 @@ interface Iface1 {
 
   struct Struct1 {
     f0  @0  :Bool;
-    f1  @1  :UInt16;
-    f2  @2  :Int16;
-    f3  @3  :UInt32;
-    f4  @4  :Int32;
-    f5  @5  :UInt64;
-    f6  @6  :Int64;
-    f7  @7  :Float32;
-    f8  @8  :Float64;
-    f9  @9  :Text;
-    f10 @10 :Data;
-    f11 @11 :AnyPointer;
+    f1 @1 :AnyPointer;
   }
 
   method0 @0 () -> (result0 :Struct0, result1 :Struct1);
   method1 @1 () -> (result0: Iface0);
-
 }
 
 

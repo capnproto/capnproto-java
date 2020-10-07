@@ -12,6 +12,30 @@ public final class Capability {
         CapTableReader capTable;
     }
 
+    public static abstract class Factory<T>
+            implements FromPointerReader<T>,
+                       FromPointerBuilder<T> {
+        @Override
+        public T fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
+            return newClient(hook);
+        }
+
+        @Override
+        public T fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
+            return newClient(hook);
+        }
+
+        @Override
+        public T initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
+            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
+            return newClient(hook);
+        }
+
+        public abstract T newClient(ClientHook hook);
+    }
+
     public static class Client {
 
         final ClientHook hook;

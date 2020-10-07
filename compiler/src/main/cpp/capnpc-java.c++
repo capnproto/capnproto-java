@@ -1027,8 +1027,8 @@ private:
 
     } else if (kind == FieldKind::INTERFACE) {
 
-      auto factoryArg = makeFactoryArg(schema::Type::ANY_POINTER);
-      auto capType = typeName(field.getType(), kj::str("Client")).flatten();
+      auto factoryArg = kj::str(typeName(field.getType()), ".factory");
+      auto capType = kj::str(typeName(field.getType()), ".Client");
 
       return FieldText {
         kj::strTree(
@@ -1040,7 +1040,7 @@ private:
 
             spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new ", capType, "(_getPointerField(", factoryArg, ", ", offset, ").getAsCap());\n",
+            spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n"),
 
         kj::strTree(
@@ -1051,13 +1051,12 @@ private:
 
             spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
             unionDiscrim.check,
-            spaces(indent), "    return new ", capType, "(\n",
-            spaces(indent), "      _getPointerField(", factoryArg, ", ", offset, ").getAsCap());\n",
+            spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
 
             spaces(indent), "  public void set", titleCase, "(", capType, " value) {\n",
             unionDiscrim.set,
-            spaces(indent), "    _initPointerField(", factoryArg, ", ", offset, ", 0).setAsCap(value);\n",
+            spaces(indent), "    _initPointerField(", factoryArg, ", ", offset, ", 0);\n",
             spaces(indent), "  }\n",
             "\n")
           };
@@ -1593,8 +1592,13 @@ private:
 
     return InterfaceText {
       kj::strTree(
-          spaces(indent), "public static class ", name, "{\n",
-          spaces(indent), "\n",
+          spaces(indent), "public static class ", name, " {\n",
+          spaces(indent), "  public static final class Factory extends org.capnproto.Capability.Factory<Client> {\n",
+          spaces(indent), "    public final Client newClient(org.capnproto.ClientHook hook) {\n",
+          spaces(indent), "      return new Client(hook);\n",
+          spaces(indent), "    }\n",
+          spaces(indent), "  }\n",
+          spaces(indent), "  public static final Factory factory = new Factory();\n",
           spaces(indent), "  public static class Client extends org.capnproto.Capability.Client {\n",
           spaces(indent), "    public Client() {}\n",
           spaces(indent), "    public Client(org.capnproto.ClientHook hook) { super(hook); }\n",
@@ -1653,15 +1657,62 @@ private:
 
     bool isStreaming = method.isStreaming();
 
+    auto implicitParamsReader = proto.getImplicitParameters();
+
     auto interfaceTypeName = javaFullName(method.getContainingInterface());
+    kj::String paramType;
+    kj::String genericParamType;
 
-    kj::String paramType = (paramProto.getScopeId() == 0)
-      ? kj::str(interfaceTypeName, "Params")
-      : kj::str(javaFullName(paramSchema, method));
+    if (paramProto.getScopeId() == 0) {
+      paramType = kj::str(interfaceTypeName);
+      if (implicitParamsReader.size() == 0) {
+        paramType = kj::str(titleCase, "Params");
+        genericParamType = kj::str(paramType);
+      } else {
+        KJ_FAIL_REQUIRE("Generic interfaces not supported");
+        //genericParamType = paramType;
+        //genericParamType.addMemberTemplate(kj::str(titleCase, "Params"), nullptr);
+        //paramType.addMemberTemplate(kj::str(titleCase, "Params"),
+        //                            kj::heapArray(implicitParams.asPtr()));
+      }
+    } else {
+      paramType = kj::str(javaFullName(paramSchema, method));
+      genericParamType = kj::str(javaFullName(paramSchema, nullptr));
+    }
 
-    kj::String resultType = (resultProto.getScopeId() == 0)
-      ? kj::str(interfaceTypeName, "Results")
-      : kj::str(javaFullName(resultSchema, method));
+    kj::String resultType;
+    kj::String genericResultType;
+    if (isStreaming) {
+      // We don't use resultType or genericResultType in this case. We want to avoid computing them
+      // at all so that we don't end up marking stream.capnp.h in usedImports.
+    } else if (resultProto.getScopeId() == 0) {
+      resultType = kj::str(interfaceTypeName);
+      if (implicitParamsReader.size() == 0) {
+        resultType = kj::str(titleCase, "Results");
+        genericResultType = kj::str(resultType);
+      } else {
+        KJ_FAIL_REQUIRE("Generic interfaces not supported");
+        //genericResultType = resultType;
+        //genericResultType.addMemberTemplate(kj::str(titleCase, "Results"), nullptr);
+        //resultType.addMemberTemplate(kj::str(titleCase, "Results"),
+        //                             kj::heapArray(implicitParams.asPtr()));
+      }
+    } else {
+      resultType = kj::str(javaFullName(resultSchema, method));
+      genericResultType = kj::str(javaFullName(resultSchema, nullptr));
+    }
+
+    kj::String shortParamType = paramProto.getScopeId() == 0 ?
+        kj::str(titleCase, "Params") : kj::str(genericParamType);
+    kj::String shortResultType = resultProto.getScopeId() == 0 || isStreaming ?
+        kj::str(titleCase, "Results") : kj::str(genericResultType);
+
+    if (paramProto.getScopeId() == 0) {
+      paramType = kj::str(javaFullName(paramSchema, method));
+    }
+    if (resultProto.getScopeId() == 0) {
+      paramType = kj::str(javaFullName(resultSchema, method));
+    }
 
     auto interfaceProto = method.getContainingInterface().getProto();
     uint64_t interfaceId = interfaceProto.getId();
@@ -1692,8 +1743,8 @@ private:
           "          return org.capnproto.Capability.Server.",
           isStreaming ? "streamResult" : "result", "(\n",
           "            this.", identifierName, "(org.capnproto.Capability.Server.typedContext(\n"
-          "              ", paramType, ".factory,\n",
-          "              ", resultType, ".factory, context)));\n")
+          "              ", genericParamType, ".factory,\n",
+          "              ", genericResultType, ".factory, context)));\n")
     };
   }
 

@@ -1,19 +1,16 @@
 package org.capnproto;
 
 import org.capnproto.demo.Demo;
+import org.capnproto.demo.DemoFoo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.*;
 
 class TestCap0 {
 
@@ -35,44 +32,31 @@ class TestCap0 {
         }
     }
 
-    static abstract class Server extends org.capnproto.Capability.Server {
-
-        public class TestMethod0Context extends CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder> {
-            public TestMethod0Context(CallContextHook hook) {
-                super(Demo.TestParams0.factory, Demo.TestResults0.factory, hook);
-            }
-        }
-
-        public class TestMethod1Context extends CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder> {
-            public TestMethod1Context(CallContextHook hook) {
-                super(Demo.TestParams1.factory, Demo.TestResults1.factory, hook);
-            }
-        }
-
+    public static class Server extends Capability.Server {
         @Override
         public DispatchCallResult dispatchCall(long interfaceId, short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> context) {
             if (interfaceId == 0xa65f4a3d7f622e6bL) {
                 return dispatchCallInternal(methodId, context);
             }
-            return internalUnimplemented(Demo.class.getName(), interfaceId);
+            return result(internalUnimplemented(Demo.class.getName(), interfaceId));
         }
 
-        private DispatchCallResult dispatchCallInternal(short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> ctx) {
+        DispatchCallResult dispatchCallInternal(short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> ctx) {
             switch (methodId) {
                 case 0:
-                    return new DispatchCallResult(testMethod0(new TestMethod0Context(ctx.getHook())));
+                    return result(testMethod0(typedContext(Demo.TestParams0.factory, Demo.TestResults0.factory, ctx)));
                 case 1:
-                    return new DispatchCallResult(testMethod1(new TestMethod1Context(ctx.getHook())));
+                    return result(testMethod1(typedContext(Demo.TestParams1.factory, Demo.TestResults1.factory, ctx)));
                 default:
-                    return internalUnimplemented(Demo.class.getName(), 0xa27d3c231c7b9202L, methodId);
+                    return result(internalUnimplemented(Demo.class.getName(), 0xa27d3c231c7b9202L, methodId));
             }
         }
 
-        public CompletableFuture<?> testMethod0(TestMethod0Context ctx) {
+        public CompletableFuture<?> testMethod0(CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder> ctx) {
             return CompletableFuture.failedFuture(RpcException.unimplemented("testMethod0"));
         }
 
-        public CompletableFuture<?> testMethod1(TestMethod1Context ctx) {
+        public CompletableFuture<?> testMethod1(CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder>  ctx) {
             return CompletableFuture.failedFuture(RpcException.unimplemented("testMethod1"));
         }
     }
@@ -97,13 +81,13 @@ class TestCap1 {
             if (interfaceId == 0x81da3f8f6079c216L) {
                 return dispatchCallInternal(methodId, context);
             }
-            return internalUnimplemented(Demo.class.getName(), interfaceId);
+            return result(internalUnimplemented(Demo.class.getName(), interfaceId));
         }
 
         private DispatchCallResult dispatchCallInternal(short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> ctx) {
             switch (methodId) {
                 default:
-                    return internalUnimplemented(Demo.class.getName(), 0x81da3f8f6079c216L, methodId);
+                    return result(internalUnimplemented(Demo.class.getName(), 0x81da3f8f6079c216L, methodId));
             }
         }
     }
@@ -114,22 +98,22 @@ class TestCap0Impl extends TestCap0.Server {
     final TestCap1.Client testCap1a = new TestCap1.Client(new TestCap1Impl());
     final TestCap1.Client testCap1b = new TestCap1.Client(new TestCap1Impl());
 
-    public CompletableFuture<?> testMethod0(TestCap0.Server.TestMethod0Context ctx) {
+    public CompletableFuture<?> testMethod0(CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder>  ctx) {
         var params = ctx.getParams();
         var results = ctx.getResults();
         results.setResult0(params.getParam0());
         return CompletableFuture.completedFuture(null);
     }
 
-    public CompletableFuture<?> testMethod1(TestCap0.Server.TestMethod1Context ctx) {
+    public CompletableFuture<?> testMethod1(CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder>  ctx) {
         var params = ctx.getParams();
         var results = ctx.getResults();
         var res0 = results.getResult0();
-        res0.setAsCapability(testCap1a);
+        res0.setAsCap(testCap1a);
         var res1 = results.getResult1();
-        res1.setAsCapability(testCap1b);
+        res1.setAsCap(testCap1b);
         var res2 = results.getResult2();
-        res2.setAsCapability(testCap1b);
+        res2.setAsCap(testCap1b);
         return CompletableFuture.completedFuture(null);
     }
 }
@@ -204,19 +188,31 @@ public class TwoPartyTest {
         }
         Assert.assertTrue(resultsPromise.isDone());
         var results = resultsPromise.get();
-        var cap0 = results.getResult0().getAsCapability();
-        Assert.assertFalse(cap0.hook.isNull());
-        Assert.assertFalse(cap0.hook.isError());
-        var cap1 = results.getResult1().getAsCapability();
-        Assert.assertFalse(cap1.hook.isNull());
-        Assert.assertFalse(cap1.hook.isError());
-        var cap2 = results.getResult2().getAsCapability();
-        Assert.assertFalse(cap2.hook.isNull());
-        Assert.assertFalse(cap2.hook.isError());
+        var cap0 = results.getResult0();
+        Assert.assertFalse(cap0.isNull());
+        var cap1 = results.getResult1();
+        Assert.assertFalse(cap1.isNull());
+        var cap2 = results.getResult2();
+        Assert.assertFalse(cap2.isNull());
+
+        var cap3 = results.getResult2().getAs(Demo.Iface0.factory);
+        Assert.assertFalse(cap2.isNull());
+        //Assert.assertFalse(cap2.hook.isError());
     }
 
     @Test
     public void testLocalServer() throws ExecutionException, InterruptedException {
+        var demo = new TestCap0Impl();
+        var client = new TestCap0.Client(demo);
+        var request = client.testMethod0Request();
+        var params = request.params();
+        params.setParam0(4321);
+        var results = request.send().get();
+        Assert.assertEquals(params.getParam0(), results.getResult0());
+    }
+
+    @Test
+    public void testGenericServer() throws ExecutionException, InterruptedException {
         var demo = new TestCap0Impl();
         var client = new TestCap0.Client(demo);
         var request = client.testMethod0Request();
