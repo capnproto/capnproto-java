@@ -9,7 +9,7 @@ endif
 
 PREFIX ?= /usr/local
 
-CXX=g++
+CXX ?= g++
 CXX_FLAGS=-std=c++14 $(CAPNP_CXX_FLAGS)
 
 CAPNPC_JAVA_SOURCES=compiler/src/main/cpp/capnpc-java.c++
