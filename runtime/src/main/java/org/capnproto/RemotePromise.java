@@ -13,6 +13,7 @@ class RemotePromise<Results> {
         this.pipeline = pipeline;
     }
 
+
     public CompletableFuture<Response<Results>> getResponse() {
         return response;
     }

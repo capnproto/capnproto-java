@@ -267,7 +267,7 @@ public final class Capability {
                 return context.response;
             });
 
-            return new RemotePromise<AnyPointer.Reader>(promise, promiseAndPipeline.pipeline);
+            return new RemotePromise<>(promise, promiseAndPipeline.pipeline);
         }
 
         @Override

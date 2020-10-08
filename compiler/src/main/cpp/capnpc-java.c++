@@ -711,6 +711,7 @@ private:
   struct FieldText {
     kj::StringTree readerMethodDecls;
     kj::StringTree builderMethodDecls;
+    kj::StringTree pipelineMethodDecls;
   };
 
   enum class FieldKind {
@@ -869,7 +870,10 @@ private:
               "  return new ", scope, titleCase,
               ".Builder(segment, data, pointers, dataSize, pointerCount);\n",
               spaces(indent), "  }\n",
-              "\n")
+              "\n"),
+
+            // TODO pipelineMethodDecls
+            kj::strTree()
           };
       }
     }
@@ -1028,7 +1032,7 @@ private:
     } else if (kind == FieldKind::INTERFACE) {
 
       auto factoryArg = kj::str(typeName(field.getType()), ".factory");
-      auto capType = kj::str(typeName(field.getType()), ".Client");
+      auto clientType = kj::str(typeName(field.getType()), ".Client");
 
       return FieldText {
         kj::strTree(
@@ -1038,7 +1042,7 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
+            spaces(indent), "  public ", clientType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n"),
@@ -1049,17 +1053,23 @@ private:
             spaces(indent), "    return !_pointerFieldIsNull(", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public ", capType, " get", titleCase, "() {\n",
+            spaces(indent), "  public ", clientType, " get", titleCase, "() {\n",
             unionDiscrim.check,
             spaces(indent), "    return _getPointerField(", factoryArg, ", ", offset, ");\n",
             spaces(indent), "  }\n",
 
-            spaces(indent), "  public void set", titleCase, "(", capType, " value) {\n",
+            spaces(indent), "  public void set", titleCase, "(", clientType, " value) {\n",
             unionDiscrim.set,
             spaces(indent), "    _initPointerField(", factoryArg, ", ", offset, ", 0);\n",
             spaces(indent), "  }\n",
-            "\n")
-          };
+            "\n"),
+
+          kj::strTree(
+             spaces(indent), "  public ", clientType, " get", titleCase, "() {\n",
+             spaces(indent), "    return new ", clientType, "(typeless.getPointerField((short)", offset, ").asCap());\n",
+             spaces(indent), "  }\n"
+          )
+      };
     } else if (kind == FieldKind::ANY_POINTER) {
 
       auto factoryArg = makeFactoryArg(field.getType());
@@ -1563,7 +1573,16 @@ private:
           spaces(indent), "    _NOT_IN_SCHEMA,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-        spaces(indent), "}\n"
+
+        spaces(indent), "  public static class Pipeline {\n",
+        spaces(indent), "    private org.capnproto.AnyPointer.Pipeline typeless;\n\n",
+        spaces(indent), "    public Pipeline() {}\n",
+        spaces(indent), "    public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {\n",
+        spaces(indent), "      this.typeless = typeless;\n",
+        spaces(indent), "    }\n",
+        KJ_MAP(f, fieldTexts) { return kj::mv(f.pipelineMethodDecls); },
+        spaces(indent), "  }\n",
+        spaces(indent), "}\n",
         "\n",
         "\n"),
 
@@ -1571,6 +1590,7 @@ private:
         kj::strTree()
         };
   }
+
   // -----------------------------------------------------------------
 
   struct InterfaceText {

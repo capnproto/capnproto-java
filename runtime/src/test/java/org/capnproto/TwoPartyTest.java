@@ -120,6 +120,32 @@ class TestCap0Impl extends TestCap0.Server {
 class TestCap1Impl extends TestCap1.Server {
 }
 
+class Iface0Impl extends Demo.Iface0.Server {
+    @Override
+    protected CompletableFuture<?> method0(CallContext<Demo.Iface0.Method0Params.Reader, Demo.Iface0.Method0Results.Builder> context) {
+        System.out.println("Called Iface0.method0");
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    protected CompletableFuture<?> method1(StreamingCallContext<Demo.Iface0.Method1Params.Reader> context) {
+        return super.method1(context);
+    }
+}
+class Iface1Impl extends Demo.Iface1.Server {
+    @Override
+    protected CompletableFuture<?> method0(CallContext<Demo.Iface1.Method0Params.Reader, Demo.Iface1.Method0Results.Builder> context) {
+        return super.method0(context);
+    }
+
+    @Override
+    protected CompletableFuture<?> method1(CallContext<Demo.Iface1.Method1Params.Reader, Demo.Iface1.Method1Results.Builder> context) {
+        context.getResults().setResult0(new Demo.Iface0.Client(new Iface0Impl()));
+        System.out.println("Called Iface0.method0");
+        return CompletableFuture.completedFuture(null);
+    }
+}
+
 public class TwoPartyTest {
 
     AsynchronousServerSocketChannel serverSocket;
@@ -163,13 +189,13 @@ public class TwoPartyTest {
         var request = demoClient.testMethod0Request();
         var params = request.params();
         params.setParam0(4321);
-        var resultsPromise = request.send();
-        while (!resultsPromise.isDone()) {
-            CompletableFuture.anyOf(resultsPromise, server.runOnce()).join();
+        var promise = request.send();
+        while (!promise.response.isDone()) {
+            CompletableFuture.anyOf(promise.response, server.runOnce()).join();
         }
-        Assert.assertTrue(resultsPromise.isDone());
-        var results = resultsPromise.get();
-        Assert.assertEquals(params.getParam0(), results.getResult0());
+        Assert.assertTrue(promise.response.isDone());
+        var response = promise.response.get();
+        Assert.assertEquals(params.getParam0(), response.getResults().getResult0());
     }
 
     @Test
@@ -181,12 +207,14 @@ public class TwoPartyTest {
         var demoClient = new TestCap0.Client(this.client.bootstrap());
         var request = demoClient.testMethod1Request();
         var params = request.params();
-        var resultsPromise = request.send();
-        while (!resultsPromise.isDone()) {
-            CompletableFuture.anyOf(resultsPromise, server.runOnce(), client.runOnce()).join();
+        var promise = request.send();
+        while (!promise.response.isDone()) {
+            CompletableFuture.anyOf(promise.response, server.runOnce(), client.runOnce()).join();
         }
-        Assert.assertTrue(resultsPromise.isDone());
-        var results = resultsPromise.get();
+        Assert.assertTrue(promise.response.isDone());
+
+        var response = promise.response.get();
+        var results = response.getResults();
         var cap0 = results.getResult0();
         Assert.assertFalse(cap0.isNull());
         var cap1 = results.getResult1();
@@ -202,7 +230,10 @@ public class TwoPartyTest {
         var request = client.testMethod0Request();
         var params = request.params();
         params.setParam0(4321);
-        var results = request.send().get();
+        var promise = request.send();
+        var future = promise.getResponse();
+        var response = future.get();
+        var results = response.getResults();
         Assert.assertEquals(params.getParam0(), results.getResult0());
     }
 
@@ -212,8 +243,18 @@ public class TwoPartyTest {
         var client = new TestCap0.Client(demo);
         var request = client.testMethod0Request();
         var params = request.params();
-        params.setParam0(4321);
-        var results = request.send().get();
+        var promise = request.send();
+        var future = promise.getResponse();
+        var response = future.get();
+        var results = response.getResults();
         Assert.assertEquals(params.getParam0(), results.getResult0());
+    }
+
+    @Test
+    public void testTwoStagePipeline() {
+        var iface1Client = new Demo.Iface1.Client(new Iface1Impl());
+        var request = iface1Client.method1Request();
+        var response = request.send();
+
     }
 }

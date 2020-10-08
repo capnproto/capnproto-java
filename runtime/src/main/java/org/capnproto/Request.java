@@ -28,7 +28,7 @@ public class Request<Params, Results> {
         var typedPromise = typelessPromise.getResponse().thenApply(response -> {
                     return new Response<Results>(
                             resultsReader,
-                            response.get(),
+                            response.getResults(),
                             response.hook);
                 });
 

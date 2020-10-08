@@ -14,7 +14,7 @@ class Response<Results> {
         this.results = reader;
     }
 
-    public final Results get() {
+    public final Results getResults() {
         return this.results.getAs(factory);
     }
 }

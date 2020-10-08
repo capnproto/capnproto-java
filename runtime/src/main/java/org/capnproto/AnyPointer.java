@@ -143,4 +143,46 @@ public final class AnyPointer {
         }
     }
 
+    public static final class Pipeline {
+        private PipelineHook hook;
+        private final PipelineOp[] ops;
+
+        Pipeline() {
+            this.hook = null;
+            this.ops = new PipelineOp[0];
+        }
+
+        Pipeline(PipelineHook hook) {
+            this.hook = hook;
+            this.ops = new PipelineOp[0];
+        }
+
+        Pipeline(PipelineHook hook, PipelineOp[] ops) {
+            this.hook = hook;
+            this.ops = ops;
+        }
+
+        Pipeline noop() {
+            return new Pipeline(this.hook, this.ops.clone());
+        }
+
+        public ClientHook asCap() {
+            return this.hook.getPipelinedCap(this.ops);
+        }
+
+        PipelineHook releasePipelineHook() {
+            var tmp = this.hook;
+            this.hook = null;
+            return tmp;
+        }
+
+        public Pipeline getPointerField(short pointerIndex) {
+            var newOps = new PipelineOp[this.ops.length+1];
+            for (int ii = 0; ii < this.ops.length; ++ii) {
+                newOps[ii] = this.ops[ii];
+            }
+            newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
+            return new Pipeline(this.hook, newOps);
+        }
+    }
 }

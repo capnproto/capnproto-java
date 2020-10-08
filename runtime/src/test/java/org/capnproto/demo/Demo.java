@@ -52,6 +52,14 @@ public final class Demo {
 
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+    }
   }
 
 
@@ -103,6 +111,14 @@ public final class Demo {
 
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+    }
   }
 
 
@@ -162,6 +178,14 @@ public final class Demo {
       }
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+    }
   }
 
 
@@ -259,6 +283,14 @@ public final class Demo {
       }
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+    }
   }
 
 
@@ -310,6 +342,14 @@ public final class Demo {
 
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+    }
   }
 
 
@@ -414,6 +454,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -454,6 +502,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -494,6 +550,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -572,6 +636,17 @@ public final class Demo {
       }
     }
 
+    public static class Pipeline {
+      private org.capnproto.AnyPointer.Pipeline typeless;
+
+      public Pipeline() {}
+      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+        this.typeless = typeless;
+      }
+      public org.capnproto.demo.Demo.Iface0.Client getF1i() {
+        return new org.capnproto.demo.Demo.Iface0.Client(typeless.getPointerField((short)1).asCap());
+      }
+    }
   }
 
 
@@ -706,6 +781,14 @@ public final class Demo {
         }
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -746,6 +829,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -818,6 +909,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -858,6 +957,14 @@ public final class Demo {
 
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+      }
     }
 
 
@@ -914,6 +1021,17 @@ public final class Demo {
         }
       }
 
+      public static class Pipeline {
+        private org.capnproto.AnyPointer.Pipeline typeless;
+
+        public Pipeline() {}
+        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
+          this.typeless = typeless;
+        }
+        public org.capnproto.demo.Demo.Iface0.Client getResult0() {
+          return new org.capnproto.demo.Demo.Iface0.Client(typeless.getPointerField((short)0).asCap());
+        }
+      }
     }
 
 
