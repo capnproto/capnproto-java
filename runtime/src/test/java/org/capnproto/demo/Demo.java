@@ -328,6 +328,13 @@ public final class Demo {
       public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {
         super(promise);
       }
+  
+      public org.capnproto.Request<Method0Params.Builder, Method0Results.Reader> method0Request() {
+        return newCall(Method0Params.factory, Method0Results.factory, 0xac6d126c2fac16ebL, (short)0);
+      }
+      public org.capnproto.StreamingRequest<Method1Params.Builder> method1Request() {
+        return newStreamingCall(Method1Params.factory, 0xac6d126c2fac16ebL, (short)1);
+      }
     }
     public static abstract class Server extends org.capnproto.Capability.Server {
       protected org.capnproto.DispatchCallResult dispatchCall(
@@ -342,14 +349,154 @@ public final class Demo {
   
       protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
         switch (methodId) {
+        case 0:
+          return org.capnproto.Capability.Server.result (
+            this.method0(org.capnproto.Capability.Server.internalGetTypedContext(
+              Method0Params.factory, Method0Results.factory, context)));
+        case 1:
+          return org.capnproto.Capability.Server.streamResult(
+            this.method1(org.capnproto.Capability.Server.internalGetTypedStreamingContext(
+              Method1Params.factory, context)));
         default:
           return org.capnproto.Capability.Server.result(
             org.capnproto.Capability.Server.internalUnimplemented("Iface0", 0xac6d126c2fac16ebL, methodId));
         }
       }
 
+      protected java.util.concurrent.CompletableFuture<?> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
+        return org.capnproto.Capability.Server.internalUnimplemented(
+          "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface0", "method0",
+          0xac6d126c2fac16ebL, (short)0);
+      }
+
+      protected java.util.concurrent.CompletableFuture<?> method1(org.capnproto.StreamingCallContext<Method1Params.Reader> context) {
+        return org.capnproto.Capability.Server.internalUnimplemented(
+          "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface0", "method1",
+          0xac6d126c2fac16ebL, (short)1);
+      }
+
     }
   
+    public static class Method0Params {
+      public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
+      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+        public Factory() {
+        }
+        public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
+          return new Reader(segment,data,pointers,dataSize,pointerCount,nestingLimit);
+        }
+        public final Builder constructBuilder(org.capnproto.SegmentBuilder segment, int data,int pointers, int dataSize, short pointerCount) {
+          return new Builder(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final org.capnproto.StructSize structSize() {
+          return Iface0.Method0Params.STRUCT_SIZE;
+        }
+        public final Reader asReader(Builder builder) {
+          return builder.asReader();
+        }
+      }
+      public static final Factory factory = new Factory();
+      public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
+        new org.capnproto.StructList.Factory<Builder, Reader>(factory);
+      public static final class Builder extends org.capnproto.StructBuilder {
+        Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,int dataSize, short pointerCount){
+          super(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final Reader asReader() {
+          return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);
+        }
+      }
+
+      public static final class Reader extends org.capnproto.StructReader {
+        Reader(org.capnproto.SegmentReader segment, int data, int pointers,int dataSize, short pointerCount, int nestingLimit){
+          super(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+        }
+
+      }
+
+    }
+
+
+    public static class Method0Results {
+      public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
+      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+        public Factory() {
+        }
+        public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
+          return new Reader(segment,data,pointers,dataSize,pointerCount,nestingLimit);
+        }
+        public final Builder constructBuilder(org.capnproto.SegmentBuilder segment, int data,int pointers, int dataSize, short pointerCount) {
+          return new Builder(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final org.capnproto.StructSize structSize() {
+          return Iface0.Method0Results.STRUCT_SIZE;
+        }
+        public final Reader asReader(Builder builder) {
+          return builder.asReader();
+        }
+      }
+      public static final Factory factory = new Factory();
+      public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
+        new org.capnproto.StructList.Factory<Builder, Reader>(factory);
+      public static final class Builder extends org.capnproto.StructBuilder {
+        Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,int dataSize, short pointerCount){
+          super(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final Reader asReader() {
+          return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);
+        }
+      }
+
+      public static final class Reader extends org.capnproto.StructReader {
+        Reader(org.capnproto.SegmentReader segment, int data, int pointers,int dataSize, short pointerCount, int nestingLimit){
+          super(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+        }
+
+      }
+
+    }
+
+
+    public static class Method1Params {
+      public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
+      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+        public Factory() {
+        }
+        public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
+          return new Reader(segment,data,pointers,dataSize,pointerCount,nestingLimit);
+        }
+        public final Builder constructBuilder(org.capnproto.SegmentBuilder segment, int data,int pointers, int dataSize, short pointerCount) {
+          return new Builder(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final org.capnproto.StructSize structSize() {
+          return Iface0.Method1Params.STRUCT_SIZE;
+        }
+        public final Reader asReader(Builder builder) {
+          return builder.asReader();
+        }
+      }
+      public static final Factory factory = new Factory();
+      public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
+        new org.capnproto.StructList.Factory<Builder, Reader>(factory);
+      public static final class Builder extends org.capnproto.StructBuilder {
+        Builder(org.capnproto.SegmentBuilder segment, int data, int pointers,int dataSize, short pointerCount){
+          super(segment, data, pointers, dataSize, pointerCount);
+        }
+        public final Reader asReader() {
+          return new Reader(segment, data, pointers, dataSize, pointerCount, 0x7fffffff);
+        }
+      }
+
+      public static final class Reader extends org.capnproto.StructReader {
+        Reader(org.capnproto.SegmentReader segment, int data, int pointers,int dataSize, short pointerCount, int nestingLimit){
+          super(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+        }
+
+      }
+
+    }
+
+
   
   }
   
@@ -443,6 +590,13 @@ public final class Demo {
       public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {
         super(promise);
       }
+  
+      public org.capnproto.Request<Method0Params.Builder, Method0Results.Reader> method0Request() {
+        return newCall(Method0Params.factory, Method0Results.factory, 0xd52dcf38c9f6f7c0L, (short)0);
+      }
+      public org.capnproto.Request<Method1Params.Builder, Method1Results.Reader> method1Request() {
+        return newCall(Method1Params.factory, Method1Results.factory, 0xd52dcf38c9f6f7c0L, (short)1);
+      }
     }
     public static abstract class Server extends org.capnproto.Capability.Server {
       protected org.capnproto.DispatchCallResult dispatchCall(
@@ -458,15 +612,13 @@ public final class Demo {
       protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
         switch (methodId) {
         case 0:
-          return org.capnproto.Capability.Server.result(
-            this.method0(org.capnproto.Capability.Server.typedContext(
-              Method0Params.factory,
-              Method0Results.factory, context)));
+          return org.capnproto.Capability.Server.result (
+            this.method0(org.capnproto.Capability.Server.internalGetTypedContext(
+              Method0Params.factory, Method0Results.factory, context)));
         case 1:
-          return org.capnproto.Capability.Server.result(
-            this.method1(org.capnproto.Capability.Server.typedContext(
-              Method1Params.factory,
-              Method1Results.factory, context)));
+          return org.capnproto.Capability.Server.result (
+            this.method1(org.capnproto.Capability.Server.internalGetTypedContext(
+              Method1Params.factory, Method1Results.factory, context)));
         default:
           return org.capnproto.Capability.Server.result(
             org.capnproto.Capability.Server.internalUnimplemented("Iface1", 0xd52dcf38c9f6f7c0L, methodId));
@@ -474,13 +626,13 @@ public final class Demo {
       }
 
       protected java.util.concurrent.CompletableFuture<?> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
-        return  org.capnproto.Capability.Server.internalUnimplemented(
+        return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface1", "method0",
           0xd52dcf38c9f6f7c0L, (short)0);
       }
 
       protected java.util.concurrent.CompletableFuture<?> method1(org.capnproto.CallContext<Method1Params.Reader, Method1Results.Builder> context) {
-        return  org.capnproto.Capability.Server.internalUnimplemented(
+        return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface1", "method1",
           0xd52dcf38c9f6f7c0L, (short)1);
       }
@@ -1008,8 +1160,8 @@ public static final org.capnproto.SegmentReader b_ac6d126c2fac16eb =
    "\u0015\u0000\u0000\u0000\u00da\u0001\u0000\u0000" +
    "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
-   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
-   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0087\u0000\u0000\u0000" +
+   "\u007d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
    "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
@@ -1020,8 +1172,100 @@ public static final org.capnproto.SegmentReader b_ac6d126c2fac16eb =
    "\u0070\u006e\u0070\u003a\u0049\u0066\u0061\u0063" +
    "\u0065\u0030\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
-   "\u0000\u0000\u0000\u0000\u0003\u0000\u0005\u0000" +
+   "\u0008\u0000\u0000\u0000\u0003\u0000\u0005\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u004b\u0029\u0076\u00aa\u00ed\u0077\u008d\u00bc" +
+   "\u003e\u0067\u0084\u00a6\u004a\u00e2\u0044\u00f7" +
+   "\u0031\u0000\u0000\u0000\u0042\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0025\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0024\u00f3\u0034\u00d2\u0078\u005b\u00c2\u00c8" +
+   "\u006e\u00b1\u00c0\u0077\u0033\u009a\u005f\u0099" +
+   "\u0019\u0000\u0000\u0000\u0042\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\r\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u006d\u0065\u0074\u0068\u006f\u0064\u0030\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000" +
+   "\u006d\u0065\u0074\u0068\u006f\u0064\u0031\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000" +
    "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" + "");
+public static final org.capnproto.SegmentReader b_bc8d77edaa76294b =
+   org.capnproto.GeneratedClassSupport.decodeRawBytes(
+   "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
+   "\u004b\u0029\u0076\u00aa\u00ed\u0077\u008d\u00bc" +
+   "\u003b\u0000\u0000\u0000\u0001\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u0052\u0002\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0064\u0065\u006d\u006f" +
+   "\u002f\u0064\u0065\u006d\u006f\u002e\u0063\u0061" +
+   "\u0070\u006e\u0070\u003a\u0049\u0066\u0061\u0063" +
+   "\u0065\u0030\u002e\u006d\u0065\u0074\u0068\u006f" +
+   "\u0064\u0030\u0024\u0050\u0061\u0072\u0061\u006d" +
+   "\u0073\u0000\u0000\u0000\u0000\u0000\u0000\u0000" + "");
+public static final org.capnproto.SegmentReader b_f744e24aa684673e =
+   org.capnproto.GeneratedClassSupport.decodeRawBytes(
+   "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
+   "\u003e\u0067\u0084\u00a6\u004a\u00e2\u0044\u00f7" +
+   "\u003b\u0000\u0000\u0000\u0001\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u005a\u0002\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0064\u0065\u006d\u006f" +
+   "\u002f\u0064\u0065\u006d\u006f\u002e\u0063\u0061" +
+   "\u0070\u006e\u0070\u003a\u0049\u0066\u0061\u0063" +
+   "\u0065\u0030\u002e\u006d\u0065\u0074\u0068\u006f" +
+   "\u0064\u0030\u0024\u0052\u0065\u0073\u0075\u006c" +
+   "\u0074\u0073\u0000\u0000\u0000\u0000\u0000\u0000" + "");
+public static final org.capnproto.SegmentReader b_c8c25b78d234f324 =
+   org.capnproto.GeneratedClassSupport.decodeRawBytes(
+   "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
+   "\u0024\u00f3\u0034\u00d2\u0078\u005b\u00c2\u00c8" +
+   "\u003b\u0000\u0000\u0000\u0001\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0007\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u0052\u0002\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0064\u0065\u006d\u006f" +
+   "\u002f\u0064\u0065\u006d\u006f\u002e\u0063\u0061" +
+   "\u0070\u006e\u0070\u003a\u0049\u0066\u0061\u0063" +
+   "\u0065\u0030\u002e\u006d\u0065\u0074\u0068\u006f" +
+   "\u0064\u0031\u0024\u0050\u0061\u0072\u0061\u006d" +
+   "\u0073\u0000\u0000\u0000\u0000\u0000\u0000\u0000" + "");
 public static final org.capnproto.SegmentReader b_a9395663e97ca3af =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +

@@ -1607,6 +1607,8 @@ private:
           spaces(indent), "    public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {\n",
           spaces(indent), "      super(promise);\n",
           spaces(indent), "    }\n",
+          spaces(indent), "\n",
+          KJ_MAP(m, methods) { return kj::mv(m.clientDefs); },
           spaces(indent), "  }\n",
           spaces(indent), "  public static abstract class Server extends org.capnproto.Capability.Server {\n",
           spaces(indent), "    protected org.capnproto.DispatchCallResult dispatchCall(\n",
@@ -1627,7 +1629,7 @@ private:
           spaces(indent), "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", 0x", hexId, "L, methodId));\n",
           spaces(indent), "      }\n",
           spaces(indent), "    }\n\n",
-          KJ_MAP(m, methods) { return kj::mv(m.sourceDefs); },
+          KJ_MAP(m, methods) { return kj::mv(m.serverDefs); },
           spaces(indent), "  }\n",
           spaces(indent), "\n",
           KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
@@ -1640,17 +1642,18 @@ private:
   // -----------------------------------------------------------------
 
   struct MethodText {
-    kj::StringTree sourceDefs;
+    kj::StringTree clientDefs;
+    kj::StringTree serverDefs;
     kj::StringTree dispatchCase;
   };
 
   MethodText makeMethodText(kj::StringPtr interfaceName, InterfaceSchema::Method method) {
     auto proto = method.getProto();
-    auto name = proto.getName();
-    auto titleCase = toTitleCase(name);
+    auto methodName = proto.getName();
+    auto titleCase = toTitleCase(methodName);
     auto paramSchema = method.getParamType();
     auto resultSchema = method.getResultType();
-    auto identifierName = safeIdentifier(name);
+    auto identifierName = safeIdentifier(methodName);
 
     auto paramProto = paramSchema.getProto();
     auto resultProto = resultSchema.getProto();
@@ -1710,42 +1713,62 @@ private:
     if (paramProto.getScopeId() == 0) {
       paramType = kj::str(javaFullName(paramSchema, method));
     }
+
     if (resultProto.getScopeId() == 0) {
       paramType = kj::str(javaFullName(resultSchema, method));
     }
+
+    kj::String paramFactory = kj::str(shortParamType, ".factory");
+    kj::String resultFactory = kj::str(shortResultType, ".factory");
 
     auto interfaceProto = method.getContainingInterface().getProto();
     uint64_t interfaceId = interfaceProto.getId();
     auto interfaceIdHex = kj::hex(interfaceId);
     uint16_t methodId = method.getIndex();
 
-    auto requestMethodImpl = kj::strTree(
-        isStreaming ? kj::strTree("org.capnproto.StreamingRequest<", paramType, ">")
-                    : kj::strTree("org.capnproto.Request<", paramType, ", ", resultType, ">"),
-        name, "Request() {\n",
-        isStreaming
-            ? kj::strTree("  return newStreamingCall<", paramType, ">(\n")
-            : kj::strTree("  return newCall<", paramType, ", ", resultType, ">(\n"),
-        "      0x", interfaceIdHex, "L, ", methodId, ");\n"
-        "}\n");
+    if (isStreaming) {
+      return MethodText {
+        kj::strTree(
+          "      public org.capnproto.StreamingRequest<", shortParamType, ".Builder> ", methodName, "Request() {\n",
+          "        return newStreamingCall(", paramFactory, ", 0x", interfaceIdHex, "L, (short)", methodId, ");\n"
+          "      }\n"),
 
-    return MethodText {
-
-      kj::strTree(
-          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.CallContext<", titleCase, "Params.Reader, ", titleCase, "Results.Builder> context) {\n"
-          "        return  org.capnproto.Capability.Server.internalUnimplemented(\n"
-          "          \"", interfaceProto.getDisplayName(), "\", \"", name, "\",\n"
+        kj::strTree(
+          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.StreamingCallContext<", shortParamType, ".Reader> context) {\n"
+          "        return org.capnproto.Capability.Server.internalUnimplemented(\n"
+          "          \"", interfaceProto.getDisplayName(), "\", \"", methodName, "\",\n"
           "          0x", interfaceIdHex, "L, (short)", methodId, ");\n"
           "      }\n\n"),
 
-      kj::strTree(
+        kj::strTree(
           "        case ", methodId, ":\n",
-          "          return org.capnproto.Capability.Server.",
-          isStreaming ? "streamResult" : "result", "(\n",
-          "            this.", identifierName, "(org.capnproto.Capability.Server.typedContext(\n"
-          "              ", genericParamType, ".factory,\n",
-          "              ", genericResultType, ".factory, context)));\n")
-    };
+          "          return org.capnproto.Capability.Server.streamResult(\n",
+          "            this.", identifierName, "(org.capnproto.Capability.Server.internalGetTypedStreamingContext(\n"
+          "              ", paramFactory, ", context)));\n")
+      };
+
+    } else {
+      return MethodText {
+
+        kj::strTree(
+          "      public org.capnproto.Request<", shortParamType, ".Builder, ", shortResultType, ".Reader> ", methodName, "Request() {\n",
+          "        return newCall(", paramFactory, ", ", resultFactory, ", 0x", interfaceIdHex, "L, (short)", methodId, ");\n"
+          "      }\n"),
+
+        kj::strTree(
+          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.CallContext<", shortParamType, ".Reader, ", shortResultType, ".Builder> context) {\n"
+          "        return org.capnproto.Capability.Server.internalUnimplemented(\n"
+          "          \"", interfaceProto.getDisplayName(), "\", \"", methodName, "\",\n"
+          "          0x", interfaceIdHex, "L, (short)", methodId, ");\n"
+          "      }\n\n"),
+
+        kj::strTree(
+          "        case ", methodId, ":\n",
+          "          return org.capnproto.Capability.Server.result (\n",
+          "            this.", identifierName, "(org.capnproto.Capability.Server.internalGetTypedContext(\n"
+          "              ", paramFactory, ", ", resultFactory, ", context)));\n")
+      };
+    }
   }
 
   // -----------------------------------------------------------------

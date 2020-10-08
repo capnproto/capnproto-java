@@ -79,10 +79,16 @@ public final class Capability {
         }
 
         protected <T, U> Request<T, U> newCall(FromPointerBuilder<T> builder,
-                                            FromPointerReader<U> reader,
-                                            long interfaceId, short methodId) {
+                                               FromPointerReader<U> reader,
+                                               long interfaceId, short methodId) {
             var request = hook.newCall(interfaceId, methodId);
-            return new Request<T, U> (builder, reader, request.params, request.hook);
+            return new Request<> (builder, reader, request.params, request.hook);
+        }
+
+        protected <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> builder,
+                                                           long interfaceId, short methodId) {
+            var request = hook.newCall(interfaceId, methodId);
+            return new StreamingRequest<> (builder, request.params, request.hook);
         }
     }
 
@@ -183,11 +189,17 @@ public final class Capability {
             return new Client(this.hook);
         }
 
-        protected static <Params, Results> CallContext<Params, Results> typedContext(
+        protected static <Params, Results> CallContext<Params, Results> internalGetTypedContext(
                 FromPointerReader<Params> paramsFactory,
                 FromPointerBuilder<Results> resultsFactory,
                 CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
             return new CallContext<>(paramsFactory, resultsFactory, typeless.hook);
+        }
+
+        protected static <Params> StreamingCallContext<Params> internalGetTypedStreamingContext(
+                FromPointerReader<Params> paramsFactory,
+                CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
+            return new StreamingCallContext<>(paramsFactory, typeless.hook);
         }
 
         protected abstract DispatchCallResult dispatchCall(
@@ -256,6 +268,13 @@ public final class Capability {
             });
 
             return new RemotePromise<AnyPointer.Reader>(promise, promiseAndPipeline.pipeline);
+        }
+
+        @Override
+        public CompletableFuture<?> sendStreaming() {
+            // We don't do any special handling of streaming in RequestHook for local requests, because
+            // there is no latency to compensate for between the client and server in this case.
+            return send().ignoreResult();
         }
 
         @Override

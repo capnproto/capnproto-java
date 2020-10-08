@@ -1,7 +1,6 @@
 package org.capnproto;
 
 import org.capnproto.demo.Demo;
-import org.capnproto.demo.DemoFoo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -44,9 +43,9 @@ class TestCap0 {
         DispatchCallResult dispatchCallInternal(short methodId, CallContext<AnyPointer.Reader, AnyPointer.Builder> ctx) {
             switch (methodId) {
                 case 0:
-                    return result(testMethod0(typedContext(Demo.TestParams0.factory, Demo.TestResults0.factory, ctx)));
+                    return result(testMethod0(internalGetTypedContext(Demo.TestParams0.factory, Demo.TestResults0.factory, ctx)));
                 case 1:
-                    return result(testMethod1(typedContext(Demo.TestParams1.factory, Demo.TestResults1.factory, ctx)));
+                    return result(testMethod1(internalGetTypedContext(Demo.TestParams1.factory, Demo.TestResults1.factory, ctx)));
                 default:
                     return result(internalUnimplemented(Demo.class.getName(), 0xa27d3c231c7b9202L, methodId));
             }
@@ -194,10 +193,6 @@ public class TwoPartyTest {
         Assert.assertFalse(cap1.isNull());
         var cap2 = results.getResult2();
         Assert.assertFalse(cap2.isNull());
-
-        var cap3 = results.getResult2().getAs(Demo.Iface0.factory);
-        Assert.assertFalse(cap2.isNull());
-        //Assert.assertFalse(cap2.hook.isError());
     }
 
     @Test

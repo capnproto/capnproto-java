@@ -25,9 +25,8 @@ public class Request<Params, Results> {
     CompletableFuture<Results> send() {
         var typelessPromise = hook.send();
         hook = null; // prevent reuse
-        return typelessPromise.getResponse().thenApply(response -> {
-            return response.getAs(resultsReader);
-        });
+        return typelessPromise.getResponse().thenApply(
+                response -> response.getAs(resultsReader));
     }
 
     static <T, U> Request<T, U> newBrokenRequest(Throwable exc) {
@@ -37,6 +36,11 @@ public class Request<Params, Results> {
             @Override
             public RemotePromise<AnyPointer.Reader> send() {
                 return new RemotePromise<>(CompletableFuture.failedFuture(exc), null);
+            }
+
+            @Override
+            public CompletableFuture<?> sendStreaming() {
+                return CompletableFuture.failedFuture(exc);
             }
 
             @Override
@@ -59,4 +63,3 @@ public class Request<Params, Results> {
         return new Request<>(params, results, typeless.params(), typeless.hook);
     }
 }
-

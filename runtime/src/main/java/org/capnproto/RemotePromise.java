@@ -16,6 +16,11 @@ class RemotePromise<Results> {
         return response;
     }
 
+    public CompletableFuture<?> ignoreResult() {
+        return this.response.thenCompose(
+                result -> CompletableFuture.completedFuture(null));
+    }
+
     public PipelineHook getHook() {
         return pipeline;
     }

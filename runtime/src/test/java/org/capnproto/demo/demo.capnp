@@ -27,6 +27,8 @@ struct Struct0 {
 }
 
 interface Iface0 {
+  method0 @0 ();
+  method1 @1 () -> stream;
 }
 
 struct Struct2 {
@@ -37,7 +39,7 @@ struct Struct2 {
 interface Iface1 {
 
   struct Struct1 {
-    f0  @0  :Bool;
+    f0 @0  :Bool;
     f1 @1 :AnyPointer;
   }
 
