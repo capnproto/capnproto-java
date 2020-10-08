@@ -306,7 +306,7 @@ public final class Capability {
 
         final CompletableFuture<?> cancelAllowed;
         MessageBuilder request;
-        Response response;
+        Response<AnyPointer.Reader> response;
         AnyPointer.Builder responseBuilder;
         ClientHook clientRef;
 
@@ -333,7 +333,10 @@ public final class Capability {
             if (this.response == null) {
                 var localResponse = new LocalResponse();
                 this.responseBuilder = localResponse.message.getRoot(AnyPointer.factory);
-                this.response = new Response(this.responseBuilder.asReader(), localResponse);
+                this.response = new Response<>(
+                        AnyPointer.factory,
+                        this.responseBuilder.asReader(),
+                        localResponse);
             }
             return this.responseBuilder;
         }

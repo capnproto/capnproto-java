@@ -22,11 +22,17 @@ public class Request<Params, Results> {
         return params.getAs(paramsBuilder);
     }
 
-    CompletableFuture<Results> send() {
+    RemotePromise<Results> send() {
         var typelessPromise = hook.send();
         hook = null; // prevent reuse
-        return typelessPromise.getResponse().thenApply(
-                response -> response.getAs(resultsReader));
+        var typedPromise = typelessPromise.getResponse().thenApply(response -> {
+                    return new Response<Results>(
+                            resultsReader,
+                            response.get(),
+                            response.hook);
+                });
+
+        return new RemotePromise<Results>(typedPromise, typelessPromise.pipeline);
     }
 
     static <T, U> Request<T, U> newBrokenRequest(Throwable exc) {

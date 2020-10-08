@@ -4,15 +4,16 @@ import java.util.concurrent.CompletableFuture;
 
 class RemotePromise<Results> {
 
-    final CompletableFuture<Response> response;
+    final CompletableFuture<Response<Results>> response;
     final PipelineHook pipeline;
 
-    RemotePromise(CompletableFuture<Response> response, PipelineHook pipeline) {
+    RemotePromise(CompletableFuture<Response<Results>> response,
+                  PipelineHook pipeline) {
         this.response = response;
         this.pipeline = pipeline;
     }
 
-    public CompletableFuture<Response> getResponse() {
+    public CompletableFuture<Response<Results>> getResponse() {
         return response;
     }
 
