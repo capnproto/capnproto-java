@@ -85,9 +85,9 @@ public final class MessageBuilder {
             if (location != 0) {
                 throw new RuntimeException("First allocated word of new segment was not at offset 0");
             }
-            return new AnyPointer.Builder(rootSegment, location);
+            return new AnyPointer.Builder(rootSegment, this.arena.getLocalCapTable(), location);
         } else {
-            return new AnyPointer.Builder(rootSegment, 0);
+            return new AnyPointer.Builder(rootSegment, this.arena.getLocalCapTable(), 0);
         }
     }
 

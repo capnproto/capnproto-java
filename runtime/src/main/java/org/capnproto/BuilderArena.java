@@ -24,6 +24,7 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class BuilderArena implements Arena {
     public enum AllocationStrategy {
@@ -37,6 +38,35 @@ public final class BuilderArena implements Arena {
 
     public final ArrayList<SegmentBuilder> segments;
     private Allocator allocator;
+
+    private CapTableBuilder localCapTable = new CapTableBuilder() {
+
+        List<ClientHook> capTable = new ArrayList<>();
+
+        @Override
+        public int injectCap(ClientHook cap) {
+            int result = this.capTable.size();
+            capTable.add(cap);
+            return result;
+        }
+
+        @Override
+        public void dropCap(int index) {
+            if (index < this.capTable.size()) {
+                assert false : "Invalid capability descriptor in message.";
+                return;
+            }
+            this.capTable.set(index, null);
+
+        }
+
+        @Override
+        public ClientHook extractCap(int index) {
+            return index < this.capTable.size()
+                    ? this.capTable.get(index)
+                    : null;
+        }
+    };
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
         this.segments = new ArrayList<SegmentBuilder>();
@@ -62,6 +92,16 @@ public final class BuilderArena implements Arena {
         this.segments.add(newSegment);
 
         this.allocator = allocator;
+    }
+
+    CapTableBuilder getLocalCapTable() {
+        return this.localCapTable;
+    }
+
+    CapTableBuilder releaseLocalCapTable() {
+        var tmp = this.localCapTable;
+        this.localCapTable = null;
+        return tmp;
     }
 
     @Override
