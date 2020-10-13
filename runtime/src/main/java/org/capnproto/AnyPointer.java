@@ -22,7 +22,9 @@
 package org.capnproto;
 
 public final class AnyPointer {
-    public static final class Factory implements PointerFactory<Builder, Reader> {
+    public static final class Factory
+            implements PointerFactory<Builder, Reader>,
+                       PipelineFactory<Pipeline> {
         public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
             return new Reader(segment, capTable, pointer, nestingLimit);
         }
@@ -33,6 +35,9 @@ public final class AnyPointer {
             Builder result = new Builder(segment, capTable, pointer);
             result.clear();
             return result;
+        }
+        public Pipeline newPipeline(RemotePromise<Reader> promise) {
+            return new AnyPointer.Pipeline(promise);
         }
     }
     public static final Factory factory = new Factory();
@@ -70,18 +75,21 @@ public final class AnyPointer {
         }
 
         public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+            AnyPointer.Reader any = this;
+
             for (var op: ops) {
                 switch (op.type) {
                     case NOOP:
                         break;
                     case GET_POINTER_FIELD:
                         var index = op.pointerIndex;
+                        var reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
                         // TODO getpointerfield
+                        any = reader._getPointerField(AnyPointer.factory, op.pointerIndex);
                         break;
                 }
             }
-            // TODO implement getPipelinedCap
-            return null;
+            return WireHelpers.readCapabilityPointer(any.segment, any.capTable, any.pointer, 0);
         }
     }
 
@@ -124,12 +132,13 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
         }
 
-        public final Capability.Client getAsCap() {
+        /*
+        final Capability.Client getAsCap() {
             return new Capability.Client(
                     WireHelpers.readCapabilityPointer(this.segment, capTable, this.pointer, 0));
         }
-
-        public final void setAsCap(Capability.Client cap) {
+*/
+        final void setAsCap(Capability.Client cap) {
             WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.hook);
         }
 
@@ -143,46 +152,15 @@ public final class AnyPointer {
         }
     }
 
-    public static final class Pipeline {
-        private PipelineHook hook;
-        private final PipelineOp[] ops;
+    public static final class Pipeline
+            extends org.capnproto.Pipeline<AnyPointer.Reader> {
 
-        Pipeline() {
-            this.hook = null;
-            this.ops = new PipelineOp[0];
+        public Pipeline(RemotePromise<AnyPointer.Reader> promise) {
+            super(promise);
         }
 
-        Pipeline(PipelineHook hook) {
-            this.hook = hook;
-            this.ops = new PipelineOp[0];
-        }
-
-        Pipeline(PipelineHook hook, PipelineOp[] ops) {
-            this.hook = hook;
-            this.ops = ops;
-        }
-
-        Pipeline noop() {
-            return new Pipeline(this.hook, this.ops.clone());
-        }
-
-        public ClientHook asCap() {
-            return this.hook.getPipelinedCap(this.ops);
-        }
-
-        PipelineHook releasePipelineHook() {
-            var tmp = this.hook;
-            this.hook = null;
-            return tmp;
-        }
-
-        public Pipeline getPointerField(short pointerIndex) {
-            var newOps = new PipelineOp[this.ops.length+1];
-            for (int ii = 0; ii < this.ops.length; ++ii) {
-                newOps[ii] = this.ops[ii];
-            }
-            newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
-            return new Pipeline(this.hook, newOps);
+        public Pipeline(RemotePromise<AnyPointer.Reader> promise, PipelineOp[] ops) {
+            super(promise, ops);
         }
     }
 }

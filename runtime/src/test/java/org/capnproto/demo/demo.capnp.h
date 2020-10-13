@@ -27,6 +27,8 @@ CAPNP_DECLARE_SCHEMA(bc8d77edaa76294b);
 CAPNP_DECLARE_SCHEMA(f744e24aa684673e);
 CAPNP_DECLARE_SCHEMA(c8c25b78d234f324);
 CAPNP_DECLARE_SCHEMA(a9395663e97ca3af);
+CAPNP_DECLARE_SCHEMA(9c0c5ee4bb0cc725);
+CAPNP_DECLARE_SCHEMA(d88e8bb64ed6f7b1);
 CAPNP_DECLARE_SCHEMA(d52dcf38c9f6f7c0);
 CAPNP_DECLARE_SCHEMA(800ca862fbfddd38);
 CAPNP_DECLARE_SCHEMA(8f92ca18632e04d5);
@@ -191,6 +193,40 @@ struct Struct2 {
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
+};
+
+struct TestCap0 {
+  TestCap0() = delete;
+
+#if !CAPNP_LITE
+  class Client;
+  class Server;
+#endif  // !CAPNP_LITE
+
+
+  #if !CAPNP_LITE
+  struct _capnpPrivate {
+    CAPNP_DECLARE_INTERFACE_HEADER(9c0c5ee4bb0cc725)
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
+  };
+  #endif  // !CAPNP_LITE
+};
+
+struct TestCap1 {
+  TestCap1() = delete;
+
+#if !CAPNP_LITE
+  class Client;
+  class Server;
+#endif  // !CAPNP_LITE
+
+
+  #if !CAPNP_LITE
+  struct _capnpPrivate {
+    CAPNP_DECLARE_INTERFACE_HEADER(d88e8bb64ed6f7b1)
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
+  };
+  #endif  // !CAPNP_LITE
 };
 
 struct Iface1 {
@@ -1055,6 +1091,108 @@ private:
 #endif  // !CAPNP_LITE
 
 #if !CAPNP_LITE
+class TestCap0::Client
+    : public virtual ::capnp::Capability::Client {
+public:
+  typedef TestCap0 Calls;
+  typedef TestCap0 Reads;
+
+  Client(decltype(nullptr));
+  explicit Client(::kj::Own< ::capnp::ClientHook>&& hook);
+  template <typename _t, typename = ::kj::EnableIf< ::kj::canConvert<_t*, Server*>()>>
+  Client(::kj::Own<_t>&& server);
+  template <typename _t, typename = ::kj::EnableIf< ::kj::canConvert<_t*, Client*>()>>
+  Client(::kj::Promise<_t>&& promise);
+  Client(::kj::Exception&& exception);
+  Client(Client&) = default;
+  Client(Client&&) = default;
+  Client& operator=(Client& other);
+  Client& operator=(Client&& other);
+
+  ::capnp::Request< ::TestParams0,  ::TestResults0> testMethod0Request(
+      ::kj::Maybe< ::capnp::MessageSize> sizeHint = nullptr);
+  ::capnp::Request< ::TestParams1,  ::TestResults1> testMethod1Request(
+      ::kj::Maybe< ::capnp::MessageSize> sizeHint = nullptr);
+
+protected:
+  Client() = default;
+};
+
+class TestCap0::Server
+    : public virtual ::capnp::Capability::Server {
+public:
+  typedef TestCap0 Serves;
+
+  ::capnp::Capability::Server::DispatchCallResult dispatchCall(
+      uint64_t interfaceId, uint16_t methodId,
+      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context)
+      override;
+
+protected:
+  typedef ::capnp::CallContext< ::TestParams0,  ::TestResults0> TestMethod0Context;
+  virtual ::kj::Promise<void> testMethod0(TestMethod0Context context);
+  typedef ::capnp::CallContext< ::TestParams1,  ::TestResults1> TestMethod1Context;
+  virtual ::kj::Promise<void> testMethod1(TestMethod1Context context);
+
+  inline  ::TestCap0::Client thisCap() {
+    return ::capnp::Capability::Server::thisCap()
+        .template castAs< ::TestCap0>();
+  }
+
+  ::capnp::Capability::Server::DispatchCallResult dispatchCallInternal(
+      uint16_t methodId,
+      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context);
+};
+#endif  // !CAPNP_LITE
+
+#if !CAPNP_LITE
+class TestCap1::Client
+    : public virtual ::capnp::Capability::Client {
+public:
+  typedef TestCap1 Calls;
+  typedef TestCap1 Reads;
+
+  Client(decltype(nullptr));
+  explicit Client(::kj::Own< ::capnp::ClientHook>&& hook);
+  template <typename _t, typename = ::kj::EnableIf< ::kj::canConvert<_t*, Server*>()>>
+  Client(::kj::Own<_t>&& server);
+  template <typename _t, typename = ::kj::EnableIf< ::kj::canConvert<_t*, Client*>()>>
+  Client(::kj::Promise<_t>&& promise);
+  Client(::kj::Exception&& exception);
+  Client(Client&) = default;
+  Client(Client&&) = default;
+  Client& operator=(Client& other);
+  Client& operator=(Client&& other);
+
+
+protected:
+  Client() = default;
+};
+
+class TestCap1::Server
+    : public virtual ::capnp::Capability::Server {
+public:
+  typedef TestCap1 Serves;
+
+  ::capnp::Capability::Server::DispatchCallResult dispatchCall(
+      uint64_t interfaceId, uint16_t methodId,
+      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context)
+      override;
+
+protected:
+
+  inline  ::TestCap1::Client thisCap() {
+    return ::capnp::Capability::Server::thisCap()
+        .template castAs< ::TestCap1>();
+  }
+
+  ::capnp::Capability::Server::DispatchCallResult dispatchCallInternal(
+      uint16_t methodId,
+      ::capnp::CallContext< ::capnp::AnyPointer, ::capnp::AnyPointer> context);
+};
+#endif  // !CAPNP_LITE
+
+#if !CAPNP_LITE
 class Iface1::Client
     : public virtual ::capnp::Capability::Client {
 public:
@@ -1739,6 +1877,54 @@ inline ::capnp::Orphan< ::Iface0> Struct2::Builder::disownF1i() {
 }
 #endif  // !CAPNP_LITE
 
+#if !CAPNP_LITE
+inline TestCap0::Client::Client(decltype(nullptr))
+    : ::capnp::Capability::Client(nullptr) {}
+inline TestCap0::Client::Client(
+    ::kj::Own< ::capnp::ClientHook>&& hook)
+    : ::capnp::Capability::Client(::kj::mv(hook)) {}
+template <typename _t, typename>
+inline TestCap0::Client::Client(::kj::Own<_t>&& server)
+    : ::capnp::Capability::Client(::kj::mv(server)) {}
+template <typename _t, typename>
+inline TestCap0::Client::Client(::kj::Promise<_t>&& promise)
+    : ::capnp::Capability::Client(::kj::mv(promise)) {}
+inline TestCap0::Client::Client(::kj::Exception&& exception)
+    : ::capnp::Capability::Client(::kj::mv(exception)) {}
+inline  ::TestCap0::Client& TestCap0::Client::operator=(Client& other) {
+  ::capnp::Capability::Client::operator=(other);
+  return *this;
+}
+inline  ::TestCap0::Client& TestCap0::Client::operator=(Client&& other) {
+  ::capnp::Capability::Client::operator=(kj::mv(other));
+  return *this;
+}
+
+#endif  // !CAPNP_LITE
+#if !CAPNP_LITE
+inline TestCap1::Client::Client(decltype(nullptr))
+    : ::capnp::Capability::Client(nullptr) {}
+inline TestCap1::Client::Client(
+    ::kj::Own< ::capnp::ClientHook>&& hook)
+    : ::capnp::Capability::Client(::kj::mv(hook)) {}
+template <typename _t, typename>
+inline TestCap1::Client::Client(::kj::Own<_t>&& server)
+    : ::capnp::Capability::Client(::kj::mv(server)) {}
+template <typename _t, typename>
+inline TestCap1::Client::Client(::kj::Promise<_t>&& promise)
+    : ::capnp::Capability::Client(::kj::mv(promise)) {}
+inline TestCap1::Client::Client(::kj::Exception&& exception)
+    : ::capnp::Capability::Client(::kj::mv(exception)) {}
+inline  ::TestCap1::Client& TestCap1::Client::operator=(Client& other) {
+  ::capnp::Capability::Client::operator=(other);
+  return *this;
+}
+inline  ::TestCap1::Client& TestCap1::Client::operator=(Client&& other) {
+  ::capnp::Capability::Client::operator=(kj::mv(other));
+  return *this;
+}
+
+#endif  // !CAPNP_LITE
 #if !CAPNP_LITE
 inline Iface1::Client::Client(decltype(nullptr))
     : ::capnp::Capability::Client(nullptr) {}

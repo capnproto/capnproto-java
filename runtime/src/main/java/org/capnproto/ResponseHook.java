@@ -1,4 +1,4 @@
 package org.capnproto;
 
-interface ResponseHook {
+public interface ResponseHook {
 }

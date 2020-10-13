@@ -4,13 +4,12 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.FutureTask;
-import java.util.function.Function;
 
 final class RpcState {
 
     static final class Question {
         final int id;
+        CompletableFuture<RpcResponse> response = new CompletableFuture<>();
         List<Integer> paramExports;
         boolean isAwaitingReturn = false;
         boolean isTailCall = false;
@@ -20,10 +19,8 @@ final class RpcState {
             this.id = id;
         }
 
-        CompletableFuture<RpcResponse> response = new CompletableFuture<>();
-
         void reject(Throwable exc) {
-            response.completeExceptionally(exc);
+            this.response.completeExceptionally(exc);
         }
 
         void answer(RpcResponse response) {
@@ -34,7 +31,7 @@ final class RpcState {
     static final class Answer {
         boolean active = false;
         PipelineHook pipeline;
-        CompletableFuture<RpcResponse> redirectedResults;
+        CompletionStage<RpcResponse> redirectedResults;
         RpcCallContext callContext;
         List<Integer> resultExports;
     }
@@ -239,20 +236,18 @@ final class RpcState {
                     case CAP:
                         var cap = resolve.getCap();
                         switch (cap.which()) {
-                            case NONE:
-                                break;
                             case SENDER_HOSTED:
                                 releaseExport(cap.getSenderHosted(), 1);
                                 break;
                             case SENDER_PROMISE:
                                 releaseExport(cap.getSenderPromise(), 1);
                                 break;
-                            case RECEIVER_ANSWER:
-                                break;
-                            case RECEIVER_HOSTED:
-                                break;
                             case THIRD_PARTY_HOSTED:
                                 releaseExport(cap.getThirdPartyHosted().getVineId(), 1);
+                                break;
+                            case NONE:
+                            case RECEIVER_ANSWER:
+                            case RECEIVER_HOSTED:
                                 break;
                         }
                         break;
@@ -278,7 +273,7 @@ final class RpcState {
         var answerId = bootstrap.getQuestionId();
         var answer = answers.put(answerId);
         if (answer.active) {
-            // questionId already in use
+            assert false: "questionId is already in use: " + answerId;
             return;
         }
         answer.active = true;
@@ -449,7 +444,7 @@ final class RpcState {
                 if (answer.redirectedResults == null) {
                     return;
                 }
-                question.response = answer.redirectedResults;
+                question.response = answer.redirectedResults.toCompletableFuture();
                 answer.redirectedResults = null;
                 break;
             default:
@@ -1214,7 +1209,7 @@ final class RpcState {
         }
 
         @Override
-        public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+        public Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId) {
             return newCallNoIntercept(interfaceId, methodId);
         }
 
@@ -1235,7 +1230,7 @@ final class RpcState {
             return RpcState.this;
         }
 
-        private Request<AnyPointer.Builder, AnyPointer.Reader> newCallNoIntercept(long interfaceId, short methodId) {
+        private Request<AnyPointer.Builder, AnyPointer.Pipeline> newCallNoIntercept(long interfaceId, short methodId) {
             if (isDisconnected()) {
                 return Request.newBrokenRequest(disconnected);
             }
@@ -1245,7 +1240,7 @@ final class RpcState {
             callBuilder.setInterfaceId(interfaceId);
             callBuilder.setMethodId(methodId);
             var root = request.getRoot();
-            return Request.newTypelessRequest(root, request);
+            return new Request<>(root, AnyPointer.factory, request);
         }
     }
 
@@ -1290,18 +1285,16 @@ final class RpcState {
             // The pipeline must get notified of resolution before the app does to maintain ordering.
             var pipeline = new RpcPipeline(question, question.response);
 
-            var appPromise = question.response.thenApply(response -> {
-                var results = response.getResults();
-                return new Response<>(AnyPointer.factory, results, response);
+            var appPromise = question.response.thenApply(hook -> {
+                return new Response<>(hook.getResults(), hook);
             });
-
             return new RemotePromise<>(appPromise, pipeline);
         }
 
         @Override
-        public CompletableFuture<?> sendStreaming() {
+        public CompletionStage<?> sendStreaming() {
             // TODO falling back to regular send for now...
-            return send().ignoreResult();
+            return send();
         }
 
         Question sendInternal(boolean isTailCall) {
@@ -1407,7 +1400,7 @@ final class RpcState {
         }
 
         @Override
-        public CompletableFuture<ClientHook> whenMoreResolved() {
+        public CompletionStage<ClientHook> whenMoreResolved() {
             return null;
         }
     }
@@ -1556,7 +1549,7 @@ final class RpcState {
         }
 
         @Override
-        public CompletableFuture<ClientHook> whenMoreResolved() {
+        public CompletionStage<ClientHook> whenMoreResolved() {
             return null;
         }
 

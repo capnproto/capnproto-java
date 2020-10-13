@@ -4,38 +4,33 @@ import java.util.concurrent.CompletableFuture;
 
 public class Request<Params, Results> {
 
-    AnyPointer.Builder params;
-    private final FromPointerBuilder<Params> paramsBuilder;
-    private final FromPointerReader<Results> resultsReader;
+    Params params;
+    PipelineFactory<Results> pipelineFactory;
     RequestHook hook;
 
-    Request(FromPointerBuilder<Params> paramsBuilder,
-            FromPointerReader<Results> resultsReader,
-            AnyPointer.Builder params, RequestHook hook) {
-        this.paramsBuilder = paramsBuilder;
-        this.resultsReader = resultsReader;
+    public Request(Params params,
+                   PipelineFactory<Results> pipelineFactory,
+                   RequestHook hook) {
         this.params = params;
+        this.pipelineFactory = pipelineFactory;
         this.hook = hook;
     }
 
-    Params params() {
-        return params.getAs(paramsBuilder);
+    public Params getParams() {
+        return params;
     }
 
-    RemotePromise<Results> send() {
-        var typelessPromise = hook.send();
-        hook = null; // prevent reuse
-        var typedPromise = typelessPromise.getResponse().thenApply(response -> {
-                    return new Response<Results>(
-                            resultsReader,
-                            response.getResults(),
-                            response.hook);
-                });
-
-        return new RemotePromise<Results>(typedPromise, typelessPromise.pipeline);
+    public RequestHook getHook() {
+        return this.hook;
     }
 
-    static <T, U> Request<T, U> newBrokenRequest(Throwable exc) {
+    public Results send() {
+        var typelessPromise = this.hook.send();
+        this.hook = null; // prevent reuse
+        return pipelineFactory.newPipeline(typelessPromise);
+    }
+
+    static <P, R> Request<P, R> newBrokenRequest(Throwable exc) {
         final MessageBuilder message = new MessageBuilder();
 
         var hook = new RequestHook() {
@@ -56,16 +51,13 @@ public class Request<Params, Results> {
         };
 
         var root = message.getRoot(AnyPointer.factory);
-        return new Request<T, U>(null, null, root, hook);
+        return new Request<P, R>(null, null, hook);
     }
 
-    static Request<AnyPointer.Builder, AnyPointer.Reader> newTypelessRequest(AnyPointer.Builder root, RequestHook hook) {
-        return new Request<>(AnyPointer.factory, AnyPointer.factory, root, hook);
-    }
-
-    static <Params, Results> Request<Params, Results> fromTypeless(FromPointerBuilder<Params> params,
-                                                                   FromPointerReader<Results> results,
-                                                                   Request<AnyPointer.Builder, AnyPointer.Reader> typeless) {
-        return new Request<>(params, results, typeless.params(), typeless.hook);
+    static <P, R> Request<P, R> fromTypeless(
+            FromPointerBuilder<P> paramsFactory,
+            PipelineFactory<R> pipelineFactory,
+            Request<AnyPointer.Builder, AnyPointer.Pipeline> typeless) {
+        return new Request<>(typeless.params.getAs(paramsFactory), pipelineFactory, typeless.hook);
     }
 }

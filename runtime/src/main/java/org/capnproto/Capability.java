@@ -1,6 +1,7 @@
 package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public final class Capability {
 
@@ -12,28 +13,35 @@ public final class Capability {
         CapTableReader capTable;
     }
 
-    public static abstract class Factory<T>
+    public static abstract class Factory<T extends Client>
             implements FromPointerReader<T>,
-                       FromPointerBuilder<T> {
+                       FromPointerBuilder<T>,
+                       SetPointerBuilder<T, T> {
+
+        public abstract T newClient(ClientHook hook);
+
         @Override
         public T fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
-            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
-            return newClient(hook);
+            return newClient(
+                    WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0));
         }
 
         @Override
         public T fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
-            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
-            return newClient(hook);
-        }
+            return newClient(
+                    WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0));
+       }
 
         @Override
         public T initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
-            var hook = WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0);
-            return newClient(hook);
+            return newClient(
+                    WireHelpers.readCapabilityPointer(segment, capTable, pointer, 0));
         }
 
-        public abstract T newClient(ClientHook hook);
+        @Override
+        public void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, T value) {
+            WireHelpers.setCapabilityPointer(segment, capTable, pointer, value.getHook());
+        }
     }
 
     public static class Client {
@@ -44,6 +52,10 @@ public final class Capability {
             this.hook = null;
         }
 
+        public Client(Client other) {
+            this.hook = other.hook;
+        }
+
         public Client(ClientHook hook) {
             this.hook = hook;
         }
@@ -52,15 +64,16 @@ public final class Capability {
             this(makeLocalClient(server));
         }
 
-        public Client(CompletableFuture<ClientHook> promise) {
-            this(Capability.newLocalPromiseClient(promise));
+        public <T extends Client> Client(CompletionStage<T> promise) {
+            this(Capability.newLocalPromiseClient(
+                    promise.thenApply(client -> client.getHook())));
         }
 
         public Client(Throwable exc) {
             this(newBrokenCap(exc));
         }
 
-        public ClientHook getHook() {
+        ClientHook getHook() {
             return this.hook;
         }
 
@@ -68,27 +81,20 @@ public final class Capability {
             return server.makeLocalClient();
         }
 
-        CompletableFuture<?> whenResolved() {
-            return hook.whenResolved();
+        CompletionStage<?> whenResolved() {
+            return this.hook.whenResolved();
         }
 
-        Request<AnyPointer.Builder, AnyPointer.Reader> typelessRequest(
-                long interfaceId,
-                short methodId) {
-            return hook.newCall(interfaceId, methodId);
-        }
-
-        protected <T, U> Request<T, U> newCall(FromPointerBuilder<T> builder,
-                                               FromPointerReader<U> reader,
+        protected <P, R> Request<P, R> newCall(FromPointerBuilder<P> paramsFactory,
+                                               PipelineFactory<R> pipelineFactory,
                                                long interfaceId, short methodId) {
-            var request = hook.newCall(interfaceId, methodId);
-            return new Request<> (builder, reader, request.params, request.hook);
+            return Request.fromTypeless(paramsFactory, pipelineFactory, hook.newCall(interfaceId, methodId));
         }
 
-        protected <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> builder,
+        protected <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> paramsBuilder,
                                                            long interfaceId, short methodId) {
             var request = hook.newCall(interfaceId, methodId);
-            return new StreamingRequest<> (builder, request.params, request.hook);
+            return new StreamingRequest<> (paramsBuilder, request.params, request.hook);
         }
     }
 
@@ -114,10 +120,10 @@ public final class Capability {
             }
 
             @Override
-            public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+            public Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId) {
                 var hook = new LocalRequest(interfaceId, methodId, this);
                 var root = hook.message.getRoot(AnyPointer.factory);
-                return new Request<>(AnyPointer.factory, AnyPointer.factory, root, hook);
+                return new Request<>(root, AnyPointer.factory, hook);
             }
 
             @Override
@@ -236,11 +242,11 @@ public final class Capability {
         }
     }
 
-    public static ClientHook newLocalPromiseClient(CompletableFuture<ClientHook> promise) {
+    public static ClientHook newLocalPromiseClient(CompletionStage<ClientHook> promise) {
         return new QueuedClient(promise);
     }
 
-    public static PipelineHook newLocalPromisePipeline(CompletableFuture<PipelineHook> promise) {
+    public static PipelineHook newLocalPromisePipeline(CompletionStage<PipelineHook> promise) {
         return new QueuedPipeline(promise);
     }
 
@@ -267,6 +273,7 @@ public final class Capability {
                 return context.response;
             });
 
+            assert promiseAndPipeline.pipeline != null;
             return new RemotePromise<>(promise, promiseAndPipeline.pipeline);
         }
 
@@ -274,7 +281,7 @@ public final class Capability {
         public CompletableFuture<?> sendStreaming() {
             // We don't do any special handling of streaming in RequestHook for local requests, because
             // there is no latency to compensate for between the client and server in this case.
-            return send().ignoreResult();
+            return send();
         }
 
         @Override
@@ -333,10 +340,7 @@ public final class Capability {
             if (this.response == null) {
                 var localResponse = new LocalResponse();
                 this.responseBuilder = localResponse.message.getRoot(AnyPointer.factory);
-                this.response = new Response<>(
-                        AnyPointer.factory,
-                        this.responseBuilder.asReader(),
-                        localResponse);
+                this.response = new Response<>(this.responseBuilder.asReader(), localResponse);
             }
             return this.responseBuilder;
         }
@@ -384,7 +388,7 @@ public final class Capability {
     static private ClientHook newBrokenClient(Throwable exc, boolean resolved, Object brand) {
         return new ClientHook() {
             @Override
-            public Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId) {
+            public Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId) {
                 return Request.newBrokenRequest(exc);
             }
 
@@ -394,12 +398,8 @@ public final class Capability {
             }
 
             @Override
-            public CompletableFuture<ClientHook> whenMoreResolved() {
-                if (resolved) {
-                    return null;
-                } else {
-                    return CompletableFuture.failedFuture(exc);
-                }
+            public CompletionStage<ClientHook> whenMoreResolved() {
+                return resolved ? null : CompletableFuture.failedFuture(exc);
             }
 
             @Override

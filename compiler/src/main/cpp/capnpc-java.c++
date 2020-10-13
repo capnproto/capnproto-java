@@ -1060,13 +1060,13 @@ private:
 
             spaces(indent), "  public void set", titleCase, "(", clientType, " value) {\n",
             unionDiscrim.set,
-            spaces(indent), "    _initPointerField(", factoryArg, ", ", offset, ", 0);\n",
+            spaces(indent), "    _setPointerField(", factoryArg, ", ", offset, ", value);\n",
             spaces(indent), "  }\n",
             "\n"),
 
           kj::strTree(
              spaces(indent), "  public ", clientType, " get", titleCase, "() {\n",
-             spaces(indent), "    return new ", clientType, "(typeless.getPointerField((short)", offset, ").asCap());\n",
+             spaces(indent), "    return new ", clientType, "(this.getPointerField((short)", offset, ").asCap());\n",
              spaces(indent), "  }\n"
           )
       };
@@ -1451,8 +1451,9 @@ private:
           " new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(), ");\n"),
 
-        spaces(indent), "  public static final class Factory", factoryTypeParams,
-        " extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
+        spaces(indent), "  public static final class Factory", factoryTypeParams, "\n",
+        spaces(indent), "      extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, ">\n",
+        spaces(indent), "      implements org.capnproto.PipelineFactory<Pipeline> {\n",
         factoryMembers.flatten(),
         spaces(indent), "    public Factory(",
         factoryArgs.flatten(),
@@ -1486,6 +1487,9 @@ private:
         spaces(indent), "      return builder.asReader(",
         (hasTypeParams ? kj::strTree("this") : kj::strTree()),
         ");\n",
+        spaces(indent), "    }\n",
+        spaces(indent), "    public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {\n",
+        spaces(indent), "      return new Pipeline(promise);\n",
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",
@@ -1574,16 +1578,13 @@ private:
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
 
-        spaces(indent), "  public static class Pipeline {\n",
-        spaces(indent), "    private org.capnproto.AnyPointer.Pipeline typeless;\n\n",
-        spaces(indent), "    public Pipeline() {}\n",
-        spaces(indent), "    public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {\n",
-        spaces(indent), "      this.typeless = typeless;\n",
+        spaces(indent), "  public static class Pipeline extends org.capnproto.Pipeline<Reader> {\n",
+        spaces(indent), "    public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {\n",
+        spaces(indent), "      super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));\n",
         spaces(indent), "    }\n",
         KJ_MAP(f, fieldTexts) { return kj::mv(f.pipelineMethodDecls); },
         spaces(indent), "  }\n",
         spaces(indent), "}\n",
-        "\n",
         "\n"),
 
         kj::strTree(),
@@ -1618,18 +1619,21 @@ private:
           spaces(indent), "      return new Client(hook);\n",
           spaces(indent), "    }\n",
           spaces(indent), "  }\n",
+          "\n",
           spaces(indent), "  public static final Factory factory = new Factory();\n",
+          "\n",
           spaces(indent), "  public static class Client extends org.capnproto.Capability.Client {\n",
           spaces(indent), "    public Client() {}\n",
           spaces(indent), "    public Client(org.capnproto.ClientHook hook) { super(hook); }\n",
-          spaces(indent), "    public Client(org.capnproto.Capability.Client cap) { super(cap.getHook()); }\n",
+          spaces(indent), "    public Client(org.capnproto.Capability.Client cap) { super(cap); }\n",
           spaces(indent), "    public Client(Server server) { super(server); }\n",
-          spaces(indent), "    public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {\n",
+          spaces(indent), "    public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {\n",
           spaces(indent), "      super(promise);\n",
           spaces(indent), "    }\n",
-          spaces(indent), "\n",
+          "\n",
           KJ_MAP(m, methods) { return kj::mv(m.clientDefs); },
           spaces(indent), "  }\n",
+          "\n",
           spaces(indent), "  public static abstract class Server extends org.capnproto.Capability.Server {\n",
           spaces(indent), "    protected org.capnproto.DispatchCallResult dispatchCall(\n",
           spaces(indent), "        long interfaceId, short methodId,\n",
@@ -1640,7 +1644,7 @@ private:
           spaces(indent), "      return org.capnproto.Capability.Server.result(\n",
           spaces(indent), "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", interfaceId));\n",
           spaces(indent), "    }\n",
-          spaces(indent), "\n",
+          "\n",
           spaces(indent), "    protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {\n",
           spaces(indent), "      switch (methodId) {\n",
           KJ_MAP(m, methods) { return kj::mv(m.dispatchCase); },
@@ -1653,9 +1657,9 @@ private:
           spaces(indent), "  }\n",
           spaces(indent), "\n",
           KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-          spaces(indent), "\n",
+          "\n",
           spaces(indent), "}\n",
-          spaces(indent), "\n")
+          "\n")
         };
   }
 
@@ -1771,8 +1775,8 @@ private:
       return MethodText {
 
         kj::strTree(
-          "      public org.capnproto.Request<", shortParamType, ".Builder, ", shortResultType, ".Reader> ", methodName, "Request() {\n",
-          "        return newCall(", paramFactory, ", ", resultFactory, ", 0x", interfaceIdHex, "L, (short)", methodId, ");\n"
+          "      public org.capnproto.Request<", shortParamType, ".Builder, ", shortResultType, ".Pipeline> ", methodName, "Request() {\n",
+          "        return newCall(", paramFactory, ", ", shortResultType, ".factory, 0x", interfaceIdHex, "L, (short)", methodId, ");\n"
           "      }\n"),
 
         kj::strTree(

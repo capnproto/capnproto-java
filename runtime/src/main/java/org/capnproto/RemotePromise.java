@@ -1,29 +1,26 @@
 package org.capnproto;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
-class RemotePromise<Results> {
+public class RemotePromise<Results>
+        extends CompletableFutureWrapper<Results> {
 
-    final CompletableFuture<Response<Results>> response;
-    final PipelineHook pipeline;
+    final CompletionStage<Response<Results>> response;
+    final PipelineHook hook;
 
-    RemotePromise(CompletableFuture<Response<Results>> response,
-                  PipelineHook pipeline) {
-        this.response = response;
-        this.pipeline = pipeline;
+    RemotePromise(CompletionStage<Response<Results>> promise,
+                  PipelineHook hook) {
+        super(promise.thenApply(response -> response.getResults()));
+        this.response = promise;
+        this.hook = hook;
     }
 
-
-    public CompletableFuture<Response<Results>> getResponse() {
-        return response;
-    }
-
-    public CompletableFuture<?> ignoreResult() {
-        return this.response.thenCompose(
-                result -> CompletableFuture.completedFuture(null));
-    }
-
-    public PipelineHook getHook() {
-        return pipeline;
+    public static <R> RemotePromise<R> fromTypeless(
+            FromPointerReader<R> resultsFactory,
+            RemotePromise<AnyPointer.Reader> typeless) {
+        var promise = typeless.response.thenApply(
+                response -> Response.fromTypeless(resultsFactory, response));
+        return new RemotePromise<>(promise, typeless.hook);
     }
 }
+

@@ -1,15 +1,15 @@
 package org.capnproto;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 final class QueuedPipeline implements PipelineHook {
 
-    final CompletableFuture<PipelineHook> promise;
-    final CompletableFuture<Void> selfResolutionOp;
+    final CompletionStage<PipelineHook> promise;
+    final CompletionStage<Void> selfResolutionOp;
     PipelineHook redirect;
 
-    public QueuedPipeline(CompletableFuture<PipelineHook> promiseParam) {
-        this.promise = promiseParam.copy();
+    public QueuedPipeline(CompletionStage<PipelineHook> promiseParam) {
+        this.promise = promiseParam;
         this.selfResolutionOp = promise.handle((pipeline, exc) -> {
             this.redirect = exc == null
                     ? pipeline

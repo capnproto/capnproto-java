@@ -64,10 +64,17 @@ public class StructReader extends Capability.ReaderContext {
         this.nestingLimit = nestingLimit;
     }
 
-    final StructReader imbue(CapTableReader capTable) {
-        var result = new StructReader(segment, data, pointers, dataSize, pointerCount, nestingLimit);
-        result.capTable = capTable;
-        return result;
+    public StructReader(SegmentReader segment, CapTableReader capTable,
+                        int data,
+                        int pointers, int dataSize, short pointerCount,
+                        int nestingLimit) {
+        this.segment = segment;
+        this.data = data;
+        this.pointers = pointers;
+        this.dataSize = dataSize;
+        this.pointerCount = pointerCount;
+        this.nestingLimit = nestingLimit;
+        this.capTable = capTable;
     }
 
     protected final boolean _getBooleanField(int offset) {

@@ -1,20 +1,27 @@
 package org.capnproto;
 
-class Response<Results> {
+public class Response<Results> {
 
-    final FromPointerReader<Results> factory;
-    final ResponseHook hook;
-    final AnyPointer.Reader results;
+    private Results results;
+    private ResponseHook hook;
 
-    public Response(FromPointerReader<Results> factory,
-                    AnyPointer.Reader reader,
+    public Response(Results results,
                     ResponseHook hook) {
-        this.factory = factory;
+        this.results = results;
         this.hook = hook;
-        this.results = reader;
     }
 
-    public final Results getResults() {
-        return this.results.getAs(factory);
+    public Results getResults() {
+        return this.results;
+    }
+
+    public ResponseHook getHook() {
+        return this.hook;
+    }
+
+    static <R> Response<R> fromTypeless(FromPointerReader<R> resultsFactory,
+                                        Response<AnyPointer.Reader> typeless) {
+        return new Response<>(typeless.getResults().getAs(resultsFactory), typeless.hook);
+
     }
 }

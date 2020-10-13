@@ -36,6 +36,15 @@ struct Struct2 {
    f1i @1 :Iface0;
 }
 
+interface TestCap0 {
+   testMethod0 @0 TestParams0 -> TestResults0;
+   testMethod1 @1 TestParams1 -> TestResults1;
+}
+
+interface TestCap1 {
+}
+
+
 interface Iface1 {
 
   struct Struct1 {

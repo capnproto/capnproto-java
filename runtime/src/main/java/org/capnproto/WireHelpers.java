@@ -956,6 +956,48 @@ final class WireHelpers {
 
     }
 
+    static StructReader readStructPointer(SegmentReader segment,
+                                   CapTableReader capTable,
+                                   int refOffset,
+                                   SegmentReader defaultSegment,
+                                   int defaultOffset,
+                                   int nestingLimit) {
+        long ref = segment.get(refOffset);
+        if (WirePointer.isNull(ref)) {
+            if (defaultSegment == null) {
+                return new StructReader(SegmentReader.EMPTY, 0, 0, 0, (short) 0, 0x7fffffff);
+            } else {
+                segment = defaultSegment;
+                refOffset = defaultOffset;
+                ref = segment.get(refOffset);
+            }
+        }
+
+        if (nestingLimit <= 0) {
+            throw new DecodeException("Message is too deeply nested or contains cycles.");
+        }
+
+        int refTarget = WirePointer.target(refOffset, ref);
+        FollowFarsResult resolved = followFars(ref, refTarget, segment);
+
+        int dataSizeWords = StructPointer.dataSize(resolved.ref);
+
+        if (WirePointer.kind(resolved.ref) != WirePointer.STRUCT) {
+            throw new DecodeException("Message contains non-struct pointer where struct pointer was expected.");
+        }
+
+        resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
+
+        return new StructReader(resolved.segment,
+                capTable,
+                resolved.ptr * Constants.BYTES_PER_WORD,
+                (resolved.ptr + dataSizeWords),
+                dataSizeWords * Constants.BITS_PER_WORD,
+                StructPointer.ptrCount(resolved.ref),
+                nestingLimit - 1);
+
+    }
+
     static SegmentBuilder setStructPointer(SegmentBuilder segment, CapTableBuilder capTable, int refOffset, StructReader value) {
         short dataSize = (short)roundBitsUpToWords(value.dataSize);
         int totalSize = dataSize + value.pointerCount * Constants.POINTER_SIZE_IN_WORDS;
@@ -1377,7 +1419,8 @@ final class WireHelpers {
             return Capability.newBrokenCap("Cannot read capability pointer without capTable.");
         }
 
-        var cap = capTable.extractCap(WirePointer.upper32Bits(ref));
+        int index = WirePointer.upper32Bits(ref);
+        var cap = capTable.extractCap(index);
         if (cap == null) {
             return Capability.newBrokenCap("Calling invalid capability pointer.");
         }

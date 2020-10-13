@@ -6,7 +6,9 @@ package org.capnproto.demo;
 public final class Demo {
   public static class TestParams0 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)1,(short)0);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -20,6 +22,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -52,20 +57,18 @@ public final class Demo {
 
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
     }
   }
 
-
   public static class TestResults0 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)1,(short)0);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -79,6 +82,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -111,20 +117,18 @@ public final class Demo {
 
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
     }
   }
 
-
   public static class TestParams1 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)1);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -138,6 +142,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -178,20 +185,18 @@ public final class Demo {
       }
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
     }
   }
 
-
   public static class TestResults1 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)3);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -205,6 +210,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -283,20 +291,18 @@ public final class Demo {
       }
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
     }
   }
 
-
   public static class Struct0 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)1,(short)0);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -310,6 +316,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -342,16 +351,12 @@ public final class Demo {
 
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
     }
   }
-
 
   public static class Iface0 {
     public static final class Factory extends org.capnproto.Capability.Factory<Client> {
@@ -359,23 +364,26 @@ public final class Demo {
         return new Client(hook);
       }
     }
+
     public static final Factory factory = new Factory();
+
     public static class Client extends org.capnproto.Capability.Client {
       public Client() {}
       public Client(org.capnproto.ClientHook hook) { super(hook); }
-      public Client(org.capnproto.Capability.Client cap) { super(cap.getHook()); }
+      public Client(org.capnproto.Capability.Client cap) { super(cap); }
       public Client(Server server) { super(server); }
-      public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {
+      public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {
         super(promise);
       }
-  
-      public org.capnproto.Request<Method0Params.Builder, Method0Results.Reader> method0Request() {
+
+      public org.capnproto.Request<Method0Params.Builder, Method0Results.Pipeline> method0Request() {
         return newCall(Method0Params.factory, Method0Results.factory, 0xac6d126c2fac16ebL, (short)0);
       }
       public org.capnproto.StreamingRequest<Method1Params.Builder> method1Request() {
         return newStreamingCall(Method1Params.factory, 0xac6d126c2fac16ebL, (short)1);
       }
     }
+
     public static abstract class Server extends org.capnproto.Capability.Server {
       protected org.capnproto.DispatchCallResult dispatchCall(
           long interfaceId, short methodId,
@@ -386,7 +394,7 @@ public final class Demo {
         return org.capnproto.Capability.Server.result(
             org.capnproto.Capability.Server.internalUnimplemented("Iface0", interfaceId));
       }
-  
+
       protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
         switch (methodId) {
         case 0:
@@ -419,7 +427,9 @@ public final class Demo {
   
     public static class Method0Params {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -434,6 +444,9 @@ public final class Demo {
         public final Reader asReader(Builder builder) {
           return builder.asReader();
         }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
+        }
       }
       public static final Factory factory = new Factory();
       public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
@@ -454,20 +467,18 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method0Results {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -482,6 +493,9 @@ public final class Demo {
         public final Reader asReader(Builder builder) {
           return builder.asReader();
         }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
+        }
       }
       public static final Factory factory = new Factory();
       public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
@@ -502,20 +516,18 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method1Params {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -530,6 +542,9 @@ public final class Demo {
         public final Reader asReader(Builder builder) {
           return builder.asReader();
         }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
+        }
       }
       public static final Factory factory = new Factory();
       public static final org.capnproto.StructList.Factory<Builder,Reader> listFactory =
@@ -550,23 +565,21 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
 
-  
   }
-  
+
   public static class Struct2 {
     public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)2);
-    public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+    public static final class Factory
+        extends org.capnproto.StructFactory<Builder, Reader>
+        implements org.capnproto.PipelineFactory<Pipeline> {
       public Factory() {
       }
       public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -580,6 +593,9 @@ public final class Demo {
       }
       public final Reader asReader(Builder builder) {
         return builder.asReader();
+      }
+      public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+        return new Pipeline(promise);
       }
     }
     public static final Factory factory = new Factory();
@@ -612,7 +628,7 @@ public final class Demo {
         return _getPointerField(org.capnproto.demo.Demo.Iface0.factory, 1);
       }
       public void setF1i(org.capnproto.demo.Demo.Iface0.Client value) {
-        _initPointerField(org.capnproto.demo.Demo.Iface0.factory, 1, 0);
+        _setPointerField(org.capnproto.demo.Demo.Iface0.factory, 1, value);
       }
 
     }
@@ -636,19 +652,129 @@ public final class Demo {
       }
     }
 
-    public static class Pipeline {
-      private org.capnproto.AnyPointer.Pipeline typeless;
-
-      public Pipeline() {}
-      public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-        this.typeless = typeless;
+    public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+      public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+        super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
       }
       public org.capnproto.demo.Demo.Iface0.Client getF1i() {
-        return new org.capnproto.demo.Demo.Iface0.Client(typeless.getPointerField((short)1).asCap());
+        return new org.capnproto.demo.Demo.Iface0.Client(this.getPointerField((short)1).asCap());
       }
     }
   }
 
+  public static class TestCap0 {
+    public static final class Factory extends org.capnproto.Capability.Factory<Client> {
+      public final Client newClient(org.capnproto.ClientHook hook) {
+        return new Client(hook);
+      }
+    }
+
+    public static final Factory factory = new Factory();
+
+    public static class Client extends org.capnproto.Capability.Client {
+      public Client() {}
+      public Client(org.capnproto.ClientHook hook) { super(hook); }
+      public Client(org.capnproto.Capability.Client cap) { super(cap); }
+      public Client(Server server) { super(server); }
+      public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {
+        super(promise);
+      }
+
+      public org.capnproto.Request<org.capnproto.demo.Demo.TestParams0.Builder, org.capnproto.demo.Demo.TestResults0.Pipeline> testMethod0Request() {
+        return newCall(org.capnproto.demo.Demo.TestParams0.factory, org.capnproto.demo.Demo.TestResults0.factory, 0x9c0c5ee4bb0cc725L, (short)0);
+      }
+      public org.capnproto.Request<org.capnproto.demo.Demo.TestParams1.Builder, org.capnproto.demo.Demo.TestResults1.Pipeline> testMethod1Request() {
+        return newCall(org.capnproto.demo.Demo.TestParams1.factory, org.capnproto.demo.Demo.TestResults1.factory, 0x9c0c5ee4bb0cc725L, (short)1);
+      }
+    }
+
+    public static abstract class Server extends org.capnproto.Capability.Server {
+      protected org.capnproto.DispatchCallResult dispatchCall(
+          long interfaceId, short methodId,
+          org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
+        if (interfaceId == 0x9c0c5ee4bb0cc725L) {
+          return dispatchCallInternal(methodId, context);
+        }
+        return org.capnproto.Capability.Server.result(
+            org.capnproto.Capability.Server.internalUnimplemented("TestCap0", interfaceId));
+      }
+
+      protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
+        switch (methodId) {
+        case 0:
+          return org.capnproto.Capability.Server.result (
+            this.testMethod0(org.capnproto.Capability.Server.internalGetTypedContext(
+              org.capnproto.demo.Demo.TestParams0.factory, org.capnproto.demo.Demo.TestResults0.factory, context)));
+        case 1:
+          return org.capnproto.Capability.Server.result (
+            this.testMethod1(org.capnproto.Capability.Server.internalGetTypedContext(
+              org.capnproto.demo.Demo.TestParams1.factory, org.capnproto.demo.Demo.TestResults1.factory, context)));
+        default:
+          return org.capnproto.Capability.Server.result(
+            org.capnproto.Capability.Server.internalUnimplemented("TestCap0", 0x9c0c5ee4bb0cc725L, methodId));
+        }
+      }
+
+      protected java.util.concurrent.CompletableFuture<?> testMethod0(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams0.Reader, org.capnproto.demo.Demo.TestResults0.Builder> context) {
+        return org.capnproto.Capability.Server.internalUnimplemented(
+          "runtime/src/test/java/org/capnproto/demo/demo.capnp:TestCap0", "testMethod0",
+          0x9c0c5ee4bb0cc725L, (short)0);
+      }
+
+      protected java.util.concurrent.CompletableFuture<?> testMethod1(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams1.Reader, org.capnproto.demo.Demo.TestResults1.Builder> context) {
+        return org.capnproto.Capability.Server.internalUnimplemented(
+          "runtime/src/test/java/org/capnproto/demo/demo.capnp:TestCap0", "testMethod1",
+          0x9c0c5ee4bb0cc725L, (short)1);
+      }
+
+    }
+  
+
+  }
+
+  public static class TestCap1 {
+    public static final class Factory extends org.capnproto.Capability.Factory<Client> {
+      public final Client newClient(org.capnproto.ClientHook hook) {
+        return new Client(hook);
+      }
+    }
+
+    public static final Factory factory = new Factory();
+
+    public static class Client extends org.capnproto.Capability.Client {
+      public Client() {}
+      public Client(org.capnproto.ClientHook hook) { super(hook); }
+      public Client(org.capnproto.Capability.Client cap) { super(cap); }
+      public Client(Server server) { super(server); }
+      public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {
+        super(promise);
+      }
+
+    }
+
+    public static abstract class Server extends org.capnproto.Capability.Server {
+      protected org.capnproto.DispatchCallResult dispatchCall(
+          long interfaceId, short methodId,
+          org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
+        if (interfaceId == 0xd88e8bb64ed6f7b1L) {
+          return dispatchCallInternal(methodId, context);
+        }
+        return org.capnproto.Capability.Server.result(
+            org.capnproto.Capability.Server.internalUnimplemented("TestCap1", interfaceId));
+      }
+
+      protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
+        switch (methodId) {
+        default:
+          return org.capnproto.Capability.Server.result(
+            org.capnproto.Capability.Server.internalUnimplemented("TestCap1", 0xd88e8bb64ed6f7b1L, methodId));
+        }
+      }
+
+    }
+  
+
+  }
 
   public static class Iface1 {
     public static final class Factory extends org.capnproto.Capability.Factory<Client> {
@@ -656,23 +782,26 @@ public final class Demo {
         return new Client(hook);
       }
     }
+
     public static final Factory factory = new Factory();
+
     public static class Client extends org.capnproto.Capability.Client {
       public Client() {}
       public Client(org.capnproto.ClientHook hook) { super(hook); }
-      public Client(org.capnproto.Capability.Client cap) { super(cap.getHook()); }
+      public Client(org.capnproto.Capability.Client cap) { super(cap); }
       public Client(Server server) { super(server); }
-      public Client(java.util.concurrent.CompletableFuture<org.capnproto.ClientHook> promise) {
+      public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {
         super(promise);
       }
-  
-      public org.capnproto.Request<Method0Params.Builder, Method0Results.Reader> method0Request() {
+
+      public org.capnproto.Request<Method0Params.Builder, Method0Results.Pipeline> method0Request() {
         return newCall(Method0Params.factory, Method0Results.factory, 0xd52dcf38c9f6f7c0L, (short)0);
       }
-      public org.capnproto.Request<Method1Params.Builder, Method1Results.Reader> method1Request() {
+      public org.capnproto.Request<Method1Params.Builder, Method1Results.Pipeline> method1Request() {
         return newCall(Method1Params.factory, Method1Results.factory, 0xd52dcf38c9f6f7c0L, (short)1);
       }
     }
+
     public static abstract class Server extends org.capnproto.Capability.Server {
       protected org.capnproto.DispatchCallResult dispatchCall(
           long interfaceId, short methodId,
@@ -683,7 +812,7 @@ public final class Demo {
         return org.capnproto.Capability.Server.result(
             org.capnproto.Capability.Server.internalUnimplemented("Iface1", interfaceId));
       }
-  
+
       protected org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {
         switch (methodId) {
         case 0:
@@ -716,7 +845,9 @@ public final class Demo {
   
     public static class Struct1 {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)1,(short)1);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -730,6 +861,9 @@ public final class Demo {
         }
         public final Reader asReader(Builder builder) {
           return builder.asReader();
+        }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
         }
       }
       public static final Factory factory = new Factory();
@@ -781,20 +915,18 @@ public final class Demo {
         }
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method0Params {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -808,6 +940,9 @@ public final class Demo {
         }
         public final Reader asReader(Builder builder) {
           return builder.asReader();
+        }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
         }
       }
       public static final Factory factory = new Factory();
@@ -829,20 +964,18 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method0Results {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)2);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -856,6 +989,9 @@ public final class Demo {
         }
         public final Reader asReader(Builder builder) {
           return builder.asReader();
+        }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
         }
       }
       public static final Factory factory = new Factory();
@@ -909,20 +1045,18 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method1Params {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)0);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -936,6 +1070,9 @@ public final class Demo {
         }
         public final Reader asReader(Builder builder) {
           return builder.asReader();
+        }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
         }
       }
       public static final Factory factory = new Factory();
@@ -957,20 +1094,18 @@ public final class Demo {
 
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
       }
     }
 
-
     public static class Method1Results {
       public static final org.capnproto.StructSize STRUCT_SIZE = new org.capnproto.StructSize((short)0,(short)1);
-      public static final class Factory extends org.capnproto.StructFactory<Builder, Reader> {
+      public static final class Factory
+          extends org.capnproto.StructFactory<Builder, Reader>
+          implements org.capnproto.PipelineFactory<Pipeline> {
         public Factory() {
         }
         public final Reader constructReader(org.capnproto.SegmentReader segment, int data,int pointers, int dataSize, short pointerCount, int nestingLimit) {
@@ -984,6 +1119,9 @@ public final class Demo {
         }
         public final Reader asReader(Builder builder) {
           return builder.asReader();
+        }
+        public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {
+          return new Pipeline(promise);
         }
       }
       public static final Factory factory = new Factory();
@@ -1003,7 +1141,7 @@ public final class Demo {
           return _getPointerField(org.capnproto.demo.Demo.Iface0.factory, 0);
         }
         public void setResult0(org.capnproto.demo.Demo.Iface0.Client value) {
-          _initPointerField(org.capnproto.demo.Demo.Iface0.factory, 0, 0);
+          _setPointerField(org.capnproto.demo.Demo.Iface0.factory, 0, value);
         }
 
       }
@@ -1021,23 +1159,19 @@ public final class Demo {
         }
       }
 
-      public static class Pipeline {
-        private org.capnproto.AnyPointer.Pipeline typeless;
-
-        public Pipeline() {}
-        public Pipeline(org.capnproto.AnyPointer.Pipeline typeless) {
-          this.typeless = typeless;
+      public static class Pipeline extends org.capnproto.Pipeline<Reader> {
+        public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {
+          super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));
         }
         public org.capnproto.demo.Demo.Iface0.Client getResult0() {
-          return new org.capnproto.demo.Demo.Iface0.Client(typeless.getPointerField((short)0).asCap());
+          return new org.capnproto.demo.Demo.Iface0.Client(this.getPointerField((short)0).asCap());
         }
       }
     }
 
 
-  
   }
-  
+
 
 public static final class Schemas {
 public static final org.capnproto.SegmentReader b_91e1b138de965ab0 =
@@ -1438,6 +1572,78 @@ public static final org.capnproto.SegmentReader b_a9395663e97ca3af =
    "\u0011\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
    "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" + "");
+public static final org.capnproto.SegmentReader b_9c0c5ee4bb0cc725 =
+   org.capnproto.GeneratedClassSupport.decodeRawBytes(
+   "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
+   "\u0025\u00c7\u000c\u00bb\u00e4\u005e\u000c\u009c" +
+   "\u0034\u0000\u0000\u0000\u0003\u0000\u0000\u0000" +
+   "\u0042\u0047\u00e8\u0082\u0015\u007a\u0057\u00b6" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00ea\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0087\u0000\u0000\u0000" +
+   "\u0085\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0064\u0065\u006d\u006f" +
+   "\u002f\u0064\u0065\u006d\u006f\u002e\u0063\u0061" +
+   "\u0070\u006e\u0070\u003a\u0054\u0065\u0073\u0074" +
+   "\u0043\u0061\u0070\u0030\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u0008\u0000\u0000\u0000\u0003\u0000\u0005\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u00b0\u005a\u0096\u00de\u0038\u00b1\u00e1\u0091" +
+   "\u00bf\u00dc\u00d1\u003b\u003c\u00dd\u007b\u00a7" +
+   "\u0031\u0000\u0000\u0000\u0062\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0029\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0049\u0090\u0033\u0012\u00e4\u0033\u000f\u00b2" +
+   "\u0063\u0069\u0053\u00ab\u0092\u0023\u0034\u00d1" +
+   "\u001d\u0000\u0000\u0000\u0062\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0074\u0065\u0073\u0074\u004d\u0065\u0074\u0068" +
+   "\u006f\u0064\u0030\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000" +
+   "\u0074\u0065\u0073\u0074\u004d\u0065\u0074\u0068" +
+   "\u006f\u0064\u0031\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000" +
+   "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" + "");
+public static final org.capnproto.SegmentReader b_d88e8bb64ed6f7b1 =
+   org.capnproto.GeneratedClassSupport.decodeRawBytes(
+   "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +
+   "\u00b1\u00f7\u00d6\u004e\u00b6\u008b\u008e\u00d8" +
+   "\u0034\u0000\u0000\u0000\u0003\u0000\u0000\u0000" +
+   "\u0042\u0047\u00e8\u0082\u0015\u007a\u0057\u00b6" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0015\u0000\u0000\u0000\u00ea\u0001\u0000\u0000" +
+   "\u0031\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u002d\u0000\u0000\u0000\u0007\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
+   "\u0072\u0075\u006e\u0074\u0069\u006d\u0065\u002f" +
+   "\u0073\u0072\u0063\u002f\u0074\u0065\u0073\u0074" +
+   "\u002f\u006a\u0061\u0076\u0061\u002f\u006f\u0072" +
+   "\u0067\u002f\u0063\u0061\u0070\u006e\u0070\u0072" +
+   "\u006f\u0074\u006f\u002f\u0064\u0065\u006d\u006f" +
+   "\u002f\u0064\u0065\u006d\u006f\u002e\u0063\u0061" +
+   "\u0070\u006e\u0070\u003a\u0054\u0065\u0073\u0074" +
+   "\u0043\u0061\u0070\u0031\u0000\u0000\u0000\u0000" +
+   "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" +
+   "\u0000\u0000\u0000\u0000\u0003\u0000\u0005\u0000" +
+   "\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000" + "");
 public static final org.capnproto.SegmentReader b_d52dcf38c9f6f7c0 =
    org.capnproto.GeneratedClassSupport.decodeRawBytes(
    "\u0000\u0000\u0000\u0000\u0005\u0000\u0006\u0000" +

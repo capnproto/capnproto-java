@@ -1,6 +1,6 @@
 package org.capnproto;
 
-interface PipelineHook {
+public interface PipelineHook {
 
     ClientHook getPipelinedCap(PipelineOp[] ops);
 

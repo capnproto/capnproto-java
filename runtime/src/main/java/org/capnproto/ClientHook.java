@@ -1,13 +1,14 @@
 package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public interface ClientHook {
 
     Object NULL_CAPABILITY_BRAND = new Object();
     Object BROKEN_CAPABILITY_BRAND = new Object();
 
-    Request<AnyPointer.Builder, AnyPointer.Reader> newCall(long interfaceId, short methodId);
+    Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId);
 
     VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context);
 
@@ -15,7 +16,7 @@ public interface ClientHook {
         return null;
     }
 
-    default CompletableFuture<ClientHook> whenMoreResolved() {
+    default CompletionStage<ClientHook> whenMoreResolved() {
         return null;
     }
 
@@ -23,7 +24,7 @@ public interface ClientHook {
         return NULL_CAPABILITY_BRAND;
     }
 
-    default CompletableFuture<java.lang.Void> whenResolved() {
+    default CompletionStage<?> whenResolved() {
         var promise = whenMoreResolved();
         return promise != null
                 ? promise.thenCompose(ClientHook::whenResolved)
@@ -43,10 +44,10 @@ public interface ClientHook {
     }
 
     final class VoidPromiseAndPipeline {
-        public final CompletableFuture<?> promise;
+        public final CompletionStage<?> promise;
         public final PipelineHook pipeline;
 
-        VoidPromiseAndPipeline(CompletableFuture<?> promise, PipelineHook pipeline) {
+        VoidPromiseAndPipeline(CompletionStage<?> promise, PipelineHook pipeline) {
             this.promise = promise;
             this.pipeline = pipeline;
         }

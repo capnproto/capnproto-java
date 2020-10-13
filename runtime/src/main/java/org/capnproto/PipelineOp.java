@@ -2,6 +2,8 @@ package org.capnproto;
 
 final class PipelineOp {
 
+    // TODO just use array of Short?
+
     enum Type {
         NOOP,
         GET_POINTER_FIELD
@@ -44,7 +46,7 @@ final class PipelineOp {
             var transform = transforms.get(ii);
             switch (transform.which()) {
                 case NOOP:
-                    ops[ii] = Noop();
+                    ops[ii] = Noop(); // TODO null?
                     break;
                 case GET_POINTER_FIELD:
                     ops[ii] = PointerField(transform.getGetPointerField());
