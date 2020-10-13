@@ -270,7 +270,7 @@ final class RpcState {
             return;
         }
 
-        var answerId = bootstrap.getQuestionId();
+        final var answerId = bootstrap.getQuestionId();
         var answer = answers.put(answerId);
         if (answer.active) {
             assert false: "questionId is already in use: " + answerId;
@@ -339,8 +339,8 @@ final class RpcState {
 
         {
             var answer = answers.put(answerId);
-            assert !answer.active : "questionId is already in use";
             if (answer.active) {
+                assert false: "questionId is already in use";
                 return;
             }
 
@@ -381,13 +381,13 @@ final class RpcState {
         var exportsToRelease = new ArrayList<Integer>();
 
         var question = questions.find(callReturn.getAnswerId());
-        assert question != null : "Invalid question ID in Return message.";
         if (question == null) {
+            assert false: "Invalid question ID in Return message.";
             return;
         }
 
-        assert question.isAwaitingReturn: "Duplicate Return";
         if (!question.isAwaitingReturn) {
+            assert false: "Duplicate Return";
             return;
         }
 
@@ -397,8 +397,8 @@ final class RpcState {
             question.paramExports = List.of();
         }
 
-        assert !callReturn.isTakeFromOtherQuestion(): "Not implemented";
         if (callReturn.isTakeFromOtherQuestion()) {
+            assert false: "Not implemented";
             // TODO process isTakeFromOtherQuestion...
             return;
         }
@@ -414,19 +414,22 @@ final class RpcState {
                 var response = new RpcResponseImpl(question, message, capTable, payload.getContent());
                 question.answer(response);
                 break;
+
             case EXCEPTION:
-                assert !question.isTailCall : "Tail call `Return` must set `resultsSentElsewhere`, not `exception`.";
                 if (question.isTailCall) {
+                    assert false: "Tail call `Return` must set `resultsSentElsewhere`, not `exception`.";
                     return;
                 }
                 question.reject(RpcException.toException(callReturn.getException()));
                 break;
+
             case CANCELED:
                 assert false : "Return message falsely claims call was canceled.";
                 break;
+
             case RESULTS_SENT_ELSEWHERE:
-                assert question.isTailCall : "`Return` had `resultsSentElsewhere` but this was not a tail call.";
                 if (!question.isTailCall) {
+                    assert false: "`Return` had `resultsSentElsewhere` but this was not a tail call.";
                     return;
                 }
                 // Tail calls are fulfilled with a null pointer.
@@ -436,22 +439,22 @@ final class RpcState {
             case TAKE_FROM_OTHER_QUESTION:
                 var other = callReturn.getTakeFromOtherQuestion();
                 var answer = answers.find(other);
-                assert answer != null : "`Return.takeFromOtherQuestion` had invalid answer ID.";
                 if (answer == null) {
+                    assert false: "`Return.takeFromOtherQuestion` had invalid answer ID.";
                     return;
                 }
-                assert answer.redirectedResults != null : "`Return.takeFromOtherQuestion` referenced a call that did not use `sendResultsTo.yourself`.";
                 if (answer.redirectedResults == null) {
+                    assert false: "`Return.takeFromOtherQuestion` referenced a call that did not use `sendResultsTo.yourself`.";
                     return;
                 }
                 question.response = answer.redirectedResults.toCompletableFuture();
                 answer.redirectedResults = null;
                 break;
+
             default:
                 assert false : "Unknown 'Return' type.";
                 return;
         }
-
     }
 
     void handleFinish(RpcProtocol.Finish.Reader finish) {
@@ -536,8 +539,8 @@ final class RpcState {
                     target = resolved;
                 }
 
-                assert target.getBrand() == RpcState.this : "'Disembargo' of type 'senderLoopback' sent to an object that does not point back to the sender.";
                 if (target.getBrand() != this) {
+                    assert false: "'Disembargo' of type 'senderLoopback' sent to an object that does not point back to the sender.";
                     return;
                 }
 
@@ -710,14 +713,16 @@ final class RpcState {
 
     void releaseExport(int exportId, int refcount) {
         var export = exports.find(exportId);
-        assert export != null;
         if (export == null) {
+            assert false: "Cannot release unknown export";
             return;
         }
-        assert export.refcount <= refcount;
+
         if (export.refcount <= refcount) {
+            assert false: "Over-reducing export refcount";
             return;
         }
+
         export.refcount -= refcount;
         if (export.refcount == 0) {
             exportsByCap.remove(exportId, export.clientHook);
@@ -834,14 +839,19 @@ final class RpcState {
         switch (target.which()) {
             case IMPORTED_CAP:
                 var exp = exports.find(target.getImportedCap());
-                assert exp != null: "Message target is not a current export ID.";
-                return exp != null ? exp.clientHook : null;
+                if (exp != null) {
+                    return exp.clientHook;
+                }
+                else {
+                    assert false: "Message target is not a current export ID.";
+                    return null;
+                }
 
             case PROMISED_ANSWER:
                 var promisedAnswer = target.getPromisedAnswer();
                 var base = answers.find(promisedAnswer.getQuestionId());
-                assert base != null && base.active: "PromisedAnswer.questionId is not a current question.";
                 if (base == null || !base.active) {
+                    assert false: "PromisedAnswer.questionId is not a current question.";
                     return null;
                 }
 
