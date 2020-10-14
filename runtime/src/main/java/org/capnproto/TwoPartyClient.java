@@ -32,7 +32,7 @@ public class TwoPartyClient {
         return rpcSystem.bootstrap(vatId.asReader());
     }
 
-    public synchronized CompletableFuture<?> runOnce() {
+    public CompletableFuture<?> runOnce() {
         return this.rpcSystem.runOnce();
     }
 }

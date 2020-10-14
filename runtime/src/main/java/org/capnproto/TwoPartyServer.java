@@ -55,7 +55,7 @@ public class TwoPartyServer {
     }
 
     public synchronized CompletableFuture<?> runOnce() {
-        var done = new CompletableFuture<Object>();
+        var done = new CompletableFuture<>();
         for (var conn: connections) {
             done = CompletableFuture.anyOf(done, conn.runOnce());
         }

@@ -83,7 +83,7 @@ public class TwoPartyTest {
         params.setParam0(4321);
         var response = request.send();
         while (!response.isDone()) {
-            CompletableFuture.anyOf(response, server.runOnce()).join();
+            CompletableFuture.anyOf(response, this.client.runOnce(), server.runOnce()).join();
         }
         Assert.assertTrue(response.isDone());
         var results = response.get();
@@ -101,7 +101,7 @@ public class TwoPartyTest {
         var params = request.getParams();
         var response = request.send();
         while (!response.isDone()) {
-            CompletableFuture.anyOf(response, server.runOnce()).join();
+            CompletableFuture.anyOf(response, this.client.runOnce(), server.runOnce()).join();
         }
         Assert.assertTrue(response.isDone());
 
