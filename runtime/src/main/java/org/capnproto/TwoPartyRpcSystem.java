@@ -1,7 +1,7 @@
 package org.capnproto;
 
 public class TwoPartyRpcSystem
-        extends RpcSystem<TwoPartyVatNetwork> {
+        extends RpcSystem<RpcTwoPartyProtocol.VatId.Reader> {
 
     public TwoPartyRpcSystem(TwoPartyVatNetwork network, Capability.Client bootstrapInterface) {
         super(network, bootstrapInterface);

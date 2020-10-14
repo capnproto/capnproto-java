@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class RpcSystem<Network extends VatNetwork> {
+public abstract class RpcSystem<VatId> {
 
-    final Network network;
+    final VatNetwork<VatId> network;
     final Capability.Client bootstrapInterface;
     final Map<VatNetwork.Connection, RpcState> connections = new HashMap<>();
     CompletableFuture<?> acceptCompleted = CompletableFuture.completedFuture(null);
 
-    public RpcSystem(Network network, Capability.Client bootstrapInterface) {
+    public RpcSystem(VatNetwork<VatId> network, Capability.Client bootstrapInterface) {
         this.network = network;
         this.bootstrapInterface = bootstrapInterface;
     }
@@ -36,7 +36,7 @@ public abstract class RpcSystem<Network extends VatNetwork> {
 
     CompletableFuture<?> acceptLoop() {
         if (this.acceptCompleted.isDone()) {
-            CompletableFuture<VatNetwork.Connection> accepted = this.network.baseAccept();
+            var accepted = this.network.baseAccept();
             this.acceptCompleted = accepted.thenAccept(this::accept);
         }
         return this.acceptCompleted;

@@ -9,7 +9,7 @@ public interface CallContextHook {
 
     AnyPointer.Builder getResults();
 
-    CompletableFuture<java.lang.Void> tailCall(RequestHook request);
+    CompletableFuture<?> tailCall(RequestHook request);
 
     void allowCancellation();
 
