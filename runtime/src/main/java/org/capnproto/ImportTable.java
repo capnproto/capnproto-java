@@ -8,10 +8,10 @@ abstract class ImportTable<T> implements Iterable<T> {
 
     private final HashMap<Integer, T> slots = new HashMap<>();
 
-    protected abstract T newImportable();
+    protected abstract T newImportable(int id);
 
     public T put(int id) {
-        return slots.computeIfAbsent(id, key -> newImportable());
+        return this.slots.computeIfAbsent(id, key -> newImportable(id));
     }
 
     public T find(int id) {
