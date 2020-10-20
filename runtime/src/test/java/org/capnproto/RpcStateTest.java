@@ -25,7 +25,8 @@ public class RpcStateTest {
 
     class TestConnection implements VatNetwork.Connection {
 
-        Executor executor = Executors.newSingleThreadExecutor();
+        private final CompletableFuture<java.lang.Void> disconnect = new CompletableFuture<>();
+
         @Override
         public OutgoingRpcMessage newOutgoingMessage(int firstSegmentWordSize) {
             var message = new MessageBuilder();
@@ -52,6 +53,17 @@ public class RpcStateTest {
         public CompletableFuture<IncomingRpcMessage> receiveIncomingMessage() {
             return null;
         }
+
+        @Override
+        public CompletableFuture<java.lang.Void> onDisconnect() {
+            return this.disconnect.copy();
+        }
+
+        @Override
+        public CompletableFuture<java.lang.Void> shutdown() {
+            this.disconnect.complete(null);
+            return this.disconnect.copy();
+        }
     }
 
     TestConnection connection;
@@ -63,7 +75,7 @@ public class RpcStateTest {
     public void setUp() throws Exception {
         connection = new TestConnection();
         bootstrapInterface = new Capability.Client(Capability.newNullCap());
-        rpc = new RpcState(connection, bootstrapInterface);
+        rpc = new RpcState(bootstrapInterface, connection, connection.disconnect);
     }
 
     @After

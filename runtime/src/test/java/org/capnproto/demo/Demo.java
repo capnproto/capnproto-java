@@ -411,13 +411,13 @@ public final class Demo {
         }
       }
 
-      protected java.util.concurrent.CompletableFuture<?> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface0", "method0",
           0xac6d126c2fac16ebL, (short)0);
       }
 
-      protected java.util.concurrent.CompletableFuture<?> method1(org.capnproto.StreamingCallContext<Method1Params.Reader> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> method1(org.capnproto.StreamingCallContext<Method1Params.Reader> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface0", "method1",
           0xac6d126c2fac16ebL, (short)1);
@@ -715,13 +715,13 @@ public final class Demo {
         }
       }
 
-      protected java.util.concurrent.CompletableFuture<?> testMethod0(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams0.Reader, org.capnproto.demo.Demo.TestResults0.Builder> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> testMethod0(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams0.Reader, org.capnproto.demo.Demo.TestResults0.Builder> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:TestCap0", "testMethod0",
           0x9c0c5ee4bb0cc725L, (short)0);
       }
 
-      protected java.util.concurrent.CompletableFuture<?> testMethod1(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams1.Reader, org.capnproto.demo.Demo.TestResults1.Builder> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> testMethod1(org.capnproto.CallContext<org.capnproto.demo.Demo.TestParams1.Reader, org.capnproto.demo.Demo.TestResults1.Builder> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:TestCap0", "testMethod1",
           0x9c0c5ee4bb0cc725L, (short)1);
@@ -829,13 +829,13 @@ public final class Demo {
         }
       }
 
-      protected java.util.concurrent.CompletableFuture<?> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> method0(org.capnproto.CallContext<Method0Params.Reader, Method0Results.Builder> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface1", "method0",
           0xd52dcf38c9f6f7c0L, (short)0);
       }
 
-      protected java.util.concurrent.CompletableFuture<?> method1(org.capnproto.CallContext<Method1Params.Reader, Method1Results.Builder> context) {
+      protected java.util.concurrent.CompletableFuture<java.lang.Void> method1(org.capnproto.CallContext<Method1Params.Reader, Method1Results.Builder> context) {
         return org.capnproto.Capability.Server.internalUnimplemented(
           "runtime/src/test/java/org/capnproto/demo/demo.capnp:Iface1", "method1",
           0xd52dcf38c9f6f7c0L, (short)1);

@@ -6,24 +6,27 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 class TestCap0Impl extends Demo.TestCap0.Server {
 
     final Demo.TestCap1.Client testCap1a = new Demo.TestCap1.Client(new TestCap1Impl());
     final Demo.TestCap1.Client testCap1b = new Demo.TestCap1.Client(new TestCap1Impl());
 
-    public CompletableFuture<?> testMethod0(CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder>  ctx) {
+    public CompletableFuture<java.lang.Void> testMethod0(CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder>  ctx) {
         var params = ctx.getParams();
         var results = ctx.getResults();
         results.setResult0(params.getParam0());
+        ctx.releaseParams();
         return CompletableFuture.completedFuture(null);
     }
 
-    public CompletableFuture<?> testMethod1(CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder>  ctx) {
+    public CompletableFuture<java.lang.Void> testMethod1(CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder>  ctx) {
         var params = ctx.getParams();
         var results = ctx.getResults();
         var res0 = results.getResult0();
@@ -39,11 +42,29 @@ class TestCap0Impl extends Demo.TestCap0.Server {
 class TestCap1Impl extends Demo.TestCap1.Server {
 }
 
+
 public class TwoPartyTest {
+
+    private Thread runServer(TwoPartyVatNetwork network) {
+        var thread = new Thread(() -> {
+            try {
+                network.onDisconnect().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }, "Server");
+
+        thread.start();
+        return thread;
+    }
 
     AsynchronousServerSocketChannel serverSocket;
     AsynchronousSocketChannel clientSocket;
     TwoPartyClient client;
+    TwoPartyVatNetwork serverNetwork;
+    Thread serverThread;
 
     @Before
     public void setUp() throws Exception {
@@ -52,14 +73,19 @@ public class TwoPartyTest {
 
         this.clientSocket = AsynchronousSocketChannel.open();
         this.clientSocket.connect(this.serverSocket.getLocalAddress()).get();
-
         this.client = new TwoPartyClient(clientSocket);
+
+        var socket = serverSocket.accept().get();
+        this.serverNetwork = new TwoPartyVatNetwork(socket, RpcTwoPartyProtocol.Side.SERVER);
+        //this.serverNetwork.dumper.addSchema(Demo.TestCap1);
+        this.serverThread = runServer(this.serverNetwork);
     }
 
     @After
     public void tearDown() throws Exception {
         this.clientSocket.close();
         this.serverSocket.close();
+        this.serverThread.join();
         this.client = null;
     }
 
@@ -73,36 +99,87 @@ public class TwoPartyTest {
     }
 
     @Test
-    public void testBasic() throws ExecutionException, InterruptedException {
-        var capServer = new TestCap0Impl();
-        var server = new TwoPartyServer(new Demo.TestCap0.Client(capServer));
-        server.listen(serverSocket);
-        var demoClient = new Demo.TestCap0.Client(this.client.bootstrap());
-        var request = demoClient.testMethod0Request();
+    public void testBasic() throws ExecutionException, InterruptedException, IOException {
+        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+
+        var demo = new Demo.TestCap0.Client(this.client.bootstrap());
+        var request = demo.testMethod0Request();
         var params = request.getParams();
         params.setParam0(4321);
         var response = request.send();
-        while (!response.isDone()) {
-            CompletableFuture.anyOf(response, this.client.runOnce(), server.runOnce()).join();
-        }
+        response.get();
         Assert.assertTrue(response.isDone());
         var results = response.get();
         Assert.assertEquals(params.getParam0(), results.getResult0());
+        this.clientSocket.shutdownOutput();
+        serverThread.join();
+    }
+
+    @Test
+    public void testBasicCleanup() throws ExecutionException, InterruptedException, TimeoutException {
+        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+        var demo = new Demo.TestCap0.Client(this.client.bootstrap());
+        var request = demo.testMethod0Request();
+        var params = request.getParams();
+        params.setParam0(4321);
+        var response = request.send();
+        response.get();
+        Assert.assertTrue(response.isDone());
+        var results = response.get();
+        Assert.assertEquals(params.getParam0(), results.getResult0());
+
+        demo = null;
+    }
+
+    @Test
+    public void testShutdown() throws InterruptedException, IOException {
+        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+        var demo = new Demo.TestCap0.Client(this.client.bootstrap());
+        this.clientSocket.shutdownOutput();
+        serverThread.join();
+    }
+
+    @Test
+    public void testCallThrows() throws ExecutionException, InterruptedException {
+        var impl = new Demo.TestCap0.Server() {
+            public CompletableFuture<java.lang.Void> testMethod0(CallContext<Demo.TestParams0.Reader, Demo.TestResults0.Builder>  ctx) {
+                return CompletableFuture.failedFuture(new RuntimeException("Call to testMethod0 failed"));
+            }
+            public CompletableFuture<java.lang.Void> testMethod1(CallContext<Demo.TestParams1.Reader, Demo.TestResults1.Builder>  ctx) {
+                return CompletableFuture.completedFuture(null);
+            }
+        };
+
+        var rpcSystem = new TwoPartyRpcSystem(this.serverNetwork, impl);
+
+        var demoClient = new Demo.TestCap0.Client(this.client.bootstrap());
+        {
+            var request = demoClient.testMethod0Request();
+            var response = request.send();
+            while (!response.isDone()) {
+                CompletableFuture.anyOf(response).exceptionally(exc -> { return null; });
+            }
+            Assert.assertTrue(response.isCompletedExceptionally());
+        }
+
+        // test that the system is still valid
+        {
+            var request = demoClient.testMethod1Request();
+            var response = request.send();
+            response.get();
+            Assert.assertFalse(response.isCompletedExceptionally());
+        }
     }
 
     @Test
     public void testReturnCap() throws ExecutionException, InterruptedException {
         // send a capability back from the server to the client
         var capServer = new TestCap0Impl();
-        var server = new TwoPartyServer(new Demo.TestCap0.Client(capServer));
-        server.listen(serverSocket);
+        var rpcSystem = new TwoPartyRpcSystem(this.serverNetwork, capServer);
         var demoClient = new Demo.TestCap0.Client(this.client.bootstrap());
         var request = demoClient.testMethod1Request();
-        var params = request.getParams();
         var response = request.send();
-        while (!response.isDone()) {
-            CompletableFuture.anyOf(response, this.client.runOnce(), server.runOnce()).join();
-        }
+        response.get();
         Assert.assertTrue(response.isDone());
 
         var results = response.get();
@@ -114,58 +191,5 @@ public class TwoPartyTest {
         Assert.assertFalse(cap2.isNull());
     }
 
-    @Test
-    public void testLocalServer() throws ExecutionException, InterruptedException {
-        var demo = new TestCap0Impl();
-        var client = new Demo.TestCap0.Client(demo);
-        var request = client.testMethod0Request();
-        var params = request.getParams();
-        params.setParam0(4321);
-        var response = request.send();
-        var results = response.get();
-        Assert.assertEquals(params.getParam0(), results.getResult0());
-    }
 
-    @Test
-    public void testGenericServer() throws ExecutionException, InterruptedException {
-        var demo = new TestCap0Impl();
-        var client = new Demo.TestCap0.Client(demo);
-        var request = client.testMethod0Request();
-        var params = request.getParams();
-        var response = request.send();
-        var results = response.get();
-        Assert.assertEquals(params.getParam0(), results.getResult0());
-    }
-
-    @Test
-    public void testLocalTwoStagePipeline() {
-
-        var server0 = new Demo.Iface0.Server() {
-            boolean method0called = false;
-
-            @Override
-            protected CompletableFuture<?> method0(CallContext<Demo.Iface0.Method0Params.Reader, Demo.Iface0.Method0Results.Builder> ctx) {
-                method0called = true;
-                return CompletableFuture.completedFuture(null);
-            }
-        };
-
-        var server1 = new Demo.Iface1.Server() {
-            @Override
-            protected CompletableFuture<?> method1(CallContext<Demo.Iface1.Method1Params.Reader, Demo.Iface1.Method1Results.Builder> ctx) {
-                ctx.getResults().setResult0(new Demo.Iface0.Client(server0));
-                return CompletableFuture.completedFuture(null);
-            }
-        };
-
-        var iface1Client = new Demo.Iface1.Client(server1);
-        var request1 = iface1Client.method1Request();
-        var response = request1.send();
-        var iface0 = response.getResult0();
-        var request0 = iface0.method0Request();
-        var response0 = request0.send();
-        response0.join();
-        Assert.assertTrue(!response0.isCompletedExceptionally());
-        Assert.assertTrue(server0.method0called);
-    }
 }

@@ -44,10 +44,10 @@ public interface ClientHook {
     }
 
     final class VoidPromiseAndPipeline {
-        public final CompletionStage<?> promise;
+        public final CompletionStage<java.lang.Void> promise;
         public final PipelineHook pipeline;
 
-        VoidPromiseAndPipeline(CompletionStage<?> promise, PipelineHook pipeline) {
+        VoidPromiseAndPipeline(CompletionStage<java.lang.Void> promise, PipelineHook pipeline) {
             this.promise = promise;
             this.pipeline = pipeline;
         }

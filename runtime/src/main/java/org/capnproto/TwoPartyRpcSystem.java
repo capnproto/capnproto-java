@@ -7,6 +7,10 @@ public class TwoPartyRpcSystem
         super(network, bootstrapInterface);
     }
 
+    public TwoPartyRpcSystem(TwoPartyVatNetwork network, Capability.Server bootstrapInterface) {
+        super(network, new Capability.Client(bootstrapInterface));
+    }
+
     public Capability.Client bootstrap(RpcTwoPartyProtocol.VatId.Reader vatId) {
         var connection = this.network.baseConnect(vatId);
         var state = getConnectionState(connection);

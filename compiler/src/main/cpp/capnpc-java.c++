@@ -1758,7 +1758,7 @@ private:
           "      }\n"),
 
         kj::strTree(
-          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.StreamingCallContext<", shortParamType, ".Reader> context) {\n"
+          "      protected java.util.concurrent.CompletableFuture<java.lang.Void> ", identifierName, "(org.capnproto.StreamingCallContext<", shortParamType, ".Reader> context) {\n"
           "        return org.capnproto.Capability.Server.internalUnimplemented(\n"
           "          \"", interfaceProto.getDisplayName(), "\", \"", methodName, "\",\n"
           "          0x", interfaceIdHex, "L, (short)", methodId, ");\n"
@@ -1780,7 +1780,7 @@ private:
           "      }\n"),
 
         kj::strTree(
-          "      protected java.util.concurrent.CompletableFuture<?> ", identifierName, "(org.capnproto.CallContext<", shortParamType, ".Reader, ", shortResultType, ".Builder> context) {\n"
+          "      protected java.util.concurrent.CompletableFuture<java.lang.Void> ", identifierName, "(org.capnproto.CallContext<", shortParamType, ".Reader, ", shortResultType, ".Builder> context) {\n"
           "        return org.capnproto.Capability.Server.internalUnimplemented(\n"
           "          \"", interfaceProto.getDisplayName(), "\", \"", methodName, "\",\n"
           "          0x", interfaceIdHex, "L, (short)", methodId, ");\n"

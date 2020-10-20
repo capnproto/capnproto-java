@@ -1,22 +1,23 @@
 package org.capnproto;
 
-import java.nio.channels.AsynchronousByteChannel;
+import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class TwoPartyVatNetwork
-        implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>, VatNetwork.Connection {
+        implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>,
+                   VatNetwork.Connection {
 
-    private CompletableFuture<?> writeCompleted = CompletableFuture.completedFuture(null);
-    private final Executor executor = Executors.newSingleThreadExecutor();
-    private final AsynchronousByteChannel channel;
+    private CompletableFuture<java.lang.Void> previousWrite = CompletableFuture.completedFuture(null);
+    private final CompletableFuture<java.lang.Void> peerDisconnected = new CompletableFuture<>();
+    private final AsynchronousSocketChannel channel;
     private final RpcTwoPartyProtocol.Side side;
     private final MessageBuilder peerVatId = new MessageBuilder(4);
     private boolean accepted;
 
-    public TwoPartyVatNetwork(AsynchronousByteChannel channel, RpcTwoPartyProtocol.Side side) {
+    public final RpcDumper dumper = new RpcDumper();
+
+    public TwoPartyVatNetwork(AsynchronousSocketChannel channel, RpcTwoPartyProtocol.Side side) {
         this.channel = channel;
         this.side = side;
         this.peerVatId.initRoot(RpcTwoPartyProtocol.VatId.factory).setSide(
@@ -33,11 +34,12 @@ public class TwoPartyVatNetwork
         return peerVatId.getRoot(RpcTwoPartyProtocol.VatId.factory).asReader();
     }
 
+    public VatNetwork.Connection asConnection() {
+        return this;
+    }
+
     private Connection connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
-        if (vatId.getSide() != side) {
-            return this;
-        }
-        return null;
+        return vatId.getSide() != side ? this : null;
     }
 
     private CompletableFuture<Connection> accept() {
@@ -58,8 +60,33 @@ public class TwoPartyVatNetwork
 
     @Override
     public CompletableFuture<IncomingRpcMessage> receiveIncomingMessage() {
-        return Serialize.readAsync(channel).thenApply(message -> {
-            return new IncomingMessage(message);
+        return Serialize.readAsync(channel).whenComplete((x, exc) -> {
+            if (exc != null) {
+                this.peerDisconnected.complete(null);
+            }
+        }).thenApply(reader -> {
+            var msg = new IncomingMessage(reader);
+            var dump = this.dumper.dump(msg.getBody().getAs(RpcProtocol.Message.factory), getSide());
+            if (!dump.isEmpty()) {
+                System.out.println(dump);
+            }
+            return msg;
+        });
+    }
+
+    @Override
+    public CompletableFuture<java.lang.Void> onDisconnect() {
+        return this.peerDisconnected.copy();
+    }
+
+    @Override
+    public CompletableFuture<java.lang.Void> shutdown() {
+        return this.previousWrite.whenComplete((x, exc) -> {
+            try {
+                this.channel.shutdownOutput();
+            }
+            catch (Exception ioExc) {
+            }
         });
     }
 
@@ -70,7 +97,7 @@ public class TwoPartyVatNetwork
 
     @Override
     public CompletableFuture<Connection> baseAccept() {
-        return this.accept().thenApply(conn -> conn);
+        return this.accept();
     }
 
     final class OutgoingMessage implements OutgoingRpcMessage {
@@ -94,7 +121,7 @@ public class TwoPartyVatNetwork
 
         @Override
         public void send() {
-            writeCompleted = writeCompleted.thenCompose(
+            previousWrite = previousWrite.thenCompose(
                     x -> Serialize.writeAsync(channel, message)
             );
         }

@@ -7,7 +7,11 @@ public interface CallContextHook {
 
     void releaseParams();
 
-    AnyPointer.Builder getResults();
+    default AnyPointer.Builder getResults() {
+        return getResults(0);
+    }
+
+    AnyPointer.Builder getResults(int sizeHint);
 
     CompletableFuture<?> tailCall(RequestHook request);
 

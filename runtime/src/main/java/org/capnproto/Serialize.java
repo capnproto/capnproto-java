@@ -342,7 +342,7 @@ public final class Serialize {
             table.putInt(4 * (ii + 1), segments[ii].limit() / 8);
         }
 
-        outputChannel.write(table, 0, new CompletionHandler<Integer, Integer>() {
+        outputChannel.write(table, 0, new CompletionHandler<>() {
 
             @Override
             public void completed(Integer result, Integer attachment) {

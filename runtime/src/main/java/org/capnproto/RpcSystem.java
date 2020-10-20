@@ -9,11 +9,22 @@ public abstract class RpcSystem<VatId> {
     final VatNetwork<VatId> network;
     final Capability.Client bootstrapInterface;
     final Map<VatNetwork.Connection, RpcState> connections = new HashMap<>();
-    CompletableFuture<?> acceptCompleted = CompletableFuture.completedFuture(null);
+    final CompletableFuture<java.lang.Void> messageLoop;
+    final CompletableFuture<java.lang.Void> acceptLoop;
 
     public RpcSystem(VatNetwork<VatId> network, Capability.Client bootstrapInterface) {
         this.network = network;
         this.bootstrapInterface = bootstrapInterface;
+        this.acceptLoop = doAcceptLoop();
+        this.messageLoop = doMessageLoop();
+    }
+
+    public CompletableFuture<java.lang.Void> getMessageLoop() {
+        return this.messageLoop;
+    }
+
+    private CompletableFuture<java.lang.Void> getAcceptLoop() {
+        return this.acceptLoop;
     }
 
     public void accept(VatNetwork.Connection connection) {
@@ -21,24 +32,27 @@ public abstract class RpcSystem<VatId> {
     }
 
     synchronized RpcState getConnectionState(VatNetwork.Connection connection) {
+
+       var onDisconnect = new CompletableFuture<VatNetwork.Connection>().thenAccept(lostConnection -> {
+            this.connections.remove(lostConnection);
+        });
+
         return connections.computeIfAbsent(connection, key ->
-                new RpcState(key, bootstrapInterface));
+                new RpcState(bootstrapInterface, connection, onDisconnect));
     }
 
-    public final CompletableFuture<?> runOnce() {
-        var done = acceptLoop();
+    private final CompletableFuture<java.lang.Void> doAcceptLoop() {
+        return this.network.baseAccept().thenCompose(connection -> {
+            this.accept(connection);
+            return this.doAcceptLoop();
+        });
+    }
+
+    private final CompletableFuture<java.lang.Void> doMessageLoop() {
+        var accept = this.getAcceptLoop();
         for (var conn : connections.values()) {
-            done = CompletableFuture.anyOf(done, conn.runOnce());
+            accept = accept.acceptEither(conn.getMessageLoop(), x -> {});
         }
-        return done;
-    }
-
-
-    CompletableFuture<?> acceptLoop() {
-        if (this.acceptCompleted.isDone()) {
-            var accepted = this.network.baseAccept();
-            this.acceptCompleted = accepted.thenAccept(this::accept);
-        }
-        return this.acceptCompleted;
+        return accept.thenCompose(x -> this.doMessageLoop());
     }
 }

@@ -5,7 +5,8 @@ public final class RpcException extends java.lang.Exception {
     public enum Type {
         UNKNOWN,
         UNIMPLEMENTED,
-        FAILED
+        FAILED,
+        DISCONNECTED
     }
 
     private Type type;
@@ -25,6 +26,10 @@ public final class RpcException extends java.lang.Exception {
 
     public static RpcException failed(String message) {
         return new RpcException(Type.FAILED, message);
+    }
+
+    public static RpcException disconnected(String message) {
+        return new RpcException(Type.DISCONNECTED, message);
     }
 
     static void fromException(Throwable exc, RpcProtocol.Exception.Builder builder) {

@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 
 abstract class ExportTable<T> implements Iterable<T> {
 
-    final HashMap<Integer, T> slots = new HashMap<>();
-    final Queue<Integer> freeIds = new PriorityQueue<>();
-    int max = 0;
+    private final HashMap<Integer, T> slots = new HashMap<>();
+    private final Queue<Integer> freeIds = new PriorityQueue<>();
+    private int max = 0;
 
     abstract T newExportable(int id);
 

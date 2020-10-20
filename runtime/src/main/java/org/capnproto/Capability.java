@@ -162,7 +162,7 @@ public final class Capability {
                 return BRAND;
             }
 
-            CompletableFuture<?> callInternal(long interfaceId, short methodId, CallContextHook context) {
+            CompletableFuture<java.lang.Void> callInternal(long interfaceId, short methodId, CallContextHook context) {
                 var result = dispatchCall(
                         interfaceId,
                         methodId,
@@ -212,7 +212,7 @@ public final class Capability {
                 long interfaceId, short methodId,
                 CallContext<AnyPointer.Reader, AnyPointer.Builder> context);
 
-        protected static DispatchCallResult streamResult(CompletableFuture<?> result) {
+        protected static DispatchCallResult streamResult(CompletableFuture<java.lang.Void> result) {
             // For streaming calls, we need to add an evalNow() here so that exceptions thrown
             // directly from the call can propagate to later calls. If we don't capture the
             // exception properly then the caller will never find out that this is a streaming
@@ -222,35 +222,35 @@ public final class Capability {
             return new DispatchCallResult(result, true);
         }
 
-        protected static DispatchCallResult result(CompletableFuture<?> result) {
+        protected static DispatchCallResult result(CompletableFuture<java.lang.Void> result) {
             return new DispatchCallResult(result, false);
         }
 
-        protected static CompletableFuture<?> internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
+        protected static CompletableFuture<java.lang.Void> internalUnimplemented(String actualInterfaceName, long requestedTypeId) {
             return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + actualInterfaceName + " " + requestedTypeId));
         }
 
-        protected static CompletableFuture<?> internalUnimplemented(String interfaceName, long typeId, short methodId) {
+        protected static CompletableFuture<java.lang.Void> internalUnimplemented(String interfaceName, long typeId, short methodId) {
             return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + interfaceName + " " + typeId + " " + methodId));
         }
 
-        protected static CompletableFuture<?> internalUnimplemented(String interfaceName, String methodName, long typeId, short methodId) {
+        protected static CompletableFuture<java.lang.Void> internalUnimplemented(String interfaceName, String methodName, long typeId, short methodId) {
             return CompletableFuture.failedFuture(RpcException.unimplemented(
                     "Method not implemented. " + interfaceName + " " + typeId + " " + methodName + " " + methodId));
         }
     }
 
     public static ClientHook newLocalPromiseClient(CompletionStage<ClientHook> promise) {
-        return new QueuedClient(promise);
+        return new QueuedClient(promise.toCompletableFuture());
     }
 
     public static PipelineHook newLocalPromisePipeline(CompletionStage<PipelineHook> promise) {
-        return new QueuedPipeline(promise);
+        return new QueuedPipeline(promise.toCompletableFuture());
     }
 
-    static class LocalRequest implements RequestHook {
+    private static class LocalRequest implements RequestHook {
 
         final MessageBuilder message = new MessageBuilder();
         final long interfaceId;
@@ -290,11 +290,11 @@ public final class Capability {
         }
     }
 
-    static final class LocalPipeline implements PipelineHook {
-        final CallContextHook context;
-        final AnyPointer.Reader results;
+    private static final class LocalPipeline implements PipelineHook {
+        private final CallContextHook context;
+        private final AnyPointer.Reader results;
 
-        public LocalPipeline(CallContextHook context) {
+        LocalPipeline(CallContextHook context) {
             this.context = context;
             this.results = context.getResults().asReader();
         }
@@ -305,11 +305,16 @@ public final class Capability {
         }
     }
 
-    static class LocalResponse implements ResponseHook {
-        final MessageBuilder message = new MessageBuilder();
+    private static final class LocalResponse implements ResponseHook {
+
+        final MessageBuilder message;
+
+        LocalResponse(int sizeHint) {
+            this.message = new MessageBuilder(sizeHint);
+        }
     }
 
-    static class LocalCallContext implements CallContextHook {
+    private static class LocalCallContext implements CallContextHook {
 
         final CompletableFuture<?> cancelAllowed;
         MessageBuilder request;
@@ -336,9 +341,9 @@ public final class Capability {
         }
 
         @Override
-        public AnyPointer.Builder getResults() {
+        public AnyPointer.Builder getResults(int sizeHint) {
             if (this.response == null) {
-                var localResponse = new LocalResponse();
+                var localResponse = new LocalResponse(sizeHint);
                 this.responseBuilder = localResponse.message.getRoot(AnyPointer.factory);
                 this.response = new Response<>(this.responseBuilder.asReader(), localResponse);
             }
@@ -409,4 +414,82 @@ public final class Capability {
         };
     }
 
+    // Call queues
+    //
+    // These classes handle pipelining in the case where calls need to be queued in-memory until some
+    // local operation completes.
+
+    // A PipelineHook which simply queues calls while waiting for a PipelineHook to which to forward them.
+    private static final class QueuedPipeline implements PipelineHook {
+
+        private final CompletableFuture<PipelineHook> promise;
+        private final CompletionStage<Void> selfResolutionOp;
+        PipelineHook redirect;
+
+        QueuedPipeline(CompletableFuture<PipelineHook> promiseParam) {
+            this.promise = promiseParam;
+            this.selfResolutionOp = promise.handle((pipeline, exc) -> {
+                this.redirect = exc == null
+                        ? pipeline
+                        : PipelineHook.newBrokenPipeline(exc);
+                return null;
+            });
+        }
+
+        @Override
+        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+            return redirect != null
+                    ? redirect.getPipelinedCap(ops)
+                    : new QueuedClient(this.promise.thenApply(
+                        pipeline -> pipeline.getPipelinedCap(ops)));
+        }
+    }
+
+    // A ClientHook which simply queues calls while waiting for a ClientHook to which to forward them.
+    private static class QueuedClient implements ClientHook {
+
+        private final CompletableFuture<ClientHook> promise;
+        private final CompletableFuture<ClientHook> promiseForCallForwarding;
+        private final CompletableFuture<ClientHook> promiseForClientResolution;
+        private final CompletableFuture<java.lang.Void> setResolutionOp;
+        private ClientHook redirect;
+
+        QueuedClient(CompletableFuture<ClientHook> promise) {
+            // TODO revisit futures
+            this.promise = promise;
+            this.promiseForCallForwarding = promise.toCompletableFuture().copy();
+            this.promiseForClientResolution = promise.toCompletableFuture().copy();
+            this.setResolutionOp = promise.thenAccept(inner -> {
+                this.redirect = inner;
+            }).exceptionally(exc -> {
+                this.redirect = newBrokenCap(exc);
+                return null;
+            });
+        }
+
+        @Override
+        public Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId) {
+            var hook = new LocalRequest(interfaceId, methodId, this);
+            var root = hook.message.getRoot(AnyPointer.factory);
+            return new Request<>(root, AnyPointer.factory, hook);
+        }
+
+        @Override
+        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
+            var callResultPromise = this.promiseForCallForwarding.thenApply(client -> client.call(interfaceId, methodId, ctx));
+            var pipelinePromise = callResultPromise.thenApply(callResult -> callResult.pipeline);
+            var pipeline = new QueuedPipeline(pipelinePromise);
+            return new VoidPromiseAndPipeline(callResultPromise.thenAccept(x -> {}), pipeline);
+        }
+
+        @Override
+        public ClientHook getResolved() {
+            return redirect;
+        }
+
+        @Override
+        public CompletionStage<ClientHook> whenMoreResolved() {
+            return promiseForClientResolution.copy();
+        }
+    }
 }
