@@ -9,7 +9,6 @@ public class TwoPartyVatNetwork
                    VatNetwork.Connection {
 
     public interface MessageTap {
-        void outgoing(OutgoingRpcMessage message, RpcTwoPartyProtocol.Side side);
         void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side);
     }
 

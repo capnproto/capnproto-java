@@ -47,14 +47,6 @@ class Tap implements TwoPartyVatNetwork.MessageTap {
     final RpcDumper dumper = new RpcDumper();
 
     @Override
-    public void outgoing(OutgoingRpcMessage message, RpcTwoPartyProtocol.Side side) {
-        var text = this.dumper.dump(message.getBody().asReader().getAs(RpcProtocol.Message.factory), side);
-        if (text.length() > 0) {
-            System.out.println(text);
-        }
-    }
-
-    @Override
     public void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side) {
         var text = this.dumper.dump(message.getBody().getAs(RpcProtocol.Message.factory), side);
         if (text.length() > 0) {
