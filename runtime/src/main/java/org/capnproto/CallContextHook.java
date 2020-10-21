@@ -13,7 +13,7 @@ public interface CallContextHook {
 
     AnyPointer.Builder getResults(int sizeHint);
 
-    CompletableFuture<?> tailCall(RequestHook request);
+    CompletableFuture<java.lang.Void> tailCall(RequestHook request);
 
     void allowCancellation();
 

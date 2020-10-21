@@ -32,7 +32,7 @@ public class CallContext<Params, Results> {
         return this.hook.getResults().initAs(results);
     }
 
-    public final <SubParams, Results> CompletableFuture<?> tailCall(Request<SubParams, Results> tailRequest) {
+    public final <SubParams, Results> CompletableFuture<java.lang.Void> tailCall(Request<SubParams, Results> tailRequest) {
         return this.hook.tailCall(tailRequest.getHook());
     }
 
