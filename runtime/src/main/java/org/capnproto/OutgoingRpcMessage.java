@@ -9,6 +9,10 @@ public interface OutgoingRpcMessage {
     default void setFds(List<Integer> fds) {
     }
 
+    default List<Integer> getFds() {
+        return List.of();
+    }
+
     void send();
 
     int sizeInWords();
