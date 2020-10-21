@@ -403,7 +403,9 @@ final class RpcState {
     ClientHook restore() {
         var question = questions.next();
         question.setAwaitingReturn(true);
-        var message = connection.newOutgoingMessage(64);
+        int sizeHint = messageSizeHint()
+                + RpcProtocol.Bootstrap.factory.structSize().total();
+        var message = connection.newOutgoingMessage(sizeHint);
         var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
         builder.setQuestionId(question.getId());
         message.send();
@@ -465,7 +467,7 @@ final class RpcState {
             default:
                 if (!isDisconnected()) {
                     // boomin' back atcha
-                    var msg = connection.newOutgoingMessage(1024);
+                    var msg = connection.newOutgoingMessage(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS);
                     msg.getBody().initAs(RpcProtocol.Message.factory).setUnimplemented(reader);
                     msg.send();
                 }
@@ -524,7 +526,10 @@ final class RpcState {
         answer.active = true;
 
         var capTable = new BuilderCapabilityTable();
-        var response = connection.newOutgoingMessage(1024);
+        int sizeHint = messageSizeHint()
+                + RpcProtocol.Return.factory.structSize().total()
+                + RpcProtocol.Payload.factory.structSize().total();
+        var response = connection.newOutgoingMessage(sizeHint);
 
         var ret = response.getBody().getAs(RpcProtocol.Message.factory).initReturn();
         ret.setAnswerId(answerId);
@@ -799,7 +804,10 @@ final class RpcState {
                         return null;
                     }
 
-                    var message = connection.newOutgoingMessage(1024);
+                    int sizeHint = messageSizeHint()
+                            + RpcProtocol.Disembargo.factory.structSize().total()
+                            + MESSAGE_TARGET_SIZE_HINT;
+                    var message = connection.newOutgoingMessage(sizeHint);
                     var builder = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
                     var redirect = rpcTarget.writeTarget(builder.initTarget());
                     // Disembargoes should only be sent to capabilities that were previously the subject of
@@ -937,7 +945,10 @@ final class RpcState {
             }
 
             // send a Resolve message
-            var message = connection.newOutgoingMessage(1024);
+            int sizeHint = messageSizeHint()
+                    + RpcProtocol.Resolve.factory.structSize().total()
+                    + CAP_DESCRIPTOR_SIZE_HINT;
+            var message = connection.newOutgoingMessage(sizeHint);
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
             var fds = List.<Integer>of();
@@ -1788,7 +1799,9 @@ final class RpcState {
             // TODO Flow control
 
             if (resolutionType == ResolutionType.REFLECTED && receivedCall && !isDisconnected()) {
-                var message = connection.newOutgoingMessage(1024);
+                int sizeHint = messageSizeHint()
+                        + RpcProtocol.Disembargo.factory.structSize().total();
+                var message = connection.newOutgoingMessage(sizeHint);
                 var disembargo = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
                 var redirect = RpcState.this.writeTarget(cap, disembargo.initTarget());
                 assert redirect == null;

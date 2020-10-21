@@ -12,6 +12,7 @@ public class TwoPartyVatNetwork
         void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side);
     }
 
+    private static BuilderArena.AllocationStrategy allocationStrategy = BuilderArena.SUGGESTED_ALLOCATION_STRATEGY;
     private CompletableFuture<java.lang.Void> previousWrite = CompletableFuture.completedFuture(null);
     private final CompletableFuture<java.lang.Void> peerDisconnected = new CompletableFuture<>();
     private final AsynchronousSocketChannel channel;
@@ -117,7 +118,7 @@ public class TwoPartyVatNetwork
         List<Integer> fds = List.of();
 
         OutgoingMessage(int firstSegmentWordSize) {
-            this.message = new MessageBuilder(firstSegmentWordSize);
+            this.message = new MessageBuilder(firstSegmentWordSize, allocationStrategy);
         }
 
         @Override
