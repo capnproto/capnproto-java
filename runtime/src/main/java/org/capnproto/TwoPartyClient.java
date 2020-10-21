@@ -32,6 +32,10 @@ public class TwoPartyClient {
         return rpcSystem.bootstrap(vatId.asReader());
     }
 
+    public TwoPartyVatNetwork getNetwork() {
+        return this.network;
+    }
+
     public CompletableFuture<java.lang.Void> onDisconnect() {
         return this.network.onDisconnect();
     }
