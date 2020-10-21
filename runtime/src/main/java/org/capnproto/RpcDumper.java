@@ -37,41 +37,67 @@ public class RpcDumper {
         return -1L;
     }
 
+    private String dumpCap(RpcProtocol.CapDescriptor.Reader cap) {
+        return cap.which().toString();
+    }
+    private String dumpCaps(StructList.Reader<RpcProtocol.CapDescriptor.Reader> capTable) {
+        switch (capTable.size()) {
+            case 0:
+                return "";
+            case 1:
+                return dumpCap(capTable.get(0));
+            default:
+            {
+                var text = dumpCap(capTable.get(0));
+                for (int ii = 1; ii< capTable.size(); ++ii) {
+                    text += ", " + dumpCap(capTable.get(ii));
+                }
+                return text;
+            }
+        }
+    }
+
     String dump(RpcProtocol.Message.Reader message, RpcTwoPartyProtocol.Side sender) {
         switch (message.which()) {
             case CALL: {
                 var call = message.getCall();
                 var iface = call.getInterfaceId();
-                var schema = this.schemas.get(iface);
-                if (schema == null || !schema.isInterface()) {
-                    break;
-                }
 
-                var interfaceSchema = schema.getInterface();
-
-                var methods = interfaceSchema.getMethods();
-                if (call.getMethodId() >= methods.size()) {
-                    break;
-                }
-
-                var method = methods.get(call.getMethodId());
-                var interfaceName = schema.getDisplayName().toString();
-                var paramType = method.getParamStructType();
-                var resultType = method.getResultStructType();
-
-                if (call.getSendResultsTo().isCaller()) {
-                    var questionId = call.getQuestionId();
-                    setReturnType(sender, call.getQuestionId(), resultType);
-                }
-
+                var interfaceName = String.format("0x%x", iface);
+                var methodName = String.format("method#%d", call.getMethodId());
                 var payload = call.getParams();
                 var params = payload.getContent();
                 var sendResultsTo = call.getSendResultsTo();
 
+                var schema = this.schemas.get(iface);
+                if (schema != null) {
+                    interfaceName = schema.getDisplayName().toString();
+                    if (schema.isInterface()) {
+
+                        interfaceName = schema.getDisplayName().toString();
+                        var interfaceSchema = schema.getInterface();
+
+                        var methods = interfaceSchema.getMethods();
+                        if (call.getMethodId() < methods.size()) {
+                            var method = methods.get(call.getMethodId());
+                            methodName = method.getName().toString();
+                            var paramType = method.getParamStructType();
+                            var resultType = method.getResultStructType();
+
+                            if (call.getSendResultsTo().isCaller()) {
+                                var questionId = call.getQuestionId();
+                                setReturnType(sender, call.getQuestionId(), resultType);
+                            }
+
+                        }
+                    }
+                }
+                
                 return sender.name() + "(" + call.getQuestionId() + "): call " +
                         call.getTarget() + " <- " + interfaceName + "." +
-                        method.getName().toString() + " " + params + " caps:[" +
-                        payload.getCapTable() + "]" + (sendResultsTo.isCaller() ? "" : (" sendResultsTo:" + sendResultsTo));
+                        methodName + " " + params.getClass().getName() + " caps:[" +
+                        dumpCaps(payload.getCapTable()) + "]" +
+                        (sendResultsTo.isCaller() ? "" : (" sendResultsTo:" + sendResultsTo));
             }
 
             case RETURN: {
@@ -81,12 +107,22 @@ public class RpcDumper {
                                 ? RpcTwoPartyProtocol.Side.SERVER
                                 : RpcTwoPartyProtocol.Side.CLIENT,
                         ret.getAnswerId());
-                if (ret.which() != RpcProtocol.Return.Which.RESULTS) {
-                    break;
+                switch (ret.which()) {
+                    case RESULTS: {
+                        var payload = ret.getResults();
+                        return sender.name() + "(" + ret.getAnswerId() + "): return " + payload +
+                                " caps:[" + dumpCaps(payload.getCapTable()) + "]";
+                    }
+                    case EXCEPTION: {
+                        var exc = ret.getException();
+                        return sender.name() + "(" + ret.getAnswerId() + "): exception "
+                                + exc.getType().toString() +
+                                " " + exc.getReason();
+                    }
+                    default: {
+                        return sender.name() + "(" + ret.getAnswerId() + "): " + ret.which().name();
+                    }
                 }
-                var payload = ret.getResults();
-                return sender.name() + "(" + ret.getAnswerId() + "): return " + payload +
-                        " caps:[" + payload.getCapTable() + "]";
             }
 
             case BOOTSTRAP: {
@@ -95,9 +131,16 @@ public class RpcDumper {
                 return sender.name() + "(" + restore.getQuestionId() + "): bootstrap " +
                         restore.getDeprecatedObjectId();
             }
+
+            case ABORT: {
+                var abort = message.getAbort();
+                return sender.name() + ": abort "
+                        + abort.getType().toString()
+                        + " \"" + abort.getReason().toString() + "\"";
+            }
+
             default:
-                break;
+                return sender.name() + ": " + message.which().name();
         }
-        return "";
     }
 }

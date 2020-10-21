@@ -42,6 +42,26 @@ class TestCap0Impl extends Demo.TestCap0.Server {
 class TestCap1Impl extends Demo.TestCap1.Server {
 }
 
+class Tap implements TwoPartyVatNetwork.MessageTap {
+
+    final RpcDumper dumper = new RpcDumper();
+
+    @Override
+    public void outgoing(OutgoingRpcMessage message, RpcTwoPartyProtocol.Side side) {
+        var text = this.dumper.dump(message.getBody().asReader().getAs(RpcProtocol.Message.factory), side);
+        if (text.length() > 0) {
+            System.out.println(text);
+        }
+    }
+
+    @Override
+    public void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side) {
+        var text = this.dumper.dump(message.getBody().getAs(RpcProtocol.Message.factory), side);
+        if (text.length() > 0) {
+            System.out.println(text);
+        }
+    }
+}
 
 public class TwoPartyTest {
 
@@ -74,9 +94,11 @@ public class TwoPartyTest {
         this.clientSocket = AsynchronousSocketChannel.open();
         this.clientSocket.connect(this.serverSocket.getLocalAddress()).get();
         this.client = new TwoPartyClient(clientSocket);
+        this.client.getNetwork().setTap(new Tap());
 
         var socket = serverSocket.accept().get();
         this.serverNetwork = new TwoPartyVatNetwork(socket, RpcTwoPartyProtocol.Side.SERVER);
+        this.serverNetwork.setTap(new Tap());
         //this.serverNetwork.dumper.addSchema(Demo.TestCap1);
         this.serverThread = runServer(this.serverNetwork);
     }
