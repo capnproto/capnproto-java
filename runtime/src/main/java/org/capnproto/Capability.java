@@ -199,13 +199,13 @@ public final class Capability {
                 FromPointerReader<Params> paramsFactory,
                 FromPointerBuilder<Results> resultsFactory,
                 CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
-            return new CallContext<>(paramsFactory, resultsFactory, typeless.hook);
+            return new CallContext<>(paramsFactory, resultsFactory, typeless.getHook());
         }
 
         protected static <Params> StreamingCallContext<Params> internalGetTypedStreamingContext(
                 FromPointerReader<Params> paramsFactory,
                 CallContext<AnyPointer.Reader, AnyPointer.Builder> typeless) {
-            return new StreamingCallContext<>(paramsFactory, typeless.hook);
+            return new StreamingCallContext<>(paramsFactory, typeless.getHook());
         }
 
         protected abstract DispatchCallResult dispatchCall(

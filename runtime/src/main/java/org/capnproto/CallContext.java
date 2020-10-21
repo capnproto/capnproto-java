@@ -6,18 +6,18 @@ public class CallContext<Params, Results> {
 
     private final FromPointerReader<Params> params;
     private final FromPointerBuilder<Results> results;
-    final CallContextHook hook;
+    private final CallContextHook hook;
 
     public CallContext(FromPointerReader<Params> params,
                 FromPointerBuilder<Results> results,
                 CallContextHook hook) {
-        this.hook = hook;
         this.params = params;
         this.results = results;
+        this.hook = hook;
     }
 
     public final Params getParams() {
-        return hook.getParams().getAs(params);
+        return this.hook.getParams().getAs(params);
     }
 
     public final void releaseParams() {
@@ -33,7 +33,7 @@ public class CallContext<Params, Results> {
     }
 
     public final <SubParams, Results> CompletableFuture<?> tailCall(Request<SubParams, Results> tailRequest) {
-        return hook.tailCall(tailRequest.getHook());
+        return this.hook.tailCall(tailRequest.getHook());
     }
 
     public final void allowCancellation() {
