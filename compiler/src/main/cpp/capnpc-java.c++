@@ -1432,6 +1432,7 @@ private:
         ">");
     }
     kj::String readerTypeParams = readerTypeParamsTree.flatten();
+    auto readerTypeParamsInferred = (hasTypeParams ? "<>" : "");
     kj::String builderTypeParams = builderTypeParamsTree.flatten();
     kj::String factoryTypeParams = factoryTypeParamsTree.flatten();
 
@@ -1443,6 +1444,14 @@ private:
           return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory;\n");
       });
 
+    kj::String factoryRef = hasTypeParams
+      ? kj::str(kj::strTree("newFactory(",
+                            kj::StringTree(KJ_MAP(p, typeParamVec) {
+                              return kj::strTree(p, "_Factory");
+                              }, ", ")
+                            , ")"))
+      : kj::str("factory");
+
     return StructText {
       kj::strTree(
         spaces(indent), "public static class ", name, " {\n",
@@ -1453,7 +1462,7 @@ private:
 
         spaces(indent), "  public static final class Factory", factoryTypeParams, "\n",
         spaces(indent), "      extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, ">\n",
-        spaces(indent), "      implements org.capnproto.PipelineFactory<Pipeline> {\n",
+        spaces(indent), "      implements org.capnproto.PipelineFactory<Pipeline", readerTypeParams, "> {\n",
         factoryMembers.flatten(),
         spaces(indent), "    public Factory(",
         factoryArgs.flatten(),
@@ -1488,8 +1497,12 @@ private:
         (hasTypeParams ? kj::strTree("this") : kj::strTree()),
         ");\n",
         spaces(indent), "    }\n",
-        spaces(indent), "    public Pipeline newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {\n",
-        spaces(indent), "      return new Pipeline(promise);\n",
+        spaces(indent), "    public Pipeline", readerTypeParams, " newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise) {\n",
+        spaces(indent), "      return new Pipeline", readerTypeParamsInferred, "(",
+        kj::StringTree(KJ_MAP(p, typeParamVec) {
+             return kj::strTree(p, "_Factory");
+          }, ", "),
+        (hasTypeParams ? ", ": ""), "promise);\n",
         spaces(indent), "    }\n",
 
         spaces(indent), "  }\n",
@@ -1578,9 +1591,12 @@ private:
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
 
-        spaces(indent), "  public static class Pipeline extends org.capnproto.Pipeline<Reader> {\n",
-        spaces(indent), "    public Pipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {\n",
-        spaces(indent), "      super(org.capnproto.RemotePromise.fromTypeless(factory, remotePromise));\n",
+        spaces(indent), "  public static class Pipeline", readerTypeParams, " extends org.capnproto.Pipeline<Reader", readerTypeParams, "> {\n",
+        spaces(indent), "    public Pipeline(",
+        KJ_MAP(p, typeParamVec) {
+            return kj::strTree("org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory,");
+        }, " org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise) {\n",
+        spaces(indent), "      super(org.capnproto.RemotePromise.fromTypeless(", factoryRef, ", remotePromise));\n",
         spaces(indent), "    }\n",
         KJ_MAP(f, fieldTexts) { return kj::mv(f.pipelineMethodDecls); },
         spaces(indent), "  }\n",
