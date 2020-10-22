@@ -41,14 +41,14 @@ public abstract class RpcSystem<VatId> {
                 new RpcState(bootstrapInterface, connection, onDisconnect));
     }
 
-    private final CompletableFuture<java.lang.Void> doAcceptLoop() {
+    private CompletableFuture<java.lang.Void> doAcceptLoop() {
         return this.network.baseAccept().thenCompose(connection -> {
             this.accept(connection);
             return this.doAcceptLoop();
         });
     }
 
-    private final CompletableFuture<java.lang.Void> doMessageLoop() {
+    private CompletableFuture<java.lang.Void> doMessageLoop() {
         var accept = this.getAcceptLoop();
         for (var conn : connections.values()) {
             accept = accept.acceptEither(conn.getMessageLoop(), x -> {});
