@@ -39,10 +39,4 @@ public class TwoPartyClient {
     public CompletableFuture<java.lang.Void> onDisconnect() {
         return this.network.onDisconnect();
     }
-
-    /*
-    public CompletableFuture<?> runOnce() {
-        return this.rpcSystem.runOnce();
-    }
-     */
 }
