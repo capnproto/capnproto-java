@@ -132,12 +132,6 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
         }
 
-        /*
-        final Capability.Client getAsCap() {
-            return new Capability.Client(
-                    WireHelpers.readCapabilityPointer(this.segment, capTable, this.pointer, 0));
-        }
-*/
         final void setAsCap(Capability.Client cap) {
             WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.hook);
         }
