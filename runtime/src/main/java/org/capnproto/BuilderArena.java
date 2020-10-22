@@ -39,14 +39,14 @@ public final class BuilderArena implements Arena {
     public final ArrayList<SegmentBuilder> segments;
     private Allocator allocator;
 
-    private CapTableBuilder localCapTable = new CapTableBuilder() {
+    private final CapTableBuilder localCapTable = new CapTableBuilder() {
 
-        List<ClientHook> capTable = new ArrayList<>();
+        private final List<ClientHook> capTable = new ArrayList<>();
 
         @Override
         public int injectCap(ClientHook cap) {
             int result = this.capTable.size();
-            capTable.add(cap);
+            this.capTable.add(cap);
             return result;
         }
 
@@ -57,7 +57,6 @@ public final class BuilderArena implements Arena {
                 return;
             }
             this.capTable.set(index, null);
-
         }
 
         @Override
@@ -94,14 +93,14 @@ public final class BuilderArena implements Arena {
         this.allocator = allocator;
     }
 
-    CapTableBuilder getLocalCapTable() {
+    /**
+     * Return a CapTableBuilder that merely implements local loopback. That is, you can set
+     * capabilities, then read the same capabilities back, but there is no intent ever to transmit
+     * these capabilities. A MessageBuilder that isn't imbued with some other CapTable uses this
+     * by default.
+     */
+    public CapTableBuilder getLocalCapTable() {
         return this.localCapTable;
-    }
-
-    CapTableBuilder releaseLocalCapTable() {
-        var tmp = this.localCapTable;
-        this.localCapTable = null;
-        return tmp;
     }
 
     @Override
