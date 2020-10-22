@@ -104,12 +104,11 @@ public class TwoPartyTest {
     }
 
     @Test
-    public void testNullCap() {
-        var server = new TwoPartyServer(new Capability.Client());
-        server.listen(serverSocket);
+    public void testNullCap() throws ExecutionException, InterruptedException {
+        var server = new TwoPartyRpcSystem(this.serverNetwork, new Capability.Client());
         var cap = this.client.bootstrap();
         var resolved = cap.whenResolved().toCompletableFuture();
-        resolved.join();
+        resolved.get();
     }
 
     @Test
@@ -204,6 +203,4 @@ public class TwoPartyTest {
         var cap2 = results.getResult2();
         Assert.assertFalse(cap2.isNull());
     }
-
-
 }
