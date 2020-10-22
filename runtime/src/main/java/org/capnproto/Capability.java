@@ -77,11 +77,36 @@ public final class Capability {
             return this.hook;
         }
 
+        /**
+         * If the capability's server implemented {@link Server.getFd} returning non-null, and all
+         * RPC links between the client and server support FD passing, returns a file descriptor pointing
+         * to the same underlying file description as the server did. Returns null if the server provided
+         * no FD or if FD passing was unavailable at some intervening link.
+         * <p>
+         * This returns a Promise to handle the case of an unresolved promise capability, e.g. a
+         * pipelined capability. The promise resolves no later than when the capability settles, i.e.
+         * the same time `whenResolved()` would complete.
+         * <p>
+         * The file descriptor will remain open at least as long as the {@link Client} remains alive.
+         * If you need it to last longer, you will need to `dup()` it.
+         */
+        public CompletableFuture<Integer> getFd() {
+            var fd = this.hook.getFd();
+            if (fd != null) {
+                return CompletableFuture.completedFuture(fd);
+            }
+            var promise = this.hook.whenMoreResolved();
+            if (promise != null) {
+                return promise.thenCompose(newHook -> new Client(newHook).getFd());
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+
         private static ClientHook makeLocalClient(Server server) {
             return server.makeLocalClient();
         }
 
-        CompletionStage<?> whenResolved() {
+        CompletionStage<java.lang.Void> whenResolved() {
             return this.hook.whenResolved();
         }
 
@@ -109,14 +134,19 @@ public final class Capability {
 
         private final class LocalClient implements ClientHook {
 
-            private CompletableFuture<java.lang.Void> resolveTask;
+            private final CompletableFuture<java.lang.Void> resolveTask;
             private ClientHook resolved;
             private boolean blocked = false;
             private Exception brokenException;
 
             LocalClient() {
                 Server.this.hook = this;
-                startResolveTask();
+                var resolver = shortenPath();
+                this.resolveTask = resolver == null
+                        ? CompletableFuture.completedFuture(null)
+                        : resolver.thenAccept(client -> {
+                            this.resolved = client.hook;
+                        });
             }
 
             @Override
@@ -134,9 +164,7 @@ public final class Capability {
                     return null;
                 }
 
-                // TODO re-visit promises
                 var promise = callInternal(interfaceId, methodId, ctx);
-                var forked = promise.copy();
 
                 CompletableFuture<PipelineHook> pipelinePromise = promise.thenApply(x -> {
                     ctx.releaseParams();
@@ -144,17 +172,25 @@ public final class Capability {
                 });
 
                 var tailCall = ctx.onTailCall();
-                // TODO implement tailCall
                 if (tailCall != null) {
                     pipelinePromise = tailCall.applyToEither(pipelinePromise, pipeline -> pipeline);
                 }
 
-                return new VoidPromiseAndPipeline(forked, new QueuedPipeline(pipelinePromise));
+                return new VoidPromiseAndPipeline(
+                        promise.copy(),
+                        new QueuedPipeline(pipelinePromise));
             }
 
             @Override
-            public CompletableFuture<java.lang.Void> whenResolved() {
-                return null;
+            public ClientHook getResolved() {
+                return this.resolved;
+            }
+
+            @Override
+            public CompletableFuture<ClientHook> whenMoreResolved() {
+                return this.resolved != null
+                        ? CompletableFuture.completedFuture(this.resolved)
+                        : this.resolveTask.thenApply(x -> this.resolved);
             }
 
             @Override
@@ -174,16 +210,6 @@ public final class Capability {
                 else {
                     return result.getPromise();
                 }
-            }
-
-            void startResolveTask() {
-                var resolver = Server.this.shortenPath();
-                if (resolver == null) {
-                    return;
-                }
-                this.resolveTask = resolver.thenAccept(client -> {
-                    this.resolved = client.hook;
-                });
             }
         }
 
@@ -403,7 +429,7 @@ public final class Capability {
             }
 
             @Override
-            public CompletionStage<ClientHook> whenMoreResolved() {
+            public CompletableFuture<ClientHook> whenMoreResolved() {
                 return resolved ? null : CompletableFuture.failedFuture(exc);
             }
 
@@ -423,7 +449,7 @@ public final class Capability {
     private static final class QueuedPipeline implements PipelineHook {
 
         private final CompletableFuture<PipelineHook> promise;
-        private final CompletionStage<Void> selfResolutionOp;
+        private final CompletableFuture<Void> selfResolutionOp;
         PipelineHook redirect;
 
         QueuedPipeline(CompletableFuture<PipelineHook> promiseParam) {
@@ -476,10 +502,10 @@ public final class Capability {
 
         @Override
         public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
-            var callResultPromise = this.promiseForCallForwarding.thenApply(client -> client.call(interfaceId, methodId, ctx));
-            var pipelinePromise = callResultPromise.thenApply(callResult -> callResult.pipeline);
-            var pipeline = new QueuedPipeline(pipelinePromise);
-            return new VoidPromiseAndPipeline(callResultPromise.thenAccept(x -> {}), pipeline);
+            var callResult = this.promiseForCallForwarding.thenApply(
+                    client -> client.call(interfaceId, methodId, ctx));
+            var pipeline = new QueuedPipeline(callResult.thenApply(result -> result.pipeline));
+            return new VoidPromiseAndPipeline(callResult.thenAccept(x -> {}), pipeline);
         }
 
         @Override
@@ -488,8 +514,8 @@ public final class Capability {
         }
 
         @Override
-        public CompletionStage<ClientHook> whenMoreResolved() {
-            return promiseForClientResolution.copy();
+        public CompletableFuture<ClientHook> whenMoreResolved() {
+            return this.promiseForClientResolution.copy();
         }
     }
 }

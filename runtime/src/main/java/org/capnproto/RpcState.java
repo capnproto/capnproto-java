@@ -403,17 +403,23 @@ final class RpcState {
     ClientHook restore() {
         var question = questions.next();
         question.setAwaitingReturn(true);
+
+        // Run the message loop until the boostrap promise is resolved.
+        var promise = new CompletableFuture<RpcResponse>();
+        var loop = CompletableFuture.anyOf(
+                getMessageLoop(), promise).thenCompose(x -> promise);
+
         int sizeHint = messageSizeHint()
                 + RpcProtocol.Bootstrap.factory.structSize().total();
         var message = connection.newOutgoingMessage(sizeHint);
         var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
         builder.setQuestionId(question.getId());
         message.send();
-        var pipeline = new RpcPipeline(question);
+        var pipeline = new RpcPipeline(question, promise);
         return pipeline.getPipelinedCap(new PipelineOp[0]);
     }
 
-    private final CompletableFuture<java.lang.Void> doMessageLoop() {
+    private CompletableFuture<java.lang.Void> doMessageLoop() {
         this.cleanupImports();
         this.cleanupQuestions();
 
@@ -424,7 +430,7 @@ final class RpcState {
         return connection.receiveIncomingMessage().thenCompose(message -> {
             try {
                 handleMessage(message);
-            } catch (Throwable rpcExc) {
+            } catch (Exception rpcExc) {
                 // either we received an Abort message from peer
                 // or internal RpcState is bad.
                 return this.disconnect(rpcExc);
@@ -467,7 +473,7 @@ final class RpcState {
             default:
                 if (!isDisconnected()) {
                     // boomin' back atcha
-                    var msg = connection.newOutgoingMessage(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS);
+                    var msg = connection.newOutgoingMessage();
                     msg.getBody().initAs(RpcProtocol.Message.factory).setUnimplemented(reader);
                     msg.send();
                 }
@@ -493,17 +499,20 @@ final class RpcState {
                                 releaseExport(cap.getThirdPartyHosted().getVineId(), 1);
                                 break;
                             case NONE:
+                                // Should never happen.
                             case RECEIVER_ANSWER:
                             case RECEIVER_HOSTED:
+                                // Nothing to do.
                                 break;
                         }
                         break;
                     case EXCEPTION:
+                        // Nothing to do
                         break;
                 }
                 break;
             default:
-                // Peer unimplemented
+                assert false: "Peer did not implement required RPC message type. " + message.which().name();
                 break;
         }
     }
@@ -537,17 +546,15 @@ final class RpcState {
         var payload = ret.initResults();
         var content = payload.getContent().imbue(capTable);
         content.setAsCap(bootstrapInterface);
-
-        var capTableArray = capTable.getTable();
-        assert capTableArray.length != 0;
-
-        var capHook = capTableArray[0];
-        assert capHook != null;
+        var caps = capTable.getTable();
+        var capHook = caps.length != 0
+                ? caps[0]
+                : Capability.newNullCap();
 
         var fds = List.<Integer>of();
         response.setFds(List.of());
 
-        answer.resultExports = writeDescriptors(capTableArray, payload, fds);
+        answer.resultExports = writeDescriptors(caps, payload, fds);
         answer.pipeline = ops -> ops.length == 0
                 ? capHook
                 : Capability.newBrokenCap("Invalid pipeline transform.");
@@ -749,11 +756,7 @@ final class RpcState {
             return;
         }
 
-        if (imp.importClient != null) {
-            // It appears this is a valid entry on the import table, but was not expected to be a
-            // promise.
-            assert false: "Import already resolved.";
-        }
+        assert imp.importClient == null : "Import already resolved.";
 
         switch (resolve.which()) {
             case CAP:
@@ -918,7 +921,7 @@ final class RpcState {
                 return CompletableFuture.completedFuture(null);
             }
 
-            resolution = getInnermostClient(resolution);
+            resolution = this.getInnermostClient(resolution);
 
             var exp = exports.find(exportId);
             exportsByCap.remove(exp.clientHook);
@@ -939,7 +942,7 @@ final class RpcState {
                         // The new promise was not already in the table, therefore the existing export table
                         // entry has now been repurposed to represent it.  There is no need to send a resolve
                         // message at all.  We do, however, have to start resolving the next promise.
-                        return resolveExportedPromise(exportId, more);
+                        return this.resolveExportedPromise(exportId, more);
                     }
                 }
             }
@@ -1381,7 +1384,7 @@ final class RpcState {
             }
 
             if (isConnected()) {
-                var message = connection.newOutgoingMessage(1024);
+                var message = connection.newOutgoingMessage();
                 var builder = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
                 builder.setAnswerId(this.answerId);
                 builder.setReleaseParamCaps(false);
@@ -1449,11 +1452,11 @@ final class RpcState {
         private Throwable broken;
 
         final HashMap<List<PipelineOp>, ClientHook> clientMap = new HashMap<>();
-        final CompletionStage<RpcResponse> redirectLater;
-        final CompletionStage<java.lang.Void> resolveSelf;
+        final CompletableFuture<RpcResponse> redirectLater;
+        final CompletableFuture<java.lang.Void> resolveSelf;
 
         RpcPipeline(Question question,
-                    CompletionStage<RpcResponse> redirectLater) {
+                    CompletableFuture<RpcResponse> redirectLater) {
             this.question = question;
             this.redirectLater = redirectLater;
             this.resolveSelf = this.redirectLater
@@ -1481,15 +1484,21 @@ final class RpcState {
             var key = new ArrayList<>(Arrays.asList(ops));
             var hook = this.clientMap.computeIfAbsent(key, k -> {
                 switch (state) {
-                    case WAITING:
-                        if (redirectLater != null) {
-                            // TODO implement redirect
-                            assert false: "redirection not implemented";
-                            return null;
+                    case WAITING: {
+                        var pipelineClient = new PipelineClient(this.question, ops);
+                        if (this.redirectLater == null) {
+                            // This pipeline will never get redirected, so just return the PipelineClient.
+                            return pipelineClient;
                         }
-                        return new PipelineClient(question, ops);
+
+                        var resolutionPromise = this.redirectLater.thenApply(
+                                response -> response.getResults().getPipelinedCap(ops));
+                        return new PromiseClient(pipelineClient, resolutionPromise, null);
+                    }
+
                     case RESOLVED:
                         return resolved.getResults().getPipelinedCap(ops);
+
                     default:
                         return Capability.newBrokenCap(broken);
                 }
@@ -1700,7 +1709,7 @@ final class RpcState {
         }
 
         @Override
-        public CompletionStage<ClientHook> whenMoreResolved() {
+        public CompletableFuture<ClientHook> whenMoreResolved() {
             return null;
         }
     }
@@ -1868,7 +1877,7 @@ final class RpcState {
         }
 
         @Override
-        public CompletionStage<ClientHook> whenMoreResolved() {
+        public CompletableFuture<ClientHook> whenMoreResolved() {
             return null;
         }
 
