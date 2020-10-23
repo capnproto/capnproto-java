@@ -58,8 +58,8 @@ public class RpcDumper {
     }
 
     String dump(RpcProtocol.Message.Reader message, RpcTwoPartyProtocol.Side sender) {
-        switch (message.which()) {
-            case CALL: {
+        return switch (message.which()) {
+            case CALL -> {
                 var call = message.getCall();
                 var iface = call.getInterfaceId();
 
@@ -92,55 +92,72 @@ public class RpcDumper {
                         }
                     }
                 }
-                
-                return sender.name() + "(" + call.getQuestionId() + "): call " +
+
+                yield sender.name() + "(" + call.getQuestionId() + "): call " +
                         call.getTarget() + " <- " + interfaceName + "." +
                         methodName + " " + params.getClass().getName() + " caps:[" +
                         dumpCaps(payload.getCapTable()) + "]" +
                         (sendResultsTo.isCaller() ? "" : (" sendResultsTo:" + sendResultsTo));
             }
 
-            case RETURN: {
+            case RETURN -> {
                 var ret = message.getReturn();
+                var text = sender.name() + "(" + ret.getAnswerId() + "): ";
                 var returnType = getReturnType(
                         sender == RpcTwoPartyProtocol.Side.CLIENT
                                 ? RpcTwoPartyProtocol.Side.SERVER
                                 : RpcTwoPartyProtocol.Side.CLIENT,
                         ret.getAnswerId());
-                switch (ret.which()) {
-                    case RESULTS: {
+                yield switch (ret.which()) {
+                    case RESULTS -> {
                         var payload = ret.getResults();
-                        return sender.name() + "(" + ret.getAnswerId() + "): return " + payload +
+                        yield text + "return " + payload +
                                 " caps:[" + dumpCaps(payload.getCapTable()) + "]";
                     }
-                    case EXCEPTION: {
+                    case EXCEPTION -> {
                         var exc = ret.getException();
-                        return sender.name() + "(" + ret.getAnswerId() + "): exception "
+                        yield text + "exception "
                                 + exc.getType().toString() +
                                 " " + exc.getReason();
                     }
-                    default: {
-                        return sender.name() + "(" + ret.getAnswerId() + "): " + ret.which().name();
+                    default -> {
+                        yield text + ret.which().name();
                     }
-                }
+                };
             }
 
-            case BOOTSTRAP: {
+            case BOOTSTRAP -> {
                 var restore = message.getBootstrap();
                 setReturnType(sender, restore.getQuestionId(), 0);
-                return sender.name() + "(" + restore.getQuestionId() + "): bootstrap " +
+                yield sender.name() + "(" + restore.getQuestionId() + "): bootstrap " +
                         restore.getDeprecatedObjectId();
             }
 
-            case ABORT: {
+            case ABORT -> {
                 var abort = message.getAbort();
-                return sender.name() + ": abort "
+                yield sender.name() + ": abort "
                         + abort.getType().toString()
                         + " \"" + abort.getReason().toString() + "\"";
             }
 
-            default:
-                return sender.name() + ": " + message.which().name();
-        }
+            case RESOLVE -> {
+                var resolve = message.getResolve();
+                var id = resolve.getPromiseId();
+                var text = switch (resolve.which()) {
+                    case CAP -> {
+                        var cap = resolve.getCap();
+                        yield cap.which().toString();
+                    }
+                    case EXCEPTION -> {
+                        var exc = resolve.getException();
+                        yield exc.getType().toString() + ": " + exc.getReason().toString();
+                    }
+                    default -> resolve.which().toString();
+                };
+                yield sender.name() + "(" + id + "): resolve " + text;
+            }
+
+            default -> sender.name() + ": " + message.which().name();
+        };
     }
 }
