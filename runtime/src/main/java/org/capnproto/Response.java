@@ -15,10 +15,6 @@ public class Response<Results> {
         return this.results;
     }
 
-    public ResponseHook getHook() {
-        return this.hook;
-    }
-
     static <R> Response<R> fromTypeless(FromPointerReader<R> resultsFactory,
                                         Response<AnyPointer.Reader> typeless) {
         return new Response<>(typeless.getResults().getAs(resultsFactory), typeless.hook);

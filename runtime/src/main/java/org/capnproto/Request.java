@@ -4,8 +4,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class Request<Params, Results> {
 
-    Params params;
-    PipelineFactory<Results> pipelineFactory;
+    protected Params params;
+    private PipelineFactory<Results> pipelineFactory;
     RequestHook hook;
 
     public Request(Params params,
@@ -20,10 +20,6 @@ public class Request<Params, Results> {
         return params;
     }
 
-    public RequestHook getHook() {
-        return this.hook;
-    }
-
     public Results send() {
         var typelessPromise = this.hook.send();
         this.hook = null; // prevent reuse
@@ -31,6 +27,7 @@ public class Request<Params, Results> {
     }
 
     static <P, R> Request<P, R> newBrokenRequest(Throwable exc) {
+
         final MessageBuilder message = new MessageBuilder();
 
         var hook = new RequestHook() {

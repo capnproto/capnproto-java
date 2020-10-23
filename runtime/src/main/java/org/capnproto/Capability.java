@@ -119,7 +119,7 @@ public final class Capability {
         protected <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> paramsBuilder,
                                                            long interfaceId, short methodId) {
             var request = hook.newCall(interfaceId, methodId);
-            return new StreamingRequest<> (paramsBuilder, request.params, request.hook);
+            return new StreamingRequest<> (paramsBuilder, request.getParams(), request.hook);
         }
     }
 
