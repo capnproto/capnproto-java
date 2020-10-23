@@ -132,21 +132,30 @@ public final class Capability {
             return new LocalClient();
         }
 
-        private final class LocalClient implements ClientHook {
+        ClientHook makeLocalClient(CapabilityServerSetBase capServerSet) {
+            return new LocalClient(capServerSet);
+        }
 
+
+        private final class LocalClient implements ClientHook {
             private final CompletableFuture<java.lang.Void> resolveTask;
             private ClientHook resolved;
             private boolean blocked = false;
             private Exception brokenException;
+            private final CapabilityServerSetBase capServerSet;
 
             LocalClient() {
+                this(null);
+            }
+
+            LocalClient(CapabilityServerSetBase capServerSet) {
                 Server.this.hook = this;
+                this.capServerSet = capServerSet;
+
                 var resolver = shortenPath();
-                this.resolveTask = resolver == null
-                        ? CompletableFuture.completedFuture(null)
-                        : resolver.thenAccept(client -> {
-                            this.resolved = client.hook;
-                        });
+                this.resolveTask = resolver != null
+                        ? resolver.thenAccept(client -> this.resolved = client.getHook())
+                        : null;
             }
 
             @Override
@@ -210,6 +219,17 @@ public final class Capability {
                 else {
                     return result.getPromise();
                 }
+            }
+
+            public CompletableFuture<Server> getLocalServer(CapabilityServerSetBase capServerSet) {
+                if (this.capServerSet == capServerSet) {
+                    if (this.blocked) {
+                        assert false: "Blocked local server not implemented";
+                    }
+
+                    return CompletableFuture.completedFuture(Server.this);
+                }
+                return null;
             }
         }
 
@@ -516,6 +536,59 @@ public final class Capability {
         @Override
         public CompletableFuture<ClientHook> whenMoreResolved() {
             return this.promiseForClientResolution.copy();
+        }
+    }
+
+    static class CapabilityServerSetBase {
+
+        ClientHook addInternal(Server server) {
+            return server.makeLocalClient(this);
+        }
+
+        CompletableFuture<Server> getLocalServerInternal(ClientHook hook) {
+            for (;;) {
+                var next = hook.getResolved();
+                if (next != null) {
+                    hook = next;
+                }
+                else {
+                    break;
+                }
+            }
+            if (hook.getBrand() == Server.BRAND) {
+                var promise = ((Server.LocalClient)hook).getLocalServer(this);
+                if (promise != null) {
+                    return promise;
+                }
+            }
+
+            // The capability isn't part of this set.
+            var resolver = hook.whenMoreResolved();
+            if (resolver != null) {
+                // This hook is an unresolved promise. It might resolve eventually to a local server, so wait
+                // for it.
+                return resolver.thenCompose(this::getLocalServerInternal);
+            }
+            else {
+                // Cap is settled, so it definitely will never resolve to a member of this set.
+                 return CompletableFuture.completedFuture(null);
+            }
+        }
+    }
+
+    public static final class CapabilityServerSet<T extends Capability.Server> extends CapabilityServerSetBase {
+
+        /**
+         *  Create a new capability Client for the given Server and also add this server to the set.
+         */
+        <U extends Capability.Client> U add(Capability.Factory<U> factory, T server) {
+            var hook = this.addInternal(server);
+            return factory.newClient(hook);
+        }
+
+        CompletableFuture<T> getLocalServer(Client client) {
+            return this.getLocalServerInternal(client.getHook())
+                    .thenApply(server -> (T)server);
         }
     }
 }
