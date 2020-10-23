@@ -440,7 +440,7 @@ final class RpcState {
         }).exceptionallyCompose(exc -> this.disconnect(exc));
     }
 
-    synchronized void handleMessage(IncomingRpcMessage message) throws RpcException {
+    private void handleMessage(IncomingRpcMessage message) throws RpcException {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
         switch (reader.which()) {
             case UNIMPLEMENTED:
