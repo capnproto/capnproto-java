@@ -221,7 +221,7 @@ final class RpcState {
 
     final static class Embargo {
         final int id;
-        CompletableFuture<?> disembargo;
+        final CompletableFuture<java.lang.Void> disembargo = new CompletableFuture<>();
 
         Embargo(int id) {
             this.id = id;
@@ -802,7 +802,7 @@ final class RpcState {
                 final var embargoId = ctx.getSenderLoopback();
                 final var rpcTarget = (RpcClient) target;
 
-                Callable<?> sendDisembargo = () -> {
+                Callable<java.lang.Void> sendDisembargo = () -> {
                     if (isDisconnected()) {
                         return null;
                     }
@@ -826,11 +826,11 @@ final class RpcState {
                     message.send();
                     return null;
                 };
-                evalLast(sendDisembargo);
+                this.evalLast(sendDisembargo);
                 break;
 
             case RECEIVER_LOOPBACK:
-                var embargo = embargos.find(ctx.getReceiverLoopback());
+                var embargo = this.embargos.find(ctx.getReceiverLoopback());
                 if (embargo == null) {
                     assert false: "Invalid embargo ID in 'Disembargo.context.receiverLoopback'.";
                     return;
@@ -875,7 +875,8 @@ final class RpcState {
             var resolved = inner.getResolved();
             if (resolved != null) {
                 inner = resolved;
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -891,7 +892,7 @@ final class RpcState {
 
         var exportId = exportsByCap.get(inner);
         if (exportId != null) {
-            // We've already seen and exported this capability before.
+            // We've already seen and exported this capability.
             var export = exports.find(exportId);
             export.refcount++;
             descriptor.setSenderHosted(exportId);
@@ -1816,7 +1817,6 @@ final class RpcState {
                 assert redirect == null;
 
                 var embargo = embargos.next();
-                embargo.disembargo = new CompletableFuture<>();
                 disembargo.getContext().setSenderLoopback(embargo.id);
 
                 final ClientHook finalReplacement = replacement;
