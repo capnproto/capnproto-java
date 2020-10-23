@@ -1110,6 +1110,16 @@ final class RpcState {
     }
 
     ClientHook writeTarget(ClientHook cap, RpcProtocol.MessageTarget.Builder target) {
+        // If calls to the given capability should pass over this connection, fill in `target`
+        // appropriately for such a call and return nullptr.  Otherwise, return a `ClientHook` to which
+        // the call should be forwarded; the caller should then delegate the call to that `ClientHook`.
+        //
+        // The main case where this ends up returning non-null is if `cap` is a promise that has
+        // recently resolved.  The application might have started building a request before the promise
+        // resolved, and so the request may have been built on the assumption that it would be sent over
+        // this network connection, but then the promise resolved to point somewhere else before the
+        // request was sent.  Now the request has to be redirected to the new target instead.
+
         return cap.getBrand() == this
                 ? ((RpcClient)cap).writeTarget(target)
                 : cap;
@@ -1828,15 +1838,6 @@ final class RpcState {
             return replacement;
         }
 
-        ClientHook writeTarget(ClientHook cap, RpcProtocol.MessageTarget.Builder target) {
-            if (cap.getBrand() == this) {
-                return ((RpcClient)cap).writeTarget(target);
-            }
-            else {
-                return cap;
-            }
-        }
-
         @Override
         public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder target, List<Integer> fds) {
             this.receivedCall = true;
@@ -1846,7 +1847,7 @@ final class RpcState {
         @Override
         public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
             this.receivedCall = true;
-            return RpcState.this.writeTarget(cap, target);
+            return RpcState.this.writeTarget(this.cap, target);
         }
 
         @Override
