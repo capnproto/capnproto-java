@@ -31,11 +31,12 @@ public abstract class RpcSystem<VatId> {
         getConnectionState(connection);
     }
 
-    synchronized RpcState getConnectionState(VatNetwork.Connection connection) {
+    RpcState getConnectionState(VatNetwork.Connection connection) {
 
-       var onDisconnect = new CompletableFuture<VatNetwork.Connection>().thenAccept(lostConnection -> {
-            this.connections.remove(lostConnection);
-        });
+        var onDisconnect = new CompletableFuture<VatNetwork.Connection>()
+                .thenAccept(lostConnection -> {
+                    this.connections.remove(lostConnection);
+                });
 
         return connections.computeIfAbsent(connection, key ->
                 new RpcState(bootstrapInterface, connection, onDisconnect));
@@ -50,7 +51,7 @@ public abstract class RpcSystem<VatId> {
 
     private CompletableFuture<java.lang.Void> doMessageLoop() {
         var accept = this.getAcceptLoop();
-        for (var conn : connections.values()) {
+        for (var conn: this.connections.values()) {
             accept = accept.acceptEither(conn.getMessageLoop(), x -> {});
         }
         return accept.thenCompose(x -> this.doMessageLoop());
