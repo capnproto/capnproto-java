@@ -46,13 +46,15 @@ public class TwoPartyVatNetwork
     }
 
     private Connection connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
-        return vatId.getSide() != side ? this : null;
+        return vatId.getSide() != side
+                ? this.asConnection()
+                : null;
     }
 
     private CompletableFuture<Connection> accept() {
         if (side == RpcTwoPartyProtocol.Side.SERVER & !accepted) {
             accepted = true;
-            return CompletableFuture.completedFuture(this);
+            return CompletableFuture.completedFuture(this.asConnection());
         }
         else {
             // never completes
