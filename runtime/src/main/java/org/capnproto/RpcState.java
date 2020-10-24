@@ -282,9 +282,9 @@ final class RpcState {
     private final ReferenceQueue<Question> questionRefs = new ReferenceQueue<>();
     private final ReferenceQueue<ImportClient> importRefs = new ReferenceQueue<>();
 
-    RpcState( Capability.Client bootstrapInterface,
-              VatNetwork.Connection connection,
-              CompletableFuture<java.lang.Void> onDisconnect) {
+    RpcState(Capability.Client bootstrapInterface,
+             VatNetwork.Connection connection,
+             CompletableFuture<java.lang.Void> onDisconnect) {
         this.bootstrapInterface = bootstrapInterface;
         this.connection = connection;
         this.onDisconnect = onDisconnect;
@@ -292,6 +292,10 @@ final class RpcState {
     }
 
     public CompletableFuture<java.lang.Void> getMessageLoop() {
+        return this.messageLoop;
+    }
+
+    public CompletableFuture<java.lang.Void> onDisconnect() {
         return this.messageLoop;
     }
 
@@ -420,21 +424,20 @@ final class RpcState {
     }
 
     private CompletableFuture<java.lang.Void> doMessageLoop() {
-        this.cleanupImports();
-        this.cleanupQuestions();
-
         if (isDisconnected()) {
             return CompletableFuture.failedFuture(this.disconnected);
         }
 
         return connection.receiveIncomingMessage().thenCompose(message -> {
             try {
-                handleMessage(message);
+                this.handleMessage(message);
             } catch (Exception rpcExc) {
                 // either we received an Abort message from peer
                 // or internal RpcState is bad.
                 return this.disconnect(rpcExc);
             }
+            this.cleanupImports();
+            this.cleanupQuestions();
             return this.doMessageLoop();
 
         }).exceptionallyCompose(exc -> this.disconnect(exc));
