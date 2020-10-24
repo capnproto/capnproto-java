@@ -1,14 +1,15 @@
 package org.capnproto;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public class RemotePromise<Results>
         extends CompletableFutureWrapper<Results> {
 
-    final CompletionStage<Response<Results>> response;
+    final CompletableFuture<Response<Results>> response;
     final PipelineHook hook;
 
-    RemotePromise(CompletionStage<Response<Results>> promise,
+    RemotePromise(CompletableFuture<Response<Results>> promise,
                   PipelineHook hook) {
         super(promise.thenApply(response -> response.getResults()));
         this.response = promise;
