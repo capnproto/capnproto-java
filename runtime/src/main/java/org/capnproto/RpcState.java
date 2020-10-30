@@ -1532,7 +1532,7 @@ final class RpcState {
         }
 
         @Override
-        public Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId) {
+        public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
             return newCallNoIntercept(interfaceId, methodId);
         }
 
@@ -1545,7 +1545,7 @@ final class RpcState {
             var params = context.getParams();
             var request = newCallNoIntercept(interfaceId, methodId);
             context.allowCancellation();
-            return context.directTailCall(request.hook);
+            return context.directTailCall(request.getHook());
         }
 
         @Override
@@ -1553,9 +1553,9 @@ final class RpcState {
             return RpcState.this;
         }
 
-        private Request<AnyPointer.Builder, AnyPointer.Pipeline> newCallNoIntercept(long interfaceId, short methodId) {
+        private Request<AnyPointer.Builder> newCallNoIntercept(long interfaceId, short methodId) {
             if (isDisconnected()) {
-                return Request.newBrokenRequest(disconnected);
+                return Request.newBrokenRequest(AnyPointer.factory, disconnected);
             }
 
             var request = new RpcRequest(this);
@@ -1563,7 +1563,7 @@ final class RpcState {
             callBuilder.setInterfaceId(interfaceId);
             callBuilder.setMethodId(methodId);
             var root = request.getRoot();
-            return new Request<>(root, AnyPointer.factory, request);
+            return new AnyPointer.Request(root, request);
         }
     }
 
@@ -1605,10 +1605,11 @@ final class RpcState {
 
             var redirect = this.target.writeTarget(this.callBuilder.getTarget());
             if (redirect != null) {
-                var replacement = redirect.newCall(
+                var redirected = redirect.newCall(
                         this.callBuilder.getInterfaceId(), this.callBuilder.getMethodId());
-                replacement.params = paramsBuilder;
-                return replacement.hook.send();
+                //replacement.params = paramsBuilder;
+                var replacement = new AnyPointer.Request(paramsBuilder, redirected.getHook());
+                return replacement.send();
             }
 
             final var question = sendInternal(false);
@@ -1624,7 +1625,7 @@ final class RpcState {
             var loop = CompletableFuture.anyOf(
                     getMessageLoop(), appPromise).thenCompose(x -> appPromise);
 
-            return new RemotePromise<>(loop, pipeline);
+            return new RemotePromise<>(loop, new AnyPointer.Pipeline(pipeline));
         }
 
         @Override

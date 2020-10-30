@@ -1,9 +1,9 @@
 package org.capnproto;
 
-public class Response<Results> {
+public final class Response<Results> {
 
-    private Results results;
-    private ResponseHook hook;
+    private final Results results;
+    private final ResponseHook hook;
 
     public Response(Results results,
                     ResponseHook hook) {
@@ -13,6 +13,10 @@ public class Response<Results> {
 
     public Results getResults() {
         return this.results;
+    }
+
+    public ResponseHook getHook() {
+        return this.hook;
     }
 
     static <R> Response<R> fromTypeless(FromPointerReader<R> resultsFactory,

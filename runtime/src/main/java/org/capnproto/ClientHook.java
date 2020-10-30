@@ -8,7 +8,7 @@ public interface ClientHook {
     Object NULL_CAPABILITY_BRAND = new Object();
     Object BROKEN_CAPABILITY_BRAND = new Object();
 
-    Request<AnyPointer.Builder, AnyPointer.Pipeline> newCall(long interfaceId, short methodId);
+    Request<AnyPointer.Builder> newCall(long interfaceId, short methodId);
 
     VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context);
 
@@ -46,7 +46,7 @@ public interface ClientHook {
     /**
      *  Repeatedly calls whenMoreResolved() until it returns nullptr.
      */
-    default CompletionStage<java.lang.Void> whenResolved() {
+    default CompletableFuture<java.lang.Void> whenResolved() {
         var promise = whenMoreResolved();
         return promise != null
                 ? promise.thenCompose(ClientHook::whenResolved)
@@ -77,13 +77,14 @@ public interface ClientHook {
     }
 
     final class VoidPromiseAndPipeline {
+
         public final CompletableFuture<java.lang.Void> promise;
         public final PipelineHook pipeline;
 
-        VoidPromiseAndPipeline(CompletableFuture<java.lang.Void> promise, PipelineHook pipeline) {
+        VoidPromiseAndPipeline(CompletableFuture<java.lang.Void> promise,
+                               PipelineHook pipeline) {
             this.promise = promise;
             this.pipeline = pipeline;
         }
     }
-
 }

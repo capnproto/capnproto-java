@@ -23,8 +23,7 @@ package org.capnproto;
 
 public final class AnyPointer {
     public static final class Factory
-            implements PointerFactory<Builder, Reader>,
-                       PipelineFactory<Pipeline> {
+            implements PointerFactory<Builder, Reader> {
         public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
             return new Reader(segment, capTable, pointer, nestingLimit);
         }
@@ -36,8 +35,8 @@ public final class AnyPointer {
             result.clear();
             return result;
         }
-        public Pipeline newPipeline(RemotePromise<Reader> promise) {
-            return new AnyPointer.Pipeline(promise);
+        public Pipeline newPipeline(PipelineImpl typeless) {
+            return new AnyPointer.Pipeline(typeless.hook, typeless.ops);
         }
     }
     public static final Factory factory = new Factory();
@@ -133,7 +132,7 @@ public final class AnyPointer {
         }
 
         final void setAsCap(Capability.Client cap) {
-            WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.hook);
+            WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.getHook());
         }
 
         public final Reader asReader() {
@@ -146,15 +145,55 @@ public final class AnyPointer {
         }
     }
 
-    public static final class Pipeline
-            extends org.capnproto.Pipeline<AnyPointer.Reader> {
+    public static class Pipeline extends PipelineImpl implements PipelineBase {
 
-        public Pipeline(RemotePromise<AnyPointer.Reader> promise) {
-            super(promise);
+        public Pipeline(PipelineHook hook) {
+            this(hook, new PipelineOp[0]);
         }
 
-        public Pipeline(RemotePromise<AnyPointer.Reader> promise, PipelineOp[] ops) {
-            super(promise, ops);
+        Pipeline(PipelineHook hook, PipelineOp[] ops) {
+            super(hook, ops);
+        }
+
+        @Override
+        public Pipeline typelessPipeline() {
+            return this;
+        }
+    }
+
+    public static final class Request
+            implements org.capnproto.Request<Builder> {
+
+        private final AnyPointer.Builder params;
+        private final RequestHook requestHook;
+
+        Request(AnyPointer.Builder params, RequestHook requestHook) {
+            this.params = params;
+            this.requestHook = requestHook;
+        }
+
+        @Override
+        public AnyPointer.Builder getParams() {
+            return this.params;
+        }
+
+        @Override
+        public org.capnproto.Request<Builder> getTypelessRequest() {
+            return this;
+        }
+
+        @Override
+        public RequestHook getHook() {
+            return this.requestHook;
+        }
+        
+        @Override
+        public FromPointerBuilder<Builder> getParamsFactory() {
+            return AnyPointer.factory;
+        }
+
+        public RemotePromise<Reader> send() {
+            return this.getHook().send();
         }
     }
 }

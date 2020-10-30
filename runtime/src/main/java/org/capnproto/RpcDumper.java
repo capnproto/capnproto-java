@@ -5,13 +5,13 @@ import java.util.Map;
 
 public class RpcDumper {
 
-    private final Map<Long, Schema.Node.Reader> schemas = new HashMap<>();
+    //private final Map<Long, Schema.Node.Reader> schemas = new HashMap<>();
     private final Map<Integer, Long> clientReturnTypes = new HashMap<>();
     private final Map<Integer, Long> serverReturnTypes = new HashMap<>();
 
-    void addSchema(long schemaId, Schema.Node.Reader node) {
+    /*void addSchema(long schemaId, Schema.Node.Reader node) {
         this.schemas.put(schemaId, node);
-    }
+    }*/
 
     private void setReturnType(RpcTwoPartyProtocol.Side side, int schemaId, long schema) {
         switch (side) {
@@ -68,7 +68,7 @@ public class RpcDumper {
                 var payload = call.getParams();
                 var params = payload.getContent();
                 var sendResultsTo = call.getSendResultsTo();
-
+/*
                 var schema = this.schemas.get(iface);
                 if (schema != null) {
                     interfaceName = schema.getDisplayName().toString();
@@ -91,7 +91,7 @@ public class RpcDumper {
 
                         }
                     }
-                }
+                }*/
 
                 yield sender.name() + "(" + call.getQuestionId() + "): call " +
                         call.getTarget() + " <- " + interfaceName + "." +

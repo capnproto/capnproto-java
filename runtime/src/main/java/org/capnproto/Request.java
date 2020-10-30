@@ -2,31 +2,22 @@ package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
 
-public class Request<Params, Results> {
+public interface Request<Params> {
 
-    protected Params params;
-    private PipelineFactory<Results> pipelineFactory;
-    RequestHook hook;
+    FromPointerBuilder<Params> getParamsFactory();
 
-    public Request(Params params,
-                   PipelineFactory<Results> pipelineFactory,
-                   RequestHook hook) {
-        this.params = params;
-        this.pipelineFactory = pipelineFactory;
-        this.hook = hook;
+    default Params getParams() {
+        return this.getTypelessRequest().getParams().getAs(this.getParamsFactory());
     }
 
-    public Params getParams() {
-        return params;
+    default RequestHook getHook() {
+        return this.getTypelessRequest().getHook();
     }
 
-    public Results send() {
-        var typelessPromise = this.hook.send();
-        this.hook = null; // prevent reuse
-        return pipelineFactory.newPipeline(typelessPromise);
-    }
+    Request<AnyPointer.Builder> getTypelessRequest();
 
-    static <P, R> Request<P, R> newBrokenRequest(Throwable exc) {
+    static <Params> Request<Params> newBrokenRequest(FromPointerBuilder<Params> paramsFactory,
+                                                     Throwable exc) {
 
         final MessageBuilder message = new MessageBuilder();
 
@@ -48,13 +39,32 @@ public class Request<Params, Results> {
         };
 
         var root = message.getRoot(AnyPointer.factory);
-        return new Request<P, R>(null, null, hook);
+        return new Request<>() {
+            @Override
+            public FromPointerBuilder<Params> getParamsFactory() {
+                return paramsFactory;
+            }
+
+            @Override
+            public Request<AnyPointer.Builder> getTypelessRequest() {
+                return null;
+            }
+        };
     }
 
-    static <P, R> Request<P, R> fromTypeless(
-            FromPointerBuilder<P> paramsFactory,
-            PipelineFactory<R> pipelineFactory,
-            Request<AnyPointer.Builder, AnyPointer.Pipeline> typeless) {
-        return new Request<>(typeless.params.getAs(paramsFactory), pipelineFactory, typeless.hook);
+    static <Params> Request<Params> fromTypeless(
+            FromPointerBuilder<Params> paramsFactory,
+            Request<AnyPointer.Builder> typeless) {
+        return new Request<>() {
+            @Override
+            public FromPointerBuilder<Params> getParamsFactory() {
+                return paramsFactory;
+            }
+
+            @Override
+            public Request<AnyPointer.Builder> getTypelessRequest() {
+                return typeless;
+            }
+        };
     }
 }
