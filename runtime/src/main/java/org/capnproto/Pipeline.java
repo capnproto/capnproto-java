@@ -1,5 +1,5 @@
 package org.capnproto;
 
-public interface PipelineBase {
+public interface Pipeline {
     AnyPointer.Pipeline typelessPipeline();
 }

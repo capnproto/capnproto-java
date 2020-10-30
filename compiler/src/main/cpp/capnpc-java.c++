@@ -1665,7 +1665,7 @@ private:
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
 
         //spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.RemotePromise<Reader", readerTypeParams, "> {\n",
-        spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.PipelineBase {\n",
+        spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.Pipeline {\n",
         //spaces(indent), "    private final org.capnproto.PipelineImpl typeless;\n",
         //spaces(indent), "    org.capnproto.AnyPointer.Pipeline getTypeless();\n",
         //spaces(indent), "    public Pipeline(",

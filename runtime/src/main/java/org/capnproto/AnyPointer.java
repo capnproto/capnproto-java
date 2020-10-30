@@ -35,9 +35,6 @@ public final class AnyPointer {
             result.clear();
             return result;
         }
-        public Pipeline newPipeline(PipelineImpl typeless) {
-            return new AnyPointer.Pipeline(typeless.hook, typeless.ops);
-        }
     }
     public static final Factory factory = new Factory();
 
@@ -145,19 +142,40 @@ public final class AnyPointer {
         }
     }
 
-    public static class Pipeline extends PipelineImpl implements PipelineBase {
+    public static class Pipeline implements org.capnproto.Pipeline {
+
+        protected final PipelineHook hook;
+        protected final PipelineOp[] ops;
 
         public Pipeline(PipelineHook hook) {
             this(hook, new PipelineOp[0]);
         }
 
         Pipeline(PipelineHook hook, PipelineOp[] ops) {
-            super(hook, ops);
+            this.hook = hook;
+            this.ops = ops;
         }
 
         @Override
         public Pipeline typelessPipeline() {
             return this;
+        }
+
+        Pipeline noop() {
+            return new Pipeline(this.hook, this.ops.clone());
+        }
+
+        public ClientHook asCap() {
+            return this.hook.getPipelinedCap(ops);
+        }
+
+        public Pipeline getPointerField(short pointerIndex) {
+            var newOps = new PipelineOp[this.ops.length + 1];
+            for (int ii = 0; ii < this.ops.length; ++ii) {
+                newOps[ii] = this.ops[ii];
+            }
+            newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
+            return new Pipeline(this.hook, newOps);
         }
     }
 
@@ -186,7 +204,7 @@ public final class AnyPointer {
         public RequestHook getHook() {
             return this.requestHook;
         }
-        
+
         @Override
         public FromPointerBuilder<Builder> getParamsFactory() {
             return AnyPointer.factory;
