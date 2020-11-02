@@ -1535,7 +1535,6 @@ private:
 
         spaces(indent), "  public static final class Factory", factoryTypeParams, "\n",
         spaces(indent), "      extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
-        //spaces(indent), "      implements org.capnproto.PipelineFactory<Pipeline", readerTypeParams, "> {\n",
         factoryMembers.flatten(),
         spaces(indent), "    public Factory(",
         factoryArgs.flatten(),
@@ -1570,14 +1569,6 @@ private:
         (hasTypeParams ? kj::strTree("this") : kj::strTree()),
         ");\n",
         spaces(indent), "    }\n",
-        //spaces(indent), "    public Pipeline", readerTypeParams, " newPipeline(org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> promise,  org.capnproto.PipelineImpl typeless) {\n",
-        //spaces(indent), "      return new Pipeline", readerTypeParamsInferred, "(",
-        //kj::StringTree(KJ_MAP(p, typeParamVec) {
-        //     return kj::strTree(p, "_Factory");
-        //  }, ", "),
-        //(hasTypeParams ? ", ": ""), "promise, typeless);\n",
-        //spaces(indent), "    }\n",
-
         spaces(indent), "  }\n",
         (hasTypeParams ?
          kj::strTree(
@@ -1663,19 +1654,8 @@ private:
           spaces(indent), "    _NOT_IN_SCHEMA,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-
-        //spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.RemotePromise<Reader", readerTypeParams, "> {\n",
-        spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.Pipeline {\n",
-        //spaces(indent), "    private final org.capnproto.PipelineImpl typeless;\n",
-        //spaces(indent), "    org.capnproto.AnyPointer.Pipeline getTypeless();\n",
-        //spaces(indent), "    public Pipeline(",
-        //#KJ_MAP(p, typeParamVec) {
-        //    return kj::strTree("org.capnproto.PointerFactory<?,", p, "_Reader> ", p, "_Factory,");
-        //}, " org.capnproto.RemotePromise<org.capnproto.AnyPointer.Reader> remotePromise,\n",
-        //spaces(indent), "    org.capnproto.PipelineImpl typelessPipeline) {\n",
-        //spaces(indent), "      super(org.capnproto.RemotePromise.fromTypeless(", factoryRef, ", remotePromise));\n",
-        //spaces(indent), "      this.typeless = typelessPipeline;\n",
-        //spaces(indent), "    }\n",
+        spaces(indent), "  public interface Pipeline", readerTypeParams, "\n",
+        spaces(indent), "      extends org.capnproto.Pipeline {\n",
         KJ_MAP(f, fieldTexts) {
           return kj::mv(f.pipelineMethodDecls);
         },
@@ -1849,14 +1829,11 @@ private:
           sp, "    public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {\n",
           sp, "      super(promise);\n",
           sp, "    }\n",
-          "\n",
           sp, "    public static final class Methods {\n",
           KJ_MAP(m, methods) { return kj::mv(m.clientMethodDefs); },
           sp, "    }\n",
-          "\n",
           KJ_MAP(m, methods) { return kj::mv(m.clientCalls); },
           sp, "  }\n",
-          "\n",
           sp, "  public static abstract class Server\n",
           (superclasses.size() == 0
            ? kj::str(sp, "      extends org.capnproto.Capability.Server ")
@@ -1883,7 +1860,6 @@ private:
           sp, "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", interfaceId));\n",
           sp, "      }\n",
           sp, "    }\n",
-          "\n",
           sp, "    private org.capnproto.DispatchCallResult dispatchCallInternal(short methodId, org.capnproto.CallContext<org.capnproto.AnyPointer.Reader, org.capnproto.AnyPointer.Builder> context) {\n",
           sp, "      switch (methodId) {\n",
           KJ_MAP(m, methods) { return kj::mv(m.dispatchCase); },
@@ -1891,12 +1867,11 @@ private:
           sp, "        return org.capnproto.Capability.Server.result(\n",
           sp, "          org.capnproto.Capability.Server.internalUnimplemented(\"", name, "\", 0x", hexId, "L, methodId));\n",
           sp, "      }\n",
-          sp, "    }\n\n",
+          sp, "    }\n",
           KJ_MAP(m, methods) { return kj::mv(m.serverDefs); },
+          sp, "    protected Client thisCap() { return new Client(super.thisCap()); }\n",
           sp, "  }\n",
-          sp, "\n",
           KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-          "\n",
           sp, "}\n",
           "\n")
         };
