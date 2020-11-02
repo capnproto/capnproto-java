@@ -199,11 +199,7 @@ private:
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
 
-  kj::StringTree javaFullName(Schema schema) {
-    return javaFullName(schema, nullptr);
-  }
-
-  kj::StringTree javaFullName(Schema schema, kj::Maybe<InterfaceSchema::Method> method) {
+  kj::StringTree javaFullName(Schema schema, kj::Maybe<InterfaceSchema::Method> method = nullptr) {
     auto node = schema.getProto();
     if (node.getScopeId() == 0) {
       usedImports.insert(node.getId());
