@@ -24,6 +24,7 @@ struct TestAllTypes {
 interface TestInterface {
   foo @0 (i :UInt32, j :Bool) -> (x :Text);
   bar @1 () -> ();
+  baz @2 (s: TestAllTypes);
 }
 
 interface TestExtends extends(TestInterface) {
@@ -49,7 +50,7 @@ interface TestPipeline {
 
 struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
-  rev @1 :TestGenerics(Bar, Foo);
+#  rev @1 :TestGenerics(Bar, Foo);
 
   interface Interface(Qux) {
   }
