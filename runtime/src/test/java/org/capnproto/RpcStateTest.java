@@ -8,8 +8,6 @@ import org.junit.Test;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class RpcStateTest {
 
@@ -23,7 +21,7 @@ public class RpcStateTest {
         }
     }
 
-    class TestConnection implements VatNetwork.Connection {
+    class TestConnection implements VatNetwork.Connection<RpcTwoPartyProtocol.VatId.Reader> {
 
         private CompletableFuture<IncomingRpcMessage> nextIncomingMessage = new CompletableFuture<>();
         private final CompletableFuture<java.lang.Void> disconnect = new CompletableFuture<>();
@@ -69,6 +67,11 @@ public class RpcStateTest {
             this.disconnect.complete(null);
             return this.disconnect.copy();
         }
+
+        @Override
+        public RpcTwoPartyProtocol.VatId.Reader getPeerVatId() {
+            return null;
+        }
     }
 
     TestConnection connection;
@@ -80,7 +83,19 @@ public class RpcStateTest {
     public void setUp() throws Exception {
         this.connection = new TestConnection();
         this.bootstrapInterface = new Capability.Client(Capability.newNullCap());
-        this.rpc = new RpcState(bootstrapInterface, connection, connection.disconnect);
+        var bootstrapFactory = new BootstrapFactory<RpcTwoPartyProtocol.VatId.Reader>() {
+            @Override
+            public FromPointerReader<RpcTwoPartyProtocol.VatId.Reader> getVatIdFactory() {
+                return RpcTwoPartyProtocol.VatId.factory;
+            }
+
+            @Override
+            public Capability.Client createFor(RpcTwoPartyProtocol.VatId.Reader clientId) {
+                return bootstrapInterface;
+            }
+        };
+
+        this.rpc = new RpcState<RpcTwoPartyProtocol.VatId.Reader>(bootstrapFactory, connection, connection.disconnect);
     }
 
     @After

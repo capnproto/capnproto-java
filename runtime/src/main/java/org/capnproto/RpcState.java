@@ -1,6 +1,7 @@
 package org.capnproto;
 
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -9,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
-final class RpcState {
+final class RpcState<VatId> {
 
     private static int messageSizeHint() {
         return 1 + RpcProtocol.Message.factory.structSize().total();
@@ -19,12 +20,12 @@ final class RpcState {
         return RpcProtocol.Exception.factory.structSize().total() + exc.getMessage().length();
     }
 
-    private static int MESSAGE_TARGET_SIZE_HINT
+    private static final int MESSAGE_TARGET_SIZE_HINT
             = RpcProtocol.MessageTarget.factory.structSize().total()
             + RpcProtocol.PromisedAnswer.factory.structSize().total()
             + 16;
 
-    private static int CAP_DESCRIPTOR_SIZE_HINT
+    private static final int CAP_DESCRIPTOR_SIZE_HINT
             = RpcProtocol.CapDescriptor.factory.structSize().total()
             + RpcProtocol.PromisedAnswer.factory.structSize().total();
 
@@ -63,7 +64,7 @@ final class RpcState {
         }
     }
 
-    private static final class QuestionRef extends WeakReference<Question> {
+    private final class QuestionRef extends WeakReference<Question> {
 
         private final QuestionDisposer disposer;
 
@@ -77,7 +78,7 @@ final class RpcState {
         }
     }
 
-    private final class Question {
+    private class Question {
 
         CompletableFuture<RpcResponse> response = new CompletableFuture<>();
         int[] paramExports = new int[0];
@@ -146,8 +147,8 @@ final class RpcState {
         public Iterator<Question> iterator() {
             return this.slots.values()
                     .stream()
-                    .map(ref -> ref.get())
-                    .filter(question -> question != null)
+                    .map(Reference::get)
+                    .filter(Objects::nonNull)
                     .iterator();
         }
 
@@ -160,7 +161,7 @@ final class RpcState {
         }
     }
 
-    static final class Answer {
+    final class Answer {
         final int answerId;
         boolean active = false;
         PipelineHook pipeline;
@@ -228,28 +229,14 @@ final class RpcState {
         }
     }
 
-    private final ExportTable<Export> exports = new ExportTable<Export>() {
+    private final ExportTable<Export> exports = new ExportTable<>() {
         @Override
         Export newExportable(int id) {
             return new Export(id);
         }
     };
 
-    /*
-    private final ExportTable<QuestionRef> questions = new ExportTable<>() {
-        @Override
-        QuestionRef newExportable(int id) {
-            return new QuestionRef(new Question(id));
-        }
-    };
-*/
     private final QuestionExportTable questions = new QuestionExportTable();
-    /*{
-    @Override
-    Question newExportable(int id) {
-        return new Question(id);
-    }
-*/
 
     private final ImportTable<Answer> answers = new ImportTable<>() {
         @Override
@@ -273,8 +260,8 @@ final class RpcState {
     };
 
     private final Map<ClientHook, Integer> exportsByCap = new HashMap<>();
-    private final Capability.Client bootstrapInterface;
-    private final VatNetwork.Connection connection;
+    private final BootstrapFactory<VatId> bootstrapFactory;
+    private final VatNetwork.Connection<VatId> connection;
     private final CompletableFuture<java.lang.Void> onDisconnect;
     private Throwable disconnected = null;
     private CompletableFuture<java.lang.Void> messageReady = CompletableFuture.completedFuture(null);
@@ -282,10 +269,10 @@ final class RpcState {
     private final ReferenceQueue<Question> questionRefs = new ReferenceQueue<>();
     private final ReferenceQueue<ImportClient> importRefs = new ReferenceQueue<>();
 
-    RpcState(Capability.Client bootstrapInterface,
-             VatNetwork.Connection connection,
+    RpcState(BootstrapFactory<VatId>  bootstrapFactory,
+             VatNetwork.Connection<VatId> connection,
              CompletableFuture<java.lang.Void> onDisconnect) {
-        this.bootstrapInterface = bootstrapInterface;
+        this.bootstrapFactory = bootstrapFactory;
         this.connection = connection;
         this.onDisconnect = onDisconnect;
         this.messageLoop = this.doMessageLoop();
@@ -445,6 +432,7 @@ final class RpcState {
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
+        //System.out.println(reader.which());
         switch (reader.which()) {
             case UNIMPLEMENTED:
                 handleUnimplemented(reader.getUnimplemented());
@@ -548,7 +536,8 @@ final class RpcState {
 
         var payload = ret.initResults();
         var content = payload.getContent().imbue(capTable);
-        content.setAsCap(bootstrapInterface);
+        var cap = this.bootstrapFactory.createFor(connection.getPeerVatId());
+        content.setAsCap(cap);
         var caps = capTable.getTable();
         var capHook = caps.length != 0
                 ? caps[0]
@@ -1193,7 +1182,7 @@ final class RpcState {
         AnyPointer.Builder getResultsBuilder();
     }
 
-    static class RpcResponseImpl implements RpcResponse {
+    class RpcResponseImpl implements RpcResponse {
         private final Question question;
         private final IncomingRpcMessage message;
         private final AnyPointer.Reader results;

@@ -24,7 +24,8 @@ public interface Request<Params> {
         var hook = new RequestHook() {
             @Override
             public RemotePromise<AnyPointer.Reader> send() {
-                return new RemotePromise<>(CompletableFuture.failedFuture(exc), null);
+                return new RemotePromise<>(CompletableFuture.failedFuture(exc),
+                        new AnyPointer.Pipeline(PipelineHook.newBrokenPipeline(exc)));
             }
 
             @Override
@@ -47,7 +48,7 @@ public interface Request<Params> {
 
             @Override
             public Request<AnyPointer.Builder> getTypelessRequest() {
-                return null;
+                return new AnyPointer.Request(message.getRoot(AnyPointer.factory), hook);
             }
         };
     }

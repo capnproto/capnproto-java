@@ -4,9 +4,15 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+
 public class TwoPartyVatNetwork
         implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>,
-                   VatNetwork.Connection {
+                   VatNetwork.Connection<RpcTwoPartyProtocol.VatId.Reader> {
+
+    @Override
+    public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> baseAccept() {
+        return this.accept();
+    }
 
     public interface MessageTap {
         void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side);
@@ -33,25 +39,22 @@ public class TwoPartyVatNetwork
         return side;
     }
 
-    public RpcTwoPartyProtocol.VatId.Reader getPeerVatId() {
-        return peerVatId.getRoot(RpcTwoPartyProtocol.VatId.factory).asReader();
-    }
-
     public void setTap(MessageTap tap) {
         this.tap = tap;
     }
 
-    public VatNetwork.Connection asConnection() {
+    public Connection asConnection() {
         return this;
     }
 
-    private Connection connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
+    @Override
+    public Connection connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
         return vatId.getSide() != side
                 ? this.asConnection()
                 : null;
     }
 
-    private CompletableFuture<Connection> accept() {
+    public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> accept() {
         if (side == RpcTwoPartyProtocol.Side.SERVER & !accepted) {
             accepted = true;
             return CompletableFuture.completedFuture(this.asConnection());
@@ -60,6 +63,10 @@ public class TwoPartyVatNetwork
             // never completes
             return new CompletableFuture<>();
         }
+    }
+
+    public RpcTwoPartyProtocol.VatId.Reader getPeerVatId() {
+        return this.peerVatId.getRoot(RpcTwoPartyProtocol.VatId.factory).asReader();
     }
 
     @Override
@@ -109,16 +116,6 @@ public class TwoPartyVatNetwork
             catch (Exception ioExc) {
             }
         });
-    }
-
-    @Override
-    public Connection baseConnect(RpcTwoPartyProtocol.VatId.Reader hostId) {
-        return this.connect(hostId);
-    }
-
-    @Override
-    public CompletableFuture<Connection> baseAccept() {
-        return this.accept();
     }
 
     final class OutgoingMessage implements OutgoingRpcMessage {
