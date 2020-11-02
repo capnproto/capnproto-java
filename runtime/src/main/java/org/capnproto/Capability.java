@@ -2,7 +2,6 @@ package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
 
 public final class Capability {
 
@@ -86,13 +85,6 @@ public final class Capability {
             }
             return CompletableFuture.completedFuture(null);
         }
-/*
-        default <Params, Results>
-        Request<Params, Results> newCall(FromPointerBuilder<Params> paramsFactory,
-                                               FromPointerReader<Results> resultsFactory,
-                                               long interfaceId, short methodId) {
-            return Request.fromTypeless(paramsFactory, resultsFactory, this.getHook().newCall(interfaceId, methodId));
-        }*/
 
         default Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
             return this.getHook().newCall(interfaceId, methodId);

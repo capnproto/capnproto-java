@@ -50,7 +50,7 @@ interface TestPipeline {
 
 struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
-#  rev @1 :TestGenerics(Bar, Foo);
+  rev @1 :TestGenerics(Bar, Foo);
 
   interface Interface(Qux) {
   }

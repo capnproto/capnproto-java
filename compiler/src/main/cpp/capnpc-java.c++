@@ -390,7 +390,7 @@ private:
         return kj::strTree("org.capnproto.ListList.", suffix, "<", kj::mv(inner), ">");
       }
       case schema::Type::INTERFACE:
-        return kj::strTree("org.capnproto.AnyPointer.", suffix);
+        return kj::strTree("org.capnproto.CapabilityList.", suffix);
       case schema::Type::ANY_POINTER:
         KJ_FAIL_REQUIRE("unimplemented");
       }
@@ -1187,7 +1187,19 @@ private:
 
       auto typeParamVec = getTypeParameters(field.getContainingStruct());
       auto factoryArg = makeFactoryArg(field.getType());
-      auto pipelineType = typeName(field.getType(), kj::str("Pipeline")).flatten();
+
+      kj::String pipelineType;
+      if (field.getType().asStruct().getProto().getIsGeneric()) {
+        auto typeArgs = getTypeArguments(structSchema, structSchema, kj::str("Reader"));
+        pipelineType = kj::strTree(
+          javaFullName(structSchema), ".Pipeline<",
+          kj::StringTree(KJ_MAP(arg, typeArgs){
+              return kj::strTree(arg);
+            }, ", "),
+          ">").flatten();
+      } else {
+        pipelineType = typeName(field.getType(), kj::str("Pipeline")).flatten();
+      }
 
       return FieldText {
         kj::strTree(
