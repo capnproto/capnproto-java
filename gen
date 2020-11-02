@@ -2,6 +2,8 @@
 
 set -eux
 
+export PATH=/usr/local/bin:/usr/bin:/bin
+
 make CXX=g++-8 capnpc-java 
 
 capnp compile -I./compiler/src/main/schema/ -o/bin/cat ./runtime/src/test/schema/test.capnp > ./runtime/src/test/schema/test.raw
