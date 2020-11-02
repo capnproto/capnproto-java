@@ -24,24 +24,16 @@ package org.capnproto;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 class Counter {
     private int count = 0;
-
-    public void inc() {
-        count++;
-    }
-
-    public int value() {
-        return count;
-    }
+    void inc() { count++; }
+    int value() { return count; }
 }
 
 class TestInterfaceImpl extends org.capnproto.test.Test.TestInterface.Server {
-
 
     final Counter counter;
 
@@ -57,7 +49,17 @@ class TestInterfaceImpl extends org.capnproto.test.Test.TestInterface.Server {
         Assert.assertEquals(123, params.getI());
         Assert.assertTrue(params.getJ());
         result.setX("foo");
-        return CompletableFuture.completedFuture(null);
+        return READY_NOW;
+    }
+
+    @Override
+    protected CompletableFuture<java.lang.Void> baz(CallContext<org.capnproto.test.Test.TestInterface.BazParams.Reader, org.capnproto.test.Test.TestInterface.BazResults.Builder> context) {
+        this.counter.inc();
+        var params = context.getParams();
+        TestUtil.checkTestMessage(params.getS());
+        context.releaseParams();
+        Assert.assertThrows(RpcException.class, () -> context.getParams());
+        return READY_NOW;
     }
 }
 
@@ -129,6 +131,59 @@ class TestPipelineImpl extends org.capnproto.test.Test.TestPipeline.Server {
 public class CapabilityTest {
 
     @Test
+    public void testBasic() {
+        var callCount = new Counter();
+        var client = new org.capnproto.test.Test.TestInterface.Client(
+                new TestInterfaceImpl(callCount));
+
+        var request1 = client.fooRequest();
+        request1.getParams().setI(123);
+        request1.getParams().setJ(true);
+        var promise1 = request1.send();
+
+        var request2 = client.bazRequest();
+        TestUtil.initTestMessage(request2.getParams().initS());
+        var promise2 = request2.send();
+
+        boolean barFailed = false;
+        var request3 = client.barRequest();
+        var promise3 = request3.send().whenComplete((value, exc) -> {
+            Assert.assertNotNull(exc);
+            Assert.assertTrue(exc instanceof RpcException);
+            var rpcExc = (RpcException)exc;
+            Assert.assertEquals(RpcException.Type.UNIMPLEMENTED, rpcExc.getType());
+        });
+    }
+
+    @Test
+    public void testInheritance() throws ExecutionException, InterruptedException {
+        var callCount = new Counter();
+
+        var client1 = new org.capnproto.test.Test.TestExtends.Client(
+                new TestExtendsImpl(callCount));
+
+        org.capnproto.test.Test.TestInterface.Client client2 = client1;
+        var client = (org.capnproto.test.Test.TestExtends.Client)client2;
+
+        var request1 = client.fooRequest();
+        request1.getParams().setI(321);
+        var promise1 = request1.send();
+
+        var request2 = client.graultRequest();
+        var promise2 = request2.send();
+
+        // Hmm, we have no means to defer the evaluation of callInternal.
+        //Assert.assertEquals(0, callCount.value());
+
+        var response2 = promise2.get();
+        TestUtil.checkTestMessage(response2);
+
+        var response1 = promise1.get();
+        Assert.assertEquals("bar", response1.getX().toString());
+        Assert.assertEquals(2, callCount.value());
+    }
+
+    @Test
     public void testPipelining() throws ExecutionException, InterruptedException {
         var callCount = new Counter();
         var chainedCallCount = new Counter();
@@ -164,9 +219,47 @@ public class CapabilityTest {
         Assert.assertEquals(1, chainedCallCount.value());
     }
 
+    class TestThisCap extends org.capnproto.test.Test.TestInterface.Server {
+
+        Counter counter;
+
+        TestThisCap(Counter counter) {
+            this.counter = counter;
+        }
+
+        org.capnproto.test.Test.TestInterface.Client getSelf() {
+            return this.thisCap();
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> bar(CallContext<org.capnproto.test.Test.TestInterface.BarParams.Reader, org.capnproto.test.Test.TestInterface.BarResults.Builder> context) {
+            this.counter.inc();
+            return READY_NOW;
+        }
+    }
+
     @Test
     public void testGenerics() {
         var factory = org.capnproto.test.Test.TestGenerics.newFactory(org.capnproto.test.Test.TestAllTypes.factory, AnyPointer.factory);
+    }
 
+
+
+    @Test
+    public void thisCap() {
+        var callCount = new Counter();
+        var server = new TestThisCap(callCount);
+        var client = new org.capnproto.test.Test.TestInterface.Client(server);
+        client.barRequest().send().join();
+        Assert.assertEquals(1, callCount.value());
+
+        var client2 = server.getSelf();
+        Assert.assertEquals(1, callCount.value());
+        client2.barRequest().send().join();
+        Assert.assertEquals(2, callCount.value());
+        client = null;
+        Assert.assertEquals(2, callCount.value());
+        client2.barRequest().send().join();
+        Assert.assertEquals(3, callCount.value());
     }
 }
