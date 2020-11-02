@@ -145,6 +145,7 @@ public final class Capability {
 
     public abstract static class Server {
 
+        public static final CompletableFuture<java.lang.Void> READY_NOW = CompletableFuture.completedFuture(null);
         private static final Object BRAND = new Object();
         private ClientHook hook;
 
