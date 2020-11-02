@@ -331,7 +331,6 @@ private:
         return kj::strTree(javaFullName(type.asStruct()), ".", suffix);
       }
     }
-      
     case schema::Type::INTERFACE: {
       auto interfaceSchema = type.asInterface();
       if (interfaceSchema.getProto().getIsGeneric()) {
@@ -347,7 +346,6 @@ private:
         return kj::strTree(javaFullName(type.asInterface()), ".", suffix);
       }
     }
-      
     case schema::Type::LIST:
     {
       auto elementType = type.asList().getElementType();
@@ -392,7 +390,7 @@ private:
         return kj::strTree("org.capnproto.ListList.", suffix, "<", kj::mv(inner), ">");
       }
       case schema::Type::INTERFACE:
-        return kj::strTree("org.capnproto.PrimitiveList.Void.", suffix);
+        return kj::strTree("org.capnproto.AnyPointer.", suffix);
       case schema::Type::ANY_POINTER:
         KJ_FAIL_REQUIRE("unimplemented");
       }
@@ -930,7 +928,6 @@ private:
 
     auto typeBody = slot.getType();
     auto defaultBody = slot.getDefaultValue();
-    
     switch (typeBody.which()) {
       case schema::Type::VOID:
         kind = FieldKind::PRIMITIVE;
@@ -1088,7 +1085,6 @@ private:
       };
 
     } else if (kind == FieldKind::INTERFACE) {
-    
       auto factoryArg = makeFactoryArg(field.getType());
       auto clientType = typeName(field.getType(), kj::str("Client")).flatten();
       auto serverType = typeName(field.getType(), kj::str("Server")).flatten();
@@ -1192,7 +1188,7 @@ private:
       auto typeParamVec = getTypeParameters(field.getContainingStruct());
       auto factoryArg = makeFactoryArg(field.getType());
       auto pipelineType = typeName(field.getType(), kj::str("Pipeline")).flatten();
-    
+
       return FieldText {
         kj::strTree(
           kj::mv(unionDiscrim.readerIsDef),
@@ -1501,7 +1497,6 @@ private:
         ">");
     }
     kj::String readerTypeParams = readerTypeParamsTree.flatten();
-    auto readerTypeParamsInferred = (hasTypeParams ? "<>" : "");
     kj::String builderTypeParams = builderTypeParamsTree.flatten();
     kj::String factoryTypeParams = factoryTypeParamsTree.flatten();
 
@@ -1529,8 +1524,8 @@ private:
           " new org.capnproto.StructSize((short)", structNode.getDataWordCount(),
           ",(short)", structNode.getPointerCount(), ");\n"),
 
-        spaces(indent), "  public static final class Factory", factoryTypeParams, "\n",
-        spaces(indent), "      extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
+        spaces(indent), "  public static final class Factory", factoryTypeParams,
+        " extends org.capnproto.StructFactory<Builder", builderTypeParams, ", Reader", readerTypeParams, "> {\n",
         factoryMembers.flatten(),
         spaces(indent), "    public Factory(",
         factoryArgs.flatten(),
@@ -1650,8 +1645,7 @@ private:
           spaces(indent), "    _NOT_IN_SCHEMA,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-        spaces(indent), "  public interface Pipeline", readerTypeParams, "\n",
-        spaces(indent), "      extends org.capnproto.Pipeline {\n",
+        spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.Pipeline {\n",
         KJ_MAP(f, fieldTexts) {
           return kj::mv(f.pipelineMethodDecls);
         },
@@ -1683,7 +1677,7 @@ private:
       }
     }
   }
-  
+
   InterfaceText makeInterfaceText(kj::StringPtr scope, kj::StringPtr name, InterfaceSchema schema,
                                   kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
 
@@ -1715,78 +1709,45 @@ private:
         };
       };
     }
-    
+
     auto typeNameVec = javaFullName(schema);
     auto typeParamVec = getTypeParameters(schema);
     bool hasTypeParams = typeParamVec.size() > 0;
 
-    kj::String genericParamTypes = proto.getIsGeneric()
-      ? kj::strTree("<",
-          kj::StringTree(
-            KJ_MAP(arg, typeParamVec) {
-              return kj::strTree(arg);
-            }, ", "),
-          ">").flatten()
+    auto params = [&](auto& prefix, auto& sep, auto& suffix, auto item) {
+      return kj::strTree(prefix, kj::StringTree(KJ_MAP(p, typeParamVec) { return item(p); }, sep), suffix).flatten();
+    };
+
+    auto genericParamTypes = proto.getIsGeneric()
+      ? params("<", ", ", ">", [](auto& p) { return kj::strTree(p); })
       : kj::str();
-    
-    kj::StringTree readerTypeParamsTree;
-    kj::StringTree builderTypeParamsTree;
-    kj::StringTree factoryTypeParamsTree;
-    if (hasTypeParams) {
-      builderTypeParamsTree = kj::strTree(
-        "<",
-        kj::StringTree(KJ_MAP(p, typeParamVec) {
-            return kj::strTree(p, "_Builder");
-          }, ", "),
-        ">");
-      readerTypeParamsTree = kj::strTree(
-        "<",
-        kj::StringTree(KJ_MAP(p, typeParamVec) {
-            return kj::strTree(p, "_Reader");
-          }, ", "),
-        ">");
 
-      factoryTypeParamsTree = kj::strTree(
-        "<",
-        kj::StringTree(KJ_MAP(p, typeParamVec) {
-            return kj::strTree(p, "_Builder, ", p, "_Reader");
-          }, ", "),
-        ">");
-    }
-    kj::String readerTypeParams = readerTypeParamsTree.flatten();
-    auto readerTypeParamsInferred = (hasTypeParams ? "<>" : "");
-    kj::String builderTypeParams = builderTypeParamsTree.flatten();
-    kj::String factoryTypeParams = factoryTypeParamsTree.flatten();
+    auto readerTypeParamsInferred = hasTypeParams ? "<>" : "";
 
-    kj::StringTree factoryArgs = kj::StringTree(KJ_MAP(p, typeParamVec) {
-        return kj::strTree("org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory");
-      }, ", ");
+    auto factoryRef = hasTypeParams
+      ? params("newFactory(", ", ", ")", [](auto& p) { return kj::strTree(p, "_Factory"); })
+      : kj::str("factory");
 
-    kj::StringTree factoryMembers = kj::strTree(KJ_MAP(p, typeParamVec) {
-          return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory;\n");
-      });
+    auto factoryTypeParams = hasTypeParams
+      ? params("<", ", ", ">", [](auto& p) { return kj::strTree(p, "_Builder, ", p, "_Reader"); })
+      : kj::str();
 
-    auto factoryConstructorParams = kj::StringTree(KJ_MAP(p, typeParamVec) {
-        return kj::strTree(p, "_Factory");
+    auto factoryArgs = kj::StringTree(KJ_MAP(p, typeParamVec) {
+          return kj::strTree("org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory");
       }, ", ").flatten();
 
-    kj::String factoryRef = hasTypeParams
-      ? kj::str(kj::strTree("newFactory(",
-                            kj::StringTree(KJ_MAP(p, typeParamVec) {
-                              return kj::strTree(p, "_Factory");
-                              }, ", ")
-                            , ")"))
-      : kj::str("factory");
-    
+    auto factoryMembers = kj::strTree(KJ_MAP(p, typeParamVec) {
+          return kj::strTree(spaces(indent), "    final org.capnproto.PointerFactory<", p, "_Builder, ", p, "_Reader> ", p, "_Factory;\n");
+      }).flatten();
 
     return InterfaceText {
       kj::strTree(
           sp, "public static class ", name, genericParamTypes, " {\n",
           sp, "  public static final class Factory", factoryTypeParams, "\n",
           sp, "      extends org.capnproto.Capability.Factory<Client> {\n",
-          factoryMembers.flatten(),
+          factoryMembers,
           sp, "    public Factory(",
-          factoryArgs.flatten(),
+          factoryArgs,
           ") {\n",
           KJ_MAP(p, typeParamVec) {
             return kj::strTree(sp, "      this.", p, "_Factory = ", p, "_Factory;\n");
@@ -1799,24 +1760,21 @@ private:
           "\n",
           (hasTypeParams
             ? kj::strTree(
-              sp, "  public static final ", factoryTypeParams, "Factory", factoryTypeParams, "\n",
-              sp, "    newFactory(", factoryArgs.flatten(), ") {\n",
-              sp, "    return new Factory<>(", factoryConstructorParams, ");\n",
-              sp, "  }\n"
-            )
-           : kj::strTree(
-               sp, "  public static final Factory factory = new Factory();\n"
-             )
+              sp, "  public static ", factoryTypeParams, "Factory", factoryTypeParams, " newFactory(", factoryArgs, ") {\n",
+              sp, "    return new Factory<>(",
+              params("", ", ", "", [](auto& p) { return kj::strTree(p, "_Factory"); }), ");\n",
+              sp, "  }\n")
+            : kj::strTree(sp, "  public static final Factory factory = new Factory();\n")
           ),
           "\n",
           sp, "  public static class Client\n",
           (superclasses.size() == 0
-           ? kj::str(sp, "      extends org.capnproto.Capability.Client ")
-           : kj::str(
-               KJ_MAP(s, superclasses) {
-                 return kj::strTree(sp, "      extends ", s.typeName, ".Client ");
-               })
-           ),
+            ? kj::str(sp, "      extends org.capnproto.Capability.Client ")
+            : kj::str(
+                KJ_MAP(s, superclasses) {
+                  return kj::strTree(sp, "      extends ", s.typeName, ".Client ");
+                })
+          ),
           "{\n",
           sp, "    public Client() {}\n",
           sp, "    public Client(org.capnproto.ClientHook hook) { super(hook); }\n",
