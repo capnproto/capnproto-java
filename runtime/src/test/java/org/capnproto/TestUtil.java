@@ -90,6 +90,15 @@ class TestUtil {
         }
     }
 
+    static class HandleImpl extends Test.TestHandle.Server {
+        final Counter count;
+
+        HandleImpl(Counter count) {
+            this.count = count;
+            count.inc();
+        }
+    }
+
     static class TestMoreStuffImpl extends Test.TestMoreStuff.Server {
 
         final Counter callCount;
@@ -98,6 +107,12 @@ class TestUtil {
         public TestMoreStuffImpl(Counter callCount, Counter handleCount) {
             this.callCount = callCount;
             this.handleCount = handleCount;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> getHandle(CallContext<Test.TestMoreStuff.GetHandleParams.Reader, Test.TestMoreStuff.GetHandleResults.Builder> context) {
+            context.getResults().setHandle(new HandleImpl(this.handleCount));
+            return READY_NOW;
         }
     }
 
