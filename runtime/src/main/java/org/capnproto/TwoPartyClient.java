@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyClient {
 
     private final TwoPartyVatNetwork network;
-    private final TwoPartyRpcSystem rpcSystem;
+    private final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
 
     public TwoPartyClient(AsynchronousSocketChannel channel) {
         this(channel, null);
@@ -20,7 +20,7 @@ public class TwoPartyClient {
                           Capability.Client bootstrapInterface,
                           RpcTwoPartyProtocol.Side side) {
         this.network = new TwoPartyVatNetwork(channel, side);
-        this.rpcSystem = new TwoPartyRpcSystem(network, bootstrapInterface);
+        this.rpcSystem = new RpcSystem<RpcTwoPartyProtocol.VatId.Reader>(network, bootstrapInterface);
     }
 
     public Capability.Client bootstrap() {

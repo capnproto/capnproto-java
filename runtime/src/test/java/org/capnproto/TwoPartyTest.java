@@ -105,7 +105,7 @@ public class TwoPartyTest {
 
     @Test
     public void testNullCap() throws ExecutionException, InterruptedException {
-        var server = new TwoPartyRpcSystem(this.serverNetwork, new Capability.Client());
+        var server = new RpcSystem<>(this.serverNetwork, new Capability.Client());
         var cap = this.client.bootstrap();
         var resolved = cap.whenResolved().toCompletableFuture();
         resolved.get();
@@ -113,7 +113,7 @@ public class TwoPartyTest {
 
     @Test
     public void testBasic() throws ExecutionException, InterruptedException, IOException {
-        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+        var server = new RpcSystem<>(this.serverNetwork, new TestCap0Impl());
 
         var demo = new Demo.TestCap0.Client(this.client.bootstrap());
         var request = demo.testMethod0Request();
@@ -130,7 +130,7 @@ public class TwoPartyTest {
 
     @Test
     public void testBasicCleanup() throws ExecutionException, InterruptedException, TimeoutException {
-        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+        var server = new RpcSystem<>(this.serverNetwork, new TestCap0Impl());
         var demo = new Demo.TestCap0.Client(this.client.bootstrap());
         var request = demo.testMethod0Request();
         var params = request.getParams();
@@ -146,7 +146,7 @@ public class TwoPartyTest {
 
     @Test
     public void testShutdown() throws InterruptedException, IOException {
-        var server = new TwoPartyRpcSystem(this.serverNetwork, new TestCap0Impl());
+        var server = new RpcSystem<>(this.serverNetwork, new TestCap0Impl());
         var demo = new Demo.TestCap0.Client(this.client.bootstrap());
         this.clientSocket.shutdownOutput();
         serverThread.join();
@@ -163,7 +163,7 @@ public class TwoPartyTest {
             }
         };
 
-        var rpcSystem = new TwoPartyRpcSystem(this.serverNetwork, impl);
+        var rpcSystem = new RpcSystem<>(this.serverNetwork, impl);
 
         var demoClient = new Demo.TestCap0.Client(this.client.bootstrap());
         {
@@ -188,7 +188,7 @@ public class TwoPartyTest {
     public void testReturnCap() throws ExecutionException, InterruptedException {
         // send a capability back from the server to the client
         var capServer = new TestCap0Impl();
-        var rpcSystem = new TwoPartyRpcSystem(this.serverNetwork, capServer);
+        var rpcSystem = new RpcSystem<>(this.serverNetwork, capServer);
         var demoClient = new Demo.TestCap0.Client(this.client.bootstrap());
         var request = demoClient.testMethod1Request();
         var response = request.send();

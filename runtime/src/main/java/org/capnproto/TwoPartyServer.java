@@ -13,13 +13,13 @@ public class TwoPartyServer {
     private class AcceptedConnection {
         final AsynchronousSocketChannel channel;
         final TwoPartyVatNetwork network;
-        final TwoPartyRpcSystem rpcSystem;
+        final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
         private final CompletableFuture<?> messageLoop;
 
         AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel channel) {
             this.channel = channel;
             this.network = new TwoPartyVatNetwork(channel, RpcTwoPartyProtocol.Side.SERVER);
-            this.rpcSystem = new TwoPartyRpcSystem(network, bootstrapInterface);
+            this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);
             this.messageLoop = this.rpcSystem.getMessageLoop().exceptionally(exc -> {
                 connections.remove(this);
                 return null;

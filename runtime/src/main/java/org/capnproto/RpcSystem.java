@@ -24,6 +24,11 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     public RpcSystem(VatNetwork<VatId> network,
+                     Capability.Server bootstrapInterface) {
+        this(network, new Capability.Client(bootstrapInterface));
+    }
+
+    public RpcSystem(VatNetwork<VatId> network,
                      Capability.Client bootstrapInterface) {
         this(network, new BootstrapFactory<VatId>() {
 
@@ -78,7 +83,7 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     private CompletableFuture<java.lang.Void> doAcceptLoop() {
-        return this.getNetwork().baseAccept().thenCompose(connection -> {
+        return this.network.baseAccept().thenCompose(connection -> {
             this.accept(connection);
             return this.doAcceptLoop();
         });

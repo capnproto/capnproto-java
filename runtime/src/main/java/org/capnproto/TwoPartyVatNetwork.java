@@ -43,12 +43,12 @@ public class TwoPartyVatNetwork
         this.tap = tap;
     }
 
-    public Connection asConnection() {
+    public Connection<RpcTwoPartyProtocol.VatId.Reader> asConnection() {
         return this;
     }
 
     @Override
-    public Connection connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
+    public Connection<RpcTwoPartyProtocol.VatId.Reader> connect(RpcTwoPartyProtocol.VatId.Reader vatId) {
         return vatId.getSide() != side
                 ? this.asConnection()
                 : null;
@@ -60,7 +60,7 @@ public class TwoPartyVatNetwork
             return CompletableFuture.completedFuture(this.asConnection());
         }
         else {
-            // never completes
+            // never /home/vaci/g/capnproto-java/compilercompletes
             return new CompletableFuture<>();
         }
     }
