@@ -20,12 +20,13 @@ public class RemotePromise<Results>
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
                          AnyPointer.Pipeline pipeline) {
-        super(promise.thenApply(response -> {
-            //System.out.println("Got a response for remote promise " + promise.toString());
-            return response.getResults();
-        }));
+        super(promise.thenApply(response -> response.getResults()));
         this.response = promise;
         this.pipeline = pipeline;
+    }
+
+    CompletableFuture<Response<Results>> _getResponse() {
+        return this.response;
     }
 
     public AnyPointer.Pipeline pipeline() {

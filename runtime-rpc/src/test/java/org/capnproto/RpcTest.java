@@ -406,5 +406,30 @@ public class RpcTest {
         //Assert.assertEquals(3, context.restorer.callCount);
         Assert.assertEquals(2, chainedCallCount.value());
     }
+
+    @org.junit.Test
+    public void testTailCall() {
+        var context = new TestContext(bootstrapFactory);
+        var caller = new Test.TestTailCaller.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_TAIL_CALLER));
+
+        var calleeCallCount = new Counter();
+        var callee = new Test.TestTailCallee.Client(new RpcTestUtil.TestTailCalleeImpl(calleeCallCount));
+        var request = caller.fooRequest();
+        request.getParams().setI(456);
+        request.getParams().setCallee(callee);
+
+        var promise = request.send();
+        var dependentCall0 = promise.getC().getCallSequenceRequest().send();
+        var response = promise.join();
+        Assert.assertEquals(456, response.getI());
+
+        var dependentCall1 = promise.getC().getCallSequenceRequest().send();
+        Assert.assertEquals(0, dependentCall0.join().getN());
+        Assert.assertEquals(1, dependentCall1.join().getN());
+
+        var dependentCall2 = response.getC().getCallSequenceRequest().send();
+        Assert.assertEquals(2, dependentCall2.join().getN());
+        Assert.assertEquals(1, calleeCallCount.value());
+    }
 }
 

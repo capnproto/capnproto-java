@@ -168,7 +168,7 @@ final class RpcState<VatId> {
         final int answerId;
         boolean active = false;
         PipelineHook pipeline;
-        CompletionStage<RpcResponse> redirectedResults;
+        CompletableFuture<RpcResponse> redirectedResults;
         RpcCallContext callContext;
         int[] resultExports;
 
@@ -599,24 +599,26 @@ final class RpcState<VatId> {
         }
 
         var pap = startCall(call.getInterfaceId(), call.getMethodId(), cap, context);
+
         {
             var answer = answers.find(answerId);
             assert answer != null;
             answer.pipeline = pap.pipeline;
 
             if (redirectResults) {
-                answer.redirectedResults = pap.promise.thenApply(x -> {
-                    return context.consumeRedirectedResponse();
-                });
+                answer.redirectedResults = pap.promise.thenApply(
+                        void_ -> context.consumeRedirectedResponse());
                 // TODO cancellation deferral
             }
             else {
-                pap.promise.thenAccept(x -> {
-                    context.sendReturn();
-                }).exceptionally(exc -> {
-                    context.sendErrorReturn(exc);
-                    // TODO wait on the cancellation...
-                    return null;
+                pap.promise.whenComplete((void_, exc) -> {
+                    if (exc == null) {
+                        context.sendReturn();
+                    }
+                    else {
+                        context.sendErrorReturn(exc);
+                        // TODO wait on the cancellation...
+                    }
                 });
             }
         }
@@ -628,7 +630,6 @@ final class RpcState<VatId> {
     }
 
     void handleReturn(IncomingRpcMessage message, RpcProtocol.Return.Reader callReturn) {
-
         var question = questions.find(callReturn.getAnswerId());
         if (question == null) {
             assert false: "Invalid question ID in Return message.";
@@ -703,7 +704,7 @@ final class RpcState<VatId> {
                     assert false: "`Return.takeFromOtherQuestion` referenced a call that did not use `sendResultsTo.yourself`.";
                     break;
                 }
-                question.response = answer.redirectedResults.toCompletableFuture();
+                question.response = answer.redirectedResults;
                 answer.redirectedResults = null;
                 break;
 
@@ -1230,7 +1231,7 @@ final class RpcState<VatId> {
 
         @Override
         public AnyPointer.Builder getResultsBuilder() {
-            return payload.getContent().imbue(capTable);
+            return this.payload.getContent().imbue(capTable);
         }
 
         int[] send() {
@@ -1284,7 +1285,7 @@ final class RpcState<VatId> {
         private RpcProtocol.Return.Builder returnMessage;
         private boolean redirectResults = false;
         private boolean responseSent = false;
-        private CompletableFuture<PipelineHook> tailCallPipelineFuture;
+        private CompletableFuture<AnyPointer.Pipeline> tailCallPipeline;
 
         private boolean cancelRequested = false;
         private boolean cancelAllowed = false;
@@ -1336,10 +1337,10 @@ final class RpcState<VatId> {
         @Override
         public CompletableFuture<java.lang.Void> tailCall(RequestHook request) {
             var result = this.directTailCall(request);
-            if (this.tailCallPipelineFuture != null) {
-                this.tailCallPipelineFuture.complete(result.pipeline);
+            if (this.tailCallPipeline != null) {
+                this.tailCallPipeline.complete(new AnyPointer.Pipeline(result.pipeline));
             }
-            return result.promise.toCompletableFuture().copy();
+            return result.promise.copy();
         }
 
         @Override
@@ -1347,8 +1348,10 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public CompletableFuture<PipelineHook> onTailCall() {
-            return null;
+        public CompletableFuture<AnyPointer.Pipeline> onTailCall() {
+            assert this.tailCallPipeline == null: "Called onTailCall twice?";
+            this.tailCallPipeline = new CompletableFuture<>();
+            return this.tailCallPipeline.copy();
         }
 
         @Override
@@ -1441,7 +1444,7 @@ final class RpcState<VatId> {
                 message.send();
             }
 
-            cleanupAnswerTable(new int[0], false);
+            cleanupAnswerTable(null, false);
         }
 
         private boolean isFirstResponder() {
@@ -1453,6 +1456,10 @@ final class RpcState<VatId> {
         }
 
         private void cleanupAnswerTable(int[] resultExports, boolean shouldFreePipeline) {
+            if (resultExports == null) {
+                resultExports = new int[0];
+            }
+
             if (this.cancelRequested) {
                 assert resultExports.length == 0;
                 answers.erase(this.answerId);

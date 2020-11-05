@@ -185,17 +185,16 @@ public final class Capability {
                 }
 
                 var promise = this.whenResolved().thenCompose(
-                        x -> this.callInternal(interfaceId, methodId, ctx));
+                        void_ -> this.callInternal(interfaceId, methodId, ctx));
 
-                CompletableFuture<PipelineHook> pipelinePromise = promise.thenApply(x -> {
+
+                var pipelinePromise = promise.thenApply(x -> {
                     ctx.releaseParams();
-                    return new LocalPipeline(ctx);
+                    return (PipelineHook)new LocalPipeline(ctx);
                 });
 
-                var tailCall = ctx.onTailCall();
-                if (tailCall != null) {
-                    pipelinePromise = tailCall.applyToEither(pipelinePromise, pipeline -> pipeline);
-                }
+                var tailCall = ctx.onTailCall().thenApply(pipeline -> pipeline.hook);
+                pipelinePromise = tailCall.applyToEither(pipelinePromise, pipeline -> pipeline);
 
                 return new VoidPromiseAndPipeline(
                         promise,
@@ -213,7 +212,7 @@ public final class Capability {
                     return CompletableFuture.completedFuture(this.resolved);
                 }
                 else if (this.resolveTask != null) {
-                    return this.resolveTask.thenApply(x -> this.resolved);
+                    return this.resolveTask.thenApply(void_ -> this.resolved);
                 }
                 else {
                     return null;
@@ -335,7 +334,7 @@ public final class Capability {
         final MessageBuilder message = new MessageBuilder();
         final long interfaceId;
         final short methodId;
-        ClientHook client;
+        final ClientHook client;
 
         LocalRequest(long interfaceId, short methodId, ClientHook client) {
             this.interfaceId = interfaceId;
@@ -371,6 +370,7 @@ public final class Capability {
     }
 
     private static final class LocalPipeline implements PipelineHook {
+
         private final CallContextHook ctx;
         private final AnyPointer.Reader results;
 
@@ -396,7 +396,8 @@ public final class Capability {
 
     private static class LocalCallContext implements CallContextHook {
 
-        final CompletableFuture<?> cancelAllowed;
+        final CompletableFuture<java.lang.Void> cancelAllowed;
+        CompletableFuture<AnyPointer.Pipeline> tailCallPipeline;
         MessageBuilder request;
         Response<AnyPointer.Reader> response;
         AnyPointer.Builder responseBuilder;
@@ -404,7 +405,7 @@ public final class Capability {
 
         LocalCallContext(MessageBuilder request,
                          ClientHook clientRef,
-                         CompletableFuture<?> cancelAllowed) {
+                         CompletableFuture<java.lang.Void> cancelAllowed) {
             this.request = request;
             this.clientRef = clientRef;
             this.cancelAllowed = cancelAllowed;
@@ -412,7 +413,7 @@ public final class Capability {
 
         @Override
         public AnyPointer.Reader getParams() {
-            return request.getRoot(AnyPointer.factory).asReader();
+            return this.request.getRoot(AnyPointer.factory).asReader();
         }
 
         @Override
@@ -437,20 +438,27 @@ public final class Capability {
 
         @Override
         public CompletableFuture<java.lang.Void> tailCall(RequestHook request) {
-            // TODO implement tailCall
-            return null;
+            var result = this.directTailCall(request);
+            if (this.tailCallPipeline != null) {
+                this.tailCallPipeline.complete(new AnyPointer.Pipeline(result.pipeline));
+            }
+            return result.promise;
         }
 
         @Override
-        public CompletableFuture<PipelineHook> onTailCall() {
-            // TODO implement onTailCall
-            return null;
+        public CompletableFuture<AnyPointer.Pipeline> onTailCall() {
+            this.tailCallPipeline = new CompletableFuture<>();
+            return this.tailCallPipeline.copy();
         }
 
         @Override
         public ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request) {
-            // TODO implement directTailCall
-            return null;
+            assert this.response == null: "Can't call tailCall() after initializing the results struct.";
+            var promise = request.send();
+            var voidPromise = promise._getResponse().thenAccept(tailResponse -> {
+                this.response = tailResponse;
+            });
+            return new ClientHook.VoidPromiseAndPipeline(voidPromise, promise.pipeline().hook);
         }
     }
 

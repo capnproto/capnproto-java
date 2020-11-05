@@ -3,6 +3,7 @@ package org.capnproto;
 import java.util.concurrent.CompletableFuture;
 
 public interface CallContextHook {
+
     AnyPointer.Reader getParams();
 
     void releaseParams();
@@ -17,7 +18,7 @@ public interface CallContextHook {
 
     void allowCancellation();
 
-    CompletableFuture<PipelineHook> onTailCall();
+    CompletableFuture<AnyPointer.Pipeline> onTailCall();
 
     ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request);
 }
