@@ -245,10 +245,12 @@ private:
       Schema parent = schemaLoader.get(node.getScopeId());
       result = getTypeArguments(leaf, parent, kj::str(suffix));
     }
-    auto brandArguments = leaf.getBrandArgumentsAtScope(node.getId());
-    auto parameters = node.getParameters();
-    for (int ii = 0; ii < parameters.size(); ++ii) {
-      result.add(typeName(brandArguments[ii], kj::str(suffix)).flatten());
+    if (node.getIsGeneric()) {
+      auto brandArguments = leaf.getBrandArgumentsAtScope(node.getId());
+      auto parameters = node.getParameters();
+      for (int ii = 0; ii < parameters.size(); ++ii) {
+        result.add(typeName(brandArguments[ii], kj::str(suffix)).flatten());
+      }
     }
     return kj::mv(result);
   }
