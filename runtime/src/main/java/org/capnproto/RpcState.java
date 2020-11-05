@@ -16,6 +16,10 @@ final class RpcState<VatId> {
         return 1 + RpcProtocol.Message.factory.structSize().total();
     }
 
+    private static <B extends StructBuilder, R extends StructReader> int messageSizeHint(StructFactory<B, R> factory) {
+        return messageSizeHint() + factory.structSize().total();
+    }
+
     private static int exceptionSizeHint(Throwable exc) {
         return RpcProtocol.Exception.factory.structSize().total() + exc.getMessage().length();
     }
@@ -47,8 +51,7 @@ final class RpcState<VatId> {
             }
 
             if (isConnected() && !this.skipFinish) {
-                var sizeHint = messageSizeHint()
-                        + RpcProtocol.Finish.factory.structSize().total();
+                var sizeHint = messageSizeHint(RpcProtocol.Finish.factory);
                 var message = connection.newOutgoingMessage(sizeHint);
                 var builder = message.getBody().getAs(RpcProtocol.Message.factory).initFinish();
                 builder.setQuestionId(this.id);
@@ -210,7 +213,7 @@ final class RpcState<VatId> {
 
             // Send a message releasing our remote references.
             if (this.remoteRefCount > 0 && isConnected()) {
-                int sizeHint = messageSizeHint() + RpcProtocol.Release.factory.structSize().total();
+                int sizeHint = messageSizeHint(RpcProtocol.Release.factory);
                 var message = connection.newOutgoingMessage(sizeHint);
                 var builder = message.getBody().initAs(RpcProtocol.Message.factory).initRelease();
                 builder.setId(importId);
@@ -400,8 +403,7 @@ final class RpcState<VatId> {
         var loop = CompletableFuture.anyOf(
                 getMessageLoop(), promise).thenCompose(x -> promise);
 
-        int sizeHint = messageSizeHint()
-                + RpcProtocol.Bootstrap.factory.structSize().total();
+        int sizeHint = messageSizeHint(RpcProtocol.Bootstrap.factory);
         var message = connection.newOutgoingMessage(sizeHint);
         var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
         builder.setQuestionId(question.getId());
@@ -526,8 +528,7 @@ final class RpcState<VatId> {
         answer.active = true;
 
         var capTable = new BuilderCapabilityTable();
-        int sizeHint = messageSizeHint()
-                + RpcProtocol.Return.factory.structSize().total()
+        int sizeHint = messageSizeHint(RpcProtocol.Return.factory)
                 + RpcProtocol.Payload.factory.structSize().total();
         var response = connection.newOutgoingMessage(sizeHint);
 
@@ -799,9 +800,7 @@ final class RpcState<VatId> {
                         return null;
                     }
 
-                    int sizeHint = messageSizeHint()
-                            + RpcProtocol.Disembargo.factory.structSize().total()
-                            + MESSAGE_TARGET_SIZE_HINT;
+                    int sizeHint = messageSizeHint(RpcProtocol.Disembargo.factory) + MESSAGE_TARGET_SIZE_HINT;
                     var message = connection.newOutgoingMessage(sizeHint);
                     var builder = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
                     var redirect = rpcTarget.writeTarget(builder.initTarget());
@@ -941,9 +940,7 @@ final class RpcState<VatId> {
             }
 
             // send a Resolve message
-            int sizeHint = messageSizeHint()
-                    + RpcProtocol.Resolve.factory.structSize().total()
-                    + CAP_DESCRIPTOR_SIZE_HINT;
+            int sizeHint = messageSizeHint(RpcProtocol.Resolve.factory) + CAP_DESCRIPTOR_SIZE_HINT;
             var message = connection.newOutgoingMessage(sizeHint);
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
@@ -956,9 +953,7 @@ final class RpcState<VatId> {
             if (exc == null) {
                 return;
             }
-            int sizeHint = messageSizeHint()
-                    + RpcProtocol.Resolve.factory.structSize().total()
-                    + exceptionSizeHint(exc);
+            int sizeHint = messageSizeHint(RpcProtocol.Resolve.factory) + exceptionSizeHint(exc);
             var message = connection.newOutgoingMessage(sizeHint);
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
@@ -1306,9 +1301,8 @@ final class RpcState<VatId> {
                     this.response = new LocallyRedirectedRpcResponse();
                 }
                 else {
-                    sizeHint += messageSizeHint()
-                            + RpcProtocol.Payload.factory.structSize().total()
-                            + RpcProtocol.Return.factory.structSize().total();
+                    sizeHint += messageSizeHint(RpcProtocol.Return.factory)
+                             + RpcProtocol.Payload.factory.structSize().total();
                     var message = connection.newOutgoingMessage(sizeHint);
                     this.returnMessage = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
                     this.response = new RpcServerResponseImpl(message, returnMessage.getResults());
@@ -1812,8 +1806,7 @@ final class RpcState<VatId> {
             // TODO Flow control
 
             if (resolutionType == ResolutionType.REFLECTED && receivedCall && !isDisconnected()) {
-                int sizeHint = messageSizeHint()
-                        + RpcProtocol.Disembargo.factory.structSize().total();
+                int sizeHint = messageSizeHint(RpcProtocol.Disembargo.factory);
                 var message = connection.newOutgoingMessage(sizeHint);
                 var disembargo = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
                 var redirect = RpcState.this.writeTarget(cap, disembargo.initTarget());
