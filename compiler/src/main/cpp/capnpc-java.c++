@@ -1193,12 +1193,17 @@ private:
       kj::String pipelineType;
       if (field.getType().asStruct().getProto().getIsGeneric()) {
         auto typeArgs = getTypeArguments(structSchema, structSchema, kj::str("Reader"));
-        pipelineType = kj::strTree(
-          javaFullName(structSchema), ".Pipeline<",
-          kj::StringTree(KJ_MAP(arg, typeArgs){
-              return kj::strTree(arg);
-            }, ", "),
-          ">").flatten();
+        if (typeArgs.size() > 0) {
+          pipelineType = kj::strTree(
+            javaFullName(structSchema), ".Pipeline<",
+            kj::StringTree(KJ_MAP(arg, typeArgs){
+                return kj::strTree(arg);
+              }, ", "),
+            ">").flatten();
+        }
+        else {
+          pipelineType = typeName(field.getType(), kj::str("Pipeline")).flatten();
+        }
       } else {
         pipelineType = typeName(field.getType(), kj::str("Pipeline")).flatten();
       }
@@ -1252,11 +1257,14 @@ private:
           "_initPointerField(", factoryArg, ",",  offset, ", 0);\n",
           spaces(indent), "  }\n"),
 
-        kj::strTree(
-          spaces(indent), "  default ", pipelineType, " get", titleCase, "() {\n",
-          spaces(indent), "    var pipeline = this.typelessPipeline().getPointerField((short)", offset, ");\n",
-          spaces(indent), "    return () -> pipeline;\n",
-          spaces(indent), "  }\n")
+          // Pipeline accessors
+          (field.getType().asStruct().getProto().getIsGeneric()
+            ? kj::strTree() // No generics for you, sorry.
+            : kj::strTree(
+              spaces(indent), "  default ", pipelineType, " get", titleCase, "() {\n",
+              spaces(indent), "    var pipeline = this.typelessPipeline().getPointerField((short)", offset, ");\n",
+              spaces(indent), "    return () -> pipeline;\n",
+              spaces(indent), "  }\n"))
       };
 
     } else if (kind == FieldKind::BLOB) {
