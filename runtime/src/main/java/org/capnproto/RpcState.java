@@ -45,7 +45,7 @@ final class RpcState<VatId> {
 
         void dispose() {
             var ref = questions.find(this.id);
-            if (ref != null) {
+            if (ref == null) {
                 assert false: "Question ID no longer on table?";
                 return;
             }
