@@ -4,6 +4,17 @@ using Java = import "/capnp/java.capnp";
 $Java.package("org.capnproto.rpctest");
 $Java.outerClassname("Test");
 
+enum TestEnum {
+  foo @0;
+  bar @1;
+  baz @2;
+  qux @3;
+  quux @4;
+  corge @5;
+  grault @6;
+  garply @7;
+}
+
 struct TestAllTypes {
   voidField      @0  : Void;
   boolField      @1  : Bool;
@@ -19,7 +30,98 @@ struct TestAllTypes {
   float64Field   @11 : Float64;
   textField      @12 : Text;
   dataField      @13 : Data;
+  structField    @14 : TestAllTypes;
+  enumField      @15 : TestEnum;
+  interfaceField @16 : Void;  # TODO
+
+  voidList      @17 : List(Void);
+  boolList      @18 : List(Bool);
+  int8List      @19 : List(Int8);
+  int16List     @20 : List(Int16);
+  int32List     @21 : List(Int32);
+  int64List     @22 : List(Int64);
+  uInt8List     @23 : List(UInt8);
+  uInt16List    @24 : List(UInt16);
+  uInt32List    @25 : List(UInt32);
+  uInt64List    @26 : List(UInt64);
+  float32List   @27 : List(Float32);
+  float64List   @28 : List(Float64);
+  textList      @29 : List(Text);
+  dataList      @30 : List(Data);
+  structList    @31 : List(TestAllTypes);
+  enumList      @32 : List(TestEnum);
+  interfaceList @33 : List(Void);  # TODO
 }
+
+struct TestAnyPointer {
+  anyPointerField @0 :AnyPointer;
+
+  # Do not add any other fields here!  Some tests rely on anyPointerField being the last pointer
+  # in the struct.
+}
+
+#struct TestAnyOthers {
+#  anyStructField @0 :AnyStruct;
+#  anyListField @1 :AnyList;
+#  capabilityField @2 :Capability;
+#}
+
+struct TestOutOfOrder {
+  foo @3 :Text;
+  bar @2 :Text;
+  baz @8 :Text;
+  qux @0 :Text;
+  quux @6 :Text;
+  corge @4 :Text;
+  grault @1 :Text;
+  garply @7 :Text;
+  waldo @5 :Text;
+}
+
+struct TestUnnamedUnion {
+  before @0 :Text;
+
+  union {
+    foo @1 :UInt16;
+    bar @3 :UInt32;
+  }
+
+  middle @2 :UInt16;
+
+  after @4 :Text;
+}
+
+struct TestUnionInUnion {
+  # There is no reason to ever do this.
+  outer :union {
+    inner :union {
+      foo @0 :Int32;
+      bar @1 :Int32;
+    }
+    baz @2 :Int32;
+  }
+}
+
+struct TestGroups {
+  groups :union {
+    foo :group {
+      corge @0 :Int32;
+      grault @2 :Int64;
+      garply @8 :Text;
+    }
+    bar :group {
+      corge @3 :Int32;
+      grault @4 :Text;
+      garply @5 :Int64;
+    }
+    baz :group {
+      corge @1 :Int32;
+      grault @6 :Text;
+      garply @7 :Text;
+    }
+  }
+}
+
 
 struct TestSturdyRef {
   hostId @0 :TestSturdyRefHostId;
