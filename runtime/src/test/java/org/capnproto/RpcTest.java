@@ -369,8 +369,42 @@ public class RpcTest {
 
         handle1 = null;
         handle2 = null;
+    }
 
+    @org.junit.Test
+    public void testPromiseResolve() {
+        var context = new TestContext(bootstrapFactory);
+        var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
+        var chainedCallCount = new Counter();
+
+        var request = client.callFooRequest();
+        var request2 = client.callFooWhenResolvedRequest();
+
+        var paf = new CompletableFuture<Test.TestInterface.Client>();
+
+        {
+            request.getParams().setCap(new Test.TestInterface.Client(paf.copy()));
+            request2.getParams().setCap(new Test.TestInterface.Client(paf.copy()));
+        }
+
+        var promise = request.send();
+        var promise2 = request2.send();
+
+        // Make sure getCap() has been called on the server side by sending another call and waiting
+        // for it.
+        Assert.assertEquals(2, client.getCallSequenceRequest().send().join().getN());
+        //Assert.assertEquals(3, context.restorer.callCount);
+
+        // OK, now fulfill the local promise.
+        paf.complete(new Test.TestInterface.Client(new TestUtil.TestInterfaceImpl(chainedCallCount)));
+
+        // We should now be able to wait for getCap() to finish.
+        Assert.assertEquals("bar", promise.join().getS().toString());
+        Assert.assertEquals("bar", promise2.join().getS().toString());
+
+        //Assert.assertEquals(3, context.restorer.callCount);
+        Assert.assertEquals(2, chainedCallCount.value());
     }
 }
 

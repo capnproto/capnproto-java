@@ -114,6 +114,46 @@ class TestUtil {
             context.getResults().setHandle(new HandleImpl(this.handleCount));
             return READY_NOW;
         }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> getCallSequence(CallContext<Test.TestCallOrder.GetCallSequenceParams.Reader, Test.TestCallOrder.GetCallSequenceResults.Builder> context) {
+            var result = context.getResults();
+            result.setN(this.callCount.inc());
+            return READY_NOW;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> callFoo(CallContext<Test.TestMoreStuff.CallFooParams.Reader, Test.TestMoreStuff.CallFooResults.Builder> context) {
+            this.callCount.inc();
+            var params = context.getParams();
+            var cap = params.getCap();
+            var request = cap.fooRequest();
+            request.getParams().setI(123);
+            request.getParams().setJ(true);
+
+            return request.send().thenAccept(response -> {
+                Assert.assertEquals("foo", response.getX().toString());
+                context.getResults().setS("bar");
+            });
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> callFooWhenResolved(CallContext<Test.TestMoreStuff.CallFooWhenResolvedParams.Reader, Test.TestMoreStuff.CallFooWhenResolvedResults.Builder> context) {
+            this.callCount.inc();
+            var params = context.getParams();
+            var cap = params.getCap();
+
+            return cap.whenResolved().thenCompose(void_ -> {
+                var request = cap.fooRequest();
+                request.getParams().setI(123);
+                request.getParams().setJ(true);
+
+                return request.send().thenAccept(response -> {
+                    Assert.assertEquals("foo", response.getX().toString());
+                    context.getResults().setS("bar");
+                });
+            });
+        }
     }
 
     static class TestTailCalleeImpl extends Test.TestTailCallee.Server {

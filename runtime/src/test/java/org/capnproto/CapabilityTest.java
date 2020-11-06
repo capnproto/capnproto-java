@@ -24,14 +24,13 @@ package org.capnproto;
 import org.capnproto.test.Test;
 
 import org.junit.Assert;
-import org.junit.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 class Counter {
     private int count = 0;
-    void inc() { count++; }
+    int inc() { return count++; }
     int value() { return count; }
 }
 

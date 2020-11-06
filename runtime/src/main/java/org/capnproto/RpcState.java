@@ -434,7 +434,7 @@ final class RpcState<VatId> {
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
-        //System.out.println(reader.which());
+        //System.out.println(this + ": Received message: " + reader.which());
         switch (reader.which()) {
             case UNIMPLEMENTED:
                 handleUnimplemented(reader.getUnimplemented());
@@ -744,26 +744,44 @@ final class RpcState<VatId> {
     }
 
     private void handleResolve(IncomingRpcMessage message, RpcProtocol.Resolve.Reader resolve) {
+        ClientHook cap = null;
+        Throwable exc = null;
+
+        switch (resolve.which()) {
+            case CAP:
+                cap = receiveCap(resolve.getCap(), message.getAttachedFds());
+                break;
+            case EXCEPTION:
+                exc = RpcException.toException(resolve.getException());
+                break;
+            default:
+                assert false: "Unknown 'Resolve' type.";
+                return;
+        }
+
+        var importId = resolve.getPromiseId();
         var imp = this.imports.find(resolve.getPromiseId());
         if (imp == null) {
             return;
         }
 
+        if (imp.promise != null) {
+            assert !imp.promise.isDone();
+
+            // This import is an unfulfilled promise.
+            if (exc != null) {
+                imp.promise.completeExceptionally(exc);
+            }
+            else {
+                imp.promise.complete(cap);
+            }
+            return;
+        }
+
+        // It appears this is a valid entry on the import table, but was not expected to be a
+        // promise.
         assert imp.importClient == null : "Import already resolved.";
 
-        switch (resolve.which()) {
-            case CAP:
-                var cap = receiveCap(resolve.getCap(), message.getAttachedFds());
-                imp.promise.complete(cap);
-                break;
-            case EXCEPTION:
-                var exc = RpcException.toException(resolve.getException());
-                imp.promise.completeExceptionally(exc);
-                break;
-            default:
-                assert false;
-                return;
-        }
     }
 
     private void handleRelease(RpcProtocol.Release.Reader release) {
@@ -898,7 +916,7 @@ final class RpcState<VatId> {
         var wrapped = inner.whenMoreResolved();
         if (wrapped != null) {
             // This is a promise.  Arrange for the `Resolve` message to be sent later.
-            export.resolveOp = resolveExportedPromise(export.exportId, wrapped);
+            export.resolveOp = this.resolveExportedPromise(export.exportId, wrapped);
             descriptor.setSenderPromise(export.exportId);
         }
         else {
@@ -916,6 +934,7 @@ final class RpcState<VatId> {
             resolution = this.getInnermostClient(resolution);
 
             var exp = exports.find(exportId);
+            assert exp != null;
             exportsByCap.remove(exp.clientHook);
             exp.clientHook = resolution;
 

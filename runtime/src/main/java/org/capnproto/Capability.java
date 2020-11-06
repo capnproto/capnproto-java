@@ -57,7 +57,7 @@ public final class Capability {
 
         ClientHook getHook();
 
-        default CompletionStage<java.lang.Void> whenResolved() {
+        default CompletableFuture<java.lang.Void> whenResolved() {
             return this.getHook().whenResolved();
         }
 
