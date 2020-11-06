@@ -5,8 +5,10 @@ import java.util.concurrent.CompletionStage;
 
 public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
+    private final CompletableFuture<T> other;
+
     public CompletableFutureWrapper(CompletionStage<T> other) {
-        other.toCompletableFuture().whenComplete((value, exc) -> {
+        this.other = other.toCompletableFuture().whenComplete((value, exc) -> {
             if (exc == null) {
                 this.complete(value);
             }
@@ -14,5 +16,10 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
                 this.completeExceptionally(exc);
             }
         });
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return this.other.cancel(mayInterruptIfRunning);
     }
 }

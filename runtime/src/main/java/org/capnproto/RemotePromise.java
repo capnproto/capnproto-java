@@ -3,7 +3,8 @@ package org.capnproto;
 import java.util.concurrent.CompletableFuture;
 
 public class RemotePromise<Results>
-        extends CompletableFutureWrapper<Results> {
+        extends CompletableFutureWrapper<Results>
+        implements AutoCloseable {
 
     private final CompletableFuture<Response<Results>> response;
     private final AnyPointer.Pipeline pipeline;
@@ -20,9 +21,15 @@ public class RemotePromise<Results>
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
                          AnyPointer.Pipeline pipeline) {
-        super(promise.thenApply(response -> response.getResults()));
+        super(promise.thenApply(Response::getResults));
         this.response = promise;
         this.pipeline = pipeline;
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.pipeline.hook.close();
+        this.join();
     }
 
     CompletableFuture<Response<Results>> _getResponse() {

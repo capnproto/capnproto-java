@@ -3,13 +3,13 @@ package org.capnproto;
 public final class RpcException extends java.lang.Exception {
 
     public enum Type {
-        UNKNOWN,
-        UNIMPLEMENTED,
         FAILED,
-        DISCONNECTED
+        OVERLOADED,
+        DISCONNECTED,
+        UNIMPLEMENTED
     }
 
-    private Type type;
+    private final Type type;
 
     public RpcException(Type type, String message) {
         super(message);

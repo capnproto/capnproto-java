@@ -344,12 +344,16 @@ public final class Capability {
 
         @Override
         public RemotePromise<AnyPointer.Reader> send() {
-            var cancelPaf = new CompletableFuture<java.lang.Void>();
-            var context = new LocalCallContext(message, client, cancelPaf);
+            var cancel = new CompletableFuture<java.lang.Void>();
+            var context = new LocalCallContext(message, client, cancel);
             var promiseAndPipeline = client.call(interfaceId, methodId, context);
             var promise = promiseAndPipeline.promise.thenApply(x -> {
                 context.getResults(); // force allocation
                 return context.response;
+            });
+
+            cancel.whenComplete((void_, exc) -> {
+               promiseAndPipeline.promise.cancel(false);
             });
 
             assert promiseAndPipeline.pipeline != null;
@@ -382,6 +386,11 @@ public final class Capability {
         @Override
         public final ClientHook getPipelinedCap(PipelineOp[] ops) {
             return this.results.getPipelinedCap(ops);
+        }
+
+        @Override
+        public void close() {
+            this.ctx.allowCancellation();
         }
     }
 
@@ -531,6 +540,16 @@ public final class Capability {
                     ? redirect.getPipelinedCap(ops)
                     : new QueuedClient(this.promise.thenApply(
                         pipeline -> pipeline.getPipelinedCap(ops)));
+        }
+
+        @Override
+        public void close() {
+            if (this.redirect != null) {
+                this.redirect.close();
+            }
+            else {
+                this.promise.cancel(false);
+            }
         }
     }
 

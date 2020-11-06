@@ -1,6 +1,6 @@
 package org.capnproto;
 
-public interface PipelineHook {
+public interface PipelineHook extends AutoCloseable {
 
     ClientHook getPipelinedCap(PipelineOp[] ops);
 
@@ -11,5 +11,9 @@ public interface PipelineHook {
                 return Capability.newBrokenCap(exc);
             }
         };
+    }
+
+    @Override
+    default void close() {
     }
 }

@@ -3,7 +3,11 @@ package org.capnproto;
 import org.capnproto.rpctest.Test;
 import org.junit.Assert;
 
+import java.awt.desktop.SystemEventListener;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 class RpcTestUtil {
 
@@ -110,7 +114,7 @@ class RpcTestUtil {
             this.callCount = callCount;
             this.handleCount = handleCount;
         }
-
+        
         @Override
         protected CompletableFuture<java.lang.Void> echo(CallContext<Test.TestMoreStuff.EchoParams.Reader, Test.TestMoreStuff.EchoResults.Builder> context) {
             this.callCount.inc();
@@ -118,6 +122,17 @@ class RpcTestUtil {
             var result = context.getResults();
             result.setCap(params.getCap());
             return READY_NOW;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> expectCancel(CallContext<Test.TestMoreStuff.ExpectCancelParams.Reader, Test.TestMoreStuff.ExpectCancelResults.Builder> context) {
+            var cap = context.getParams().getCap();
+            context.allowCancellation();
+            return new CompletableFuture<java.lang.Void>().whenComplete((void_, exc) -> {
+               if (exc != null) {
+                   System.out.println("expectCancel completed exceptionally: " + exc.getMessage());
+               }
+            }); // never completes, just await doom...
         }
 
         @Override
@@ -193,6 +208,18 @@ class RpcTestUtil {
             result.setCap(this.clientToHold);
             return READY_NOW;
         }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> neverReturn(CallContext<Test.TestMoreStuff.NeverReturnParams.Reader, Test.TestMoreStuff.NeverReturnResults.Builder> context) {
+            this.callCount.inc();
+            var cap = context.getParams().getCap();
+            context.getResults().setCapCopy(cap);
+            context.allowCancellation();
+            return new CompletableFuture<>().thenAccept(void_ -> {
+                // Ensure that the cap is used inside the lambda.
+                System.out.println(cap);
+            });
+        }
     }
 
     static class TestTailCalleeImpl extends Test.TestTailCallee.Server {
@@ -262,12 +289,23 @@ class RpcTestUtil {
             request.getParams().setJ(true);
 
             return request.send().thenAccept(response -> {
-               Assert.assertEquals("foo", response.getX().toString());
+                Assert.assertEquals("foo", response.getX().toString());
 
-               var result = context.getResults();
-               result.setS("bar");
-               result.initOutBox().setCap(new TestExtendsImpl(callCount));
+                var result = context.getResults();
+                result.setS("bar");
+                result.initOutBox().setCap(new TestExtendsImpl(callCount));
             });
         }
     }
+
+    static class TestCapDestructor extends Test.TestInterface.Server {
+        private final Counter dummy = new Counter();
+        private final TestInterfaceImpl impl = new TestInterfaceImpl(dummy);
+
+        @Override
+        protected CompletableFuture<java.lang.Void> foo(CallContext<Test.TestInterface.FooParams.Reader, Test.TestInterface.FooResults.Builder> context) {
+            return this.impl.foo(context);
+        }
+    }
 }
+

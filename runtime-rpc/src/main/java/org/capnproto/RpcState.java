@@ -1,6 +1,8 @@
 package org.capnproto;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -43,13 +45,7 @@ final class RpcState<VatId> {
             this.id = id;
         }
 
-        void dispose() {
-            var ref = questions.find(this.id);
-            if (ref == null) {
-                assert false: "Question ID no longer on table?";
-                return;
-            }
-
+        void finish() {
             if (isConnected() && !this.skipFinish) {
                 var sizeHint = messageSizeHint(RpcProtocol.Finish.factory);
                 var message = connection.newOutgoingMessage(sizeHint);
@@ -58,12 +54,18 @@ final class RpcState<VatId> {
                 builder.setReleaseResultCaps(this.isAwaitingReturn);
                 message.send();
             }
+            this.skipFinish = true;
+        }
+
+        void dispose() {
+            this.finish();
 
             // Check if the question has returned and, if so, remove it from the table.
             // Remove question ID from the table.  Must do this *after* sending `Finish` to ensure that
             // the ID is not re-allocated before the `Finish` message can be sent.
-            assert !this.isAwaitingReturn;
-            questions.erase(id);
+            if (!this.isAwaitingReturn) {
+                questions.erase(this.id);
+            }
         }
     }
 
@@ -114,6 +116,10 @@ final class RpcState<VatId> {
 
         void setSkipFinish(boolean value) {
             this.disposer.skipFinish = value;
+        }
+
+        public void finish() {
+            this.disposer.finish();
         }
     }
 
@@ -514,7 +520,7 @@ final class RpcState<VatId> {
         final var answerId = bootstrap.getQuestionId();
         var answer = answers.put(answerId);
         if (answer.active) {
-            assert false: "questionId is already in use: " + answerId;
+            assert false: "bootstrap questionId is already in use: " + answerId;
             return;
         }
         answer.active = true;
@@ -574,10 +580,9 @@ final class RpcState<VatId> {
         var payload = call.getParams();
         var capTableArray = receiveCaps(payload.getCapTable(), message.getAttachedFds());
         var answerId = call.getQuestionId();
-        var cancel = new CompletableFuture<java.lang.Void>();
         var context = new RpcCallContext(
                 answerId, message, capTableArray,
-                payload.getContent(), redirectResults, cancel,
+                payload.getContent(), redirectResults,
                 call.getInterfaceId(), call.getMethodId());
 
         {
@@ -593,28 +598,35 @@ final class RpcState<VatId> {
 
         var pap = startCall(call.getInterfaceId(), call.getMethodId(), cap, context);
 
+        // Things may have changed -- in particular if startCall() immediately called
+        // context->directTailCall().
+
         {
             var answer = answers.find(answerId);
             assert answer != null;
             assert answer.pipeline == null;
             answer.pipeline = pap.pipeline;
 
+            var callReady = pap.promise;
+
             if (redirectResults) {
-                answer.redirectedResults = pap.promise.thenApply(
-                        void_ -> context.consumeRedirectedResponse());
-                // TODO cancellation deferral
+                answer.redirectedResults = callReady.thenApply(void_ ->
+                        context.consumeRedirectedResponse());
             }
             else {
-                pap.promise.whenComplete((void_, exc) -> {
+                callReady.whenComplete((void_, exc) -> {
                     if (exc == null) {
                         context.sendReturn();
                     }
                     else {
                         context.sendErrorReturn(exc);
-                        // TODO wait on the cancellation...
                     }
                 });
             }
+
+            context.whenCancelled().thenRun(() -> {
+                callReady.cancel(false);
+            });
         }
     }
 
@@ -636,10 +648,10 @@ final class RpcState<VatId> {
         }
         question.setAwaitingReturn(false);
 
-        var exportsToRelease = new int[0];
+        int[] exportsToRelease = null;
         if (callReturn.getReleaseParamCaps()) {
             exportsToRelease = question.paramExports;
-            question.paramExports = new int[0];
+            question.paramExports = null;
         }
 
         if (callReturn.isTakeFromOtherQuestion()) {
@@ -647,8 +659,9 @@ final class RpcState<VatId> {
             if (answer != null) {
                 answer.redirectedResults = null;
             }
-            //this.questions.erase(callReturn.getAnswerId());
-            this.releaseExports(exportsToRelease);
+            if (exportsToRelease != null) {
+                this.releaseExports(exportsToRelease);
+            }
             return;
         }
 
@@ -661,8 +674,7 @@ final class RpcState<VatId> {
 
                 var payload = callReturn.getResults();
                 var capTable = receiveCaps(payload.getCapTable(), message.getAttachedFds());
-                // TODO question, message unused in RpcResponseImpl
-                var response = new RpcResponseImpl(question, message, capTable, payload.getContent());
+                var response = new RpcResponseImpl(capTable, payload.getContent());
                 question.answer(response);
                 break;
 
@@ -707,7 +719,9 @@ final class RpcState<VatId> {
                 break;
         }
 
-        this.releaseExports(exportsToRelease);
+        if (exportsToRelease != null) {
+            this.releaseExports(exportsToRelease);
+        }
     }
 
     void handleFinish(RpcProtocol.Finish.Reader finish) {
@@ -734,7 +748,9 @@ final class RpcState<VatId> {
             answers.erase(questionId);
         }
 
-        this.releaseExports(exportsToRelease);
+        if (exportsToRelease != null) {
+            this.releaseExports(exportsToRelease);
+        }
     }
 
     private void handleResolve(IncomingRpcMessage message, RpcProtocol.Resolve.Reader resolve) {
@@ -760,14 +776,14 @@ final class RpcState<VatId> {
         }
 
         if (imp.promise != null) {
-            assert !imp.promise.isDone();
-
             // This import is an unfulfilled promise.
-            if (exc != null) {
-                imp.promise.completeExceptionally(exc);
+
+            assert !imp.promise.isDone();
+            if (exc == null) {
+                imp.promise.complete(cap);
             }
             else {
-                imp.promise.complete(cap);
+                imp.promise.completeExceptionally(exc);
             }
             return;
         }
@@ -980,7 +996,7 @@ final class RpcState<VatId> {
     }
 
     void releaseExports(int[] exports) {
-        for (var exportId : exports) {
+        for (var exportId: exports) {
             this.releaseExport(exportId, 1);
         }
     }
@@ -1190,16 +1206,11 @@ final class RpcState<VatId> {
     }
 
     class RpcResponseImpl implements RpcResponse {
-        private final Question question;
-        private final IncomingRpcMessage message;
+
         private final AnyPointer.Reader results;
 
-        RpcResponseImpl(Question question,
-                        IncomingRpcMessage message,
-                        List<ClientHook> capTable,
+        RpcResponseImpl(List<ClientHook> capTable,
                         AnyPointer.Reader results) {
-            this.question = question;
-            this.message = message;
             this.results = results.imbue(new ReaderCapabilityTable(capTable));
         }
 
@@ -1280,11 +1291,10 @@ final class RpcState<VatId> {
         private boolean cancelRequested = false;
         private boolean cancelAllowed = false;
 
-        private final CompletableFuture<java.lang.Void> whenCancelled;
+        private final CompletableFuture<java.lang.Void> canceller = new CompletableFuture<>();
 
         RpcCallContext(int answerId, IncomingRpcMessage request, List<ClientHook> capTable,
                        AnyPointer.Reader params, boolean redirectResults,
-                       CompletableFuture<java.lang.Void> whenCancelled,
                        long interfaceId, short methodId) {
             this.answerId = answerId;
             this.interfaceId = interfaceId;
@@ -1292,7 +1302,6 @@ final class RpcState<VatId> {
             this.request = request;
             this.params = params.imbue(new ReaderCapabilityTable(capTable));
             this.redirectResults = redirectResults;
-            this.whenCancelled = whenCancelled;
         }
 
         @Override
@@ -1335,6 +1344,12 @@ final class RpcState<VatId> {
 
         @Override
         public void allowCancellation() {
+            boolean previouslyRequestedButNotAllowed = (this.cancelAllowed == false && this.cancelRequested == true);
+            this.cancelAllowed = true;
+
+            if (previouslyRequestedButNotAllowed) {
+                this.canceller.complete(null);
+            }
         }
 
         @Override
@@ -1380,7 +1395,7 @@ final class RpcState<VatId> {
             return new ClientHook.VoidPromiseAndPipeline(promise, response.pipeline().hook);
         }
 
-        private RpcResponse consumeRedirectedResponse() {
+        RpcResponse consumeRedirectedResponse() {
             assert this.redirectResults;
 
             if (this.response == null) {
@@ -1446,16 +1461,19 @@ final class RpcState<VatId> {
         private void cleanupAnswerTable(int[] resultExports) {
             if (this.cancelRequested) {
                 assert resultExports == null || resultExports.length == 0;
+                // Already received `Finish` so it's our job to erase the table entry. We shouldn't have
+                // sent results if canceled, so we shouldn't have an export list to deal with.
                 answers.erase(this.answerId);
             }
             else {
+                // We just have to null out callContext and set the exports.
                 var answer = answers.find(answerId);
                 answer.callContext = null;
                 answer.resultExports = resultExports;
             }
         }
 
-        public void requestCancel() {
+        void requestCancel() {
             // Hints that the caller wishes to cancel this call.  At the next time when cancellation is
             // deemed safe, the RpcCallContext shall send a canceled Return -- or if it never becomes
             // safe, the RpcCallContext will send a normal return when the call completes.  Either way
@@ -1468,9 +1486,15 @@ final class RpcState<VatId> {
             if (previouslyAllowedButNotRequested) {
                 // We just set CANCEL_REQUESTED, and CANCEL_ALLOWED was already set previously.  Initiate
                 // the cancellation.
-                this.whenCancelled.complete(null);
+                this.canceller.complete(null);
             }
-            // TODO do we care about cancelRequested if further completions are effectively ignored?
+        }
+
+        /** Completed by the call context when a cancellation has been
+         * requested and cancellation is allowed
+         */
+        CompletableFuture<java.lang.Void> whenCancelled() {
+            return this.canceller;
         }
     }
 
@@ -1544,6 +1568,7 @@ final class RpcState<VatId> {
             var params = ctx.getParams();
             var request = newCallNoIntercept(interfaceId, methodId);
             ctx.allowCancellation();
+            ctx.releaseParams();
             return ctx.directTailCall(request.getHook());
         }
 
@@ -1606,7 +1631,6 @@ final class RpcState<VatId> {
             if (redirect != null) {
                 var redirected = redirect.newCall(
                         this.callBuilder.getInterfaceId(), this.callBuilder.getMethodId());
-                //replacement.params = paramsBuilder;
                 var replacement = new AnyPointer.Request(paramsBuilder, redirected.getHook());
                 return replacement.send();
             }
@@ -1619,12 +1643,7 @@ final class RpcState<VatId> {
             var appPromise = question.response.thenApply(
                     hook -> new Response<>(hook.getResults(), hook));
 
-            // complete when either the message loop completes (exceptionally) or
-            // the appPromise is fulfilled
-            var loop = CompletableFuture.anyOf(
-                    getMessageLoop(), appPromise).thenCompose(x -> appPromise);
-
-            return new RemotePromise<>(loop, new AnyPointer.Pipeline(pipeline));
+            return new RemotePromise<>(appPromise, new AnyPointer.Pipeline(pipeline));
         }
 
         @Override
@@ -1759,7 +1778,6 @@ final class RpcState<VatId> {
 
         private final ClientHook cap;
         private final Integer importId;
-        private final CompletableFuture<ClientHook> promise;
         private boolean receivedCall = false;
         private ResolutionType resolutionType = ResolutionType.UNRESOLVED;
 
@@ -1768,7 +1786,14 @@ final class RpcState<VatId> {
                       Integer importId) {
             this.cap = initial;
             this.importId = importId;
-            this.promise = eventual.thenApply(resolution -> resolve(resolution));
+            eventual.whenComplete((resolution, exc) -> {
+                if (exc != null) {
+                    resolve(Capability.newBrokenCap(exc));
+                }
+                else {
+                    resolve(resolution);
+                }
+            });
         }
 
         public boolean isResolved() {
@@ -1932,25 +1957,32 @@ final class RpcState<VatId> {
     }
 
     static void FromException(Throwable exc, RpcProtocol.Exception.Builder builder) {
-        builder.setReason(exc.getMessage());
-        builder.setType(RpcProtocol.Exception.Type.FAILED);
+        var type = RpcProtocol.Exception.Type.FAILED;
+        if (exc instanceof RpcException) {
+            var rpcExc = (RpcException) exc;
+            type = switch (rpcExc.getType()) {
+                case FAILED -> RpcProtocol.Exception.Type.FAILED;
+                case OVERLOADED -> RpcProtocol.Exception.Type.OVERLOADED;
+                case DISCONNECTED -> RpcProtocol.Exception.Type.DISCONNECTED;
+                case UNIMPLEMENTED -> RpcProtocol.Exception.Type.UNIMPLEMENTED;
+                default -> RpcProtocol.Exception.Type.FAILED;
+            };
+        }
+        builder.setType(type);
+
+        var writer = new StringWriter();
+        exc.printStackTrace(new PrintWriter(writer));
+        builder.setReason(writer.toString());
     }
 
     static RpcException ToException(RpcProtocol.Exception.Reader reader) {
-        var type = RpcException.Type.UNKNOWN;
-
-        switch (reader.getType()) {
-            case UNIMPLEMENTED:
-                type = RpcException.Type.UNIMPLEMENTED;
-                break;
-            case FAILED:
-                type = RpcException.Type.FAILED;
-                break;
-            case DISCONNECTED:
-            case OVERLOADED:
-            default:
-                break;
-        }
+        var type = switch (reader.getType()) {
+            case FAILED -> RpcException.Type.FAILED;
+            case OVERLOADED -> RpcException.Type.OVERLOADED;
+            case DISCONNECTED -> RpcException.Type.DISCONNECTED;
+            case UNIMPLEMENTED -> RpcException.Type.UNIMPLEMENTED;
+            default -> RpcException.Type.FAILED;
+        };
         return new RpcException(type, reader.getReason().toString());
     }
 

@@ -2,7 +2,7 @@ package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
 
-public class CallContext<Params, Results> {
+public final class CallContext<Params, Results> {
 
     private final FromPointerReader<Params> params;
     private final FromPointerBuilder<Results> results;

@@ -25,11 +25,15 @@ import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -504,6 +508,33 @@ public class RpcTest {
 
         // Verify that we are still connected
         getCallSequence(client, 1).get();
+    }
+
+    @org.junit.Test
+    public void testCallCancel() {
+        var context = new TestContext(bootstrapFactory);
+        var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
+
+        var request = client.expectCancelRequest();
+        var cap = new RpcTestUtil.TestCapDestructor();
+        request.getParams().setCap(cap);
+
+        // auto-close the request without waiting for a response, triggering a cancellation request.
+        try (var response = request.send()) {
+            response.thenRun(() -> Assert.fail("Never completing call returned?"));
+        }
+        catch (CompletionException exc) {
+            Assert.assertTrue(exc instanceof CompletionException);
+            Assert.assertNotNull(exc.getCause());
+            Assert.assertTrue(exc.getCause() instanceof RpcException);
+            Assert.assertTrue(((RpcException)exc.getCause()).getType() == RpcException.Type.FAILED);
+        }
+        catch (Exception exc) {
+            Assert.fail(exc.toString());
+        }
+
+        // check that the connection is still open
+        getCallSequence(client, 1);
     }
 }
 
