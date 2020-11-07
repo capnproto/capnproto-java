@@ -335,6 +335,9 @@ private:
       }
     }
     case schema::Type::INTERFACE: {
+      if (liteMode) {
+        return kj::strTree("org.capnproto.Capability.", suffix);
+      }
       auto interfaceSchema = type.asInterface();
       if (interfaceSchema.getProto().getIsGeneric()) {
         auto typeArgs = getTypeArguments(interfaceSchema, interfaceSchema, kj::str(suffix));
@@ -2516,7 +2519,7 @@ private:
 
   kj::MainBuilder::Validity run() {
 
-    if (context.getProgramName().endsWith("lite")) {
+    if (::getenv("CAPNP_LITE") != nullptr) {
       liteMode = true;
     }
 

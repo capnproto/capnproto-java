@@ -5,11 +5,10 @@ set -eux
 export PATH=/usr/local/bin:/usr/bin:/bin
 
 make CXX=g++-8 capnpc-java 
-cp capnpc-java capnpc-java-lite
 
 capnp compile -I./compiler/src/main/schema/ -o/bin/cat ./runtime/src/test/schema/test.capnp > ./runtime/src/test/schema/test.raw
 capnp compile -I./compiler/src/main/schema/ -oc++ ./runtime/src/test/schema/test.capnp
-capnp compile -I./compiler/src/main/schema/ -o./capnpc-java-lite ./runtime/src/test/schema/test.capnp
+env CAPNP_LITE=1 capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/test.capnp
 cp ./runtime/src/test/schema/Test.java ./runtime/src/test/schema/TestLite.java
 capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/test.capnp 
 #cp ./runtime/src/test/schema/Test.java ./runtime/src/test/java/org/capnproto/test/
