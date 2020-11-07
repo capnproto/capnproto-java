@@ -161,7 +161,7 @@ public final class AnyPointer {
             return this;
         }
 
-        Pipeline noop() {
+        public Pipeline noop() {
             return new Pipeline(this.hook, this.ops.clone());
         }
 
