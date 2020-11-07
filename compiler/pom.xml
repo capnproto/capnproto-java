@@ -39,12 +39,13 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-
+<!--
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
           <version>0.1.6-SNAPSHOT</version>
         </dependency>
+-->
     </dependencies>
 
     <build>
@@ -79,7 +80,7 @@
                 <goal>run</goal>
               </goals>
             </execution>
-
+<!--
             <execution>
               <id>generate-test-sources</id>
               <phase>generate-test-sources</phase>
@@ -90,7 +91,7 @@
                     <arg value="compile"/>
                     <arg value="-I"/>
                     <arg value="src/main/schema/"/>
-                    <arg value="--src-prefix=src/test/schema/"/>
+                    <arg value="- -src-prefix=src/test/schema/"/>
                     <arg value="-o../capnpc-java:src/test/generated"/>
                     <arg value="src/test/schema/test.capnp"/>
                     <arg value="src/test/schema/test-import.capnp"/>
@@ -101,9 +102,11 @@
                 <goal>run</goal>
               </goals>
             </execution>
+            -->
           </executions>
         </plugin>
 
+          <!--
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
@@ -123,6 +126,7 @@
             </execution>
           </executions>
         </plugin>
+        -->
       </plugins>
     </build>
 </project>

@@ -12,6 +12,7 @@
       <module>compiler</module>
       <module>examples</module>
       <module>benchmark</module>
+        <module>compiler-tests</module>
     </modules>
     <licenses>
         <license>
