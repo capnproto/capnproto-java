@@ -1,3 +1,5 @@
+package org.capnproto;
+
 // Copyright (c) 2018 Sandstorm Development Group, Inc. and contributors
 // Licensed under the MIT License:
 //
@@ -19,8 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.capnproto;
-
+import org.capnproto.AnyPointer;
+import org.capnproto.CallContext;
+import org.capnproto.Capability;
+import org.capnproto.RpcException;
 import org.capnproto.test.Test;
 
 import org.junit.Assert;

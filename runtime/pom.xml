@@ -44,12 +44,6 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.capnproto</groupId>
-            <artifactId>compiler</artifactId>
-            <version>0.1.6-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <distributionManagement>

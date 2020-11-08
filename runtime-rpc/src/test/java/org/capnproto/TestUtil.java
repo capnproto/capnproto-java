@@ -1,11 +1,16 @@
 package org.capnproto;
 
+import org.capnproto.CallContext;
+import org.capnproto.Capability;
+import org.capnproto.Void;
 import org.capnproto.test.Test;
 import org.junit.Assert;
 
 import java.util.concurrent.CompletableFuture;
 
 class TestUtil {
+
+
     static void initTestMessage(Test.TestAllTypes.Builder builder) {
         builder.setVoidField(Void.VOID);
         builder.setBoolField(true);
@@ -54,7 +59,7 @@ class TestUtil {
             Assert.assertEquals(123, params.getI());
             Assert.assertTrue(params.getJ());
             result.setX("foo");
-            return READY_NOW;
+            return Capability.Server.READY_NOW;
         }
 
         @Override
@@ -63,7 +68,7 @@ class TestUtil {
             var params = context.getParams();
             checkTestMessage(params.getS());
             context.releaseParams();
-            return READY_NOW;
+            return Capability.Server.READY_NOW;
         }
     }
 
@@ -112,14 +117,14 @@ class TestUtil {
         @Override
         protected CompletableFuture<java.lang.Void> getHandle(CallContext<Test.TestMoreStuff.GetHandleParams.Reader, Test.TestMoreStuff.GetHandleResults.Builder> context) {
             context.getResults().setHandle(new HandleImpl(this.handleCount));
-            return READY_NOW;
+            return Capability.Server.READY_NOW;
         }
 
         @Override
         protected CompletableFuture<java.lang.Void> getCallSequence(CallContext<Test.TestCallOrder.GetCallSequenceParams.Reader, Test.TestCallOrder.GetCallSequenceResults.Builder> context) {
             var result = context.getResults();
             result.setN(this.callCount.inc());
-            return READY_NOW;
+            return Capability.Server.READY_NOW;
         }
 
         @Override
@@ -174,7 +179,7 @@ class TestUtil {
             results.setI(params.getI());
             results.setT(params.getT());
             results.setC(new TestCallOrderImpl());
-            return READY_NOW;
+            return Capability.Server.READY_NOW;
         }
     }
 

@@ -4,7 +4,6 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-
 public class TwoPartyVatNetwork
         implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>,
                    VatNetwork.Connection<RpcTwoPartyProtocol.VatId.Reader> {

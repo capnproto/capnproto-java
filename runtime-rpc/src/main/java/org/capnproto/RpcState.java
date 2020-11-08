@@ -346,7 +346,7 @@ final class RpcState<VatId> {
             int sizeHint = messageSizeHint() + exceptionSizeHint(exc);
             var message = this.connection.newOutgoingMessage(sizeHint);
             var abort = message.getBody().getAs(RpcProtocol.Message.factory).initAbort();
-            RpcException.fromException(exc, abort);
+            FromException(exc, abort);
             message.send();
         }
         catch (Throwable abortFailed) {
@@ -511,7 +511,7 @@ final class RpcState<VatId> {
     }
 
     void handleAbort(RpcProtocol.Exception.Reader abort) throws RpcException {
-        throw RpcException.toException(abort);
+        throw ToException(abort);
     }
 
     void handleBootstrap(IncomingRpcMessage message, RpcProtocol.Bootstrap.Reader bootstrap) {
@@ -538,7 +538,7 @@ final class RpcState<VatId> {
         var payload = ret.initResults();
         var content = payload.getContent().imbue(capTable);
         var cap = this.bootstrapFactory.createFor(connection.getPeerVatId());
-        content.setAsCap(cap);
+        content.setAs(Capability.factory, cap);
         var caps = capTable.getTable();
         var capHook = caps.length != 0
                 ? caps[0]
@@ -676,7 +676,7 @@ final class RpcState<VatId> {
                     assert false: "Tail call `Return` must set `resultsSentElsewhere`, not `exception`.";
                     break;
                 }
-                question.reject(RpcException.toException(callReturn.getException()));
+                question.reject(ToException(callReturn.getException()));
                 break;
 
             case CANCELED:
@@ -752,7 +752,7 @@ final class RpcState<VatId> {
                 cap = receiveCap(resolve.getCap(), message.getAttachedFds());
                 break;
             case EXCEPTION:
-                exc = RpcException.toException(resolve.getException());
+                exc = ToException(resolve.getException());
                 break;
             default:
                 assert false: "Unknown 'Resolve' type.";
@@ -976,7 +976,7 @@ final class RpcState<VatId> {
             var message = connection.newOutgoingMessage(sizeHint);
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
-            RpcException.fromException(exc, resolve.initException());
+            FromException(exc, resolve.initException());
             message.send();
 
             // TODO disconnect?
@@ -1053,7 +1053,7 @@ final class RpcState<VatId> {
             case RECEIVER_ANSWER:
                 var promisedAnswer = descriptor.getReceiverAnswer();
                 var answer = answers.find(promisedAnswer.getQuestionId());
-                var ops = PipelineOp.ToPipelineOps(promisedAnswer);
+                var ops = ToPipelineOps(promisedAnswer);
 
                 if (answer == null || !answer.active || answer.pipeline == null || ops == null) {
                     return Capability.newBrokenCap("invalid 'receiverAnswer'");
@@ -1158,7 +1158,7 @@ final class RpcState<VatId> {
                             RpcException.failed("Pipeline call on a request that returned no capabilities or was already closed."));
                 }
 
-                var ops = PipelineOp.ToPipelineOps(promisedAnswer);
+                var ops = ToPipelineOps(promisedAnswer);
                 if (ops == null) {
                     return null;
                 }
@@ -1404,7 +1404,7 @@ final class RpcState<VatId> {
                 var builder = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
                 builder.setAnswerId(this.answerId);
                 builder.setReleaseParamCaps(false);
-                RpcException.fromException(exc, builder.initException());
+                FromException(exc, builder.initException());
                 message.send();
             }
 
@@ -1891,7 +1891,7 @@ final class RpcState<VatId> {
         public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
             var promisedAnswer = descriptor.initReceiverAnswer();
             promisedAnswer.setQuestionId(question.getId());
-            PipelineOp.FromPipelineOps(ops, promisedAnswer);
+            FromPipelineOps(ops, promisedAnswer);
             return null;
         }
 
@@ -1899,8 +1899,66 @@ final class RpcState<VatId> {
         public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
             var builder = target.initPromisedAnswer();
             builder.setQuestionId(question.getId());
-            PipelineOp.FromPipelineOps(ops, builder);
+            FromPipelineOps(ops, builder);
             return null;
         }
+    }
+
+    static void FromPipelineOps(PipelineOp[] ops, RpcProtocol.PromisedAnswer.Builder builder) {
+        var transforms = builder.initTransform(ops.length);
+        for (int ii = 0; ii < ops.length; ++ii) {
+            switch (ops[ii].type) {
+                case NOOP:
+                    transforms.get(ii).setNoop(null);
+                    break;
+                case GET_POINTER_FIELD:
+                    transforms.get(ii).setGetPointerField(ops[ii].pointerIndex);
+                    break;
+            }
+        }
+    }
+
+    static PipelineOp[] ToPipelineOps(RpcProtocol.PromisedAnswer.Reader reader) {
+        var transforms = reader.getTransform();
+        var ops = new PipelineOp[transforms.size()];
+        for (int ii = 0; ii < ops.length; ++ii) {
+            var transform = transforms.get(ii);
+            switch (transform.which()) {
+                case NOOP:
+                    ops[ii] = PipelineOp.Noop(); // TODO null?
+                    break;
+                case GET_POINTER_FIELD:
+                    ops[ii] = PipelineOp.PointerField(transform.getGetPointerField());
+                    break;
+                default:
+                    // TODO improve error handling here
+                    // Unsupported pipeline ops
+                    return null;
+            }
+        }
+        return ops;
+    }
+
+    static void FromException(Throwable exc, RpcProtocol.Exception.Builder builder) {
+        builder.setReason(exc.getMessage());
+        builder.setType(RpcProtocol.Exception.Type.FAILED);
+    }
+
+    static RpcException ToException(RpcProtocol.Exception.Reader reader) {
+        var type = RpcException.Type.UNKNOWN;
+
+        switch (reader.getType()) {
+            case UNIMPLEMENTED:
+                type = RpcException.Type.UNIMPLEMENTED;
+                break;
+            case FAILED:
+                type = RpcException.Type.FAILED;
+                break;
+            case DISCONNECTED:
+            case OVERLOADED:
+            default:
+                break;
+        }
+        return new RpcException(type, reader.getReason().toString());
     }
 }

@@ -31,27 +31,4 @@ public final class RpcException extends java.lang.Exception {
     public static RpcException disconnected(String message) {
         return new RpcException(Type.DISCONNECTED, message);
     }
-
-    static void fromException(Throwable exc, RpcProtocol.Exception.Builder builder) {
-        builder.setReason(exc.getMessage());
-        builder.setType(RpcProtocol.Exception.Type.FAILED);
-    }
-
-    static RpcException toException(RpcProtocol.Exception.Reader reader) {
-        var type = RpcException.Type.UNKNOWN;
-
-        switch (reader.getType()) {
-            case UNIMPLEMENTED:
-                type = RpcException.Type.UNIMPLEMENTED;
-                break;
-            case FAILED:
-                type = RpcException.Type.FAILED;
-                break;
-            case DISCONNECTED:
-            case OVERLOADED:
-            default:
-                break;
-        }
-        return new RpcException(type, reader.getReason().toString());
-    }
 }
