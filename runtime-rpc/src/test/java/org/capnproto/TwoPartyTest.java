@@ -1,4 +1,5 @@
 package org.capnproto;
+
 /*
 import org.capnproto.demo.Demo;
 import org.junit.After;
@@ -42,7 +43,7 @@ class TestCap0Impl extends Demo.TestCap0.Server {
 class TestCap1Impl extends Demo.TestCap1.Server {
 }
 
-class Tap implements TwoPartyVatNetwork.MessageTap {
+class Tap implements org.capnproto.TwoPartyVatNetwork.MessageTap {
 
     final RpcDumper dumper = new RpcDumper();
 
@@ -57,7 +58,7 @@ class Tap implements TwoPartyVatNetwork.MessageTap {
 
 public class TwoPartyTest {
 
-    private Thread runServer(TwoPartyVatNetwork network) {
+    private Thread runServer(org.capnproto.TwoPartyVatNetwork network) {
         var thread = new Thread(() -> {
             try {
                 network.onDisconnect().get();
@@ -75,7 +76,7 @@ public class TwoPartyTest {
     AsynchronousServerSocketChannel serverSocket;
     AsynchronousSocketChannel clientSocket;
     TwoPartyClient client;
-    TwoPartyVatNetwork serverNetwork;
+    org.capnproto.TwoPartyVatNetwork serverNetwork;
     Thread serverThread;
 
     @Before
@@ -89,7 +90,7 @@ public class TwoPartyTest {
         this.client.getNetwork().setTap(new Tap());
 
         var socket = serverSocket.accept().get();
-        this.serverNetwork = new TwoPartyVatNetwork(socket, RpcTwoPartyProtocol.Side.SERVER);
+        this.serverNetwork = new org.capnproto.TwoPartyVatNetwork(socket, RpcTwoPartyProtocol.Side.SERVER);
         this.serverNetwork.setTap(new Tap());
         //this.serverNetwork.dumper.addSchema(Demo.TestCap1);
         this.serverThread = runServer(this.serverNetwork);

@@ -198,6 +198,7 @@ private:
   SchemaLoader schemaLoader;
   std::unordered_set<uint64_t> usedImports;
   bool hasInterfaces = false;
+  bool liteMode = false;
 
   kj::StringTree javaFullName(Schema schema, kj::Maybe<InterfaceSchema::Method> method = nullptr) {
     auto node = schema.getProto();
@@ -334,6 +335,9 @@ private:
       }
     }
     case schema::Type::INTERFACE: {
+      if (liteMode) {
+        return kj::strTree("org.capnproto.Capability.", suffix);
+      }
       auto interfaceSchema = type.asInterface();
       if (interfaceSchema.getProto().getIsGeneric()) {
         auto typeArgs = getTypeArguments(interfaceSchema, interfaceSchema, kj::str(suffix));
@@ -912,8 +916,13 @@ private:
               spaces(indent), "  }\n",
               "\n"),
 
-            // TODO pipelineMethodDecls
-            kj::strTree()
+            (hasDiscriminantValue(proto) || liteMode)
+              ? kj::strTree()
+              : kj::strTree(
+                spaces(indent), "  default ", titleCase, ".Pipeline get", titleCase, "() {\n",
+                spaces(indent), "    var pipeline = this.typelessPipeline().noop();\n",
+                spaces(indent), "    return () -> pipeline;\n",
+                spaces(indent), "  }\n")
           };
       }
     }
@@ -1087,6 +1096,9 @@ private:
       };
 
     } else if (kind == FieldKind::INTERFACE) {
+      if (liteMode) {
+        return {};
+      }
       auto factoryArg = makeFactoryArg(field.getType());
       auto clientType = typeName(field.getType(), kj::str("Client")).flatten();
       auto serverType = typeName(field.getType(), kj::str("Server")).flatten();
@@ -1258,7 +1270,7 @@ private:
           spaces(indent), "  }\n"),
 
           // Pipeline accessors
-          (field.getType().asStruct().getProto().getIsGeneric()
+          ((liteMode || field.getType().asStruct().getProto().getIsGeneric())
             ? kj::strTree() // No generics for you, sorry.
             : kj::strTree(
               spaces(indent), "  default ", pipelineType, " get", titleCase, "() {\n",
@@ -1667,11 +1679,14 @@ private:
           spaces(indent), "    _NOT_IN_SCHEMA,\n",
           spaces(indent), "  }\n"),
         KJ_MAP(n, nestedTypeDecls) { return kj::mv(n); },
-        spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.Pipeline {\n",
-        KJ_MAP(f, fieldTexts) {
-          return kj::mv(f.pipelineMethodDecls);
-        },
-        spaces(indent), "  }\n",
+        (liteMode ? kj::strTree()
+           : kj::strTree(
+               spaces(indent), "  public interface Pipeline", readerTypeParams, " extends org.capnproto.Pipeline {\n",
+               KJ_MAP(f, fieldTexts) {
+                 return kj::mv(f.pipelineMethodDecls);
+               },
+               spaces(indent), "  }\n")
+             ),
         spaces(indent), "}\n"),
 
         kj::strTree(),
@@ -1702,6 +1717,10 @@ private:
 
   InterfaceText makeInterfaceText(kj::StringPtr scope, kj::StringPtr name, InterfaceSchema schema,
                                   kj::Array<kj::StringTree> nestedTypeDecls, int indent) {
+
+    if (liteMode) {
+      return {};
+    }
 
     auto sp = spaces(indent);
     auto fullName = kj::str(scope, name);
@@ -2499,6 +2518,11 @@ private:
   }
 
   kj::MainBuilder::Validity run() {
+
+    if (::getenv("CAPNP_LITE") != nullptr) {
+      liteMode = true;
+    }
+
     ReaderOptions options;
     options.traversalLimitInWords = 1 << 30;  // Don't limit.
     StreamFdMessageReader reader(STDIN_FILENO, options);

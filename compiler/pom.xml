@@ -39,7 +39,6 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
@@ -79,7 +78,6 @@
                 <goal>run</goal>
               </goals>
             </execution>
-
             <execution>
               <id>generate-test-sources</id>
               <phase>generate-test-sources</phase>
@@ -94,6 +92,7 @@
                     <arg value="-o../capnpc-java:src/test/generated"/>
                     <arg value="src/test/schema/test.capnp"/>
                     <arg value="src/test/schema/test-import.capnp"/>
+                    <env key="CAPNP_LITE" value="1"/>
                   </exec>
                 </target>
               </configuration>

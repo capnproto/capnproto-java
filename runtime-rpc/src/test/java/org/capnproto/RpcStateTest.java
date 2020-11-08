@@ -117,7 +117,7 @@ public class RpcStateTest {
     public void handleAbort() {
         var msg = new TestMessage();
         var builder = msg.builder.getRoot(RpcProtocol.Message.factory);
-        RpcException.fromException(RpcException.failed("Test abort"), builder.initAbort());
+        RpcState.FromException(RpcException.failed("Test abort"), builder.initAbort());
         this.connection.setNextIncomingMessage(msg);
         //Assert.assertThrows(RpcException.class, () -> rpc.handleMessage(msg));
     }
