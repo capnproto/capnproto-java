@@ -870,7 +870,9 @@ final class RpcState<VatId> {
             }
 
             var exportId = writeDescriptor(cap, capTableBuilder.get(ii), fds);
-            exports.add(exportId);
+            if (exportId != null) {
+                exports.add(exportId);
+            }
         }
 
         return exports.stream()
@@ -878,7 +880,7 @@ final class RpcState<VatId> {
                 .toArray();
     }
 
-    private int writeDescriptor(ClientHook cap, RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
+    private Integer writeDescriptor(ClientHook cap, RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
         ClientHook inner = cap;
         for (;;) {
             var resolved = inner.getResolved();
