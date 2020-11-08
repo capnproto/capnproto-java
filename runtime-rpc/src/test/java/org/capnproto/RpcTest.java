@@ -431,5 +431,46 @@ public class RpcTest {
         Assert.assertEquals(2, dependentCall2.join().getN());
         Assert.assertEquals(1, calleeCallCount.value());
     }
+
+    static CompletableFuture<Test.TestCallOrder.GetCallSequenceResults.Reader> getCallSequence(
+            Test.TestCallOrder.Client client, int expected) {
+        var req = client.getCallSequenceRequest();
+        req.getParams().setExpected(expected);
+        return req.send();
+    }
+
+    @org.junit.Test
+    public void testEmbargo() {
+        var context = new TestContext(bootstrapFactory);
+        var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
+
+        var cap = new Test.TestCallOrder.Client(new TestCallOrderImpl());
+        var earlyCall = client.getCallSequenceRequest().send();
+
+        var echoRequest = client.echoRequest();
+        echoRequest.getParams().setCap(cap);
+        var echo = echoRequest.send();
+
+        var pipeline = echo.getCap();
+        var call0 = getCallSequence(pipeline, 0);
+        var call1 = getCallSequence(pipeline, 1);
+
+        earlyCall.join();
+
+        var call2 = getCallSequence(pipeline, 2);
+
+        var resolved = echo.join().getCap();
+
+        var call3 = getCallSequence(pipeline, 3);
+        var call4 = getCallSequence(pipeline, 4);
+        var call5 = getCallSequence(pipeline, 5);
+
+        Assert.assertEquals(0, call0.join().getN());
+        Assert.assertEquals(1, call1.join().getN());
+        Assert.assertEquals(2, call2.join().getN());
+        Assert.assertEquals(3, call3.join().getN());
+        Assert.assertEquals(4, call4.join().getN());
+        Assert.assertEquals(5, call5.join().getN());
+    }
 }
 

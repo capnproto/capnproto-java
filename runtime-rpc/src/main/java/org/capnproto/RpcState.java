@@ -1041,19 +1041,18 @@ final class RpcState<VatId> {
             case SENDER_PROMISE:
                 return importCap(descriptor.getSenderPromise(), true, fd);
 
-            case RECEIVER_HOSTED:
+            case RECEIVER_HOSTED: {
                 var exp = exports.find(descriptor.getReceiverHosted());
                 if (exp == null) {
                     return Capability.newBrokenCap("invalid 'receiverHosted' export ID");
-                }
-                if (exp.clientHook.getBrand() == this) {
-                    // TODO Tribble 4-way race!
+                } else if (exp.clientHook.getBrand() == this) {
+                    return new TribbleRaceBlocker(exp.clientHook);
+                } else {
                     return exp.clientHook;
                 }
+            }
 
-                return exp.clientHook;
-
-            case RECEIVER_ANSWER:
+            case RECEIVER_ANSWER: {
                 var promisedAnswer = descriptor.getReceiverAnswer();
                 var answer = answers.find(promisedAnswer.getQuestionId());
                 var ops = ToPipelineOps(promisedAnswer);
@@ -1065,14 +1064,12 @@ final class RpcState<VatId> {
                 var result = answer.pipeline.getPipelinedCap(ops);
                 if (result == null) {
                     return Capability.newBrokenCap("Unrecognised pipeline ops");
-                }
-
-                if (result.getBrand() == this) {
-                    // TODO Tribble 4-way race!
+                } else if (result.getBrand() == this) {
+                    return new TribbleRaceBlocker(result);
+                } else {
                     return result;
                 }
-
-                return result;
+            }
 
             case THIRD_PARTY_HOSTED:
                 return Capability.newBrokenCap("Third party caps not supported");
@@ -1579,15 +1576,15 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
-            return null;
+        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
+            return this.callNoIntercept(interfaceId, methodId, ctx);
         }
 
-        public VoidPromiseAndPipeline callNoIntercept(long interfaceId, short methodId, CallContextHook context) {
-            var params = context.getParams();
+        public VoidPromiseAndPipeline callNoIntercept(long interfaceId, short methodId, CallContextHook ctx) {
+            var params = ctx.getParams();
             var request = newCallNoIntercept(interfaceId, methodId);
-            context.allowCancellation();
-            return context.directTailCall(request.getHook());
+            ctx.allowCancellation();
+            return ctx.directTailCall(request.getHook());
         }
 
         @Override
@@ -1757,11 +1754,6 @@ final class RpcState<VatId> {
         @Override
         public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
             target.setImportedCap(this.imp.importId);
-            return null;
-        }
-
-        @Override
-        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
             return null;
         }
 
@@ -2000,5 +1992,44 @@ final class RpcState<VatId> {
                 break;
         }
         return new RpcException(type, reader.getReason().toString());
+    }
+
+    class TribbleRaceBlocker implements ClientHook {
+
+        final ClientHook inner;
+
+        TribbleRaceBlocker(ClientHook inner) {
+            this.inner = inner;
+        }
+
+        @Override
+        public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
+            return this.inner.newCall(interfaceId, methodId);
+        }
+
+        @Override
+        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
+            return this.inner.call(interfaceId, methodId, ctx);
+        }
+
+        @Override
+        public ClientHook getResolved() {
+            return null;
+        }
+
+        @Override
+        public CompletableFuture<ClientHook> whenMoreResolved() {
+            return null;
+        }
+
+        @Override
+        public Object getBrand() {
+            return null;
+        }
+
+        @Override
+        public Integer getFd() {
+            return this.inner.getFd();
+        }
     }
 }

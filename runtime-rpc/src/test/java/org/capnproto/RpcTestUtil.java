@@ -115,16 +115,25 @@ class RpcTestUtil {
         }
 
         @Override
+        protected CompletableFuture<java.lang.Void> echo(CallContext<Test.TestMoreStuff.EchoParams.Reader, Test.TestMoreStuff.EchoResults.Builder> context) {
+            this.callCount.inc();
+            var params = context.getParams();
+            var result = context.getResults();
+            result.setCap(params.getCap());
+            return READY_NOW;
+        }
+
+        @Override
         protected CompletableFuture<java.lang.Void> getHandle(CallContext<Test.TestMoreStuff.GetHandleParams.Reader, Test.TestMoreStuff.GetHandleResults.Builder> context) {
             context.getResults().setHandle(new HandleImpl(this.handleCount));
-            return Capability.Server.READY_NOW;
+            return READY_NOW;
         }
 
         @Override
         protected CompletableFuture<java.lang.Void> getCallSequence(CallContext<Test.TestCallOrder.GetCallSequenceParams.Reader, Test.TestCallOrder.GetCallSequenceResults.Builder> context) {
             var result = context.getResults();
             result.setN(this.callCount.inc());
-            return Capability.Server.READY_NOW;
+            return READY_NOW;
         }
 
         @Override
@@ -179,7 +188,7 @@ class RpcTestUtil {
             results.setI(params.getI());
             results.setT(params.getT());
             results.setC(new TestCallOrderImpl());
-            return Capability.Server.READY_NOW;
+            return READY_NOW;
         }
     }
 
