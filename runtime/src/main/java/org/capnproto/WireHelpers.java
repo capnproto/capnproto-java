@@ -1127,6 +1127,7 @@ final class WireHelpers {
             resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
             return setStructPointer(dstSegment, dstCapTable, dstOffset,
                                     new StructReader(resolved.segment,
+                                                     srcCapTable,
                                                      resolved.ptr * Constants.BYTES_PER_WORD,
                                                      resolved.ptr + StructPointer.dataSize(resolved.ref),
                                                      StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
@@ -1196,7 +1197,14 @@ final class WireHelpers {
         case WirePointer.FAR :
             throw new DecodeException("Unexpected FAR pointer.");
         case WirePointer.OTHER :
-            throw new RuntimeException("copyPointer is unimplemented for OTHER pointers");
+            if (WirePointer.isCapability(srcRef)) {
+                var cap = readCapabilityPointer(srcSegment, srcCapTable, srcOffset, 0);
+                setCapabilityPointer(dstSegment, dstCapTable, dstOffset, cap);
+                return dstSegment;
+            }
+            else {
+                throw new RuntimeException("copyPointer is unimplemented for OTHER pointers");
+            }
         }
         throw new RuntimeException("unreachable");
     }
