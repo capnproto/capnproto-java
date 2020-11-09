@@ -1353,7 +1353,38 @@ final class RpcState<VatId> {
 
         @Override
         public ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request) {
-            return null;
+            assert this.response == null: "Can't call tailCall() after initializing the results struct.";
+
+            if (request.getBrand() == RpcState.this && !this.redirectResults) {
+                // The tail call is headed towards the peer that called us in the first place, so we can
+                // optimize out the return trip.
+
+                var tailInfo = ((RpcRequest)request).tailSend();
+                if (tailInfo != null) {
+                    if (isFirstResponder()) {
+                        if (isConnected()) {
+                            var message = connection.newOutgoingMessage(
+                                    messageSizeHint()
+                                            + RpcProtocol.Return.factory.structSize().total());
+                            var builder = message.getBody().initAs(RpcProtocol.Message.factory).initReturn();
+                            builder.setAnswerId(this.answerId);
+                            builder.setReleaseParamCaps(false);
+                            builder.setTakeFromOtherQuestion(tailInfo.questionId);
+                            message.send();
+                        }
+
+                        cleanupAnswerTable(null, false);
+                    }
+                    return new ClientHook.VoidPromiseAndPipeline(tailInfo.promise, tailInfo.pipeline);
+                }
+            }
+
+            // Just forward to another local call
+            var promise = request.send();
+            var voidPromise = promise.thenAccept(results -> {
+                getResults(0).set(results);
+            });
+            return new ClientHook.VoidPromiseAndPipeline(voidPromise, promise.pipeline().hook);
         }
 
         private RpcResponse consumeRedirectedResponse() {

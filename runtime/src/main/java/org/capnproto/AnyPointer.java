@@ -128,6 +128,18 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
         }
 
+        public void set(AnyPointer.Reader reader) {
+            if (reader.isNull()) {
+                WireHelpers.zeroObject(this.segment, this.capTable, this.pointer);
+                WireHelpers.zeroPointerAndFars(this.segment, this.pointer);
+            }
+            else {
+                WireHelpers.copyPointer(
+                        this.segment, this.capTable, this.pointer,
+                        reader.segment, reader.capTable, reader.pointer, reader.nestingLimit);
+            }
+        }
+
         final void setAsCap(Capability.Client cap) {
             WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.getHook());
         }
