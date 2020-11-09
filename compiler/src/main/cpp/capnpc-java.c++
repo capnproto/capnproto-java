@@ -412,6 +412,8 @@ private:
         switch (type.whichAnyPointerKind()) {
         case schema::Type::AnyPointer::Unconstrained::CAPABILITY:
           return kj::strTree("org.capnproto.Capability.", suffix);
+        case schema::Type::AnyPointer::Unconstrained::STRUCT:
+          return kj::strTree("org.capnproto.AnyStruct.", suffix);
         default:
           return kj::strTree("org.capnproto.AnyPointer.", suffix);
         }
@@ -775,8 +777,10 @@ private:
 
       } else {
         switch (type.whichAnyPointerKind()) {
-          case  schema::Type::AnyPointer::Unconstrained::CAPABILITY:
-            return kj::str("org.capnproto.Capability.factory");
+        case  schema::Type::AnyPointer::Unconstrained::CAPABILITY:
+          return kj::str("org.capnproto.Capability.factory");
+        case  schema::Type::AnyPointer::Unconstrained::STRUCT:
+          return kj::str("org.capnproto.AnyStruct.factory");
         default:
           return kj::str("org.capnproto.AnyPointer.factory");
         }
@@ -1035,7 +1039,7 @@ private:
             kind = FieldKind::ANY_POINTER;
             break;
           case schema::Type::AnyPointer::Unconstrained::STRUCT:
-            kind = FieldKind::STRUCT;
+            kind = FieldKind::ANY_POINTER;
             break;
           case schema::Type::AnyPointer::Unconstrained::LIST:
             kind = FieldKind::LIST;
@@ -1967,14 +1971,14 @@ private:
     }
 
     if (resultProto.getIsGeneric()) {
-    auto resultFactoryArgs = getFactoryArguments(resultSchema, paramSchema);
-     resultFactory = resultFactoryArgs.size() == 0
-      ? kj::str(shortResultType, ".factory")
-      : kj::strTree("newFactory(",
-                    kj::StringTree(KJ_MAP(arg, resultFactoryArgs) {
-                        return kj::strTree(arg);
-                      }, ", "),
-                    ")").flatten();
+      auto resultFactoryArgs = getFactoryArguments(resultSchema, paramSchema);
+      resultFactory = resultFactoryArgs.size() == 0
+        ? kj::str(shortResultType, ".factory")
+        : kj::strTree("newFactory(",
+                      kj::StringTree(KJ_MAP(arg, resultFactoryArgs) {
+                          return kj::strTree(arg);
+                        }, ", "),
+                      ")").flatten();
     }
 
     auto paramBuilder = kj::str(shortParamType, ".Builder");

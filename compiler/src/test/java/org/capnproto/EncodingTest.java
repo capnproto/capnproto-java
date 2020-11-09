@@ -1,5 +1,6 @@
 package org.capnproto.test;
 
+import org.capnproto.test.Test;
 import org.capnproto.*;
 import org.capnproto.Void;
 import org.junit.Assert;
@@ -844,6 +845,13 @@ public class EncodingTest {
       Assert.assertEquals(listReader.get(0).getInt8Field(), 11);
       TestUtil.checkTestMessage(listReader.get(1));
   }
+
+    @org.junit.Test
+    public void testAnyStruct() {
+        MessageBuilder builder = new MessageBuilder();
+        var root = builder.initRoot(Test.TestAnyOthers.factory);
+        var anyStruct = root.initAnyStructField();
+    }
 
     @org.junit.Test
     public void testCopyAnyPointer() {
