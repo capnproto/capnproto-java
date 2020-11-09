@@ -24,8 +24,8 @@ install:
   - cd ../
 
 jdk:
-  - oraclejdk8
-  - openjdk8
+  - oraclejdk14
+  - openjdk14
 script:
   - make CC=gcc-7 CXX=g++-7
   - mvn compile
