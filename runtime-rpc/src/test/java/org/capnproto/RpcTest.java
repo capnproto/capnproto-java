@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RpcTest {
 
@@ -471,6 +473,37 @@ public class RpcTest {
         Assert.assertEquals(3, call3.join().getN());
         Assert.assertEquals(4, call4.join().getN());
         Assert.assertEquals(5, call5.join().getN());
+    }
+
+    @org.junit.Test
+    public void testCallBrokenPromise() throws ExecutionException, InterruptedException {
+        var context = new TestContext(bootstrapFactory);
+        var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
+
+        var paf = new CompletableFuture<Test.TestInterface.Client>();
+
+        {
+            var req = client.holdRequest();
+            req.getParams().setCap(new Test.TestInterface.Client(paf));
+            req.send().join();
+        }
+
+        AtomicBoolean returned = new AtomicBoolean(false);
+
+        var req = client.callHeldRequest().send().exceptionallyCompose(exc -> {
+            returned.set(true);
+            return CompletableFuture.failedFuture(exc);
+        }).thenAccept(results -> {
+            returned.set(true);
+        });
+
+        Assert.assertFalse(returned.get());
+
+        paf.completeExceptionally(new Exception("foo"));
+        Assert.assertTrue(returned.get());
+
+        // Verify that we are still connected
+        getCallSequence(client, 1).get();
     }
 }
 

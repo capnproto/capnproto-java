@@ -102,8 +102,9 @@ class RpcTestUtil {
 
     static class TestMoreStuffImpl extends Test.TestMoreStuff.Server {
 
-        final Counter callCount;
-        final Counter handleCount;
+        private final Counter callCount;
+        private final Counter handleCount;
+        private Test.TestInterface.Client clientToHold;
 
         public TestMoreStuffImpl(Counter callCount, Counter handleCount) {
             this.callCount = callCount;
@@ -163,6 +164,34 @@ class RpcTestUtil {
                     context.getResults().setS("bar");
                 });
             });
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> hold(CallContext<Test.TestMoreStuff.HoldParams.Reader, Test.TestMoreStuff.HoldResults.Builder> context) {
+            this.callCount.inc();
+            var params = context.getParams();
+            this.clientToHold = params.getCap();
+            return READY_NOW;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> callHeld(CallContext<Test.TestMoreStuff.CallHeldParams.Reader, Test.TestMoreStuff.CallHeldResults.Builder> context) {
+            this.callCount.inc();
+            var request = this.clientToHold.fooRequest();
+            request.getParams().setI(123);
+            request.getParams().setJ(true);
+            return request.send().thenAccept(response -> {
+                Assert.assertEquals("foo", response.getX().toString());
+                context.getResults().setS("bar");
+            });
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> getHeld(CallContext<Test.TestMoreStuff.GetHeldParams.Reader, Test.TestMoreStuff.GetHeldResults.Builder> context) {
+            this.callCount.inc();
+            var result = context.getResults();
+            result.setCap(this.clientToHold);
+            return READY_NOW;
         }
     }
 
