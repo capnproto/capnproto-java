@@ -117,9 +117,9 @@ public final class Capability {
             this.hook = hook;
         }
 
-        public <T extends Client> Client(CompletionStage<T> promise) {
+        public Client(CompletionStage<? extends Client> promise) {
             this(Capability.newLocalPromiseClient(
-                    promise.thenApply(client -> client.getHook())));
+                    promise.thenApply(Client::getHook)));
         }
 
         public Client(Throwable exc) {

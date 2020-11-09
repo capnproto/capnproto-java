@@ -1137,6 +1137,9 @@ private:
             spaces(indent), "  }\n",
             spaces(indent), "  public void set", titleCase, "(", serverType, " value) {\n",
             spaces(indent), "    this.set", titleCase, "(new ", clientType, "(value));\n",
+            spaces(indent), "  }\n",
+            spaces(indent), "  public void set", titleCase, "(java.util.concurrent.CompletableFuture<? extends ", clientType, "> value) {\n",
+            spaces(indent), "    this.set", titleCase, "(new ", clientType, "(value));\n",
             spaces(indent), "  }\n"
           ),
 
@@ -1825,7 +1828,7 @@ private:
           sp, "    public Client(org.capnproto.ClientHook hook) { super(hook); }\n",
           sp, "    public Client(org.capnproto.Capability.Client cap) { super(cap); }\n",
           sp, "    public Client(Server server) { super(server); }\n",
-          sp, "    public <T extends Client> Client(java.util.concurrent.CompletionStage<T> promise) {\n",
+          sp, "    public Client(java.util.concurrent.CompletionStage<? extends Client> promise) {\n",
           sp, "      super(promise);\n",
           sp, "    }\n",
           sp, "    public static final class Methods {\n",

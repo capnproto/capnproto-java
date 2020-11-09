@@ -484,7 +484,7 @@ public class RpcTest {
 
         {
             var req = client.holdRequest();
-            req.getParams().setCap(new Test.TestInterface.Client(paf));
+            req.getParams().setCap(paf);
             req.send().join();
         }
 
