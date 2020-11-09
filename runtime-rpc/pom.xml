@@ -111,13 +111,13 @@
                         <phase>generate-test-sources</phase>
                         <configuration>
                             <target>
-                                <mkdir dir="src/test/generated/org/capnproto"/>
+                                <mkdir dir="src/test/generated/org/capnproto/rpctest"/>
                                 <exec executable="capnp" failonerror="true">
                                     <arg value="compile"/>
                                     <arg value="-I"/>
                                     <arg value="../compiler/src/main/schema/"/>
                                     <arg value="--src-prefix=src/test/schema/"/>
-                                    <arg value="-o../capnpc-java:src/test/generated/org/capnproto"/>
+                                    <arg value="-o../capnpc-java:src/test/generated/org/capnproto/rpctest"/>
                                     <arg value="src/test/schema/test.capnp"/>
                                 </exec>
                             </target>

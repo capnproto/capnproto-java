@@ -1,7 +1,7 @@
 @0xb365fb00cc89383b;
 
 using Java = import "/capnp/java.capnp";
-$Java.package("org.capnproto.test");
+$Java.package("org.capnproto.rpctest");
 $Java.outerClassname("Test");
 
 struct TestAllTypes {

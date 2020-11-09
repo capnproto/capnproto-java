@@ -1,15 +1,11 @@
 package org.capnproto;
 
-import org.capnproto.CallContext;
-import org.capnproto.Capability;
-import org.capnproto.Void;
 import org.capnproto.rpctest.Test;
 import org.junit.Assert;
 
 import java.util.concurrent.CompletableFuture;
 
 class RpcTestUtil {
-
 
     static void initTestMessage(Test.TestAllTypes.Builder builder) {
         builder.setVoidField(Void.VOID);
