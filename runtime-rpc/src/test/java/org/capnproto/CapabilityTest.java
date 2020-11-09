@@ -25,7 +25,7 @@ import org.capnproto.AnyPointer;
 import org.capnproto.CallContext;
 import org.capnproto.Capability;
 import org.capnproto.RpcException;
-import org.capnproto.test.Test;
+import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
@@ -61,7 +61,7 @@ class TestExtendsImpl extends Test.TestExtends2.Server {
     protected CompletableFuture<java.lang.Void> grault(CallContext<Test.TestExtends.GraultParams.Reader, Test.TestAllTypes.Builder> context) {
         counter.inc();
         context.releaseParams();
-        TestUtil.initTestMessage(context.getResults());
+        RpcTestUtil.initTestMessage(context.getResults());
         return CompletableFuture.completedFuture(null);
     }
 }
@@ -84,7 +84,7 @@ public class CapabilityTest {
     public void testBasic() {
         var callCount = new Counter();
         var client = new Test.TestInterface.Client(
-                new TestUtil.TestInterfaceImpl(callCount));
+                new RpcTestUtil.TestInterfaceImpl(callCount));
 
         var request1 = client.fooRequest();
         request1.getParams().setI(123);
@@ -92,7 +92,7 @@ public class CapabilityTest {
         var promise1 = request1.send();
 
         var request2 = client.bazRequest();
-        TestUtil.initTestMessage(request2.getParams().initS());
+        RpcTestUtil.initTestMessage(request2.getParams().initS());
         var promise2 = request2.send();
 
         boolean barFailed = false;
@@ -126,7 +126,7 @@ public class CapabilityTest {
         //Assert.assertEquals(0, callCount.value());
 
         var response2 = promise2.get();
-        TestUtil.checkTestMessage(response2);
+        RpcTestUtil.checkTestMessage(response2);
 
         var response1 = promise1.get();
         Assert.assertEquals("bar", response1.getX().toString());
@@ -139,13 +139,13 @@ public class CapabilityTest {
         var chainedCallCount = new Counter();
 
         var client = new Test.TestPipeline.Client(
-                new TestUtil.TestPipelineImpl(callCount));
+                new RpcTestUtil.TestPipelineImpl(callCount));
 
         var request = client.getCapRequest();
         var params = request.getParams();
         params.setN(234);
         params.setInCap(new Test.TestInterface.Client(
-                new TestUtil.TestInterfaceImpl(chainedCallCount)));
+                new RpcTestUtil.TestInterfaceImpl(chainedCallCount)));
 
         var promise = request.send();
         var outbox = promise.getOutBox();
@@ -164,7 +164,7 @@ public class CapabilityTest {
         var response = pipelinePromise.get();
         Assert.assertEquals("bar", response.getX().toString());
         var response2 = pipelinePromise2.get();
-        TestUtil.checkTestMessage(response2);
+        RpcTestUtil.checkTestMessage(response2);
         Assert.assertEquals(3, callCount.value());
         Assert.assertEquals(1, chainedCallCount.value());
     }

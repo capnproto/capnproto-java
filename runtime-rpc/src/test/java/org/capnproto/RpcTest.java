@@ -21,7 +21,7 @@
 
 package org.capnproto;
 
-import org.capnproto.test.Test;
+import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
@@ -276,17 +276,17 @@ public class RpcTest {
             var tag = objectId.getTag();
             switch (tag) {
                 case TEST_INTERFACE:
-                    return new Capability.Client(new TestUtil.TestInterfaceImpl(callCount));
+                    return new Capability.Client(new RpcTestUtil.TestInterfaceImpl(callCount));
                 case TEST_EXTENDS:
                     return new Capability.Client(Capability.newBrokenCap("No TestExtends implemented."));
                 case TEST_PIPELINE:
-                    return new Capability.Client(new TestUtil.TestPipelineImpl(callCount));
+                    return new Capability.Client(new RpcTestUtil.TestPipelineImpl(callCount));
                 case TEST_TAIL_CALLEE:
-                    return new Capability.Client(new TestUtil.TestTailCalleeImpl(callCount));
+                    return new Capability.Client(new RpcTestUtil.TestTailCalleeImpl(callCount));
                 case TEST_TAIL_CALLER:
-                    return new Capability.Client(new TestUtil.TestTailCallerImpl(callCount));
+                    return new Capability.Client(new RpcTestUtil.TestTailCallerImpl(callCount));
                 case TEST_MORE_STUFF:
-                    return new Capability.Client(new TestUtil.TestMoreStuffImpl(callCount, handleCount));
+                    return new Capability.Client(new RpcTestUtil.TestMoreStuffImpl(callCount, handleCount));
                 default:
                     return new Capability.Client();
             }
@@ -312,7 +312,7 @@ public class RpcTest {
         });
 
         var request2 = client.bazRequest();
-        TestUtil.initTestMessage(request2.getParams().initS());
+        RpcTestUtil.initTestMessage(request2.getParams().initS());
         var promise2 = request2.send();
 
         var response1 = promise1.join();
@@ -333,7 +333,7 @@ public class RpcTest {
 
         var request = client.getCapRequest();
         request.getParams().setN(234);
-        request.getParams().setInCap(new TestUtil.TestInterfaceImpl(chainedCallCount));
+        request.getParams().setInCap(new RpcTestUtil.TestInterfaceImpl(chainedCallCount));
 
         var promise = request.send();
 
@@ -353,7 +353,7 @@ public class RpcTest {
         Assert.assertEquals("bar", response.getX().toString());
 
         var response2 = pipelinePromise2.join();
-        TestUtil.checkTestMessage(response2);
+        RpcTestUtil.checkTestMessage(response2);
 
         Assert.assertEquals(1, chainedCallCount.value());
     }
@@ -397,7 +397,7 @@ public class RpcTest {
         //Assert.assertEquals(3, context.restorer.callCount);
 
         // OK, now fulfill the local promise.
-        paf.complete(new Test.TestInterface.Client(new TestUtil.TestInterfaceImpl(chainedCallCount)));
+        paf.complete(new Test.TestInterface.Client(new RpcTestUtil.TestInterfaceImpl(chainedCallCount)));
 
         // We should now be able to wait for getCap() to finish.
         Assert.assertEquals("bar", promise.join().getS().toString());
