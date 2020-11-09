@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <description>runtime-rpc</description>
     <version>0.1.6-SNAPSHOT</version>
-    <name>Cap'n Proto runtime library</name>
+    <name>Cap'n Proto RPC runtime library</name>
     <organization>
         <name>org.capnproto</name>
     </organization>
