@@ -86,6 +86,18 @@ public final class AnyPointer {
             factory.setPointerBuilder(this.segment, this.pointer, reader);
         }
 
+        public void set(AnyPointer.Reader reader) {
+            if (reader.isNull()) {
+                WireHelpers.zeroObject(this.segment, this.pointer);
+                WireHelpers.zeroPointerAndFars(this.segment, this.pointer);
+            }
+            else {
+                WireHelpers.copyPointer(
+                        this.segment, this.pointer,
+                        reader.segment, reader.pointer, reader.nestingLimit);
+            }
+        }
+
         public final Reader asReader() {
             return new Reader(segment, pointer, java.lang.Integer.MAX_VALUE);
         }
