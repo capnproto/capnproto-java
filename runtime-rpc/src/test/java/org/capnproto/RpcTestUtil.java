@@ -244,6 +244,22 @@ class RpcTestUtil {
         }
     }
 
+    static class TestCallOrderImpl extends Test.TestCallOrder.Server {
+
+        private int count = 0;
+
+        @Override
+        protected CompletableFuture<java.lang.Void> getCallSequence(CallContext<Test.TestCallOrder.GetCallSequenceParams.Reader, Test.TestCallOrder.GetCallSequenceResults.Builder> context) {
+            var result = context.getResults();
+            result.setN(this.count++);
+            return READY_NOW;
+        }
+
+        public int getCount() {
+            return this.count;
+        }
+    }
+
     static class TestPipelineImpl extends Test.TestPipeline.Server {
 
         final Counter callCount;

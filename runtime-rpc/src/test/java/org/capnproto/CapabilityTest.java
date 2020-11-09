@@ -66,18 +66,6 @@ class TestExtendsImpl extends Test.TestExtends2.Server {
     }
 }
 
-class TestCallOrderImpl extends Test.TestCallOrder.Server {
-
-    int count = 0;
-
-    @Override
-    protected CompletableFuture<java.lang.Void> getCallSequence(CallContext<Test.TestCallOrder.GetCallSequenceParams.Reader, Test.TestCallOrder.GetCallSequenceResults.Builder> context) {
-        var result = context.getResults();
-        result.setN(this.count++);
-        return READY_NOW;
-    }
-}
-
 public class CapabilityTest {
 
     @org.junit.Test
