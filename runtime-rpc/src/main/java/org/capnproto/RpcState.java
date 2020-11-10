@@ -1380,11 +1380,11 @@ final class RpcState<VatId> {
             }
 
             // Just forward to another local call
-            var promise = request.send();
-            var voidPromise = promise.thenAccept(results -> {
+            var response = request.send();
+            var promise = response.thenAccept(results -> {
                 getResults(0).setAs(AnyPointer.factory, results);
             });
-            return new ClientHook.VoidPromiseAndPipeline(voidPromise, promise.pipeline().hook);
+            return new ClientHook.VoidPromiseAndPipeline(promise, response.pipeline().hook);
         }
 
         private RpcResponse consumeRedirectedResponse() {
