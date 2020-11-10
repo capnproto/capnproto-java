@@ -23,7 +23,8 @@ package org.capnproto;
 
 public final class AnyPointer {
     public static final class Factory
-            implements PointerFactory<Builder, Reader> {
+            implements PointerFactory<Builder, Reader>,
+                       SetPointerBuilder<Builder, Reader> {
         public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
             return new Reader(segment, capTable, pointer, nestingLimit);
         }
@@ -34,6 +35,15 @@ public final class AnyPointer {
             Builder result = new Builder(segment, capTable, pointer);
             result.clear();
             return result;
+        }
+        public void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+            if (value.isNull()) {
+                WireHelpers.zeroObject(segment, capTable, pointer);
+                WireHelpers.zeroPointerAndFars(segment, pointer);
+            }
+            else {
+                WireHelpers.copyPointer(segment, capTable, pointer, value.segment, value.capTable, value.pointer, value.nestingLimit);
+            }
         }
     }
     public static final Factory factory = new Factory();
@@ -126,22 +136,6 @@ public final class AnyPointer {
 
         public final <T, U> void setAs(SetPointerBuilder<T, U> factory, U reader) {
             factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
-        }
-
-        public void set(AnyPointer.Reader reader) {
-            if (reader.isNull()) {
-                WireHelpers.zeroObject(this.segment, this.capTable, this.pointer);
-                WireHelpers.zeroPointerAndFars(this.segment, this.pointer);
-            }
-            else {
-                WireHelpers.copyPointer(
-                        this.segment, this.capTable, this.pointer,
-                        reader.segment, reader.capTable, reader.pointer, reader.nestingLimit);
-            }
-        }
-
-        final void setAsCap(Capability.Client cap) {
-            WireHelpers.setCapabilityPointer(this.segment, capTable, this.pointer, cap.getHook());
         }
 
         public final Reader asReader() {

@@ -861,10 +861,8 @@ public class EncodingTest {
 
         MessageBuilder message2 = new MessageBuilder();
         AnyPointer.Builder root2 = message2.initRoot(AnyPointer.factory);
-        root2.set(message1.getRoot(AnyPointer.factory).asReader());
+        root2.setAs(AnyPointer.factory, message1.getRoot(AnyPointer.factory).asReader());
 
         TestUtil.checkTestMessage(root2.getAs(Test.TestAllTypes.factory));
     }
 }
-
-
