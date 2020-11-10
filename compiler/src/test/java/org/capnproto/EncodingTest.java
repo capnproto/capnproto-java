@@ -844,6 +844,17 @@ public class EncodingTest {
       Assert.assertEquals(listReader.get(0).getInt8Field(), 11);
       TestUtil.checkTestMessage(listReader.get(1));
   }
+
+  @org.junit.Test
+  public void testCopyAnyPointer() {
+      MessageBuilder message1 = new MessageBuilder();
+      Test.TestAllTypes.Builder root1 = message1.initRoot(Test.TestAllTypes.factory);
+      TestUtil.initTestMessage(root1);
+
+      MessageBuilder message2 = new MessageBuilder();
+      AnyPointer.Builder root2 = message2.initRoot(AnyPointer.factory);
+      root2.setAs(AnyPointer.factory, message1.getRoot(AnyPointer.factory).asReader());
+
+      TestUtil.checkTestMessage(root2.getAs(Test.TestAllTypes.factory));
+  }
 }
-
-

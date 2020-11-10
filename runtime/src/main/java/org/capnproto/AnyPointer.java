@@ -22,7 +22,10 @@
 package org.capnproto;
 
 public final class AnyPointer {
-    public static final class Factory implements PointerFactory<Builder, Reader> {
+    public static final class Factory
+            implements PointerFactory<Builder, Reader>,
+                       SetPointerBuilder<Builder, Reader>
+    {
         public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
             return new Reader(segment, pointer, nestingLimit);
         }
@@ -33,6 +36,15 @@ public final class AnyPointer {
             Builder result = new Builder(segment, pointer);
             result.clear();
             return result;
+        }
+        public void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+            if (value.isNull()) {
+                WireHelpers.zeroObject(segment, pointer);
+                WireHelpers.zeroPointerAndFars(segment, pointer);
+            }
+            else {
+                WireHelpers.copyPointer(segment, pointer, value.segment, value.pointer, value.nestingLimit);
+            }
         }
     }
     public static final Factory factory = new Factory();
