@@ -307,11 +307,6 @@ final class RpcState<VatId> {
         List<CompletionStage<java.lang.Void>> resolveOpsToRelease = new ArrayList<>();
 
         for (var answer : answers) {
-            if (answer.pipeline != null) {
-                pipelinesToRelease.add(answer.pipeline);
-                answer.pipeline = null;
-            }
-
             if (answer.redirectedResults != null) {
                 tailCallsToRelease.add(answer.redirectedResults);
                 answer.redirectedResults = null;
@@ -548,6 +543,7 @@ final class RpcState<VatId> {
         response.setFds(List.of());
 
         answer.resultExports = writeDescriptors(caps, payload, fds);
+        assert answer.pipeline == null;
         answer.pipeline = ops -> ops.length == 0
                 ? capHook
                 : Capability.newBrokenCap("Invalid pipeline transform.");
@@ -603,6 +599,7 @@ final class RpcState<VatId> {
         {
             var answer = answers.find(answerId);
             assert answer != null;
+            assert answer.pipeline == null;
             answer.pipeline = pap.pipeline;
 
             if (redirectResults) {
@@ -728,7 +725,6 @@ final class RpcState<VatId> {
                 : null;
 
         answer.resultExports = null;
-        answer.pipeline = null;
 
         // If the call isn't actually done yet, cancel it.  Otherwise, we can go ahead and erase the
         // question from the table.
@@ -1373,7 +1369,7 @@ final class RpcState<VatId> {
                             message.send();
                         }
 
-                        cleanupAnswerTable(null, false);
+                        cleanupAnswerTable(null);
                     }
                     return new ClientHook.VoidPromiseAndPipeline(tailInfo.promise, tailInfo.pipeline);
                 }
@@ -1412,7 +1408,7 @@ final class RpcState<VatId> {
             this.returnMessage.setAnswerId(this.answerId);
             this.returnMessage.setReleaseParamCaps(false);
 
-            var exports = new int[0];
+            int[] exports = null;
             try {
                 exports = ((RpcServerResponseImpl) response).send();
             } catch (Throwable exc) {
@@ -1420,9 +1416,7 @@ final class RpcState<VatId> {
                 sendErrorReturn(exc);
             }
 
-            // If no caps in the results, the pipeline is irrelevant.
-            boolean shouldFreePipeline = exports.length == 0;
-            cleanupAnswerTable(exports, shouldFreePipeline);
+            cleanupAnswerTable(exports);
         }
 
         private void sendErrorReturn(Throwable exc) {
@@ -1441,7 +1435,7 @@ final class RpcState<VatId> {
                 message.send();
             }
 
-            cleanupAnswerTable(null, false);
+            cleanupAnswerTable(null);
         }
 
         private boolean isFirstResponder() {
@@ -1452,25 +1446,15 @@ final class RpcState<VatId> {
             return true;
         }
 
-        private void cleanupAnswerTable(int[] resultExports, boolean shouldFreePipeline) {
-            if (resultExports == null) {
-                resultExports = new int[0];
-            }
-
+        private void cleanupAnswerTable(int[] resultExports) {
             if (this.cancelRequested) {
-                assert resultExports.length == 0;
+                assert resultExports == null || resultExports.length == 0;
                 answers.erase(this.answerId);
-                return;
             }
             else {
                 var answer = answers.find(answerId);
                 answer.callContext = null;
                 answer.resultExports = resultExports;
-
-                if (shouldFreePipeline) {
-                    assert resultExports.length == 0;
-                    answer.pipeline = null;
-                }
             }
         }
 
