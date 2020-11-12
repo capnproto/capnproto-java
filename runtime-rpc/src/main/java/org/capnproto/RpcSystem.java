@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -68,14 +69,21 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
+        var state = this.connections.get(connection);
+        if (state == null) {
+            var onDisconnect = new CompletableFuture<RpcState.DisconnectInfo>()
+                    .whenComplete((info, exc) -> {
+                        this.connections.remove(connection);
+                        try {
+                            connection.close();
+                        } catch (IOException ignored) {
+                        }
+                    });
 
-        var onDisconnect = new CompletableFuture<VatNetwork.Connection<VatId>>()
-                .thenAccept(lostConnection -> {
-                    this.connections.remove(lostConnection);
-                });
-
-        return connections.computeIfAbsent(connection, key ->
-                new RpcState<VatId>(this.bootstrapFactory, connection, onDisconnect));
+            state = new RpcState<>(this.bootstrapFactory, connection, onDisconnect);
+            this.connections.put(connection, state);
+        }
+        return state;
     }
 
     public void accept(VatNetwork.Connection<VatId> connection) {

@@ -25,13 +25,10 @@ import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -157,11 +154,6 @@ public class RpcTest {
             }
 
             @Override
-            public CompletableFuture<java.lang.Void> onDisconnect() {
-                return null;
-            }
-
-            @Override
             public CompletableFuture<java.lang.Void> shutdown() {
                 if (this.partner == null) {
                     return CompletableFuture.completedFuture(null);
@@ -173,6 +165,10 @@ public class RpcTest {
 
             public Test.TestSturdyRef.Reader getPeerVatId() {
                 return this.peerId;
+            }
+
+            @Override
+            public void close() {
             }
         }
 
@@ -430,6 +426,7 @@ public class RpcTest {
         Assert.assertEquals(456, response.getI());
 
         var dependentCall1 = promise.getC().getCallSequenceRequest().send();
+
         Assert.assertEquals(0, dependentCall0.join().getN());
         Assert.assertEquals(1, dependentCall1.join().getN());
 

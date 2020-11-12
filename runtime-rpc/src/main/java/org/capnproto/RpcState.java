@@ -3,7 +3,6 @@ package org.capnproto;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -34,6 +33,16 @@ final class RpcState<VatId> {
     private static final int CAP_DESCRIPTOR_SIZE_HINT
             = RpcProtocol.CapDescriptor.factory.structSize().total()
             + RpcProtocol.PromisedAnswer.factory.structSize().total();
+
+    static class DisconnectInfo {
+
+        final CompletableFuture<java.lang.Void> shutdownPromise;
+        // Task which is working on sending an abort message and cleanly ending the connection.
+
+        DisconnectInfo(CompletableFuture<java.lang.Void> shutdownPromise) {
+            this.shutdownPromise = shutdownPromise;
+        }
+   }
 
     private final class QuestionDisposer {
 
@@ -224,7 +233,6 @@ final class RpcState<VatId> {
     final static class Embargo {
         final int id;
         final CompletableFuture<java.lang.Void> disembargo = new CompletableFuture<>();
-
         Embargo(int id) {
             this.id = id;
         }
@@ -263,7 +271,7 @@ final class RpcState<VatId> {
     private final Map<ClientHook, Integer> exportsByCap = new HashMap<>();
     private final BootstrapFactory<VatId> bootstrapFactory;
     private final VatNetwork.Connection<VatId> connection;
-    private final CompletableFuture<java.lang.Void> onDisconnect;
+    private final CompletableFuture<DisconnectInfo> disconnectFulfiller;
     private Throwable disconnected = null;
     private CompletableFuture<java.lang.Void> messageReady = CompletableFuture.completedFuture(null);
     private final CompletableFuture<java.lang.Void> messageLoop = new CompletableFuture<>();
@@ -273,10 +281,10 @@ final class RpcState<VatId> {
 
     RpcState(BootstrapFactory<VatId>  bootstrapFactory,
              VatNetwork.Connection<VatId> connection,
-             CompletableFuture<java.lang.Void> onDisconnect) {
+             CompletableFuture<DisconnectInfo> disconnectFulfiller) {
         this.bootstrapFactory = bootstrapFactory;
         this.connection = connection;
-        this.onDisconnect = onDisconnect;
+        this.disconnectFulfiller = disconnectFulfiller;
         startMessageLoop();
     }
 
@@ -284,13 +292,10 @@ final class RpcState<VatId> {
         return this.messageLoop;
     }
 
-    public CompletableFuture<java.lang.Void> onDisconnect() {
-        return this.messageLoop;
-    }
-
-    CompletableFuture<java.lang.Void> disconnect(Throwable exc) {
+    void disconnect(Throwable exc) {
         if (isDisconnected()) {
-            return CompletableFuture.failedFuture(this.disconnected);
+            // Already disconnected.
+            return;
         }
 
         var networkExc = RpcException.disconnected(exc.getMessage());
@@ -334,6 +339,7 @@ final class RpcState<VatId> {
             }
         }
 
+        // Send an abort message, but ignore failure.
         try {
             int sizeHint = messageSizeHint() + exceptionSizeHint(exc);
             var message = this.connection.newOutgoingMessage(sizeHint);
@@ -344,25 +350,31 @@ final class RpcState<VatId> {
         catch (Exception ignored) {
         }
 
-        var onShutdown = this.connection.shutdown().handle((x, ioExc) -> {
-            if (ioExc == null) {
-                return CompletableFuture.completedFuture(null);
-            }
+        var shutdownPromise = this.connection.shutdown()
+                .exceptionallyCompose(ioExc -> {
 
-            // TODO IOException?
             assert !(ioExc instanceof IOException);
 
             if (ioExc instanceof RpcException) {
                 var rpcExc = (RpcException)exc;
+
+                // Don't report disconnects as an error
                 if (rpcExc.getType() == RpcException.Type.DISCONNECTED) {
                     return CompletableFuture.completedFuture(null);
                 }
             }
+
             return CompletableFuture.failedFuture(ioExc);
         });
 
         this.disconnected = networkExc;
-        return onShutdown.thenCompose(x -> CompletableFuture.failedFuture(networkExc));
+        this.disconnectFulfiller.complete(new DisconnectInfo(shutdownPromise));
+
+        for (var pipeline: pipelinesToRelease) {
+            if (pipeline instanceof RpcState<?>.RpcPipeline) {
+                ((RpcPipeline) pipeline).redirectLater.completeExceptionally(networkExc);
+            }
+        }
     }
 
     final boolean isDisconnected() {
@@ -389,12 +401,7 @@ final class RpcState<VatId> {
     ClientHook restore() {
         var question = questions.next();
         question.setAwaitingReturn(true);
-
-        // Run the message loop until the boostrap promise is resolved.
         var promise = new CompletableFuture<RpcResponse>();
-        var loop = CompletableFuture.anyOf(
-                getMessageLoop(), promise).thenCompose(x -> promise);
-
         int sizeHint = messageSizeHint(RpcProtocol.Bootstrap.factory);
         var message = connection.newOutgoingMessage(sizeHint);
         var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
@@ -413,6 +420,7 @@ final class RpcState<VatId> {
         var messageReader = this.connection.receiveIncomingMessage()
                 .thenAccept(message -> {
                     if (message == null) {
+                        this.disconnect(RpcException.disconnected("Peer disconnected"));
                         this.messageLoop.complete(null);
                         return;
                     }
@@ -423,11 +431,12 @@ final class RpcState<VatId> {
                         // or internal RpcState is bad.
                         this.disconnect(rpcExc);
                     }
-                    this.cleanupImports();
-                    this.cleanupQuestions();
                 });
 
-        messageReader.thenRunAsync(this::startMessageLoop);
+        messageReader.thenRunAsync(this::startMessageLoop).exceptionallyCompose(exc -> {
+            assert exc == null: "Exception in startMessageLoop!";
+            return CompletableFuture.failedFuture(exc);
+        });
     }
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {
@@ -470,6 +479,9 @@ final class RpcState<VatId> {
                 }
                 break;
         }
+
+        this.cleanupImports();
+        this.cleanupQuestions();
     }
 
     void handleUnimplemented(RpcProtocol.Message.Reader message) {
@@ -1427,7 +1439,6 @@ final class RpcState<VatId> {
                 this.responseSent = false;
                 sendErrorReturn(exc);
             }
-
             cleanupAnswerTable(exports);
         }
 
@@ -1512,6 +1523,7 @@ final class RpcState<VatId> {
         RpcPipeline(Question question,
                     CompletableFuture<RpcResponse> redirectLater) {
             this.question = question;
+            assert redirectLater != null;
             this.redirectLater = redirectLater;
         }
 
@@ -1541,6 +1553,11 @@ final class RpcState<VatId> {
                         response -> response.getResults().getPipelinedCap(ops));
                 return new PromiseClient(pipelineClient, resolutionPromise, null);
             });
+        }
+
+        @Override
+        public void close() {
+            this.question.finish();
         }
     }
 
@@ -1787,11 +1804,11 @@ final class RpcState<VatId> {
             this.cap = initial;
             this.importId = importId;
             eventual.whenComplete((resolution, exc) -> {
-                if (exc != null) {
-                    resolve(Capability.newBrokenCap(exc));
+                if (exc == null) {
+                    resolve(resolution);
                 }
                 else {
-                    resolve(resolution);
+                    resolve(Capability.newBrokenCap(exc));
                 }
             });
         }
@@ -1842,6 +1859,10 @@ final class RpcState<VatId> {
             // TODO Flow control
 
             if (resolutionType == ResolutionType.REFLECTED && receivedCall && !isDisconnected()) {
+                // The new capability is hosted locally, not on the remote machine.  And, we had made calls
+                // to the promise.  We need to make sure those calls echo back to us before we allow new
+                // calls to go directly to the local capability, so we need to set a local embargo and send
+                // a `Disembargo` to echo through the peer.
                 int sizeHint = messageSizeHint(RpcProtocol.Disembargo.factory);
                 var message = connection.newOutgoingMessage(sizeHint);
                 var disembargo = message.getBody().initAs(RpcProtocol.Message.factory).initDisembargo();
@@ -1852,7 +1873,8 @@ final class RpcState<VatId> {
                 disembargo.getContext().setSenderLoopback(embargo.id);
 
                 final ClientHook finalReplacement = replacement;
-                var embargoPromise = embargo.disembargo.thenApply(x -> finalReplacement);
+                var embargoPromise = embargo.disembargo.thenApply(
+                        void_ -> finalReplacement);
                 replacement = Capability.newLocalPromiseClient(embargoPromise);
                 message.send();
             }

@@ -150,7 +150,7 @@ public final class Capability {
         }
 
         private final class LocalClient implements ClientHook {
-            private final CompletableFuture<java.lang.Void> resolveTask;
+            private CompletableFuture<java.lang.Void> resolveTask;
             private ClientHook resolved;
             private boolean blocked = false;
             private final CapabilityServerSetBase capServerSet;
@@ -162,11 +162,16 @@ public final class Capability {
             LocalClient(CapabilityServerSetBase capServerSet) {
                 Server.this.hook = this;
                 this.capServerSet = capServerSet;
+                startResolveTask();
+            }
 
-                var resolver = shortenPath();
-                this.resolveTask = resolver != null
-                        ? resolver.thenAccept(client -> this.resolved = client.getHook())
-                        : null;
+            private void startResolveTask() {
+                var resolveTask = shortenPath();
+                if (resolveTask != null) {
+                    this.resolveTask = resolveTask.thenAccept(cap -> {
+                        this.resolved = cap.getHook();
+                    });
+                }
             }
 
             @Override
@@ -209,6 +214,7 @@ public final class Capability {
             @Override
             public CompletableFuture<ClientHook> whenMoreResolved() {
                 if (this.resolved != null) {
+                    System.out.println("Local client resolved! " + this.toString());
                     return CompletableFuture.completedFuture(this.resolved);
                 }
                 else if (this.resolveTask != null) {

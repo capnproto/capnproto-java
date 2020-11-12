@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +19,7 @@ public class TwoPartyVatNetwork
     }
 
     private CompletableFuture<java.lang.Void> previousWrite = CompletableFuture.completedFuture(null);
-    private final CompletableFuture<java.lang.Void> peerDisconnected = new CompletableFuture<>();
+    private final CompletableFuture<java.lang.Void> disconnectPromise = new CompletableFuture<>();
     private final AsynchronousSocketChannel channel;
     private final RpcTwoPartyProtocol.Side side;
     private final MessageBuilder peerVatId = new MessageBuilder(4);
@@ -34,6 +35,12 @@ public class TwoPartyVatNetwork
                         : RpcTwoPartyProtocol.Side.CLIENT);
     }
 
+    @Override
+    public void close() throws IOException {
+        this.channel.close();
+        this.disconnectPromise.complete(null);
+    }
+
     public RpcTwoPartyProtocol.Side getSide() {
         return side;
     }
@@ -44,6 +51,10 @@ public class TwoPartyVatNetwork
 
     public Connection<RpcTwoPartyProtocol.VatId.Reader> asConnection() {
         return this;
+    }
+
+    public CompletableFuture<java.lang.Void> onDisconnect() {
+        return this.disconnectPromise.copy();
     }
 
     @Override
@@ -59,7 +70,7 @@ public class TwoPartyVatNetwork
             return CompletableFuture.completedFuture(this.asConnection());
         }
         else {
-            // never /home/vaci/g/capnproto-java/compilercompletes
+            // never completes
             return new CompletableFuture<>();
         }
     }
@@ -98,19 +109,19 @@ public class TwoPartyVatNetwork
     }
 
     @Override
-    public CompletableFuture<java.lang.Void> onDisconnect() {
-        return this.peerDisconnected.copy();
-    }
-
-    @Override
     public CompletableFuture<java.lang.Void> shutdown() {
-        return this.previousWrite.whenComplete((x, exc) -> {
+        assert this.previousWrite != null: "Already shut down";
+
+        var result = this.previousWrite.thenRun(() -> {
             try {
                 this.channel.shutdownOutput();
             }
             catch (Exception ioExc) {
             }
         });
+
+        this.previousWrite = null;
+        return result;
     }
 
     final class OutgoingMessage implements OutgoingRpcMessage {

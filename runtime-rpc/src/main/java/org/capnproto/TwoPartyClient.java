@@ -20,7 +20,7 @@ public class TwoPartyClient {
                           Capability.Client bootstrapInterface,
                           RpcTwoPartyProtocol.Side side) {
         this.network = new TwoPartyVatNetwork(channel, side);
-        this.rpcSystem = new RpcSystem<RpcTwoPartyProtocol.VatId.Reader>(network, bootstrapInterface);
+        this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);
     }
 
     public Capability.Client bootstrap() {
@@ -30,13 +30,5 @@ public class TwoPartyClient {
                 ? RpcTwoPartyProtocol.Side.SERVER
                 : RpcTwoPartyProtocol.Side.CLIENT);
         return rpcSystem.bootstrap(vatId.asReader());
-    }
-
-    public TwoPartyVatNetwork getNetwork() {
-        return this.network;
-    }
-
-    public CompletableFuture<java.lang.Void> onDisconnect() {
-        return this.network.onDisconnect();
     }
 }
