@@ -260,7 +260,8 @@ final class RpcState<VatId> {
     private final CompletableFuture<java.lang.Void> onDisconnect;
     private Throwable disconnected = null;
     private CompletableFuture<java.lang.Void> messageReady = CompletableFuture.completedFuture(null);
-    private final CompletableFuture<java.lang.Void> messageLoop;
+    private final CompletableFuture<java.lang.Void> messageLoop = new CompletableFuture<>();
+    // completes when the message loop exits
     private final ReferenceQueue<Question> questionRefs = new ReferenceQueue<>();
     private final ReferenceQueue<ImportClient> importRefs = new ReferenceQueue<>();
 
@@ -270,7 +271,7 @@ final class RpcState<VatId> {
         this.bootstrapFactory = bootstrapFactory;
         this.connection = connection;
         this.onDisconnect = onDisconnect;
-        this.messageLoop = this.doMessageLoop();
+        startMessageLoop();
     }
 
     public CompletableFuture<java.lang.Void> getMessageLoop() {
@@ -397,24 +398,30 @@ final class RpcState<VatId> {
         return pipeline.getPipelinedCap(new PipelineOp[0]);
     }
 
-    private CompletableFuture<java.lang.Void> doMessageLoop() {
+    private void startMessageLoop() {
         if (isDisconnected()) {
-            return CompletableFuture.failedFuture(this.disconnected);
+            this.messageLoop.completeExceptionally(this.disconnected);
+            return;
         }
 
-        return connection.receiveIncomingMessage().thenCompose(message -> {
-            try {
-                this.handleMessage(message);
-            } catch (Exception rpcExc) {
-                // either we received an Abort message from peer
-                // or internal RpcState is bad.
-                return this.disconnect(rpcExc);
-            }
-            this.cleanupImports();
-            this.cleanupQuestions();
-            return this.doMessageLoop();
+        var messageReader = this.connection.receiveIncomingMessage()
+                .thenAccept(message -> {
+                    if (message == null) {
+                        this.messageLoop.complete(null);
+                        return;
+                    }
+                    try {
+                        this.handleMessage(message);
+                    } catch (Exception rpcExc) {
+                        // either we received an Abort message from peer
+                        // or internal RpcState is bad.
+                        this.disconnect(rpcExc);
+                    }
+                    this.cleanupImports();
+                    this.cleanupQuestions();
+                });
 
-        }).exceptionallyCompose(exc -> this.disconnect(exc));
+        messageReader.thenRunAsync(this::startMessageLoop);
     }
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {

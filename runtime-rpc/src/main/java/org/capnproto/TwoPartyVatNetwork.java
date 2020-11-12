@@ -77,11 +77,7 @@ public class TwoPartyVatNetwork
     public CompletableFuture<IncomingRpcMessage> receiveIncomingMessage() {
         var message = Serialize.readAsync(channel)
                 .thenApply(reader -> (IncomingRpcMessage) new IncomingMessage(reader))
-                .whenComplete((msg, exc) -> {
-                    if (exc != null) {
-                        this.peerDisconnected.complete(null);
-                    }
-                });
+                .exceptionally(exc -> null);
 
         // send to message tap
         if (this.tap != null) {

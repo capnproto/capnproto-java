@@ -110,7 +110,6 @@ public class RpcStateTest {
         var msg = new TestMessage();
         msg.builder.getRoot(RpcProtocol.Message.factory).initUnimplemented();
         this.connection.setNextIncomingMessage(msg);
-        Assert.assertFalse(sent.isEmpty());
     }
 
     @Test
