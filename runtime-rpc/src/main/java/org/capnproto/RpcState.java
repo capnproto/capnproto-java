@@ -117,7 +117,7 @@ final class RpcState<VatId> {
         }
     }
 
-    class QuestionExportTable implements Iterable<Question> {
+    class QuestionExportTable {
         private final HashMap<Integer, WeakReference<Question>> slots = new HashMap<>();
         private final Queue<Integer> freeIds = new PriorityQueue<>();
         private int max = 0;
@@ -146,20 +146,12 @@ final class RpcState<VatId> {
             return value;
         }
 
-        @Override
-        public Iterator<Question> iterator() {
-            return this.slots.values()
-                    .stream()
-                    .map(Reference::get)
-                    .filter(Objects::nonNull)
-                    .iterator();
-        }
-
-        @Override
         public void forEach(Consumer<? super Question> action) {
-            var iter = this.iterator();
-            while (iter.hasNext()) {
-                action.accept(iter.next());
+            for (var entry: this.slots.values()) {
+                var question = entry.get();
+                if (question != null) {
+                    action.accept(question);
+                }
             }
         }
     }
@@ -297,9 +289,7 @@ final class RpcState<VatId> {
         var networkExc = RpcException.disconnected(exc.getMessage());
 
         // All current questions complete with exceptions.
-        for (var question: questions) {
-            question.reject(networkExc);
-        }
+        questions.forEach(question -> question.reject(networkExc));
 
         List<PipelineHook> pipelinesToRelease = new ArrayList<>();
         List<ClientHook> clientsToRelease = new ArrayList<>();
