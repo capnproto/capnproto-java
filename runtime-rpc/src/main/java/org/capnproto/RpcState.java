@@ -306,7 +306,7 @@ final class RpcState<VatId> {
         List<CompletionStage<RpcResponse>> tailCallsToRelease = new ArrayList<>();
         List<CompletionStage<java.lang.Void>> resolveOpsToRelease = new ArrayList<>();
 
-        for (var answer : answers) {
+        for (var answer: answers) {
             if (answer.redirectedResults != null) {
                 tailCallsToRelease.add(answer.redirectedResults);
                 answer.redirectedResults = null;
@@ -317,7 +317,7 @@ final class RpcState<VatId> {
             }
         }
 
-        for (var export : exports) {
+        for (var export: exports) {
             clientsToRelease.add(export.clientHook);
             resolveOpsToRelease.add(export.resolveOp);
             export.clientHook = null;
@@ -325,13 +325,13 @@ final class RpcState<VatId> {
             export.refcount = 0;
         }
 
-        for (var imp : imports) {
+        for (var imp: imports) {
             if (imp.promise != null) {
                 imp.promise.completeExceptionally(networkExc);
             }
         }
 
-        for (var embargo : embargos) {
+        for (var embargo: embargos) {
             if (embargo.disembargo != null) {
                 embargo.disembargo.completeExceptionally(networkExc);
             }
@@ -344,7 +344,7 @@ final class RpcState<VatId> {
             FromException(exc, abort);
             message.send();
         }
-        catch (Throwable abortFailed) {
+        catch (Exception ignored) {
         }
 
         var onShutdown = this.connection.shutdown().handle((x, ioExc) -> {
