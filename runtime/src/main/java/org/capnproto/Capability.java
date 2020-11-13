@@ -162,10 +162,6 @@ public final class Capability {
             LocalClient(CapabilityServerSetBase capServerSet) {
                 Server.this.hook = this;
                 this.capServerSet = capServerSet;
-                startResolveTask();
-            }
-
-            private void startResolveTask() {
                 var resolveTask = shortenPath();
                 if (resolveTask != null) {
                     this.resolveTask = resolveTask.thenAccept(cap -> {
@@ -214,7 +210,6 @@ public final class Capability {
             @Override
             public CompletableFuture<ClientHook> whenMoreResolved() {
                 if (this.resolved != null) {
-                    System.out.println("Local client resolved! " + this.toString());
                     return CompletableFuture.completedFuture(this.resolved);
                 }
                 else if (this.resolveTask != null) {
