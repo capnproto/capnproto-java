@@ -1,27 +1,21 @@
 package org.capnproto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RpcSystem<VatId extends StructReader> {
 
     private final VatNetwork<VatId> network;
     private final BootstrapFactory<VatId> bootstrapFactory;
-    private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new HashMap<>();
-    private final CompletableFuture<java.lang.Void> messageLoop;
-    private final CompletableFuture<java.lang.Void> acceptLoop;
+    private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new ConcurrentHashMap<>();
 
     public RpcSystem(VatNetwork<VatId> network) {
-        this.network = network;
-        this.bootstrapFactory = null;
-        this.acceptLoop = new CompletableFuture<>();
-        this.messageLoop = doMessageLoop();
-    }
-
-    public VatNetwork<VatId> getNetwork() {
-        return this.network;
+        this(network, (BootstrapFactory)null);
     }
 
     public RpcSystem(VatNetwork<VatId> network,
@@ -49,8 +43,7 @@ public class RpcSystem<VatId extends StructReader> {
                      BootstrapFactory<VatId> bootstrapFactory) {
         this.network = network;
         this.bootstrapFactory = bootstrapFactory;
-        this.acceptLoop = doAcceptLoop();
-        this.messageLoop = doMessageLoop();
+        this.startAcceptLoop();
     }
 
     public Capability.Client bootstrap(VatId vatId) {
@@ -68,21 +61,19 @@ public class RpcSystem<VatId extends StructReader> {
         }
     }
 
-    RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
-        var state = this.connections.get(connection);
-        if (state == null) {
-            var onDisconnect = new CompletableFuture<RpcState.DisconnectInfo>()
-                    .whenComplete((info, exc) -> {
-                        this.connections.remove(connection);
-                        try {
-                            connection.close();
-                        } catch (IOException ignored) {
-                        }
-                    });
+    public VatNetwork<VatId> getNetwork() {
+        return this.network;
+    }
 
-            state = new RpcState<>(this.bootstrapFactory, connection, onDisconnect);
-            this.connections.put(connection, state);
-        }
+    RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
+        var state = this.connections.computeIfAbsent(connection, conn -> {
+            var onDisconnect = new CompletableFuture<RpcState.DisconnectInfo>();
+            onDisconnect.thenCompose(info -> {
+                        this.connections.remove(connection);
+                        return info.shutdownPromise.thenRun(() -> connection.close());
+                    });
+           return new RpcState<>(this.bootstrapFactory, conn, onDisconnect);
+        });
         return state;
     }
 
@@ -90,27 +81,10 @@ public class RpcSystem<VatId extends StructReader> {
         getConnectionState(connection);
     }
 
-    private CompletableFuture<java.lang.Void> doAcceptLoop() {
-        return this.network.baseAccept().thenCompose(connection -> {
-            this.accept(connection);
-            return this.doAcceptLoop();
-        });
-    }
-
-    private CompletableFuture<java.lang.Void> doMessageLoop() {
-        var accept = this.getAcceptLoop();
-        for (var conn: this.connections.values()) {
-            accept = accept.acceptEither(conn.getMessageLoop(), x -> {});
-        }
-        return accept.thenCompose(x -> this.doMessageLoop());
-    }
-
-    public CompletableFuture<java.lang.Void> getMessageLoop() {
-        return this.messageLoop;
-    }
-
-    private CompletableFuture<java.lang.Void> getAcceptLoop() {
-        return this.acceptLoop;
+    private void startAcceptLoop() {
+        this.network.baseAccept()
+                .thenAccept(this::accept)
+                .thenRunAsync(this::startAcceptLoop);
     }
 
     public static <VatId extends StructReader>

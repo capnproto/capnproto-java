@@ -13,7 +13,7 @@ public interface VatNetwork<VatId>
         CompletableFuture<IncomingRpcMessage> receiveIncomingMessage();
         CompletableFuture<java.lang.Void> shutdown();
         VatId getPeerVatId();
-        void close() throws IOException;
+        void close();
     }
 
     CompletableFuture<Connection<VatId>> baseAccept();

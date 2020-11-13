@@ -5,9 +5,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
@@ -288,7 +290,7 @@ final class RpcState<VatId> {
         startMessageLoop();
     }
 
-    public CompletableFuture<java.lang.Void> getMessageLoop() {
+    CompletableFuture<java.lang.Void> onDisconnection() {
         return this.messageLoop;
     }
 
@@ -363,6 +365,12 @@ final class RpcState<VatId> {
                     return CompletableFuture.completedFuture(null);
                 }
             }
+            else if (ioExc instanceof CompletionException) {
+                var compExc = (CompletionException)ioExc;
+                if (compExc.getCause() instanceof ClosedChannelException) {
+                    return CompletableFuture.completedFuture(null);
+                }
+            }
 
             return CompletableFuture.failedFuture(ioExc);
         });
@@ -371,9 +379,7 @@ final class RpcState<VatId> {
         this.disconnectFulfiller.complete(new DisconnectInfo(shutdownPromise));
 
         for (var pipeline: pipelinesToRelease) {
-            if (pipeline instanceof RpcState<?>.RpcPipeline) {
-                ((RpcPipeline) pipeline).redirectLater.completeExceptionally(networkExc);
-            }
+            pipeline.cancel(networkExc);
         }
     }
 
@@ -1556,8 +1562,8 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public void close() {
-            this.question.finish();
+        public void cancel(Throwable exc) {
+            this.question.reject(exc);
         }
     }
 

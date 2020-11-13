@@ -10,135 +10,80 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyServer {
 
     private class AcceptedConnection {
-        final AsynchronousSocketChannel channel;
+        final AsynchronousSocketChannel connection;
         final TwoPartyVatNetwork network;
         final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
-        private final CompletableFuture<?> messageLoop;
 
-        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel channel) {
-            this.channel = channel;
-            this.network = new TwoPartyVatNetwork(channel, RpcTwoPartyProtocol.Side.SERVER);
+        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel connection) {
+            this.connection = connection;
+            this.network = new TwoPartyVatNetwork(this.connection, RpcTwoPartyProtocol.Side.SERVER);
             this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);
-            this.messageLoop = this.rpcSystem.getMessageLoop().exceptionally(exc -> {
-                connections.remove(this);
-                return null;
-            });
-        }
-
-        public CompletableFuture<?> getMessageLoop() {
-            return this.messageLoop;
         }
      }
 
     class ConnectionReceiver {
-        AsynchronousServerSocketChannel listener;
-        final CompletableFuture<?> messageLoop;
-        public ConnectionReceiver(AsynchronousServerSocketChannel listener) {
+        final AsynchronousServerSocketChannel listener;
+
+        ConnectionReceiver(AsynchronousServerSocketChannel listener) {
             this.listener = listener;
-            this.messageLoop = doMessageLoop();
         }
 
-        public CompletableFuture<?> getMessageLoop() {
-            return this.messageLoop;
-        }
-
-        private CompletableFuture<?> doMessageLoop() {
-            final var accepted = new CompletableFuture<AsynchronousSocketChannel>();
-            listener.accept(null, new CompletionHandler<>() {
-
+        CompletableFuture<AsynchronousSocketChannel> accept() {
+            CompletableFuture<AsynchronousSocketChannel> result = new CompletableFuture<>();
+            this.listener.accept(null, new CompletionHandler<>() {
                 @Override
                 public void completed(AsynchronousSocketChannel channel, Object attachment) {
-                    accepted.complete(channel);
+                    result.complete(channel);
                 }
 
                 @Override
                 public void failed(Throwable exc, Object attachment) {
-                    accepted.completeExceptionally(exc);
+                    result.completeExceptionally(exc);
                 }
             });
-            return accepted.thenCompose(channel -> CompletableFuture.allOf(
-                    accept(channel),
-                    doMessageLoop()));
+            return result.copy();
         }
     }
 
     private final Capability.Client bootstrapInterface;
     private final List<AcceptedConnection> connections = new ArrayList<>();
-    private final List<ConnectionReceiver> listeners = new ArrayList<>();
-    private final CompletableFuture<?> messageLoop;
 
     public TwoPartyServer(Capability.Client bootstrapInterface) {
         this.bootstrapInterface = bootstrapInterface;
-        this.messageLoop = doMessageLoop();
     }
 
     public TwoPartyServer(Capability.Server bootstrapServer) {
         this(new Capability.Client(bootstrapServer));
     }
 
-    private CompletableFuture<?> getMessageLoop() {
-        return this.messageLoop;
-    }
-
-    public CompletableFuture<?> drain() {
-        CompletableFuture<java.lang.Void> done = new CompletableFuture<>();
-        for (var conn: this.connections) {
-            done = CompletableFuture.allOf(done, conn.getMessageLoop());
-        }
-        return done;
-    }
-
-    private CompletableFuture<java.lang.Void> accept(AsynchronousSocketChannel channel) {
+    public void accept(AsynchronousSocketChannel channel) {
         var connection = new AcceptedConnection(this.bootstrapInterface, channel);
         this.connections.add(connection);
-        return connection.network.onDisconnect().whenComplete((x, exc) -> {
+        connection.network.onDisconnect().whenComplete((x, exc) -> {
             this.connections.remove(connection);
         });
     }
-/*
-    private final CompletableFuture<?> acceptLoop(AsynchronousServerSocketChannel listener) {
-        final var accepted = new CompletableFuture<AsynchronousSocketChannel>();
-        listener.accept(null, new CompletionHandler<>() {
 
-            @Override
-            public void completed(AsynchronousSocketChannel channel, Object attachment) {
-                accepted.complete(channel);
-            }
+    public CompletableFuture<java.lang.Void> listen(AsynchronousServerSocketChannel listener) {
+        return this.listen(wrapListenSocket(listener));
+    }
 
-            @Override
-            public void failed(Throwable exc, Object attachment) {
-                accepted.completeExceptionally(exc);
-            }
+    CompletableFuture<java.lang.Void> listen(ConnectionReceiver listener) {
+        return listener.accept().thenCompose(channel -> {
+            this.accept(channel);
+            return this.listen(listener);
         });
-        return accepted.thenCompose(channel -> CompletableFuture.anyOf(
-                accept(channel),
-                acceptLoop(listener)));
-    }
-*/
-    public CompletableFuture<?> listen(AsynchronousServerSocketChannel listener) {
-        var receiver = new ConnectionReceiver(listener);
-        this.listeners.add(receiver);
-        return receiver.getMessageLoop();
     }
 
-    private CompletableFuture<?> doMessageLoop() {
-        var done = new CompletableFuture<>();
+    CompletableFuture<java.lang.Void> drain() {
+        CompletableFuture<java.lang.Void> loop = CompletableFuture.completedFuture(null);
         for (var conn: this.connections) {
-            done = CompletableFuture.anyOf(done, conn.getMessageLoop());
+            loop = CompletableFuture.allOf(loop, conn.network.onDisconnect());
         }
-        for (var listener: this.listeners) {
-            done = CompletableFuture.anyOf(done, listener.getMessageLoop());
-        }
-        return done.thenCompose(x -> doMessageLoop());
+        return loop;
     }
 
-    /*
-    public CompletableFuture<?> runOnce() {
-        var done = new CompletableFuture<>();
-        for (var conn: connections) {
-            done = CompletableFuture.anyOf(done, conn.runOnce());
-        }
-        return done;
+    ConnectionReceiver wrapListenSocket(AsynchronousServerSocketChannel channel) {
+        return new ConnectionReceiver(channel);
     }
-     */
 }

@@ -167,6 +167,11 @@ public final class AnyPointer {
             return this;
         }
 
+        @Override
+        public void cancel(Throwable exc) {
+            this.hook.cancel(exc);
+        }
+
         public Pipeline noop() {
             return new Pipeline(this.hook, this.ops.clone());
         }

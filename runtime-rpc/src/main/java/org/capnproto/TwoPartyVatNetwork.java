@@ -37,9 +37,14 @@ public class TwoPartyVatNetwork
     }
 
     @Override
-    public void close() throws IOException {
-        this.channel.close();
-        this.disconnectPromise.complete(null);
+    public void close() {
+        try {
+            this.channel.close();
+            this.disconnectPromise.complete(null);
+        }
+        catch (Exception exc) {
+            this.disconnectPromise.completeExceptionally(exc);
+        }
     }
 
     public RpcTwoPartyProtocol.Side getSide() {
@@ -113,13 +118,13 @@ public class TwoPartyVatNetwork
     public CompletableFuture<java.lang.Void> shutdown() {
         assert this.previousWrite != null: "Already shut down";
 
-        var result = this.previousWrite.thenRun(() -> {
+        var result = this.previousWrite.whenComplete((void_, exc) -> {
             try {
                 if (this.channel instanceof AsynchronousSocketChannel) {
                     ((AsynchronousSocketChannel)this.channel).shutdownOutput();
                 }
             }
-            catch (Exception ioExc) {
+            catch (Exception ignored) {
             }
         });
 

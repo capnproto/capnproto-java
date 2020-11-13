@@ -388,11 +388,6 @@ public final class Capability {
         public final ClientHook getPipelinedCap(PipelineOp[] ops) {
             return this.results.getPipelinedCap(ops);
         }
-
-        @Override
-        public void close() {
-            this.ctx.allowCancellation();
-        }
     }
 
     private static final class LocalResponse implements ResponseHook {
@@ -542,7 +537,7 @@ public final class Capability {
                     : new QueuedClient(this.promise.thenApply(
                         pipeline -> pipeline.getPipelinedCap(ops)));
         }
-
+/*
         @Override
         public void close() {
             if (this.redirect != null) {
@@ -552,6 +547,7 @@ public final class Capability {
                 this.promise.cancel(false);
             }
         }
+        */
     }
 
     // A ClientHook which simply queues calls while waiting for a ClientHook to which to forward them.

@@ -27,8 +27,8 @@ public class RemotePromise<Results>
     }
 
     @Override
-    public void close() throws Exception {
-        this.pipeline.hook.close();
+    public void close() {
+        this.pipeline.cancel(RpcException.failed("Cancelled"));
         this.join();
     }
 
