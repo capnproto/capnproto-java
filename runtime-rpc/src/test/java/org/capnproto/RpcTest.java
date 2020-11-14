@@ -53,12 +53,8 @@ public class RpcTest {
     }
 
     static final class TestNetworkAdapter
-            implements VatNetwork<Test.TestSturdyRef.Reader> {
-
-        @Override
-        public CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>> baseAccept() {
-            return this.accept().thenApply(conn -> conn);
-        }
+            implements VatNetwork<Test.TestSturdyRef.Reader>,
+                       AutoCloseable {
 
         class Connection implements VatNetwork.Connection<Test.TestSturdyRef.Reader> {
 
@@ -80,6 +76,14 @@ public class RpcTest {
                 Assert.assertNull(other.partner);
                 this.partner = other;
                 other.partner = this;
+            }
+
+            void disconnect(Exception exc) {
+                while (!fulfillers.isEmpty()) {
+                    fulfillers.remove().completeExceptionally(exc);
+                }
+
+                this.networkException = exc;
             }
 
             TestNetwork getNetwork() {
@@ -170,10 +174,6 @@ public class RpcTest {
 
             @Override
             public void close() {
-                var msg = newOutgoingMessage(0);
-                var abort = msg.getBody().initAs(RpcProtocol.Message.factory).initAbort();
-                FromException(RpcException.disconnected(""), abort);
-                msg.send();
             }
         }
 
@@ -192,6 +192,18 @@ public class RpcTest {
 
         Connection newConnection(boolean isClient, Test.TestSturdyRef.Reader peerId) {
             return new Connection(isClient, peerId);
+        }
+
+        public CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>> baseAccept() {
+            return this.accept().thenApply(conn -> conn);
+        }
+
+        @Override
+        public void close() {
+            var exc = RpcException.failed("Network was destroyed");
+            for (var conn: this.connections.values()) {
+                conn.disconnect(exc);
+            }
         }
 
         @Override

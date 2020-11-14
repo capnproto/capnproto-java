@@ -12,6 +12,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
+@SuppressWarnings({"OverlyCoupledMethod", "OverlyLongMethod"})
 public class TwoPartyTest {
 
     static final class PipeThread {
@@ -163,8 +164,8 @@ public class TwoPartyTest {
             var pipelineRequest2 = new Test.TestExtends.Client(promise.getOutBox().getCap()).graultRequest();
             var pipelinePromise2 = pipelineRequest2.send();
 
-            Assert.assertThrows(Exception.class, () -> pipelinePromise.join());
-            Assert.assertThrows(Exception.class, () -> pipelinePromise2.join());
+            Assert.assertThrows(Exception.class, pipelinePromise::join);
+            Assert.assertThrows(Exception.class, pipelinePromise2::join);
 
             Assert.assertEquals(3, callCount.value());
             Assert.assertEquals(1, chainedCallCount.value());
