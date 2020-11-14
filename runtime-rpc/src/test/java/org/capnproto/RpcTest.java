@@ -33,10 +33,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import static org.capnproto.RpcState.FromException;
 
 public class RpcTest {
 
-    final class TestNetwork {
+    static final class TestNetwork {
 
         final Map<String, TestNetworkAdapter> map = new HashMap<>();
         int received = 0;
@@ -51,7 +52,7 @@ public class RpcTest {
         }
     }
 
-    final class TestNetworkAdapter
+    static final class TestNetworkAdapter
             implements VatNetwork<Test.TestSturdyRef.Reader> {
 
         @Override
@@ -169,6 +170,10 @@ public class RpcTest {
 
             @Override
             public void close() {
+                var msg = newOutgoingMessage(0);
+                var abort = msg.getBody().initAs(RpcProtocol.Message.factory).initAbort();
+                FromException(RpcException.disconnected(""), abort);
+                msg.send();
             }
         }
 
