@@ -371,6 +371,9 @@ public class RpcTest {
 
         handle1 = null;
         handle2 = null;
+
+        System.gc();
+        client.echoRequest().send().join();
     }
 
     @org.junit.Test
