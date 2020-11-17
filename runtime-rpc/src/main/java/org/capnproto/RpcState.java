@@ -376,8 +376,7 @@ final class RpcState<VatId> {
         var question = questions.next();
         question.isAwaitingReturn = true;
         var questionRef = question.selfRef;
-        var promise = new CompletableFuture<RpcResponse>();
-        var pipeline = new RpcPipeline(questionRef, promise);
+        var pipeline = new RpcPipeline(questionRef, questionRef.response);
 
         int sizeHint = messageSizeHint(RpcProtocol.Bootstrap.factory);
         var message = connection.newOutgoingMessage(sizeHint);
@@ -507,7 +506,7 @@ final class RpcState<VatId> {
             return;
         }
 
-        final var answerId = bootstrap.getQuestionId();
+        var answerId = bootstrap.getQuestionId();
         var answer = answers.put(answerId);
         if (answer.active) {
             assert false: "bootstrap questionId is already in use: " + answerId;
