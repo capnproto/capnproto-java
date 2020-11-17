@@ -1793,23 +1793,82 @@ final class RpcState<VatId> {
         private final Integer importId;
         private boolean receivedCall = false;
         private ResolutionType resolutionType = ResolutionType.UNRESOLVED;
+        private final CompletableFuture<ClientHook> eventual;
 
         PromiseClient(RpcClient initial,
                       CompletableFuture<ClientHook> eventual,
                       Integer importId) {
             this.cap = initial;
             this.importId = importId;
-            eventual.whenComplete((resolution, exc) -> {
+            this.eventual = eventual.whenComplete((resolution, exc) -> {
                 if (exc == null) {
-                    resolve(resolution);
+                    this.resolve(resolution);
                 }
                 else {
-                    resolve(Capability.newBrokenCap(exc));
+                    this.resolve(Capability.newBrokenCap(exc));
                 }
             });
         }
 
-        public boolean isResolved() {
+        @Override
+        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder target, List<Integer> fds) {
+            this.receivedCall = true;
+            return RpcState.this.writeDescriptor(this.cap, target, fds);
+        }
+
+        @Override
+        public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
+            this.receivedCall = true;
+            return RpcState.this.writeTarget(this.cap, target);
+        }
+
+        @Override
+        public ClientHook getInnermostClient() {
+            this.receivedCall = true;
+            return RpcState.this.getInnermostClient(this.cap);
+        }
+
+        @Override
+        public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
+            this.receivedCall = true;
+            return this.cap.newCall(interfaceId, methodId);
+        }
+
+        @Override
+        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
+            this.receivedCall = true;
+            return this.cap.call(interfaceId, methodId, ctx);
+        }
+
+        @Override
+        public ClientHook getResolved() {
+            return this.isResolved()
+                    ? this.cap
+                    : null;
+        }
+
+        @Override
+        public CompletableFuture<ClientHook> whenMoreResolved() {
+            return this.eventual.copy();
+        }
+
+        @Override
+        public Integer getFd() {
+            if (this.isResolved()) {
+                return this.cap.getFd();
+            }
+            else {
+                // In theory, before resolution, the ImportClient for the promise could have an FD
+                // attached, if the promise itself was presented with an attached FD. However, we can't
+                // really return that one here because it may be closed when we get the Resolve message
+                // later. In theory we could have the PromiseClient itself take ownership of an FD that
+                // arrived attached to a promise cap, but the use case for that is questionable. I'm
+                // keeping it simple for now.
+                return null;
+            }
+        }
+
+        private boolean isResolved() {
             return resolutionType != ResolutionType.UNRESOLVED;
         }
 
@@ -1876,29 +1935,6 @@ final class RpcState<VatId> {
             }
 
             return replacement;
-        }
-
-        @Override
-        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder target, List<Integer> fds) {
-            this.receivedCall = true;
-            return RpcState.this.writeDescriptor(cap, target, fds);
-        }
-
-        @Override
-        public ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target) {
-            this.receivedCall = true;
-            return RpcState.this.writeTarget(this.cap, target);
-        }
-
-        @Override
-        public ClientHook getInnermostClient() {
-            this.receivedCall = true;
-            return RpcState.this.getInnermostClient(cap);
-        }
-
-        @Override
-        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
-            return null;
         }
     }
 
