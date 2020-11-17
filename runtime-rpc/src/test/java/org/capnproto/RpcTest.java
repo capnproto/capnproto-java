@@ -248,7 +248,7 @@ public class RpcTest {
         }
     }
 
-    final class TestContext {
+    static final class TestContext {
         final TestNetwork network = new TestNetwork();
         final TestNetworkAdapter clientNetwork;
         final TestNetworkAdapter serverNetwork;
@@ -312,9 +312,23 @@ public class RpcTest {
         }
     };
 
+    TestContext context;
+
+    @org.junit.Before
+    public void setUp() {
+        this.context = new TestContext(bootstrapFactory);
+    }
+
+    @org.junit.After
+    public void tearDown() {
+        this.context.clientNetwork.close();
+        this.context.serverNetwork.close();
+        this.context = null;
+    }
+
+
     @org.junit.Test
     public void testBasic() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestInterface.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_INTERFACE));
         var request1 = client.fooRequest();
         request1.getParams().setI(123);
@@ -345,7 +359,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testPipelining() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestPipeline.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_PIPELINE));
 
         var chainedCallCount = new Counter();
@@ -379,7 +392,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testRelease() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var handle1 = client.getHandleRequest().send().join().getHandle();
@@ -395,7 +407,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testPromiseResolve() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var chainedCallCount = new Counter();
@@ -431,7 +442,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testTailCall() {
-        var context = new TestContext(bootstrapFactory);
         var caller = new Test.TestTailCaller.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_TAIL_CALLER));
 
         var calleeCallCount = new Counter();
@@ -464,7 +474,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testEmbargo() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var cap = new Test.TestCallOrder.Client(new RpcTestUtil.TestCallOrderImpl());
@@ -498,7 +507,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testCallBrokenPromise() throws ExecutionException, InterruptedException {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var paf = new CompletableFuture<Test.TestInterface.Client>();
@@ -529,7 +537,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testCallCancel() {
-        var context = new TestContext(bootstrapFactory);
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var request = client.expectCancelRequest();
@@ -556,7 +563,6 @@ public class RpcTest {
 
     @org.junit.Test
     public void testEmbargoUnwrap() {
-        var context = new TestContext(bootstrapFactory);
         var capSet = new Capability.CapabilityServerSet<Test.TestCallOrder.Server>();
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
@@ -571,6 +577,7 @@ public class RpcTest {
         var pipeline = echo.getCap();
 
         var unwrap = capSet.getLocalServer(pipeline).thenApply(unwrapped -> {
+            Assert.assertNotNull(unwrapped);
             return ((RpcTestUtil.TestCallOrderImpl)unwrapped).getCount();
         });
 
