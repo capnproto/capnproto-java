@@ -71,6 +71,11 @@ public class RpcTest {
                 this.peerId = peerId;
             }
 
+            @Override
+            public String toString() {
+                return this.isClient ? "CLIENT" : "SERVER";
+            }
+
             void attach(Connection other) {
                 Assert.assertNull(this.partner);
                 Assert.assertNull(other.partner);

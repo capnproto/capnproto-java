@@ -47,6 +47,11 @@ public class TwoPartyVatNetwork
         }
     }
 
+    @Override
+    public String toString() {
+        return this.getSide().toString();
+    }
+
     public RpcTwoPartyProtocol.Side getSide() {
         return side;
     }
