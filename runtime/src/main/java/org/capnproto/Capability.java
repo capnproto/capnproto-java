@@ -584,7 +584,7 @@ public final class Capability {
             var callResult = this.promiseForCallForwarding.thenApply(
                     client -> client.call(interfaceId, methodId, ctx));
             var pipeline = new QueuedPipeline(callResult.thenApply(result -> result.pipeline));
-            return new VoidPromiseAndPipeline(callResult.thenAccept(x -> {}), pipeline);
+            return new VoidPromiseAndPipeline(callResult.thenRun(() -> {}), pipeline);
         }
 
         @Override
