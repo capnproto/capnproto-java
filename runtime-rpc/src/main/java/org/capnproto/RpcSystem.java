@@ -1,9 +1,5 @@
 package org.capnproto;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +11,8 @@ public class RpcSystem<VatId extends StructReader> {
     private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new ConcurrentHashMap<>();
 
     public RpcSystem(VatNetwork<VatId> network) {
-        this(network, (BootstrapFactory<VatId>)null);
+        this(network, clientId -> new Capability.Client(
+                Capability.newBrokenCap("No bootstrap interface available")));
     }
 
     public RpcSystem(VatNetwork<VatId> network,
@@ -25,12 +22,7 @@ public class RpcSystem<VatId extends StructReader> {
 
     public RpcSystem(VatNetwork<VatId> network,
                      Capability.Client bootstrapInterface) {
-        this(network, new BootstrapFactory<VatId>() {
-            @Override
-            public Capability.Client createFor(VatId clientId) {
-                return bootstrapInterface;
-            }
-        });
+        this(network, clientId -> bootstrapInterface);
     }
 
     public RpcSystem(VatNetwork<VatId> network,
@@ -47,19 +39,16 @@ public class RpcSystem<VatId extends StructReader> {
             var hook = state.restore();
             return new Capability.Client(hook);
         }
-        else if (this.bootstrapFactory != null) {
+        else {
             return this.bootstrapFactory.createFor(vatId);
         }
-        else {
-            return new Capability.Client(Capability.newBrokenCap("No bootstrap interface available"));
-        }
     }
 
-    public VatNetwork<VatId> getNetwork() {
-        return this.network;
+    public void accept(VatNetwork.Connection<VatId> connection) {
+        getConnectionState(connection);
     }
 
-    RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
+    private RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
         return this.connections.computeIfAbsent(connection, conn -> {
             var onDisconnect = new CompletableFuture<RpcState.DisconnectInfo>();
             onDisconnect.thenCompose(info -> {
@@ -68,10 +57,6 @@ public class RpcSystem<VatId extends StructReader> {
                     });
            return new RpcState<>(this.bootstrapFactory, conn, onDisconnect);
         });
-    }
-
-    public void accept(VatNetwork.Connection<VatId> connection) {
-        getConnectionState(connection);
     }
 
     private void startAcceptLoop() {
