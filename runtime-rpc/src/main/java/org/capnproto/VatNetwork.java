@@ -15,7 +15,6 @@ public interface VatNetwork<VatId>
         void close();
     }
 
-    CompletableFuture<Connection<VatId>> baseAccept();
+    CompletableFuture<Connection<VatId>> accept();
     Connection<VatId> connect(VatId hostId);
 }
-

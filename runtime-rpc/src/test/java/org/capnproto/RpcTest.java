@@ -33,7 +33,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import static org.capnproto.RpcState.FromException;
 
 public class RpcTest {
 
@@ -187,7 +186,7 @@ public class RpcTest {
         int sent = 0;
         int received = 0;
         Map<TestNetworkAdapter, Connection> connections = new HashMap<>();
-        Queue<CompletableFuture<Connection>> fulfillerQueue = new ArrayDeque<>();
+        Queue<CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>>> fulfillerQueue = new ArrayDeque<>();
         Queue<Connection> connectionQueue = new ArrayDeque<>();
 
         TestNetworkAdapter(TestNetwork network, String self) {
@@ -197,10 +196,6 @@ public class RpcTest {
 
         Connection newConnection(boolean isClient, Test.TestSturdyRef.Reader peerId) {
             return new Connection(isClient, peerId);
-        }
-
-        public CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>> baseAccept() {
-            return this.accept().thenApply(conn -> conn);
         }
 
         @Override
@@ -241,11 +236,11 @@ public class RpcTest {
             return local;
         }
 
-        public CompletableFuture<Connection> accept() {
+        public CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>> accept() {
             if (this.connections.isEmpty()) {
-                var promise = new CompletableFuture<Connection>();
+                var promise = new CompletableFuture<VatNetwork.Connection<Test.TestSturdyRef.Reader>>();
                 this.fulfillerQueue.add(promise);
-                return promise.thenApply(conn -> conn);
+                return promise;
             }
             else {
                 return CompletableFuture.completedFuture(this.connectionQueue.remove());

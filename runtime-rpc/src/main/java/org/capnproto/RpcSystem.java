@@ -82,7 +82,7 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     private void startAcceptLoop() {
-        this.network.baseAccept()
+        this.network.accept()
                 .thenAccept(this::accept)
                 .thenRunAsync(this::startAcceptLoop);
     }

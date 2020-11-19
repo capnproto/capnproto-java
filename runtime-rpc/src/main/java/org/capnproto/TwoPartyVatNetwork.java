@@ -1,6 +1,5 @@
 package org.capnproto;
 
-import java.io.IOException;
 import java.nio.channels.AsynchronousByteChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
@@ -9,11 +8,6 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyVatNetwork
         implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>,
                    VatNetwork.Connection<RpcTwoPartyProtocol.VatId.Reader> {
-
-    @Override
-    public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> baseAccept() {
-        return this.accept();
-    }
 
     public interface MessageTap {
         void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side);
@@ -49,23 +43,7 @@ public class TwoPartyVatNetwork
 
     @Override
     public String toString() {
-        return this.getSide().toString();
-    }
-
-    public RpcTwoPartyProtocol.Side getSide() {
-        return side;
-    }
-
-    public void setTap(MessageTap tap) {
-        this.tap = tap;
-    }
-
-    public Connection<RpcTwoPartyProtocol.VatId.Reader> asConnection() {
-        return this;
-    }
-
-    public CompletableFuture<java.lang.Void> onDisconnect() {
-        return this.disconnectPromise.copy();
+        return this.side.toString();
     }
 
     @Override
@@ -75,17 +53,7 @@ public class TwoPartyVatNetwork
                 : null;
     }
 
-    public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> accept() {
-        if (side == RpcTwoPartyProtocol.Side.SERVER & !accepted) {
-            accepted = true;
-            return CompletableFuture.completedFuture(this.asConnection());
-        }
-        else {
-            // never completes
-            return new CompletableFuture<>();
-        }
-    }
-
+    @Override
     public RpcTwoPartyProtocol.VatId.Reader getPeerVatId() {
         return this.peerVatId.getRoot(RpcTwoPartyProtocol.VatId.factory).asReader();
     }
@@ -108,7 +76,7 @@ public class TwoPartyVatNetwork
                     return;
                 }
 
-                var side = this.getSide() == RpcTwoPartyProtocol.Side.CLIENT
+                var side = this.side == RpcTwoPartyProtocol.Side.CLIENT
                         ? RpcTwoPartyProtocol.Side.SERVER
                         : RpcTwoPartyProtocol.Side.CLIENT;
 
@@ -137,6 +105,34 @@ public class TwoPartyVatNetwork
         return result;
     }
 
+    public RpcTwoPartyProtocol.Side getSide() {
+        return side;
+    }
+
+    public void setTap(MessageTap tap) {
+        this.tap = tap;
+    }
+
+    public Connection<RpcTwoPartyProtocol.VatId.Reader> asConnection() {
+        return this;
+    }
+
+    public CompletableFuture<java.lang.Void> onDisconnect() {
+        return this.disconnectPromise.copy();
+    }
+
+
+    public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> accept() {
+        if (side == RpcTwoPartyProtocol.Side.SERVER & !accepted) {
+            accepted = true;
+            return CompletableFuture.completedFuture(this.asConnection());
+        }
+        else {
+            // never completes
+            return new CompletableFuture<>();
+        }
+    }
+
     final class OutgoingMessage implements OutgoingRpcMessage {
 
         private final MessageBuilder message;
@@ -160,7 +156,7 @@ public class TwoPartyVatNetwork
 
         @Override
         public void send() {
-            previousWrite = previousWrite.thenCompose(x -> Serialize.writeAsync(channel, message));
+            previousWrite = previousWrite.thenRun(() -> Serialize.writeAsync(channel, message));
         }
 
         @Override
@@ -173,7 +169,7 @@ public class TwoPartyVatNetwork
         }
     }
 
-    final class IncomingMessage implements IncomingRpcMessage {
+    static final class IncomingMessage implements IncomingRpcMessage {
 
         private final MessageReader message;
         private final List<Integer> fds;
