@@ -282,11 +282,6 @@ public class RpcTest {
 
     static BootstrapFactory<Test.TestSturdyRef.Reader> bootstrapFactory = new BootstrapFactory<>() {
         @Override
-        public FromPointerReader<Test.TestSturdyRef.Reader> getVatIdFactory() {
-            return Test.TestSturdyRef.factory;
-        }
-
-        @Override
         public Capability.Client createFor(Test.TestSturdyRef.Reader refId) {
             var callCount = new Counter();
             var handleCount = new Counter();

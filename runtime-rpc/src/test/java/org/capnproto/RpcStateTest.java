@@ -84,11 +84,6 @@ public class RpcStateTest {
         this.bootstrapInterface = new Capability.Client(Capability.newNullCap());
         var bootstrapFactory = new BootstrapFactory<RpcTwoPartyProtocol.VatId.Reader>() {
             @Override
-            public FromPointerReader<RpcTwoPartyProtocol.VatId.Reader> getVatIdFactory() {
-                return RpcTwoPartyProtocol.VatId.factory;
-            }
-
-            @Override
             public Capability.Client createFor(RpcTwoPartyProtocol.VatId.Reader clientId) {
                 return bootstrapInterface;
             }

@@ -15,7 +15,7 @@ public class RpcSystem<VatId extends StructReader> {
     private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new ConcurrentHashMap<>();
 
     public RpcSystem(VatNetwork<VatId> network) {
-        this(network, (BootstrapFactory)null);
+        this(network, (BootstrapFactory<VatId>)null);
     }
 
     public RpcSystem(VatNetwork<VatId> network,
@@ -26,12 +26,6 @@ public class RpcSystem<VatId extends StructReader> {
     public RpcSystem(VatNetwork<VatId> network,
                      Capability.Client bootstrapInterface) {
         this(network, new BootstrapFactory<VatId>() {
-
-            @Override
-            public FromPointerReader<VatId> getVatIdFactory() {
-                return this.getVatIdFactory();
-            }
-
             @Override
             public Capability.Client createFor(VatId clientId) {
                 return bootstrapInterface;
@@ -47,7 +41,7 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     public Capability.Client bootstrap(VatId vatId) {
-        var connection = this.getNetwork().connect(vatId);
+        var connection = this.network.connect(vatId);
         if (connection != null) {
             var state = getConnectionState(connection);
             var hook = state.restore();
@@ -66,15 +60,14 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
-        var state = this.connections.computeIfAbsent(connection, conn -> {
+        return this.connections.computeIfAbsent(connection, conn -> {
             var onDisconnect = new CompletableFuture<RpcState.DisconnectInfo>();
             onDisconnect.thenCompose(info -> {
                         this.connections.remove(connection);
-                        return info.shutdownPromise.thenRun(() -> connection.close());
+                        return info.shutdownPromise.thenRun(connection::close);
                     });
            return new RpcState<>(this.bootstrapFactory, conn, onDisconnect);
         });
-        return state;
     }
 
     public void accept(VatNetwork.Connection<VatId> connection) {
