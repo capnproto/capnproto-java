@@ -1824,13 +1824,11 @@ final class RpcState<VatId> {
                       Integer importId) {
             this.cap = initial;
             this.importId = importId;
-            this.eventual = eventual.whenComplete((resolution, exc) -> {
-                if (exc == null) {
-                    this.resolve(resolution);
-                }
-                else {
-                    this.resolve(Capability.newBrokenCap(exc));
-                }
+            this.eventual = eventual.handle((resolution, exc) -> {
+                this.cap = exc == null
+                        ? this.resolve(resolution)
+                        : this.resolve(Capability.newBrokenCap(exc));
+                return this.cap;
             });
         }
 
@@ -1954,13 +1952,13 @@ final class RpcState<VatId> {
                 ClientHook finalReplacement = replacement;
                 var embargoPromise = embargo.disembargo.thenApply(
                         void_ -> finalReplacement);
-                replacement = Capability.newLocalPromiseClient(embargoPromise);
                 LOGGER.info(() -> RpcState.this.toString() + ": > DISEMBARGO");
                 message.send();
+                return Capability.newLocalPromiseClient(embargoPromise);
             }
-
-            this.cap = replacement;
-            return replacement;
+            else {
+                return replacement;
+            }
         }
     }
 
