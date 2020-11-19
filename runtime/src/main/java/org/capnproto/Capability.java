@@ -185,9 +185,17 @@ public final class Capability {
                     return null;
                 }
 
+                // We don't want to actually dispatch the call synchronously, because we don't want the callee
+                // to have any side effects before the promise is returned to the caller.  This helps avoid
+                // race conditions.
+                //
+                // So, we do an evalLater() here.
+                //
+                // Note also that QueuedClient depends on this evalLater() to ensure that pipelined calls don't
+                // complete before 'whenMoreResolved()' promises resolve.
+                // TODO fix the above comment! we don't have the option of evalLater (yes)
                 var promise = this.whenResolved().thenCompose(
                         void_ -> this.callInternal(interfaceId, methodId, ctx));
-
 
                 var pipelinePromise = promise.thenApply(x -> {
                     ctx.releaseParams();

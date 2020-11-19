@@ -66,7 +66,7 @@ class TestExtendsImpl extends Test.TestExtends2.Server {
     }
 }
 
-public class CapabilityTest {
+public final class CapabilityTest {
 
     @org.junit.Test
     public void testBasic() {
@@ -155,6 +155,40 @@ public class CapabilityTest {
         RpcTestUtil.checkTestMessage(response2);
         Assert.assertEquals(3, callCount.value());
         Assert.assertEquals(1, chainedCallCount.value());
+    }
+
+    @org.junit.Test
+    public void testTailCall() {
+        var calleeCallCount = new Counter();
+        var callerCallCount = new Counter();
+        var callee = new Test.TestTailCallee.Client(
+                new RpcTestUtil.TestTailCalleeImpl(calleeCallCount));
+
+        var caller = new Test.TestTailCaller.Client(
+                new RpcTestUtil.TestTailCallerImpl(callerCallCount));
+
+        var request = caller.fooRequest();
+        request.getParams().setI(456);
+        request.getParams().setCallee(callee);
+
+        var promise = request.send();
+
+        var dependentCall0 = promise.getC().getCallSequenceRequest().send();
+
+        var response = promise.join();
+        Assert.assertEquals(456, response.getI());
+        Assert.assertEquals(456, response.getI());
+
+        var dependentCall1 = promise.getC().getCallSequenceRequest().send();
+
+        var dependentCall2 = response.getC().getCallSequenceRequest().send();
+
+        Assert.assertEquals(0, dependentCall0.join().getN());
+        Assert.assertEquals(1, dependentCall1.join().getN());
+        Assert.assertEquals(2, dependentCall2.join().getN());
+
+        Assert.assertEquals(1, calleeCallCount.value());
+        Assert.assertEquals(1, callerCallCount.value());
     }
 
     class TestThisCap extends Test.TestInterface.Server {
