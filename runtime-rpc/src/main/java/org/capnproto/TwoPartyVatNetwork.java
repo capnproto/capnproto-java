@@ -133,6 +133,10 @@ public class TwoPartyVatNetwork
         }
     }
 
+    private synchronized void write(MessageBuilder message) {
+        this.previousWrite = this.previousWrite.thenCompose(void_ -> Serialize.writeAsync(channel, message));
+    }
+
     final class OutgoingMessage implements OutgoingRpcMessage {
 
         private final MessageBuilder message;
@@ -156,7 +160,7 @@ public class TwoPartyVatNetwork
 
         @Override
         public void send() {
-            previousWrite = previousWrite.thenRun(() -> Serialize.writeAsync(channel, message));
+            write(message);
         }
 
         @Override
