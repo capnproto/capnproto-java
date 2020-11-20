@@ -21,4 +21,8 @@ public interface CallContextHook {
     CompletableFuture<AnyPointer.Pipeline> onTailCall();
 
     ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request);
+
+    default CompletableFuture<java.lang.Void> releaseCall() {
+        return CompletableFuture.completedFuture(null);
+    }
 }

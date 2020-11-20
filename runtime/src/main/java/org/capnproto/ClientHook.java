@@ -1,7 +1,6 @@
 package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public interface ClientHook {
 
