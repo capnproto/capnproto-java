@@ -16,6 +16,10 @@ public interface Request<Params> {
 
     Request<AnyPointer.Builder> getTypelessRequest();
 
+    default RemotePromise<AnyPointer.Reader> sendInternal() {
+        return this.getTypelessRequest().sendInternal();
+    }
+
     static <Params> Request<Params> newBrokenRequest(FromPointerBuilder<Params> paramsFactory,
                                                      Throwable exc) {
 

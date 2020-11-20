@@ -2031,7 +2031,7 @@ private:
           sp, "        return ", paramFactory, ";\n",
           sp, "      }\n",
           sp, "      default Response send() {\n",
-          sp, "        return new Response(this.getHook().send());\n",
+          sp, "        return new Response(this.sendInternal());\n",
           sp, "      }\n",
           sp, "    }\n",
           sp, "    public static final class Response\n",

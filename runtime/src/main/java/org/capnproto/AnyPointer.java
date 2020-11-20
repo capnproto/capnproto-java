@@ -221,6 +221,11 @@ public final class AnyPointer {
             return AnyPointer.factory;
         }
 
+        @Override
+        public RemotePromise<Reader> sendInternal() {
+            return this.send();
+        }
+
         public RemotePromise<Reader> send() {
             return this.getHook().send();
         }
