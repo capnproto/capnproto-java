@@ -9,17 +9,12 @@ public class TwoPartyVatNetwork
         implements VatNetwork<RpcTwoPartyProtocol.VatId.Reader>,
                    VatNetwork.Connection<RpcTwoPartyProtocol.VatId.Reader> {
 
-    public interface MessageTap {
-        void incoming(IncomingRpcMessage message, RpcTwoPartyProtocol.Side side);
-    }
-
     private CompletableFuture<java.lang.Void> previousWrite = CompletableFuture.completedFuture(null);
     private final CompletableFuture<java.lang.Void> disconnectPromise = new CompletableFuture<>();
     private final AsynchronousByteChannel channel;
     private final RpcTwoPartyProtocol.Side side;
     private final MessageBuilder peerVatId = new MessageBuilder(4);
     private boolean accepted;
-    private MessageTap tap;
 
     public TwoPartyVatNetwork(AsynchronousByteChannel channel, RpcTwoPartyProtocol.Side side) {
         this.channel = channel;
@@ -65,26 +60,9 @@ public class TwoPartyVatNetwork
 
     @Override
     public CompletableFuture<IncomingRpcMessage> receiveIncomingMessage() {
-        var message = Serialize.readAsync(channel)
+        return Serialize.readAsync(channel)
                 .thenApply(reader -> (IncomingRpcMessage) new IncomingMessage(reader))
                 .exceptionally(exc -> null);
-
-        // send to message tap
-        if (this.tap != null) {
-            message = message.whenComplete((msg, exc) -> {
-                if (this.tap == null || msg == null) {
-                    return;
-                }
-
-                var side = this.side == RpcTwoPartyProtocol.Side.CLIENT
-                        ? RpcTwoPartyProtocol.Side.SERVER
-                        : RpcTwoPartyProtocol.Side.CLIENT;
-
-                this.tap.incoming(msg, side);
-            });
-        }
-
-        return message;
     }
 
     @Override
@@ -109,10 +87,6 @@ public class TwoPartyVatNetwork
         return side;
     }
 
-    public void setTap(MessageTap tap) {
-        this.tap = tap;
-    }
-
     public Connection<RpcTwoPartyProtocol.VatId.Reader> asConnection() {
         return this;
     }
@@ -120,8 +94,7 @@ public class TwoPartyVatNetwork
     public CompletableFuture<java.lang.Void> onDisconnect() {
         return this.disconnectPromise.copy();
     }
-
-
+    
     public CompletableFuture<Connection<RpcTwoPartyProtocol.VatId.Reader>> accept() {
         if (side == RpcTwoPartyProtocol.Side.SERVER & !accepted) {
             accepted = true;

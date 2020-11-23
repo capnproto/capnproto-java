@@ -1,8 +1,6 @@
 package org.capnproto;
 
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
+import java.nio.channels.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -10,40 +8,17 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyServer {
 
     private class AcceptedConnection {
-        final AsynchronousSocketChannel connection;
-        final TwoPartyVatNetwork network;
-        final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
+        private final AsynchronousByteChannel connection;
+        private final TwoPartyVatNetwork network;
+        private final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
 
-        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel connection) {
+        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousByteChannel connection) {
             this.connection = connection;
             this.network = new TwoPartyVatNetwork(this.connection, RpcTwoPartyProtocol.Side.SERVER);
             this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);
+            this.rpcSystem.start();
         }
      }
-
-    class ConnectionReceiver {
-        final AsynchronousServerSocketChannel listener;
-
-        ConnectionReceiver(AsynchronousServerSocketChannel listener) {
-            this.listener = listener;
-        }
-
-        CompletableFuture<AsynchronousSocketChannel> accept() {
-            CompletableFuture<AsynchronousSocketChannel> result = new CompletableFuture<>();
-            this.listener.accept(null, new CompletionHandler<>() {
-                @Override
-                public void completed(AsynchronousSocketChannel channel, Object attachment) {
-                    result.complete(channel);
-                }
-
-                @Override
-                public void failed(Throwable exc, Object attachment) {
-                    result.completeExceptionally(exc);
-                }
-            });
-            return result.copy();
-        }
-    }
 
     private final Capability.Client bootstrapInterface;
     private final List<AcceptedConnection> connections = new ArrayList<>();
@@ -65,14 +40,20 @@ public class TwoPartyServer {
     }
 
     public CompletableFuture<java.lang.Void> listen(AsynchronousServerSocketChannel listener) {
-        return this.listen(wrapListenSocket(listener));
-    }
+        var result = new CompletableFuture<AsynchronousSocketChannel>();
+        listener.accept(null, new CompletionHandler<>() {
+            @Override
+            public void completed(AsynchronousSocketChannel channel, Object attachment) {
+                accept(channel);
+                result.complete(null);
+            }
 
-    CompletableFuture<java.lang.Void> listen(ConnectionReceiver listener) {
-        return listener.accept().thenCompose(channel -> {
-            this.accept(channel);
-            return this.listen(listener);
+            @Override
+            public void failed(Throwable exc, Object attachment) {
+                result.completeExceptionally(exc);
+            }
         });
+        return result.thenCompose(void_ -> this.listen(listener));
     }
 
     CompletableFuture<java.lang.Void> drain() {
@@ -81,9 +62,5 @@ public class TwoPartyServer {
             loop = CompletableFuture.allOf(loop, conn.network.onDisconnect());
         }
         return loop;
-    }
-
-    ConnectionReceiver wrapListenSocket(AsynchronousServerSocketChannel channel) {
-        return new ConnectionReceiver(channel);
     }
 }

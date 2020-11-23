@@ -255,7 +255,6 @@ final class RpcState<VatId> {
         this.bootstrapFactory = bootstrapFactory;
         this.connection = connection;
         this.disconnectFulfiller = disconnectFulfiller;
-        startMessageLoop();
     }
 
     @Override
@@ -391,36 +390,41 @@ final class RpcState<VatId> {
         return pipeline.getPipelinedCap(new PipelineOp[0]);
     }
 
-    private void startMessageLoop() {
+    /**
+     * Returns a CompletableFuture that, when complete, has processed one message.
+     */
+    public CompletableFuture<java.lang.Void> pollOnce() {
         if (isDisconnected()) {
             this.messageLoop.completeExceptionally(this.disconnected);
-            return;
+            return CompletableFuture.failedFuture(this.disconnected);
         }
 
-        var messageReader = this.connection.receiveIncomingMessage()
-                .thenAccept(message -> {
-                    if (message == null) {
-                        this.disconnect(RpcException.disconnected("Peer disconnected"));
-                        this.messageLoop.complete(null);
-                        return;
-                    }
-                    try {
-                        this.handleMessage(message);
-
-                        while (!this.lastEvals.isEmpty()) {
-                            this.lastEvals.remove().call();
+        return this.connection.receiveIncomingMessage()
+                    .thenAccept(message -> {
+                        if (message == null) {
+                            this.disconnect(RpcException.disconnected("Peer disconnected"));
+                            this.messageLoop.complete(null);
+                            return;
                         }
+                        try {
+                            this.handleMessage(message);
+                            while (!this.lastEvals.isEmpty()) {
+                                this.lastEvals.remove().call();
+                            }
+                        }
+                        catch (Throwable rpcExc) {
+                            // either we received an Abort message from peer
+                            // or internal RpcState is bad.
+                            this.disconnect(rpcExc);
+                        }
+                    });
+    }
 
-                    }
-                    catch (Throwable rpcExc) {
-                        // either we received an Abort message from peer
-                        // or internal RpcState is bad.
-                        this.disconnect(rpcExc);
-                    }
-                });
-
-        messageReader.thenRunAsync(this::startMessageLoop).exceptionallyCompose(
-                CompletableFuture::failedFuture);
+    public void runMessageLoop() {
+        this.pollOnce().thenRun(this::runMessageLoop).exceptionally(exc -> {
+            LOGGER.warning(() -> "Event loop exited: " + exc.getMessage());
+            return null;
+        });
     }
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {
@@ -766,7 +770,6 @@ final class RpcState<VatId> {
         }
 
         // This import is an unfulfilled promise.
-        assert !imp.promise.isDone();
         switch (resolve.which()) {
             case CAP -> {
                 var cap = receiveCap(resolve.getCap(), message.getAttachedFds());
@@ -981,10 +984,8 @@ final class RpcState<VatId> {
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
             FromException(exc, resolve.initException());
-            LOGGER.log(Level.INFO, this.toString() + ": > RESOLVE", exc.getMessage());
+            LOGGER.info(() -> this.toString() + ": > RESOLVE FAILED export=" + exportId + " msg=" + exc.getMessage());
             message.send();
-
-            // TODO disconnect?
         });
     }
 
@@ -1900,6 +1901,7 @@ final class RpcState<VatId> {
             var replacementBrand = replacement.getBrand();
             boolean isSameConnection = replacementBrand == RpcState.this;
             if (isSameConnection) {
+                // We resolved to some other RPC capability hosted by the same peer.
                 var promise = replacement.whenMoreResolved();
                 if (promise != null) {
                     var other = (PromiseClient)replacement;
@@ -1936,6 +1938,7 @@ final class RpcState<VatId> {
             // TODO Flow control
 
             if (resolutionType == ResolutionType.REFLECTED && receivedCall && !isDisconnected()) {
+                LOGGER.fine(() -> RpcState.this.toString() + ": embargoing reflected capability " + this.toString());
                 // The new capability is hosted locally, not on the remote machine.  And, we had made calls
                 // to the promise.  We need to make sure those calls echo back to us before we allow new
                 // calls to go directly to the local capability, so we need to set a local embargo and send

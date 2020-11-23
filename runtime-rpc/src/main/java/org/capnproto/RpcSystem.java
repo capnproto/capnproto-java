@@ -1,14 +1,14 @@
 package org.capnproto;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RpcSystem<VatId extends StructReader> {
 
     private final VatNetwork<VatId> network;
     private final BootstrapFactory<VatId> bootstrapFactory;
-    private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new ConcurrentHashMap<>();
+    private final Map<VatNetwork.Connection<VatId>, RpcState<VatId>> connections = new HashMap<>();
 
     public RpcSystem(VatNetwork<VatId> network) {
         this(network, clientId -> new Capability.Client(
@@ -29,7 +29,6 @@ public class RpcSystem<VatId extends StructReader> {
                      BootstrapFactory<VatId> bootstrapFactory) {
         this.network = network;
         this.bootstrapFactory = bootstrapFactory;
-        this.startAcceptLoop();
     }
 
     public Capability.Client bootstrap(VatId vatId) {
@@ -45,7 +44,8 @@ public class RpcSystem<VatId extends StructReader> {
     }
 
     public void accept(VatNetwork.Connection<VatId> connection) {
-        getConnectionState(connection);
+        var state = getConnectionState(connection);
+        state.runMessageLoop();
     }
 
     private RpcState<VatId> getConnectionState(VatNetwork.Connection<VatId> connection) {
@@ -59,10 +59,17 @@ public class RpcSystem<VatId extends StructReader> {
         });
     }
 
-    private void startAcceptLoop() {
+    public void runOnce() {
+        for (var state: this.connections.values()) {
+            state.pollOnce().join();
+            return;
+        }
+    }
+
+    public void start() {
         this.network.accept()
                 .thenAccept(this::accept)
-                .thenRunAsync(this::startAcceptLoop);
+                .thenRunAsync(this::start);
     }
 
     public static <VatId extends StructReader>

@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousByteChannel;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,5 +35,12 @@ public class TwoPartyClient {
 
     CompletableFuture<java.lang.Void> onDisconnect() {
         return this.network.onDisconnect();
+    }
+
+    public <T> CompletableFuture<T> runUntil(CompletableFuture<T> done) {
+        while (!done.isDone()) {
+            this.rpcSystem.runOnce();
+        }
+        return done;
     }
 }

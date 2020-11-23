@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RpcTest {
@@ -268,6 +267,7 @@ public class RpcTest {
             this.serverNetwork = this.network.add("server");
             this.rpcClient = RpcSystem.makeRpcClient(this.clientNetwork);
             this.rpcServer = RpcSystem.makeRpcServer(this.serverNetwork, bootstrapFactory);
+            this.rpcServer.start();
         }
 
         Capability.Client connect(Test.TestSturdyRefObjectId.Tag tag) {
@@ -277,6 +277,13 @@ public class RpcTest {
             hostId.setHost("server");
             ref.getObjectId().initAs(Test.TestSturdyRefObjectId.factory).setTag(tag);
             return rpcClient.bootstrap(ref.asReader());
+        }
+
+        public <T> CompletableFuture<T> runUntil(CompletableFuture<T> done) {
+            while (!done.isDone()) {
+                this.rpcClient.runOnce();
+            }
+            return done;
         }
     }
 
@@ -321,7 +328,6 @@ public class RpcTest {
         this.context = null;
     }
 
-
     @org.junit.Test
     public void testBasic() {
         var client = new Test.TestInterface.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_INTERFACE));
@@ -343,12 +349,15 @@ public class RpcTest {
         RpcTestUtil.initTestMessage(request2.getParams().initS());
         var promise2 = request2.send();
 
-        var response1 = promise1.join();
+        var response1 = this.context.runUntil(promise1).join();
         Assert.assertEquals("foo", response1.getX().toString());
 
-        var response2 = promise2.join();
-        promise3.join();
+        while (!promise2.isDone()) {
+            this.context.rpcClient.runOnce();
+        }
+        var response2 = this.context.runUntil(promise2).join();
 
+        this.context.runUntil(promise3).join();
         Assert.assertTrue(ref.barFailed);
     }
 
@@ -376,10 +385,10 @@ public class RpcTest {
 
         //Assert.assertEquals(0, chainedCallCount.value());
 
-        var response = pipelinePromise.join();
+        var response = this.context.runUntil(pipelinePromise).join();
         Assert.assertEquals("bar", response.getX().toString());
 
-        var response2 = pipelinePromise2.join();
+        var response2 = this.context.runUntil(pipelinePromise2).join();
         RpcTestUtil.checkTestMessage(response2);
 
         Assert.assertEquals(1, chainedCallCount.value());
@@ -389,15 +398,15 @@ public class RpcTest {
     public void testRelease() {
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
-        var handle1 = client.getHandleRequest().send().join().getHandle();
+        var handle1 = this.context.runUntil(client.getHandleRequest().send()).join().getHandle();
         var promise = client.getHandleRequest().send();
-        var handle2 = promise.join().getHandle();
+        var handle2 = this.context.runUntil(promise).join().getHandle();
 
         handle1 = null;
         handle2 = null;
 
         System.gc();
-        client.echoRequest().send().join();
+        this.context.runUntil(client.echoRequest().send()).join();
     }
 
     @org.junit.Test
@@ -421,15 +430,15 @@ public class RpcTest {
 
         // Make sure getCap() has been called on the server side by sending another call and waiting
         // for it.
-        Assert.assertEquals(2, client.getCallSequenceRequest().send().join().getN());
+        Assert.assertEquals(2, this.context.runUntil(client.getCallSequenceRequest().send()).join().getN());
         //Assert.assertEquals(3, context.restorer.callCount);
 
         // OK, now fulfill the local promise.
         paf.complete(new Test.TestInterface.Client(new RpcTestUtil.TestInterfaceImpl(chainedCallCount)));
 
         // We should now be able to wait for getCap() to finish.
-        Assert.assertEquals("bar", promise.join().getS().toString());
-        Assert.assertEquals("bar", promise2.join().getS().toString());
+        Assert.assertEquals("bar", this.context.runUntil(promise).join().getS().toString());
+        Assert.assertEquals("bar", this.context.runUntil(promise2).join().getS().toString());
 
         //Assert.assertEquals(3, context.restorer.callCount);
         Assert.assertEquals(2, chainedCallCount.value());
@@ -447,16 +456,16 @@ public class RpcTest {
 
         var promise = request.send();
         var dependentCall0 = promise.getC().getCallSequenceRequest().send();
-        var response = promise.join();
+        var response = this.context.runUntil(promise).join();
         Assert.assertEquals(456, response.getI());
 
         var dependentCall1 = promise.getC().getCallSequenceRequest().send();
 
-        Assert.assertEquals(0, dependentCall0.join().getN());
-        Assert.assertEquals(1, dependentCall1.join().getN());
+        Assert.assertEquals(0, this.context.runUntil(dependentCall0).join().getN());
+        Assert.assertEquals(1, this.context.runUntil(dependentCall1).join().getN());
 
         var dependentCall2 = response.getC().getCallSequenceRequest().send();
-        Assert.assertEquals(2, dependentCall2.join().getN());
+        Assert.assertEquals(2, this.context.runUntil(dependentCall2).join().getN());
         Assert.assertEquals(1, calleeCallCount.value());
     }
 
@@ -482,26 +491,26 @@ public class RpcTest {
         var call0 = getCallSequence(pipeline, 0);
         var call1 = getCallSequence(pipeline, 1);
 
-        earlyCall.join();
+        this.context.runUntil(earlyCall).join();
 
         var call2 = getCallSequence(pipeline, 2);
 
-        var resolved = echo.join().getCap();
+        var resolved = this.context.runUntil(echo).join().getCap();
 
         var call3 = getCallSequence(pipeline, 3);
         var call4 = getCallSequence(pipeline, 4);
         var call5 = getCallSequence(pipeline, 5);
 
-        Assert.assertEquals(0, call0.join().getN());
-        Assert.assertEquals(1, call1.join().getN());
-        Assert.assertEquals(2, call2.join().getN());
-        Assert.assertEquals(3, call3.join().getN());
-        Assert.assertEquals(4, call4.join().getN());
-        Assert.assertEquals(5, call5.join().getN());
+        Assert.assertEquals(0, this.context.runUntil(call0).join().getN());
+        Assert.assertEquals(1, this.context.runUntil(call1).join().getN());
+        Assert.assertEquals(2, this.context.runUntil(call2).join().getN());
+        Assert.assertEquals(3, this.context.runUntil(call3).join().getN());
+        Assert.assertEquals(4, this.context.runUntil(call4).join().getN());
+        Assert.assertEquals(5, this.context.runUntil(call5).join().getN());
     }
 
     @org.junit.Test
-    public void testCallBrokenPromise() throws ExecutionException, InterruptedException {
+    public void testCallBrokenPromise() {
         var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
 
         var paf = new CompletableFuture<Test.TestInterface.Client>();
@@ -509,7 +518,7 @@ public class RpcTest {
         {
             var req = client.holdRequest();
             req.getParams().setCap(paf);
-            req.send().join();
+            this.context.runUntil(req.send()).join();
         }
 
         AtomicBoolean returned = new AtomicBoolean(false);
@@ -524,10 +533,11 @@ public class RpcTest {
         Assert.assertFalse(returned.get());
 
         paf.completeExceptionally(new Exception("foo"));
+        this.context.runUntil(req);
         Assert.assertTrue(returned.get());
 
         // Verify that we are still connected
-        getCallSequence(client, 1).get();
+        this.context.runUntil(getCallSequence(client, 1)).join();
     }
 
     @org.junit.Test
@@ -581,24 +591,24 @@ public class RpcTest {
         var call0 = getCallSequence(pipeline, 0);
         var call1 = getCallSequence(pipeline, 1);
 
-        earlyCall.join();
+        this.context.runUntil(earlyCall).join();
 
         var call2 = getCallSequence(pipeline, 2);
 
-        var resolved = echo.join().getCap();
+        var resolved = this.context.runUntil(echo).join().getCap();
 
         var call3 = getCallSequence(pipeline, 3);
         var call4 = getCallSequence(pipeline, 4);
         var call5 = getCallSequence(pipeline, 5);
 
-        Assert.assertEquals(0, call0.join().getN());
-        Assert.assertEquals(1, call1.join().getN());
-        Assert.assertEquals(2, call2.join().getN());
-        Assert.assertEquals(3, call3.join().getN());
-        Assert.assertEquals(4, call4.join().getN());
-        Assert.assertEquals(5, call5.join().getN());
+        Assert.assertEquals(0, this.context.runUntil(call0).join().getN());
+        Assert.assertEquals(1, this.context.runUntil(call1).join().getN());
+        Assert.assertEquals(2, this.context.runUntil(call2).join().getN());
+        Assert.assertEquals(3, this.context.runUntil(call3).join().getN());
+        Assert.assertEquals(4, this.context.runUntil(call4).join().getN());
+        Assert.assertEquals(5, this.context.runUntil(call5).join().getN());
 
-        int unwrappedAt = unwrap.join();
+        int unwrappedAt = this.context.runUntil(unwrap).join();
         Assert.assertTrue(unwrappedAt >= 0);
     }
 }

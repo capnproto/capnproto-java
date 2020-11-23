@@ -7,39 +7,44 @@ import org.junit.Before;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousByteChannel;
+import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-@SuppressWarnings({"OverlyCoupledMethod", "OverlyLongMethod"})
 public class TwoPartyTest {
 
     static final class PipeThread {
         Thread thread;
-        AsynchronousByteChannel channel;
+        AsynchronousSocketChannel channel;
 
-        static PipeThread newPipeThread(Consumer<AsynchronousByteChannel> startFunc) throws Exception {
-            var pipeThread = new PipeThread();
-            var serverAcceptSocket = AsynchronousServerSocketChannel.open();
-            serverAcceptSocket.bind(null);
-            var clientSocket = AsynchronousSocketChannel.open();
+    }
 
-            pipeThread.thread = new Thread(() -> {
-                try {
-                    var serverSocket = serverAcceptSocket.accept().get();
-                    startFunc.accept(serverSocket);
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            });
-            pipeThread.thread.start();
-            pipeThread.thread.setName("TwoPartyTest server");
+    private AsynchronousChannelGroup group;
 
-            clientSocket.connect(serverAcceptSocket.getLocalAddress()).get();
-            pipeThread.channel = clientSocket;
-            return pipeThread;
-        }
+    PipeThread newPipeThread(Consumer<AsynchronousSocketChannel> startFunc) throws Exception {
+        var pipeThread = new PipeThread();
+        var serverAcceptSocket = AsynchronousServerSocketChannel.open(this.group);
+        serverAcceptSocket.bind(null);
+        var clientSocket = AsynchronousSocketChannel.open();
+
+        pipeThread.thread = new Thread(() -> {
+            try {
+                var serverSocket = serverAcceptSocket.accept().get();
+                startFunc.accept(serverSocket);
+            } catch (InterruptedException | ExecutionException exc) {
+                exc.printStackTrace();
+            }
+        });
+        pipeThread.thread.start();
+        pipeThread.thread.setName("TwoPartyTest server");
+
+        clientSocket.connect(serverAcceptSocket.getLocalAddress()).get();
+        pipeThread.channel = clientSocket;
+        return pipeThread;
     }
 
     PipeThread runServer(Capability.Server bootstrapInterface) throws Exception {
@@ -47,19 +52,22 @@ public class TwoPartyTest {
     }
 
     PipeThread runServer(Capability.Client bootstrapInterface) throws Exception {
-        return PipeThread.newPipeThread(channel -> {
+        return newPipeThread(channel -> {
             var network = new TwoPartyVatNetwork(channel, RpcTwoPartyProtocol.Side.SERVER);
             var system = new RpcSystem<>(network, bootstrapInterface);
+            system.start();
             network.onDisconnect().join();
         });
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        this.group = AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(5));
     }
 
     @After
     public void tearDown() {
+        this.group.shutdown();
     }
 
     @org.junit.Test
@@ -68,7 +76,7 @@ public class TwoPartyTest {
         var rpcClient = new TwoPartyClient(pipe.channel);
         var client = rpcClient.bootstrap();
         var resolved = client.whenResolved();
-        resolved.get();
+        rpcClient.runUntil(resolved).join();
     }
 
     @org.junit.Test
@@ -93,11 +101,11 @@ public class TwoPartyTest {
                 .thenAccept(results -> Assert.fail("Expected bar() to fail"))
                 .exceptionally(exc -> null);
 
-        var response1 = promise1.join();
+        var response1 = rpcClient.runUntil(promise1).join();
         Assert.assertEquals("foo", response1.getX().toString());
 
-        promise2.join();
-        promise3.join();
+        rpcClient.runUntil(promise2).join();
+        rpcClient.runUntil(promise3).join();
 
         Assert.assertEquals(2, callCount.value());
     }
@@ -136,10 +144,10 @@ public class TwoPartyTest {
 
             //Assert.assertEquals(0, chainedCallCount.value());
 
-            var response = pipelinePromise.join();
+            var response = rpcClient.runUntil(pipelinePromise).join();
             Assert.assertEquals("bar", response.getX().toString());
 
-            var response2 = pipelinePromise2.join();
+            var response2 = rpcClient.runUntil(pipelinePromise2).join();
             RpcTestUtil.checkTestMessage(response2);
 
             Assert.assertEquals(1, chainedCallCount.value());
@@ -147,7 +155,7 @@ public class TwoPartyTest {
 
         // disconnect the client
         ((AsynchronousSocketChannel)pipe.channel).shutdownOutput();
-        rpcClient.onDisconnect().join();
+        rpcClient.runUntil(rpcClient.onDisconnect()).join();
 
         {
             // Use the now-broken capability.
