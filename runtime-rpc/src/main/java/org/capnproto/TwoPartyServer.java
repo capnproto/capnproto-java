@@ -8,11 +8,11 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyServer {
 
     private class AcceptedConnection {
-        private final AsynchronousByteChannel connection;
+        private final AsynchronousSocketChannel connection;
         private final TwoPartyVatNetwork network;
         private final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
 
-        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousByteChannel connection) {
+        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel connection) {
             this.connection = connection;
             this.network = new TwoPartyVatNetwork(this.connection, RpcTwoPartyProtocol.Side.SERVER);
             this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);

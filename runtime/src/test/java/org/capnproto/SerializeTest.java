@@ -22,7 +22,6 @@
 package org.capnproto;
 
 import java.io.IOException;
-import java.net.SocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -72,10 +71,10 @@ public class SerializeTest {
     }
 
     // read via AsyncChannel
-    expectSerializesToAsync(exampleSegmentCount, exampleBytes);
+    expectSerializesToAsyncSocket(exampleSegmentCount, exampleBytes);
   }
 
-  private void expectSerializesToAsync(int exampleSegmentCount, byte[] exampleBytes) throws IOException {
+  private void expectSerializesToAsyncSocket(int exampleSegmentCount, byte[] exampleBytes) throws IOException {
     var done =  new CompletableFuture<java.lang.Void>();
     var server = AsynchronousServerSocketChannel.open();
     server.bind(null);
@@ -108,10 +107,7 @@ public class SerializeTest {
       checkSegmentContents(exampleSegmentCount, messageReader.arena);
       done.get();
     }
-    catch (InterruptedException exc) {
-      Assert.fail(exc.getMessage());
-    }
-    catch (ExecutionException exc) {
+    catch (InterruptedException | ExecutionException exc) {
       Assert.fail(exc.getMessage());
     }
   }
