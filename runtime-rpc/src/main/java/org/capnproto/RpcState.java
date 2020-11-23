@@ -828,7 +828,7 @@ final class RpcState<VatId> {
                     // a PromiseClient.  The code which sends `Resolve` and `Return` should have replaced
                     // any promise with a direct node in order to solve the Tribble 4-way race condition.
                     // See the documentation of Disembargo in rpc.capnp for more.
-                    if (redirect == null) {
+                    if (redirect != null) {
                         assert false : "'Disembargo' of type 'senderLoopback' sent to an object that does not appear to have been the subject of a previous 'Resolve' message.";
                         return null;
                     }
