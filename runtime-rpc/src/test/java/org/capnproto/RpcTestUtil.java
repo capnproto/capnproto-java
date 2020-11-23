@@ -225,9 +225,14 @@ class RpcTestUtil {
     static class TestTailCalleeImpl extends Test.TestTailCallee.Server {
 
         private final Counter count;
+        private final CompletableFuture<java.lang.Void> releaseMe;
 
         public TestTailCalleeImpl(Counter count) {
+            this(count, READY_NOW);
+        }
+        public TestTailCalleeImpl(Counter count, CompletableFuture<java.lang.Void> releaseMe) {
             this.count = count;
+            this.releaseMe = releaseMe;
         }
 
         @Override
@@ -240,7 +245,7 @@ class RpcTestUtil {
             results.setI(params.getI());
             results.setT(params.getT());
             results.setC(new TestCallOrderImpl());
-            return READY_NOW;
+            return releaseMe;
         }
     }
 

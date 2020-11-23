@@ -446,16 +446,18 @@ public class RpcTest {
 
     @org.junit.Test
     public void testTailCall() {
+        var releaseMe = new CompletableFuture<java.lang.Void>();
         var caller = new Test.TestTailCaller.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_TAIL_CALLER));
 
         var calleeCallCount = new Counter();
-        var callee = new Test.TestTailCallee.Client(new RpcTestUtil.TestTailCalleeImpl(calleeCallCount));
+        var callee = new Test.TestTailCallee.Client(new RpcTestUtil.TestTailCalleeImpl(calleeCallCount, releaseMe));
         var request = caller.fooRequest();
         request.getParams().setI(456);
         request.getParams().setCallee(callee);
 
         var promise = request.send();
         var dependentCall0 = promise.getC().getCallSequenceRequest().send();
+        releaseMe.complete(null);
         var response = this.context.runUntil(promise).join();
         Assert.assertEquals(456, response.getI());
 
@@ -467,6 +469,10 @@ public class RpcTest {
         var dependentCall2 = response.getC().getCallSequenceRequest().send();
         Assert.assertEquals(2, this.context.runUntil(dependentCall2).join().getN());
         Assert.assertEquals(1, calleeCallCount.value());
+
+        // The imported cap has resolved locally, and can be called directly
+        Assert.assertEquals(3, promise.getC().getCallSequenceRequest().send().join().getN());
+        Assert.assertEquals(4, promise.getC().getCallSequenceRequest().send().join().getN());
     }
 
     static CompletableFuture<Test.TestCallOrder.GetCallSequenceResults.Reader> getCallSequence(
