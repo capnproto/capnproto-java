@@ -25,6 +25,7 @@ import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
@@ -402,11 +403,18 @@ public class RpcTest {
         var promise = client.getHandleRequest().send();
         var handle2 = this.context.runUntil(promise).join().getHandle();
 
+        var handleRef1 = new WeakReference<>(handle1);
+        var handleRef2 = new WeakReference<>(handle2);
+
+        promise = null;
         handle1 = null;
         handle2 = null;
 
-        System.gc();
-        this.context.runUntil(client.echoRequest().send()).join();
+        // TODO monitor the imported caps for release? close?
+        while (handleRef1.get() != null && handleRef2.get() != null) {
+            System.gc();
+            this.context.runUntil(client.echoRequest().send()).join();
+        }
     }
 
     @org.junit.Test
