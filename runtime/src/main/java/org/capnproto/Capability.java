@@ -6,11 +6,11 @@ import java.util.concurrent.CompletionStage;
 
 public final class Capability {
 
-    public static abstract class BuilderContext {
+    static class BuilderContext {
         CapTableBuilder capTable;
     }
 
-    public static class ReaderContext {
+    static class ReaderContext {
         CapTableReader capTable;
     }
 
