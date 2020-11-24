@@ -90,7 +90,6 @@ public final class AnyPointer {
                     case GET_POINTER_FIELD:
                         var index = op.pointerIndex;
                         var reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
-                        // TODO getpointerfield
                         any = reader._getPointerField(AnyPointer.factory, op.pointerIndex);
                         break;
                 }
@@ -148,10 +147,11 @@ public final class AnyPointer {
         }
     }
 
-    public static class Pipeline implements org.capnproto.Pipeline {
+    public static final class Pipeline
+            implements org.capnproto.Pipeline {
 
-        protected final PipelineHook hook;
-        protected final PipelineOp[] ops;
+        final PipelineHook hook;
+        private final PipelineOp[] ops;
 
         public Pipeline(PipelineHook hook) {
             this(hook, new PipelineOp[0]);
@@ -182,9 +182,7 @@ public final class AnyPointer {
 
         public Pipeline getPointerField(short pointerIndex) {
             var newOps = new PipelineOp[this.ops.length + 1];
-            for (int ii = 0; ii < this.ops.length; ++ii) {
-                newOps[ii] = this.ops[ii];
-            }
+            System.arraycopy(this.ops, 0, newOps, 0, this.ops.length);
             newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
             return new Pipeline(this.hook, newOps);
         }
@@ -193,16 +191,16 @@ public final class AnyPointer {
     public static final class Request
             implements org.capnproto.Request<Builder> {
 
-        private final AnyPointer.Builder params;
+        private final Builder params;
         private final RequestHook requestHook;
 
-        Request(AnyPointer.Builder params, RequestHook requestHook) {
+        Request(Builder params, RequestHook requestHook) {
             this.params = params;
             this.requestHook = requestHook;
         }
 
         @Override
-        public AnyPointer.Builder getParams() {
+        public Builder getParams() {
             return this.params;
         }
 
@@ -227,7 +225,7 @@ public final class AnyPointer {
         }
 
         public RemotePromise<Reader> send() {
-            return this.getHook().send();
+            return this.requestHook.send();
         }
     }
 }
