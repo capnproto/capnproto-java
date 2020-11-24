@@ -6,6 +6,8 @@ public interface Request<Params> {
 
     FromPointerBuilder<Params> getParamsFactory();
 
+    Request<AnyPointer.Builder> getTypelessRequest();
+
     default Params getParams() {
         return this.getTypelessRequest().getParams().getAs(this.getParamsFactory());
     }
@@ -14,7 +16,6 @@ public interface Request<Params> {
         return this.getTypelessRequest().getHook();
     }
 
-    Request<AnyPointer.Builder> getTypelessRequest();
 
     default RemotePromise<AnyPointer.Reader> sendInternal() {
         return this.getTypelessRequest().sendInternal();
@@ -23,7 +24,7 @@ public interface Request<Params> {
     static <Params> Request<Params> newBrokenRequest(FromPointerBuilder<Params> paramsFactory,
                                                      Throwable exc) {
 
-        final MessageBuilder message = new MessageBuilder();
+        var message = new MessageBuilder();
 
         var hook = new RequestHook() {
             @Override
@@ -36,14 +37,8 @@ public interface Request<Params> {
             public CompletableFuture<?> sendStreaming() {
                 return CompletableFuture.failedFuture(exc);
             }
-
-            @Override
-            public Object getBrand() {
-                return null;
-            }
         };
 
-        var root = message.getRoot(AnyPointer.factory);
         return new Request<>() {
             @Override
             public FromPointerBuilder<Params> getParamsFactory() {
