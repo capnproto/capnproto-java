@@ -6,7 +6,9 @@ public interface RequestHook {
 
     RemotePromise<AnyPointer.Reader> send();
 
-    CompletableFuture<java.lang.Void> sendStreaming();
+    default CompletableFuture<java.lang.Void> sendStreaming() {
+        return this.send().thenApply(results -> null);
+    }
 
     default Object getBrand() {
         return null;

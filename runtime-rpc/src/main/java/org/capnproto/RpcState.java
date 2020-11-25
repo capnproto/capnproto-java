@@ -1697,12 +1697,6 @@ final class RpcState<VatId> {
             return new RemotePromise<>(appPromise, new AnyPointer.Pipeline(pipeline));
         }
 
-        @Override
-        public CompletableFuture<java.lang.Void> sendStreaming() {
-            // TODO falling back to regular send for now...
-            return send().thenApply(results -> null);
-        }
-
         QuestionRef sendInternal(boolean isTailCall) {
             // TODO refactor
             var fds = List.<Integer>of();

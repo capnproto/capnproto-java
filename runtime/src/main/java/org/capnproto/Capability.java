@@ -371,10 +371,10 @@ public final class Capability {
 
     private static class LocalRequest implements RequestHook {
 
-        final MessageBuilder message = new MessageBuilder();
-        final long interfaceId;
-        final short methodId;
-        final ClientHook client;
+        private final MessageBuilder message = new MessageBuilder();
+        private final long interfaceId;
+        private final short methodId;
+        private final ClientHook client;
         private final CompletableFuture<java.lang.Void> callRelease = new CompletableFuture<>();
 
         LocalRequest(long interfaceId, short methodId, ClientHook client) {
@@ -400,13 +400,6 @@ public final class Capability {
             this.callRelease.complete(null);
             assert promiseAndPipeline.pipeline != null;
             return new RemotePromise<>(promise, new AnyPointer.Pipeline(promiseAndPipeline.pipeline));
-        }
-
-        @Override
-        public CompletableFuture<java.lang.Void> sendStreaming() {
-            // We don't do any special handling of streaming in RequestHook for local requests, because
-            // there is no latency to compensate for between the client and server in this case.
-            return send().thenApply(results -> null);
         }
 
         @Override
