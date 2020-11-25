@@ -2027,9 +2027,6 @@ private:
         kj::strTree(
           sp, "  public static final class ", methodName, " {\n",
           sp, "    public interface Request extends org.capnproto.Request<", paramBuilder, "> {\n",
-          sp, "      default org.capnproto.FromPointerBuilder<", paramBuilder, "> getParamsFactory() {\n",
-          sp, "        return ", paramFactory, ";\n",
-          sp, "      }\n",
           sp, "      default Response send() {\n",
           sp, "        return new Response(this.sendInternal());\n",
           sp, "      }\n",
@@ -2050,7 +2047,7 @@ private:
         // client call
         kj::strTree(
           sp, "public Methods.", methodName, ".Request ", methodName, "Request() {\n",
-          sp, "  var result = newCall(0x", interfaceIdHex, "L, (short)", methodId, ");\n",
+          sp, "  var result = newCall(", paramFactory, ", 0x", interfaceIdHex, "L, (short)", methodId, ");\n",
           sp, "  return () -> result;\n",
           sp, "}\n"
         ),

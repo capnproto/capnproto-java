@@ -1,12 +1,10 @@
 package org.capnproto;
 
-import java.util.concurrent.CompletableFuture;
-
-public interface StreamingRequest<Params> {
+public interface RequestBase<Params> {
 
     FromPointerBuilder<Params> getParamsFactory();
 
-    StreamingRequest<AnyPointer.Builder> getTypelessRequest();
+    RequestBase<AnyPointer.Builder> getTypelessRequest();
 
     default Params getParams() {
         return this.getTypelessRequest().getParams().getAs(this.getParamsFactory());
@@ -16,8 +14,7 @@ public interface StreamingRequest<Params> {
         return this.getTypelessRequest().getHook();
     }
 
-    default CompletableFuture<java.lang.Void> send() {
-        return this.getHook().sendStreaming();
+    default RemotePromise<AnyPointer.Reader> sendInternal() {
+        return this.getTypelessRequest().sendInternal();
     }
 }
-

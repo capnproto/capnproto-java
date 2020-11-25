@@ -1,12 +1,12 @@
 package org.capnproto;
 
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 public interface RequestHook {
 
     RemotePromise<AnyPointer.Reader> send();
 
-    CompletionStage<?> sendStreaming();
+    CompletableFuture<java.lang.Void> sendStreaming();
 
     default Object getBrand() {
         return null;

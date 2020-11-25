@@ -1698,9 +1698,9 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public CompletionStage<?> sendStreaming() {
+        public CompletableFuture<java.lang.Void> sendStreaming() {
             // TODO falling back to regular send for now...
-            return send();
+            return send().thenApply(results -> null);
         }
 
         QuestionRef sendInternal(boolean isTailCall) {

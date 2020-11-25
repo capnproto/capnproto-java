@@ -114,7 +114,7 @@ class RpcTestUtil {
             this.callCount = callCount;
             this.handleCount = handleCount;
         }
-        
+
         @Override
         protected CompletableFuture<java.lang.Void> echo(CallContext<Test.TestMoreStuff.EchoParams.Reader, Test.TestMoreStuff.EchoResults.Builder> context) {
             this.callCount.inc();
@@ -129,9 +129,9 @@ class RpcTestUtil {
             var cap = context.getParams().getCap();
             context.allowCancellation();
             return new CompletableFuture<java.lang.Void>().whenComplete((void_, exc) -> {
-               if (exc != null) {
-                   System.out.println("expectCancel completed exceptionally: " + exc.getMessage());
-               }
+                if (exc != null) {
+                    System.out.println("expectCancel completed exceptionally: " + exc.getMessage());
+                }
             }); // never completes, just await doom...
         }
 
@@ -230,6 +230,7 @@ class RpcTestUtil {
         public TestTailCalleeImpl(Counter count) {
             this(count, READY_NOW);
         }
+
         public TestTailCalleeImpl(Counter count, CompletableFuture<java.lang.Void> releaseMe) {
             this.count = count;
             this.releaseMe = releaseMe;
@@ -326,6 +327,41 @@ class RpcTestUtil {
         @Override
         protected CompletableFuture<java.lang.Void> foo(CallContext<Test.TestInterface.FooParams.Reader, Test.TestInterface.FooResults.Builder> context) {
             return this.impl.foo(context);
+        }
+    }
+
+    static class TestStreamingImpl
+        extends Test.TestStreaming.Server {
+
+        public int iSum = 0;
+        public int jSum = 0;
+        CompletableFuture<java.lang.Void> fulfiller;
+        boolean jShouldThrow = false;
+
+        @Override
+        protected CompletableFuture<java.lang.Void> doStreamI(StreamingCallContext<Test.TestStreaming.DoStreamIParams.Reader> context) {
+            iSum += context.getParams().getI();
+            fulfiller = new CompletableFuture<>();
+            return fulfiller;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> doStreamJ(StreamingCallContext<Test.TestStreaming.DoStreamJParams.Reader> context) {
+            context.allowCancellation();
+            jSum += context.getParams().getJ();
+            if (jShouldThrow) {
+                return CompletableFuture.failedFuture(RpcException.failed("throw requested"));
+            }
+            fulfiller = new CompletableFuture<>();
+            return fulfiller;
+        }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> finishStream(CallContext<Test.TestStreaming.FinishStreamParams.Reader, Test.TestStreaming.FinishStreamResults.Builder> context) {
+            var results = context.getResults();
+            results.setTotalI(iSum);
+            results.setTotalJ(jSum);
+            return READY_NOW;
         }
     }
 }

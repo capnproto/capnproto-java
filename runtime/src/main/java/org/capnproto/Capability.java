@@ -87,14 +87,40 @@ public final class Capability {
             return CompletableFuture.completedFuture(null);
         }
 
-        default Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
-            return this.getHook().newCall(interfaceId, methodId);
+        default <T> Request<T> newCall(FromPointerBuilder<T> paramsFactory, long interfaceId, short methodId) {
+            var request = this.getHook().newCall(interfaceId, methodId);
+            return new Request<>() {
+                @Override
+                public FromPointerBuilder<T> getParamsFactory() {
+                    return paramsFactory;
+                }
+
+                @Override
+                public Request<AnyPointer.Builder> getTypelessRequest() {
+                    return request;
+                }
+
+                @Override
+                public Request<T> getBaseRequest() {
+                    return this;
+                }
+            };
         }
 
-        default <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> paramsBuilder,
-                                                           long interfaceId, short methodId) {
-            var request = getHook().newCall(interfaceId, methodId);
-            return new StreamingRequest<> (paramsBuilder, request.getParams(), request.getHook());
+        default <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> paramsFactory, long interfaceId, short methodId) {
+            var request =  this.getHook().newCall(interfaceId, methodId);
+            var streamingRequest = new AnyPointer.StreamingRequest(request.getParams(), request.getHook());
+            return new StreamingRequest<>() {
+                @Override
+                public FromPointerBuilder<T> getParamsFactory() {
+                    return paramsFactory;
+                }
+
+                @Override
+                public StreamingRequest<AnyPointer.Builder> getTypelessRequest() {
+                    return streamingRequest;
+                }
+            };
         }
     }
 
@@ -377,10 +403,10 @@ public final class Capability {
         }
 
         @Override
-        public CompletableFuture<?> sendStreaming() {
+        public CompletableFuture<java.lang.Void> sendStreaming() {
             // We don't do any special handling of streaming in RequestHook for local requests, because
             // there is no latency to compensate for between the client and server in this case.
-            return send();
+            return send().thenApply(results -> null);
         }
 
         @Override

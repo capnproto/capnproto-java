@@ -215,8 +215,6 @@ public final class CapabilityTest {
         var factory = Test.TestGenerics.newFactory(Test.TestAllTypes.factory, AnyPointer.factory);
     }
 
-
-
     @org.junit.Test
     public void thisCap() {
         var callCount = new Counter();
@@ -233,5 +231,17 @@ public final class CapabilityTest {
         Assert.assertEquals(2, callCount.value());
         client2.barRequest().send().join();
         Assert.assertEquals(3, callCount.value());
+    }
+
+    @org.junit.Test
+    public void testStreamingCallsBlockSubsequentCalls() {
+        var server = new RpcTestUtil.TestStreamingImpl();
+        var cap = new Test.TestStreaming.Client(server);
+
+        {
+            var req = cap.doStreamIRequest();
+        }
+
+
     }
 }

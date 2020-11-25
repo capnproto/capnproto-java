@@ -2,12 +2,20 @@ package org.capnproto;
 
 public class StreamingCallContext<Params> {
 
-    private final FromPointerReader<Params> params;
-    final CallContextHook hook;
+    private final FromPointerReader<Params> paramsFactory;
+    private final CallContextHook hook;
 
-    public StreamingCallContext(FromPointerReader<Params> params,
+    public StreamingCallContext(FromPointerReader<Params> paramsFactory,
                                 CallContextHook hook) {
-        this.params = params;
+        this.paramsFactory = paramsFactory;
         this.hook = hook;
+    }
+
+    public final Params getParams() {
+        return this.hook.getParams().getAs(paramsFactory);
+    }
+
+    public final void allowCancellation() {
+        this.hook.allowCancellation();
     }
 }

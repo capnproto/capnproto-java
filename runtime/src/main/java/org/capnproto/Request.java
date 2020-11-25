@@ -2,23 +2,17 @@ package org.capnproto;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface Request<Params> {
+public interface Request<Params>
+    extends RequestBase<Params> {
 
-    FromPointerBuilder<Params> getParamsFactory();
+    RequestBase<Params> getBaseRequest();
 
-    Request<AnyPointer.Builder> getTypelessRequest();
-
-    default Params getParams() {
-        return this.getTypelessRequest().getParams().getAs(this.getParamsFactory());
+    default FromPointerBuilder<Params> getParamsFactory() {
+        return getBaseRequest().getParamsFactory();
     }
 
-    default RequestHook getHook() {
-        return this.getTypelessRequest().getHook();
-    }
-
-
-    default RemotePromise<AnyPointer.Reader> sendInternal() {
-        return this.getTypelessRequest().sendInternal();
+    default RequestBase<AnyPointer.Builder> getTypelessRequest() {
+        return getBaseRequest().getTypelessRequest();
     }
 
     static <Params> Request<Params> newBrokenRequest(FromPointerBuilder<Params> paramsFactory,
@@ -34,7 +28,7 @@ public interface Request<Params> {
             }
 
             @Override
-            public CompletableFuture<?> sendStreaming() {
+            public CompletableFuture<java.lang.Void> sendStreaming() {
                 return CompletableFuture.failedFuture(exc);
             }
         };
@@ -46,8 +40,13 @@ public interface Request<Params> {
             }
 
             @Override
-            public Request<AnyPointer.Builder> getTypelessRequest() {
+            public RequestBase<AnyPointer.Builder> getTypelessRequest() {
                 return new AnyPointer.Request(message.getRoot(AnyPointer.factory), hook);
+            }
+
+            @Override
+            public Request<Params> getBaseRequest() {
+                return this;
             }
         };
     }
@@ -64,6 +63,11 @@ public interface Request<Params> {
             @Override
             public Request<AnyPointer.Builder> getTypelessRequest() {
                 return typeless;
+            }
+
+            @Override
+            public Request<Params> getBaseRequest() {
+                return this;
             }
         };
     }
