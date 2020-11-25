@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class DispatchCallResult {
 
-    private final CompletableFuture<java.lang.Void> promise;
+    final CompletableFuture<java.lang.Void> promise;
     private final boolean streaming;
 
     public DispatchCallResult(CompletableFuture<java.lang.Void> promise, boolean isStreaming) {
@@ -14,10 +14,6 @@ public final class DispatchCallResult {
 
     public DispatchCallResult(Throwable exc) {
         this(CompletableFuture.failedFuture(exc), false);
-    }
-
-    public CompletableFuture<java.lang.Void> getPromise() {
-        return promise.copy();
     }
 
     public boolean isStreaming() {

@@ -177,9 +177,12 @@ public final class Capability {
         }
 
         private final class LocalClient implements ClientHook {
+
             private CompletableFuture<java.lang.Void> resolveTask;
             private ClientHook resolved;
             private boolean blocked = false;
+            private Throwable brokenException;
+            private final Queue<Runnable> blockedCalls = new ArrayDeque<>();
             private final CapabilityServerSetBase capServerSet;
 
             LocalClient() {
@@ -206,12 +209,6 @@ public final class Capability {
 
             @Override
             public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
-                assert !blocked: "Blocked condition not implemented";
-                if (blocked) {
-                    // TODO implement blocked behaviour
-                    return null;
-                }
-
                 // Note this comment from the C++ source:
                 //
                 // "We don't want to actually dispatch the call synchronously, because we don't want the callee
@@ -225,12 +222,27 @@ public final class Capability {
                 //
                 // As the Java implementation doesn't (currently) have an evalLater() call, we obtain a promise
                 // from the CallContextHook that will be completed by QueuedClient when appropriate.
-                var promise = ctx.releaseCall().thenCompose(
-                        void_ -> this.callInternal(interfaceId, methodId, ctx));
+                var promise = ctx.releaseCall().thenCompose(void_ -> {
+                    if (blocked) {
+                        var blockedCall = new CompletableFuture<java.lang.Void>();
+                        this.blockedCalls.add(() -> callInternal(interfaceId, methodId, ctx).whenComplete((result, exc) -> {
+                            if (exc == null) {
+                                blockedCall.complete(result);
+                            }
+                            else {
+                                blockedCall.completeExceptionally(exc);
+                            }
+                        }));
+                        return blockedCall;
+                    }
+                    else {
+                        return this.callInternal(interfaceId, methodId, ctx);
+                    }
+                });
 
                 var pipelinePromise = promise.thenApply(x -> {
                     ctx.releaseParams();
-                    return (PipelineHook)new LocalPipeline(ctx);
+                    return (PipelineHook) new LocalPipeline(ctx);
                 });
 
                 var tailCall = ctx.onTailCall().thenApply(pipeline -> pipeline.hook);
@@ -264,29 +276,56 @@ public final class Capability {
                 return BRAND;
             }
 
+            void unblock() {
+                this.blocked = false;
+                while (!this.blocked) {
+                    if (this.blockedCalls.isEmpty()) {
+                        break;
+                    }
+                    var call = this.blockedCalls.remove();
+                    call.run();
+                }
+            }
+
             CompletableFuture<java.lang.Void> callInternal(long interfaceId, short methodId, CallContextHook ctx) {
+                assert !this.blocked;
+
+                if (this.brokenException != null) {
+                    return CompletableFuture.failedFuture(this.brokenException);
+                }
+
                 var result = dispatchCall(
                         interfaceId, methodId,
                         new CallContext<>(AnyPointer.factory, AnyPointer.factory, ctx));
-                if (result.isStreaming()) {
-                    // TODO streaming
-                    return null;
+                if (!result.isStreaming()) {
+                    return result.promise;
                 }
                 else {
-                    return result.getPromise();
+                    this.blocked = true;
+                    return result.promise.exceptionallyCompose(exc -> {
+                        this.brokenException = exc;
+                        return CompletableFuture.failedFuture(exc);
+                    }).whenComplete((void_, exc) -> {
+                        this.unblock();
+                    });
                 }
             }
 
             public CompletableFuture<Server> getLocalServer(CapabilityServerSetBase capServerSet) {
                 if (this.capServerSet == capServerSet) {
                     if (this.blocked) {
-                        assert false: "Blocked local server not implemented";
+                        var promise = new CompletableFuture<Server>();
+                        this.blockedCalls.add(() -> promise.complete(Server.this));
+                        return promise;
                     }
-
                     return CompletableFuture.completedFuture(Server.this);
                 }
                 return null;
             }
+        }
+
+        public Integer getFd() {
+            return null;
         }
 
         /**

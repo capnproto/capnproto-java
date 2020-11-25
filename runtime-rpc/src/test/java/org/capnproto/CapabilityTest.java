@@ -238,10 +238,57 @@ public final class CapabilityTest {
         var server = new RpcTestUtil.TestStreamingImpl();
         var cap = new Test.TestStreaming.Client(server);
 
+        CompletableFuture<java.lang.Void> promise1 = null;
+        CompletableFuture<java.lang.Void> promise2 = null;
+        CompletableFuture<java.lang.Void> promise3 = null;
+
         {
             var req = cap.doStreamIRequest();
+            req.getParams().setI(123);
+            promise1 = req.send();
         }
 
+        {
+            var req = cap.doStreamJRequest();
+            req.getParams().setJ(321);
+            promise2 = req.send();
+        }
 
+        {
+            var req = cap.doStreamIRequest();
+            req.getParams().setI(456);
+            promise3 = req.send();
+        }
+
+        var promise4 = cap.finishStreamRequest().send();
+
+        // Only the first streaming call has executed
+        Assert.assertEquals(123, server.iSum);
+        Assert.assertEquals(0, server.jSum);
+
+        // Complete first streaming call
+        Assert.assertNotNull(server.fulfiller);
+        server.fulfiller.complete(null);
+
+        // second streaming call unblocked
+        Assert.assertEquals(123, server.iSum);
+        Assert.assertEquals(321, server.jSum);
+
+        // complete second streaming call
+        Assert.assertNotNull(server.fulfiller);
+        server.fulfiller.complete(null);
+
+        // third streaming call unblocked
+        Assert.assertEquals(579, server.iSum);
+        Assert.assertEquals(321, server.jSum);
+
+        // complete third streaming call
+        Assert.assertNotNull(server.fulfiller);
+        server.fulfiller.complete(null);
+
+        // last call is unblocked
+        var result = promise4.join();
+        Assert.assertEquals(579, result.getTotalI());
+        Assert.assertEquals(321, result.getTotalJ());
     }
 }
