@@ -1560,7 +1560,9 @@ final class RpcState<VatId> {
          * Construct a new RpcPipeline that is never expected to resolve.
          */
         RpcPipeline(QuestionRef questionRef) {
-            this(questionRef, null);
+            this.questionRef = questionRef;
+            this.redirectLater = null;
+            this.resolveSelf = null;
         }
 
         @Override
