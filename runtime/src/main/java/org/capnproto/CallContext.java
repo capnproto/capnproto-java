@@ -4,20 +4,20 @@ import java.util.concurrent.CompletableFuture;
 
 public final class CallContext<Params, Results> {
 
-    private final FromPointerReader<Params> params;
-    private final FromPointerBuilder<Results> results;
+    private final FromPointerReader<Params> paramsFactory;
+    private final FromPointerBuilder<Results> resultsFactory;
     private final CallContextHook hook;
 
-    public CallContext(FromPointerReader<Params> params,
-                FromPointerBuilder<Results> results,
+    public CallContext(FromPointerReader<Params> paramsFactory,
+                FromPointerBuilder<Results> resultsFactory,
                 CallContextHook hook) {
-        this.params = params;
-        this.results = results;
+        this.paramsFactory = paramsFactory;
+        this.resultsFactory = resultsFactory;
         this.hook = hook;
     }
 
     public final Params getParams() {
-        return this.hook.getParams().getAs(params);
+        return this.hook.getParams().getAs(paramsFactory);
     }
 
     public final void releaseParams() {
@@ -25,11 +25,11 @@ public final class CallContext<Params, Results> {
     }
 
     public final Results getResults() {
-        return this.hook.getResults().getAs(results);
+        return this.hook.getResults().getAs(resultsFactory);
     }
 
     public final Results initResults() {
-        return this.hook.getResults().initAs(results);
+        return this.hook.getResults().initAs(resultsFactory);
     }
 
     public final <SubParams> CompletableFuture<java.lang.Void> tailCall(Request<SubParams> tailRequest) {
