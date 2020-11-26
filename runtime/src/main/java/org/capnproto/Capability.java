@@ -136,7 +136,7 @@ public final class Capability {
             this(other.hook);
         }
 
-        public Client(Server server) {
+        public <T extends Server> Client(T server) {
             this(makeLocalClient(server));
         }
 
@@ -157,7 +157,7 @@ public final class Capability {
             return this.hook;
         }
 
-        private static ClientHook makeLocalClient(Server server) {
+        private static <T extends Server> ClientHook makeLocalClient(T server) {
             return server.makeLocalClient();
         }
     }
@@ -169,27 +169,27 @@ public final class Capability {
         private ClientHook hook;
 
         ClientHook makeLocalClient() {
-            return new LocalClient();
+            return new LocalClient<>();
         }
 
-        ClientHook makeLocalClient(CapabilityServerSetBase capServerSet) {
-            return new LocalClient(capServerSet);
+        <T extends Server> ClientHook makeLocalClient(CapabilityServerSet<T> capServerSet) {
+            return new LocalClient<>(capServerSet);
         }
 
-        private final class LocalClient implements ClientHook {
+        private final class LocalClient<T extends Server> implements ClientHook {
 
             private CompletableFuture<java.lang.Void> resolveTask;
             private ClientHook resolved;
             private boolean blocked = false;
             private Throwable brokenException;
             private final Queue<Runnable> blockedCalls = new ArrayDeque<>();
-            private final CapabilityServerSetBase capServerSet;
+            private final CapabilityServerSet<T> capServerSet;
 
             LocalClient() {
                 this(null);
             }
 
-            LocalClient(CapabilityServerSetBase capServerSet) {
+            LocalClient(CapabilityServerSet<T> capServerSet) {
                 Server.this.hook = this;
                 this.capServerSet = capServerSet;
                 var resolveTask = shortenPath();
@@ -311,14 +311,17 @@ public final class Capability {
                 }
             }
 
-            public CompletableFuture<Server> getLocalServer(CapabilityServerSetBase capServerSet) {
+            public CompletableFuture<T> getLocalServer(CapabilityServerSet<T> capServerSet) {
                 if (this.capServerSet == capServerSet) {
                     if (this.blocked) {
-                        var promise = new CompletableFuture<Server>();
-                        this.blockedCalls.add(() -> promise.complete(Server.this));
+                        var promise = new CompletableFuture<T>();
+                        var server = (T)Server.this;
+                        this.blockedCalls.add(() -> promise.complete(server));
                         return promise;
                     }
-                    return CompletableFuture.completedFuture(Server.this);
+
+                    var server = (T)Server.this;
+                    return CompletableFuture.completedFuture(server);
                 }
                 return null;
             }
@@ -712,13 +715,13 @@ public final class Capability {
         }
     }
 
-    static class CapabilityServerSetBase {
+    public static final class CapabilityServerSet<T extends Capability.Server> {
 
-        ClientHook addInternal(Server server) {
+        ClientHook addInternal(T server) {
             return server.makeLocalClient(this);
         }
 
-        CompletableFuture<Server> getLocalServerInternal(ClientHook hook) {
+        CompletableFuture<T> getLocalServerInternal(ClientHook hook) {
             for (;;) {
                 var next = hook.getResolved();
                 if (next != null) {
@@ -728,8 +731,9 @@ public final class Capability {
                     break;
                 }
             }
+            
             if (hook.getBrand() == Server.BRAND) {
-                var promise = ((Server.LocalClient)hook).getLocalServer(this);
+                var promise = ((Server.LocalClient<T>)hook).getLocalServer(this);
                 if (promise != null) {
                     return promise;
                 }
@@ -744,12 +748,9 @@ public final class Capability {
             }
             else {
                 // Cap is settled, so it definitely will never resolve to a member of this set.
-                 return CompletableFuture.completedFuture(null);
+                return CompletableFuture.completedFuture(null);
             }
         }
-    }
-
-    public static final class CapabilityServerSet<T extends Capability.Server> extends CapabilityServerSetBase {
 
         /**
          *  Create a new capability Client for the given Server and also add this server to the set.

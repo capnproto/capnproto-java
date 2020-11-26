@@ -21,16 +21,13 @@ package org.capnproto;
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import org.capnproto.AnyPointer;
-import org.capnproto.CallContext;
-import org.capnproto.Capability;
-import org.capnproto.RpcException;
 import org.capnproto.rpctest.Test;
 
 import org.junit.Assert;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class Counter {
     private int count = 0;
@@ -290,5 +287,71 @@ public final class CapabilityTest {
         var result = promise4.join();
         Assert.assertEquals(579, result.getTotalI());
         Assert.assertEquals(321, result.getTotalJ());
+    }
+
+    @org.junit.Test
+    public void testCapabilityServerSet() {
+        var set1 = new Capability.CapabilityServerSet<Test.TestInterface.Server>();
+        var set2 = new Capability.CapabilityServerSet<Test.TestInterface.Server>();
+
+        var callCount = new Counter();
+        var clientStandalone = new Test.TestInterface.Client(new RpcTestUtil.TestInterfaceImpl(callCount));
+        var clientNull = new Test.TestInterface.Client();
+
+        var ownServer1 = new RpcTestUtil.TestInterfaceImpl(callCount);
+        var server1 = ownServer1;
+        var client1 = set1.add(Test.TestInterface.factory, ownServer1);
+
+        var ownServer2 = new RpcTestUtil.TestInterfaceImpl(callCount);
+        var server2 = ownServer2;
+        var client2 = set2.add(Test.TestInterface.factory, ownServer2);
+
+        // Getting the local server using the correct set works.
+        Assert.assertEquals(server1, set1.getLocalServer(client1).join());
+        Assert.assertEquals(server2, set2.getLocalServer(client2).join());
+
+        // Getting the local server using the wrong set doesn't work.
+        Assert.assertNull(set1.getLocalServer(client2).join());
+        Assert.assertNull(set2.getLocalServer(client1).join());
+        Assert.assertNull(set1.getLocalServer(clientStandalone).join());
+        Assert.assertNull(set1.getLocalServer(clientNull).join());
+
+        var promise = new CompletableFuture<Test.TestInterface.Client>();
+        var clientPromise = new Test.TestInterface.Client(promise);
+
+        var errorPromise = new CompletableFuture<Test.TestInterface.Client>();
+        var clientErrorPromise = new Test.TestInterface.Client(errorPromise);
+
+        var resolved1 = new AtomicBoolean(false);
+        var resolved2 = new AtomicBoolean(false);
+        var resolved3 = new AtomicBoolean(false);
+
+        var promise1 = set1.getLocalServer(clientPromise).thenAccept(server -> {
+           resolved1.set(true);
+           Assert.assertEquals(server1, server);
+        });
+
+        var promise2 = set2.getLocalServer(clientPromise).thenAccept(server -> {
+            resolved2.set(true);
+            Assert.assertNull(server);
+        });
+
+        var promise3 = set1.getLocalServer(clientErrorPromise).whenComplete((server, exc) -> {
+            resolved3.set(true);
+            Assert.assertNull(server);
+            Assert.assertNotNull(exc);
+            Assert.assertTrue(exc.getCause() instanceof RpcException);
+        });
+
+        Assert.assertFalse(resolved1.get());
+        Assert.assertFalse(resolved2.get());
+        Assert.assertFalse(resolved3.get());
+
+        promise.complete(client1);
+        errorPromise.completeExceptionally(RpcException.failed("foo"));
+
+        Assert.assertTrue(resolved1.get());
+        Assert.assertTrue(resolved2.get());
+        Assert.assertTrue(resolved3.get());
     }
 }
