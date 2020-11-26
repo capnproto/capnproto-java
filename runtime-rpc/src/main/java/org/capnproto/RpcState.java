@@ -1561,7 +1561,6 @@ final class RpcState<VatId> {
          */
         RpcPipeline(QuestionRef questionRef) {
             this(questionRef, null);
-            // TODO implement tail calls...
         }
 
         @Override
@@ -1569,30 +1568,30 @@ final class RpcState<VatId> {
             // TODO avoid conversion to/from ArrayList?
             var key = new ArrayList<>(Arrays.asList(ops));
 
-            var hook = this.clientMap.computeIfAbsent(key, k -> {
-                switch (state) {
-                    case WAITING: {
+            return this.clientMap.computeIfAbsent(key, k -> {
+                return switch (state) {
+                    case WAITING -> {
                         var pipelineClient = new PipelineClient(this.questionRef, ops);
                         if (this.redirectLater == null) {
                             // This pipeline will never get redirected, so just return the PipelineClient.
-                            return pipelineClient;
+                            yield pipelineClient;
                         }
 
                         assert this.resolveSelf != null;
                         var resolutionPromise = this.resolveSelf.thenApply(
                                 response -> response.getResults().getPipelinedCap(ops));
-                        return new PromiseClient(pipelineClient, resolutionPromise, null);
+                        yield new PromiseClient(pipelineClient, resolutionPromise, null);
                     }
-
-                    case RESOLVED:
+                    case RESOLVED -> {
                         assert this.resolved != null;
-                        return this.resolved.getResults().getPipelinedCap(ops);
-
-                    default:
-                        return Capability.newBrokenCap(broken);
-                }
+                        yield this.resolved.getResults().getPipelinedCap(ops);
+                    }
+                    case BROKEN -> {
+                        assert this.broken != null;
+                        yield Capability.newBrokenCap(broken);
+                    }
+                };
             });
-            return hook;
         }
 
         @Override
