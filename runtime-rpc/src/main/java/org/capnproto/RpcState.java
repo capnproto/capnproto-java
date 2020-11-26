@@ -205,6 +205,7 @@ final class RpcState<VatId> {
     final static class Embargo {
         final int id;
         final CompletableFuture<java.lang.Void> disembargo = new CompletableFuture<>();
+
         Embargo(int id) {
             this.id = id;
         }
@@ -320,9 +321,7 @@ final class RpcState<VatId> {
         }
 
         for (var embargo: embargos) {
-            if (embargo.disembargo != null) {
-                embargo.disembargo.completeExceptionally(networkExc);
-            }
+            embargo.disembargo.completeExceptionally(networkExc);
         }
 
         // Send an abort message, but ignore failure.
