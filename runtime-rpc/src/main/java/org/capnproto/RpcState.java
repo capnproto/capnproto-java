@@ -301,6 +301,11 @@ final class RpcState<VatId> {
                 answer.redirectedResults = null;
             }
 
+            if (answer.pipeline != null) {
+                pipelinesToRelease.add(answer.pipeline);
+                answer.pipeline = null;
+            }
+
             if (answer.callContext != null) {
                 answer.callContext.requestCancel();
             }

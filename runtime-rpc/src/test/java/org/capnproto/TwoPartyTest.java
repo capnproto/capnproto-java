@@ -111,7 +111,7 @@ public class TwoPartyTest {
     }
 
     @org.junit.Test
-    public void testDisconnect() throws IOException {
+    public void testDisconnect() {
         //this.serverSocket.shutdownOutput();
         //this.serverNetwork.close();
         //this.serverNetwork.onDisconnect().join();

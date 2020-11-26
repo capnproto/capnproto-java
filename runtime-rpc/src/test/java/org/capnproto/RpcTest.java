@@ -567,17 +567,16 @@ public class RpcTest {
             response.thenRun(() -> Assert.fail("Never completing call returned?"));
         }
         catch (CompletionException exc) {
-            Assert.assertTrue(exc instanceof CompletionException);
             Assert.assertNotNull(exc.getCause());
             Assert.assertTrue(exc.getCause() instanceof RpcException);
-            Assert.assertTrue(((RpcException)exc.getCause()).getType() == RpcException.Type.FAILED);
+            Assert.assertSame(((RpcException) exc.getCause()).getType(), RpcException.Type.FAILED);
         }
         catch (Exception exc) {
             Assert.fail(exc.toString());
         }
 
         // check that the connection is still open
-        getCallSequence(client, 1);
+        this.context.runUntil(getCallSequence(client, 1)).join();
     }
 
     @org.junit.Test
@@ -624,6 +623,22 @@ public class RpcTest {
 
         int unwrappedAt = this.context.runUntil(unwrap).join();
         Assert.assertTrue(unwrappedAt >= 0);
+    }
+
+    @org.junit.Test
+    public void testEmbargoNull() {
+        var client = new Test.TestMoreStuff.Client(context.connect(Test.TestSturdyRefObjectId.Tag.TEST_MORE_STUFF));
+        var promise = client.getNullRequest().send();
+        var cap = promise.getNullCap();
+        var call0 = cap.getCallSequenceRequest().send();
+        this.context.runUntil(promise);
+        var call1 = cap.getCallSequenceRequest().send();
+
+        Assert.assertThrows(CompletionException.class, () -> this.context.runUntil(call0).join());
+        Assert.assertThrows(CompletionException.class, () -> this.context.runUntil(call1).join());
+
+        // check that the connection is still open
+        this.context.runUntil(getCallSequence(client, 0)).join();
     }
 }
 

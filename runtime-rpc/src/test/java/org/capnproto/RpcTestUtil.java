@@ -220,6 +220,11 @@ class RpcTestUtil {
                 System.out.println(cap);
             });
         }
+
+        @Override
+        protected CompletableFuture<java.lang.Void> getNull(CallContext<Test.TestMoreStuff.GetNullParams.Reader, Test.TestMoreStuff.GetNullResults.Builder> context) {
+            return READY_NOW;
+        }
     }
 
     static class TestTailCalleeImpl extends Test.TestTailCallee.Server {

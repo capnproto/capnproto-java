@@ -562,11 +562,11 @@ public final class Capability {
     }
 
     public static ClientHook newNullCap() {
-        return newBrokenClient(new RuntimeException("Called null capability"), true, ClientHook.NULL_CAPABILITY_BRAND);
+        return newBrokenClient(RpcException.failed("Called null capability"), true, ClientHook.NULL_CAPABILITY_BRAND);
     }
 
     static private ClientHook newBrokenClient(String reason, boolean resolved, Object brand) {
-        return newBrokenClient(new RuntimeException(reason), resolved, brand);
+        return newBrokenClient(RpcException.failed(reason), resolved, brand);
     }
 
     static private ClientHook newBrokenClient(Throwable exc, boolean resolved, Object brand) {
