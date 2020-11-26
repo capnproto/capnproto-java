@@ -731,7 +731,7 @@ public final class Capability {
                     break;
                 }
             }
-            
+
             if (hook.getBrand() == Server.BRAND) {
                 var promise = ((Server.LocalClient<T>)hook).getLocalServer(this);
                 if (promise != null) {

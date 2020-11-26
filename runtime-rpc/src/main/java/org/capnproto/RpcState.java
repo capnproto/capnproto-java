@@ -433,7 +433,7 @@ final class RpcState<VatId> {
 
     public void runMessageLoop() {
         this.pollOnce().thenRun(this::runMessageLoop).exceptionally(exc -> {
-            LOGGER.warning(() -> "Event loop exited: " + exc.getMessage());
+            LOGGER.log(Level.FINE, "Event loop exited", exc);
             return null;
         });
     }
