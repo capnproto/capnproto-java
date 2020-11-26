@@ -70,9 +70,7 @@ public class TwoPartyVatNetwork
 
         var result = this.previousWrite.whenComplete((void_, exc) -> {
             try {
-                if (this.channel instanceof AsynchronousSocketChannel) {
-                    ((AsynchronousSocketChannel)this.channel).shutdownOutput();
-                }
+                this.channel.shutdownOutput();
             }
             catch (Exception ignored) {
             }
