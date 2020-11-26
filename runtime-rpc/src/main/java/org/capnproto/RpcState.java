@@ -71,7 +71,7 @@ final class RpcState<VatId> {
                 var builder = message.getBody().getAs(RpcProtocol.Message.factory).initFinish();
                 builder.setQuestionId(this.id);
                 builder.setReleaseResultCaps(this.isAwaitingReturn);
-                LOGGER.info(() -> RpcState.this.toString() + ": > FINISH question=" + this.id);
+                LOGGER.fine(() -> RpcState.this.toString() + ": > FINISH question=" + this.id);
                 message.send();
             }
             this.skipFinish = true;
@@ -196,7 +196,7 @@ final class RpcState<VatId> {
                 var builder = message.getBody().initAs(RpcProtocol.Message.factory).initRelease();
                 builder.setId(importId);
                 builder.setReferenceCount(remoteRefCount);
-                LOGGER.info(() -> this.toString() + ": > RELEASE import=" + importId);
+                LOGGER.fine(() -> this.toString() + ": > RELEASE import=" + importId);
                 message.send();
             }
         }
@@ -331,7 +331,7 @@ final class RpcState<VatId> {
             var message = this.connection.newOutgoingMessage(sizeHint);
             var abort = message.getBody().getAs(RpcProtocol.Message.factory).initAbort();
             FromException(exc, abort);
-            LOGGER.log(Level.INFO, this.toString() + ": > ABORT", exc.getMessage());
+            LOGGER.log(Level.FINE, this.toString() + ": > ABORT", exc);
             message.send();
         }
         catch (Exception ignored) {
@@ -391,7 +391,7 @@ final class RpcState<VatId> {
         var message = connection.newOutgoingMessage(sizeHint);
         var builder = message.getBody().initAs(RpcProtocol.Message.factory).initBootstrap();
         builder.setQuestionId(question.id);
-        LOGGER.info(() -> this.toString() + ": > BOOTSTRAP question=" + question.id);
+        LOGGER.fine(() -> this.toString() + ": > BOOTSTRAP question=" + question.id);
         message.send();
 
         return pipeline.getPipelinedCap(new PipelineOp[0]);
@@ -452,7 +452,7 @@ final class RpcState<VatId> {
                     // boomin' back atcha
                     var msg = connection.newOutgoingMessage();
                     msg.getBody().initAs(RpcProtocol.Message.factory).setUnimplemented(reader);
-                    LOGGER.info(() -> this.toString() + ": > UNIMPLEMENTED");
+                    LOGGER.fine(() -> this.toString() + ": > UNIMPLEMENTED");
                     msg.send();
                 }
             }
@@ -463,7 +463,7 @@ final class RpcState<VatId> {
     }
 
     void handleUnimplemented(RpcProtocol.Message.Reader message) {
-        LOGGER.info(() -> this.toString() + ": < UNIMPLEMENTED");
+        LOGGER.fine(() -> this.toString() + ": < UNIMPLEMENTED");
 
         switch (message.which()) {
             case RESOLVE:
@@ -502,12 +502,12 @@ final class RpcState<VatId> {
 
     void handleAbort(RpcProtocol.Exception.Reader abort) throws RpcException {
         var exc = ToException(abort);
-        LOGGER.log(Level.INFO, this.toString() + ": < ABORT ", exc.getMessage());
+        LOGGER.log(Level.FINE, this.toString() + ": < ABORT ", exc);
         throw exc;
     }
 
     void handleBootstrap(RpcProtocol.Bootstrap.Reader bootstrap) {
-        LOGGER.info(() -> this.toString() + ": < BOOTSTRAP question=" + bootstrap.getQuestionId());
+        LOGGER.fine(() -> this.toString() + ": < BOOTSTRAP question=" + bootstrap.getQuestionId());
         if (isDisconnected()) {
             return;
         }
@@ -546,7 +546,7 @@ final class RpcState<VatId> {
                 ? capHook
                 : Capability.newBrokenCap("Invalid pipeline transform.");
 
-        LOGGER.info(() -> this.toString() + ": > RETURN answer=" + answerId);
+        LOGGER.fine(() -> this.toString() + ": > RETURN answer=" + answerId);
         response.send();
 
         assert answer.active;
@@ -555,6 +555,8 @@ final class RpcState<VatId> {
     }
 
     void handleCall(IncomingRpcMessage message, RpcProtocol.Call.Reader call) {
+        LOGGER.fine(() -> this.toString() + ": < CALL question=" + call.getQuestionId());
+
         var cap = getMessageTarget(call.getTarget());
         if (cap == null) {
             return;
@@ -629,7 +631,7 @@ final class RpcState<VatId> {
     }
 
     void handleReturn(IncomingRpcMessage message, RpcProtocol.Return.Reader callReturn) {
-        LOGGER.info(() -> this.toString() + ": < RETURN answer=" + callReturn.getAnswerId());
+        LOGGER.fine(() -> this.toString() + ": < RETURN answer=" + callReturn.getAnswerId());
 
         var question = questions.find(callReturn.getAnswerId());
         if (question == null) {
@@ -730,7 +732,7 @@ final class RpcState<VatId> {
     }
 
     void handleFinish(RpcProtocol.Finish.Reader finish) {
-        LOGGER.info(() -> this.toString() + ": < FINISH question=" + finish.getQuestionId());
+        LOGGER.fine(() -> this.toString() + ": < FINISH question=" + finish.getQuestionId());
 
         var answer = answers.find(finish.getQuestionId());
         if (answer == null || !answer.active) {
@@ -761,7 +763,7 @@ final class RpcState<VatId> {
     }
 
     private void handleResolve(IncomingRpcMessage message, RpcProtocol.Resolve.Reader resolve) {
-        LOGGER.info(() -> this.toString() + ": < RESOLVE promise=" + resolve.getPromiseId());
+        LOGGER.fine(() -> this.toString() + ": < RESOLVE promise=" + resolve.getPromiseId());
 
         var importId = resolve.getPromiseId();
         var imp = this.imports.find(importId);
@@ -793,12 +795,12 @@ final class RpcState<VatId> {
     }
 
     private void handleRelease(RpcProtocol.Release.Reader release) {
-        LOGGER.info(() -> this.toString() + ": < RELEASE promise=" + release.getId());
+        LOGGER.fine(() -> this.toString() + ": < RELEASE promise=" + release.getId());
         this.releaseExport(release.getId(), release.getReferenceCount());
     }
 
     private void handleDisembargo(RpcProtocol.Disembargo.Reader disembargo) {
-        LOGGER.info(() -> this.toString() + ": < DISEMBARGO");
+        LOGGER.fine(() -> this.toString() + ": < DISEMBARGO");
 
         var ctx = disembargo.getContext();
         switch (ctx.which()) {
@@ -843,7 +845,7 @@ final class RpcState<VatId> {
                         return null;
                     }
                     builder.getContext().setReceiverLoopback(embargoId);
-                    LOGGER.info(() -> this.toString() + ": > DISEMBARGO");
+                    LOGGER.fine(() -> this.toString() + ": > DISEMBARGO");
                     message.send();
                     return null;
                 };
@@ -979,7 +981,7 @@ final class RpcState<VatId> {
             var fds = List.<Integer>of();
             writeDescriptor(exp.clientHook, resolve.initCap(), fds);
             message.setFds(fds);
-            LOGGER.info(() -> this.toString() + ": > RESOLVE export=" + exportId);
+            LOGGER.fine(() -> this.toString() + ": > RESOLVE export=" + exportId);
             message.send();
             return CompletableFuture.completedFuture(null);
         }).whenComplete((value, exc) -> {
@@ -991,7 +993,7 @@ final class RpcState<VatId> {
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
             FromException(exc, resolve.initException());
-            LOGGER.info(() -> this.toString() + ": > RESOLVE FAILED export=" + exportId + " msg=" + exc.getMessage());
+            LOGGER.fine(() -> this.toString() + ": > RESOLVE FAILED export=" + exportId + " msg=" + exc.getMessage());
             message.send();
         });
     }
@@ -1395,7 +1397,7 @@ final class RpcState<VatId> {
                             builder.setAnswerId(this.answerId);
                             builder.setReleaseParamCaps(false);
                             builder.setTakeFromOtherQuestion(tailInfo.questionId);
-                            LOGGER.info(() -> this.toString() + ": > RETURN answer=" + answerId);
+                            LOGGER.fine(() -> this.toString() + ": > RETURN answer=" + answerId);
                             message.send();
                         }
 
@@ -1437,7 +1439,7 @@ final class RpcState<VatId> {
             this.returnMessage.setAnswerId(this.answerId);
             this.returnMessage.setReleaseParamCaps(false);
 
-            LOGGER.info(() -> RpcState.this.toString() + ": > RETURN answer=" + this.answerId);
+            LOGGER.fine(() -> RpcState.this.toString() + ": > RETURN answer=" + this.answerId);
 
             int[] exports = null;
             try {
@@ -1462,7 +1464,7 @@ final class RpcState<VatId> {
                 builder.setAnswerId(this.answerId);
                 builder.setReleaseParamCaps(false);
                 FromException(exc, builder.initException());
-                LOGGER.log(Level.INFO, this.toString() + ": > RETURN", exc.getMessage());
+                LOGGER.log(Level.FINE, this.toString() + ": > RETURN", exc);
                 message.send();
             }
 
@@ -1714,7 +1716,7 @@ final class RpcState<VatId> {
                 callBuilder.getSendResultsTo().getYourself();
             }
             try {
-                LOGGER.info(() -> RpcState.this.toString() + ": > CALL question=" + question.id);
+                LOGGER.fine(() -> RpcState.this.toString() + ": > CALL question=" + question.id);
                 message.send();
             } catch (Exception exc) {
                 question.isAwaitingReturn = false;
@@ -1983,7 +1985,7 @@ final class RpcState<VatId> {
                 ClientHook finalReplacement = replacement;
                 var embargoPromise = embargo.disembargo.thenApply(
                         void_ -> finalReplacement);
-                LOGGER.info(() -> RpcState.this.toString() + ": > DISEMBARGO");
+                LOGGER.fine(() -> RpcState.this.toString() + ": > DISEMBARGO");
                 message.send();
                 return Capability.newLocalPromiseClient(embargoPromise);
             }
