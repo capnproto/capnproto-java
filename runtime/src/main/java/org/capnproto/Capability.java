@@ -688,17 +688,14 @@ public final class Capability {
     private static final class QueuedPipeline implements PipelineHook {
 
         private final CompletableFuture<PipelineHook> promise;
-        private final CompletableFuture<Void> selfResolutionOp;
         PipelineHook redirect;
         private final Map<List<PipelineOp>, ClientHook> clientMap = new HashMap<>();
 
-        QueuedPipeline(CompletableFuture<PipelineHook> promiseParam) {
-            this.promise = promiseParam;
-            this.selfResolutionOp = promise.handle((pipeline, exc) -> {
+        QueuedPipeline(CompletableFuture<PipelineHook> promise) {
+            this.promise = promise.whenComplete((pipeline, exc) -> {
                 this.redirect = exc == null
                         ? pipeline
                         : PipelineHook.newBrokenPipeline(exc);
-                return null;
             });
         }
 
@@ -713,17 +710,6 @@ public final class Capability {
                     k -> new QueuedClient(this.promise.thenApply(
                             pipeline -> pipeline.getPipelinedCap(ops))));
         }
-/*
-        @Override
-        public void close() {
-            if (this.redirect != null) {
-                this.redirect.close();
-            }
-            else {
-                this.promise.cancel(false);
-            }
-        }
-        */
     }
 
     // A ClientHook which simply queues calls while waiting for a ClientHook to which to forward them.
