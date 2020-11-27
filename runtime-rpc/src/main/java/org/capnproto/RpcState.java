@@ -1690,7 +1690,7 @@ final class RpcState<VatId> {
                 var redirected = redirect.newCall(
                         this.callBuilder.getInterfaceId(), this.callBuilder.getMethodId());
                 var replacement = new AnyPointer.Request(paramsBuilder, redirected.getHook());
-                return replacement.send();
+                return replacement.sendInternal();
             }
 
             var questionRef = sendInternal(false);

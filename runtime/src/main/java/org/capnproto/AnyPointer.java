@@ -228,10 +228,6 @@ public final class AnyPointer {
 
         @Override
         public RemotePromise<Reader> sendInternal() {
-            return this.send();
-        }
-
-        public RemotePromise<Reader> send() {
             return this.requestHook.send();
         }
     }
