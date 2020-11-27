@@ -21,8 +21,6 @@
 
 package org.capnproto;
 
-import java.util.concurrent.CompletableFuture;
-
 public final class AnyPointer {
     public static final class Factory
             implements PointerFactory<Builder, Reader>,
@@ -187,88 +185,6 @@ public final class AnyPointer {
             System.arraycopy(this.ops, 0, newOps, 0, this.ops.length);
             newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
             return new Pipeline(this.hook, newOps);
-        }
-    }
-
-    public static final class Request
-            implements org.capnproto.Request<Builder> {
-
-        private final Builder params;
-        private final RequestHook requestHook;
-
-        Request(Builder params, RequestHook requestHook) {
-            this.params = params;
-            this.requestHook = requestHook;
-        }
-
-        @Override
-        public Builder getParams() {
-            return this.params;
-        }
-
-        @Override
-        public org.capnproto.Request<Builder> getTypelessRequest() {
-            return this;
-        }
-
-        @Override
-        public org.capnproto.Request<Builder> getBaseRequest() {
-            return this;
-        }
-
-        @Override
-        public RequestHook getHook() {
-            return this.requestHook;
-        }
-
-        @Override
-        public FromPointerBuilder<Builder> getParamsFactory() {
-            return AnyPointer.factory;
-        }
-
-        @Override
-        public RemotePromise<Reader> sendInternal() {
-            return this.requestHook.send();
-        }
-    }
-
-    public static final class StreamingRequest
-            implements org.capnproto.StreamingRequest<Builder> {
-
-        private final Builder params;
-        private final RequestHook requestHook;
-
-        StreamingRequest(AnyPointer.Request request) {
-            this(request.params, request.requestHook);
-        }
-
-        StreamingRequest(Builder params, RequestHook requestHook) {
-            this.params = params;
-            this.requestHook = requestHook;
-        }
-
-        @Override
-        public Builder getParams() {
-            return this.params;
-        }
-
-        @Override
-        public org.capnproto.StreamingRequest<Builder> getTypelessRequest() {
-            return this;
-        }
-
-        @Override
-        public RequestHook getHook() {
-            return this.requestHook;
-        }
-
-        @Override
-        public FromPointerBuilder<Builder> getParamsFactory() {
-            return AnyPointer.factory;
-        }
-
-        public CompletableFuture<java.lang.Void> send() {
-            return this.requestHook.sendStreaming();
         }
     }
 }

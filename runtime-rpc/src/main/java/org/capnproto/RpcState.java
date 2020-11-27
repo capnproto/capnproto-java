@@ -1637,7 +1637,7 @@ final class RpcState<VatId> {
 
         private Request<AnyPointer.Builder> newCallNoIntercept(long interfaceId, short methodId) {
             if (isDisconnected()) {
-                return Request.newBrokenRequest(AnyPointer.factory, disconnected);
+                return Capability.newBrokenRequest(disconnected);
             }
 
             var request = new RpcRequest(this);
@@ -1645,7 +1645,7 @@ final class RpcState<VatId> {
             callBuilder.setInterfaceId(interfaceId);
             callBuilder.setMethodId(methodId);
             var root = request.getRoot();
-            return new AnyPointer.Request(root, request);
+            return Capability.newTypelessRequest(root, request);
         }
     }
 
@@ -1689,7 +1689,7 @@ final class RpcState<VatId> {
             if (redirect != null) {
                 var redirected = redirect.newCall(
                         this.callBuilder.getInterfaceId(), this.callBuilder.getMethodId());
-                var replacement = new AnyPointer.Request(paramsBuilder, redirected.getHook());
+                var replacement = Capability.newTypelessRequest(paramsBuilder, redirected.getHook());
                 return replacement.sendInternal();
             }
 

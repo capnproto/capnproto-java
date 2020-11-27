@@ -109,7 +109,7 @@ public final class Capability {
 
         default <T> StreamingRequest<T> newStreamingCall(FromPointerBuilder<T> paramsFactory, long interfaceId, short methodId) {
             var request =  this.getHook().newCall(interfaceId, methodId);
-            var streamingRequest = new AnyPointer.StreamingRequest(request.getParams(), request.getHook());
+            var streamingRequest = newTypelessStreamingRequest(request.getParams(), request.getHook());
             return new StreamingRequest<>() {
                 @Override
                 public FromPointerBuilder<T> getParamsFactory() {
@@ -204,7 +204,7 @@ public final class Capability {
             public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
                 var hook = new LocalRequest(interfaceId, methodId, this);
                 var root = hook.message.getRoot(AnyPointer.factory);
-                return new AnyPointer.Request(root, hook);
+                return newTypelessRequest(root, hook);
             }
 
             @Override
@@ -556,6 +556,89 @@ public final class Capability {
         }
     }
 
+    static Request<AnyPointer.Builder> newTypelessRequest(AnyPointer.Builder params, RequestHook requestHook) {
+        return new Request<>() {
+            @Override
+            public AnyPointer.Builder getParams() {
+                return params;
+            }
+
+            @Override
+            public org.capnproto.Request<AnyPointer.Builder> getTypelessRequest() {
+                return this;
+            }
+
+            @Override
+            public org.capnproto.Request<AnyPointer.Builder> getBaseRequest() {
+                return this;
+            }
+
+            @Override
+            public RequestHook getHook() {
+                return requestHook;
+            }
+
+            @Override
+            public FromPointerBuilder<AnyPointer.Builder> getParamsFactory() {
+                return AnyPointer.factory;
+            }
+
+            @Override
+            public RemotePromise<AnyPointer.Reader> sendInternal() {
+                return requestHook.send();
+            }
+        };
+    }
+
+    static StreamingRequest<AnyPointer.Builder> newTypelessStreamingRequest(AnyPointer.Builder params, RequestHook requestHook) {
+        return new StreamingRequest<>() {
+            @Override
+            public AnyPointer.Builder getParams() {
+                return params;
+            }
+
+            @Override
+            public org.capnproto.StreamingRequest<AnyPointer.Builder> getTypelessRequest() {
+                return this;
+            }
+
+            @Override
+            public RequestHook getHook() {
+                return requestHook;
+            }
+
+            @Override
+            public FromPointerBuilder<AnyPointer.Builder> getParamsFactory() {
+                return AnyPointer.factory;
+            }
+
+            public CompletableFuture<java.lang.Void> send() {
+                return requestHook.sendStreaming();
+            }
+        };
+    }
+
+    static Request<AnyPointer.Builder> newBrokenRequest(Throwable exc) {
+
+        var message = new MessageBuilder();
+        var params = message.getRoot(AnyPointer.factory);
+
+        var hook = new RequestHook() {
+            @Override
+            public RemotePromise<AnyPointer.Reader> send() {
+                return new RemotePromise<>(CompletableFuture.failedFuture(exc),
+                        new AnyPointer.Pipeline(PipelineHook.newBrokenPipeline(exc)));
+            }
+
+            @Override
+            public CompletableFuture<java.lang.Void> sendStreaming() {
+                return CompletableFuture.failedFuture(exc);
+            }
+        };
+
+        return Capability.newTypelessRequest(params, hook);
+    }
+
     public static ClientHook newBrokenCap(String reason) {
         return newBrokenClient(reason, false, ClientHook.BROKEN_CAPABILITY_BRAND);
     }
@@ -568,16 +651,15 @@ public final class Capability {
         return newBrokenClient(RpcException.failed("Called null capability"), true, ClientHook.NULL_CAPABILITY_BRAND);
     }
 
-    static private ClientHook newBrokenClient(String reason, boolean resolved, Object brand) {
+    private static ClientHook newBrokenClient(String reason, boolean resolved, Object brand) {
         return newBrokenClient(RpcException.failed(reason), resolved, brand);
     }
 
-    static private ClientHook newBrokenClient(Throwable exc, boolean resolved, Object brand) {
+    private static ClientHook newBrokenClient(Throwable exc, boolean resolved, Object brand) {
         return new ClientHook() {
             @Override
             public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
-                var broken = Request.newBrokenRequest(AnyPointer.factory, exc);
-                return new AnyPointer.Request(broken.getParams(), broken.getHook());
+                return newBrokenRequest(exc);
             }
 
             @Override
@@ -689,7 +771,7 @@ public final class Capability {
             var hook = new LocalRequest(interfaceId, methodId, this);
             this.pendingCalls.add(hook);
             var root = hook.message.getRoot(AnyPointer.factory);
-            return new AnyPointer.Request(root, hook);
+            return newTypelessRequest(root, hook);
         }
 
         @Override
