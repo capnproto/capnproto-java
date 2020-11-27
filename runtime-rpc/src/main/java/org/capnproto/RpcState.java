@@ -398,7 +398,7 @@ final class RpcState<VatId> {
         LOGGER.fine(() -> this.toString() + ": > BOOTSTRAP question=" + question.id);
         message.send();
 
-        return pipeline.getPipelinedCap(new PipelineOp[0]);
+        return pipeline.getPipelinedCap(new short[0]);
     }
 
     /**
@@ -1534,7 +1534,7 @@ final class RpcState<VatId> {
         private RpcResponse resolved;
         private Throwable broken;
 
-        private final HashMap<List<PipelineOp>, ClientHook> clientMap = new HashMap<>();
+        private final HashMap<List<Short>, ClientHook> clientMap = new HashMap<>();
         private final CompletableFuture<RpcResponse> redirectLater;
         private final CompletableFuture<RpcResponse> resolveSelf;
 
@@ -1566,9 +1566,11 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public ClientHook getPipelinedCap(PipelineOp[] ops) {
-            // TODO avoid conversion to/from ArrayList?
-            var key = new ArrayList<>(Arrays.asList(ops));
+        public ClientHook getPipelinedCap(short[] ops) {
+            var key = new ArrayList<Short>(ops.length);
+            for (short op: ops) {
+                key.add(op);
+            }
 
             return this.clientMap.computeIfAbsent(key, k -> {
                 return switch (state) {
@@ -2003,11 +2005,11 @@ final class RpcState<VatId> {
     private class PipelineClient extends RpcClient {
 
         private final QuestionRef questionRef;
-        private final PipelineOp[] ops;
+        private final short[] ops;
 
-        PipelineClient(QuestionRef questionRef, PipelineOp[] ops) {
+        PipelineClient(QuestionRef questionRef, short[] ops) {
             this.questionRef = questionRef;
-            this.ops = ops;
+            this.ops = ops.clone();
         }
 
         @Override
@@ -2037,34 +2039,35 @@ final class RpcState<VatId> {
         }
     }
 
-    static void FromPipelineOps(PipelineOp[] ops, RpcProtocol.PromisedAnswer.Builder builder) {
+    static void FromPipelineOps(short[] ops, RpcProtocol.PromisedAnswer.Builder builder) {
         var transforms = builder.initTransform(ops.length);
         for (int ii = 0; ii < ops.length; ++ii) {
             var transform = transforms.get(ii);
-            switch (ops[ii].type) {
-                case NOOP -> transform.setNoop(null);
-                case GET_POINTER_FIELD -> transform.setGetPointerField(ops[ii].pointerIndex);
+            var pointerIndex = ops[ii];
+            if (pointerIndex < 0) {
+                transform.setNoop(null);
+            }
+            else {
+                transform.setGetPointerField(pointerIndex);
             }
         }
     }
 
-    static PipelineOp[] ToPipelineOps(RpcProtocol.PromisedAnswer.Reader reader) {
+    static short[] ToPipelineOps(RpcProtocol.PromisedAnswer.Reader reader) {
         var transforms = reader.getTransform();
-        var ops = new PipelineOp[transforms.size()];
+        var ops = new short[transforms.size()];
         for (int ii = 0; ii < ops.length; ++ii) {
             var transform = transforms.get(ii);
             switch (transform.which()) {
                 case NOOP:
-                    ops[ii] = PipelineOp.Noop(); // TODO null?
+                    ops[ii] = -1;
                     break;
                 case GET_POINTER_FIELD:
-                    ops[ii] = PipelineOp.PointerField(transform.getGetPointerField());
+                    ops[ii] = transform.getGetPointerField();
                     break;
-                default:
-                    // TODO improve error handling here
-                    // Unsupported pipeline ops
+                case _NOT_IN_SCHEMA:
                     return null;
-            }
+            };
         }
         return ops;
     }

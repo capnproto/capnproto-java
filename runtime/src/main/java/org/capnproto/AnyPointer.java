@@ -80,18 +80,13 @@ public final class AnyPointer {
             return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
 
-        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+        public final ClientHook getPipelinedCap(short[] ops) {
             AnyPointer.Reader any = this;
 
-            for (var op: ops) {
-                switch (op.type) {
-                    case NOOP:
-                        break;
-                    case GET_POINTER_FIELD:
-                        var index = op.pointerIndex;
-                        var reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
-                        any = reader._getPointerField(AnyPointer.factory, op.pointerIndex);
-                        break;
+            for (var pointerIndex: ops) {
+                if (pointerIndex >= 0) {
+                    var reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
+                    any = reader._getPointerField(AnyPointer.factory, pointerIndex);
                 }
             }
             return WireHelpers.readCapabilityPointer(any.segment, any.capTable, any.pointer, 0);
@@ -151,13 +146,13 @@ public final class AnyPointer {
             implements org.capnproto.Pipeline {
 
         final PipelineHook hook;
-        private final PipelineOp[] ops;
+        private final short[] ops;
 
         public Pipeline(PipelineHook hook) {
-            this(hook, new PipelineOp[0]);
+            this(hook, new short[0]);
         }
 
-        Pipeline(PipelineHook hook, PipelineOp[] ops) {
+        Pipeline(PipelineHook hook, short[] ops) {
             this.hook = hook;
             this.ops = ops;
         }
@@ -181,9 +176,9 @@ public final class AnyPointer {
         }
 
         public Pipeline getPointerField(short pointerIndex) {
-            var newOps = new PipelineOp[this.ops.length + 1];
+            var newOps = new short[this.ops.length + 1];
             System.arraycopy(this.ops, 0, newOps, 0, this.ops.length);
-            newOps[this.ops.length] = PipelineOp.PointerField(pointerIndex);
+            newOps[this.ops.length] = pointerIndex;
             return new Pipeline(this.hook, newOps);
         }
     }

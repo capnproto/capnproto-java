@@ -465,7 +465,7 @@ public final class Capability {
         }
 
         @Override
-        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+        public final ClientHook getPipelinedCap(short[] ops) {
             return this.results.getPipelinedCap(ops);
         }
     }
@@ -689,7 +689,7 @@ public final class Capability {
 
         private final CompletableFuture<PipelineHook> promise;
         PipelineHook redirect;
-        private final Map<List<PipelineOp>, ClientHook> clientMap = new HashMap<>();
+        private final Map<List<Short>, ClientHook> clientMap = new HashMap<>();
 
         QueuedPipeline(CompletableFuture<PipelineHook> promise) {
             this.promise = promise.whenComplete((pipeline, exc) -> {
@@ -700,11 +700,16 @@ public final class Capability {
         }
 
         @Override
-        public final ClientHook getPipelinedCap(PipelineOp[] ops) {
+        public final ClientHook getPipelinedCap(short[] ops) {
             if (redirect != null) {
                 return redirect.getPipelinedCap(ops);
             }
-            var key = Arrays.asList(ops);
+
+            var key = new ArrayList<Short>(ops.length);
+            for (short op: ops) {
+                key.add(op);
+            }
+
             return this.clientMap.computeIfAbsent(key,
                     k -> new QueuedClient(this.promise.thenApply(
                             pipeline -> pipeline.getPipelinedCap(ops))));
