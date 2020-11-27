@@ -759,7 +759,12 @@ public final class Capability {
         @Override
         public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
             var hook = new LocalRequest(interfaceId, methodId, this);
-            this.pendingCalls.add(hook);
+            if (this.redirect == null) {
+                this.pendingCalls.add(hook);
+            }
+            else {
+                hook.releaseCall();
+            }
             var root = hook.message.getRoot(AnyPointer.factory);
             return newTypelessRequest(root, hook);
         }
@@ -767,7 +772,12 @@ public final class Capability {
         @Override
         public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
             var promise = new CompletableFuture<ClientHook>();
-            this.queuedCalls.add(promise);
+            if (this.redirect == null) {
+                this.queuedCalls.add(promise);
+            }
+            else {
+                promise.complete(this.redirect);
+            }
 
             var callResult = promise.thenApply(
                     client -> client.call(interfaceId, methodId, ctx));
