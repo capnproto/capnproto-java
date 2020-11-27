@@ -704,8 +704,7 @@ public final class Capability {
             if (redirect != null) {
                 return redirect.getPipelinedCap(ops);
             }
-
-            var key = new ArrayList<>(Arrays.asList(ops));
+            var key = Arrays.asList(ops);
             return this.clientMap.computeIfAbsent(key,
                     k -> new QueuedClient(this.promise.thenApply(
                             pipeline -> pipeline.getPipelinedCap(ops))));
