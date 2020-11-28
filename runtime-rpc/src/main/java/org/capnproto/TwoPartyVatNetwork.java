@@ -114,9 +114,7 @@ public class TwoPartyVatNetwork
         private List<FileDescriptor> fds = List.of();
 
         OutgoingMessage(int firstSegmentWordSize) {
-            this.message = new MessageBuilder(firstSegmentWordSize == 0
-                    ? BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS
-                    : firstSegmentWordSize);
+            this.message = new MessageBuilder(firstSegmentWordSize);
         }
 
         @Override
