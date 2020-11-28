@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.FileDescriptor;
 import java.util.concurrent.CompletableFuture;
 
 public interface ClientHook {
@@ -71,7 +72,7 @@ public interface ClientHook {
      *  Implements {@link Capability.Client.getFd}. If this returns null but whenMoreResolved() returns
      *  non-null, then Capability::Client::getFd() waits for resolution and tries again.
      */
-    default Integer getFd() {
+    default FileDescriptor getFd() {
         return null;
     }
 

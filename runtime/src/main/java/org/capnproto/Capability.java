@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.FileDescriptor;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -75,7 +76,7 @@ public final class Capability {
          * The file descriptor will remain open at least as long as the {@link Client} remains alive.
          * If you need it to last longer, you will need to `dup()` it.
          */
-        default CompletableFuture<Integer> getFd() {
+        default CompletableFuture<FileDescriptor> getFd() {
             var fd = this.getHook().getFd();
             if (fd != null) {
                 return CompletableFuture.completedFuture(fd);

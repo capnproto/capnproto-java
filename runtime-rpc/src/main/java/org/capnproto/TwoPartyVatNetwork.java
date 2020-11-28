@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.FileDescriptor;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -110,7 +111,7 @@ public class TwoPartyVatNetwork
     final class OutgoingMessage implements OutgoingRpcMessage {
 
         private final MessageBuilder message;
-        private List<Integer> fds = List.of();
+        private List<FileDescriptor> fds = List.of();
 
         OutgoingMessage(int firstSegmentWordSize) {
             this.message = new MessageBuilder(firstSegmentWordSize == 0
@@ -124,7 +125,7 @@ public class TwoPartyVatNetwork
         }
 
         @Override
-        public void setFds(List<Integer> fds) {
+        public void setFds(List<FileDescriptor> fds) {
             this.fds = fds;
         }
 
@@ -146,13 +147,13 @@ public class TwoPartyVatNetwork
     static final class IncomingMessage implements IncomingRpcMessage {
 
         private final MessageReader message;
-        private final List<Integer> fds;
+        private final List<FileDescriptor> fds;
 
         IncomingMessage(MessageReader message) {
             this(message, List.of());
         }
 
-        IncomingMessage(MessageReader message, List<Integer> fds) {
+        IncomingMessage(MessageReader message, List<FileDescriptor> fds) {
             this.message = message;
             this.fds = fds;
         }
@@ -163,7 +164,7 @@ public class TwoPartyVatNetwork
         }
 
         @Override
-        public List<Integer> getAttachedFds() {
+        public List<FileDescriptor> getAttachedFds() {
             return this.fds;
         }
     }

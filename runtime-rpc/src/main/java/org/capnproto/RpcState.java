@@ -1,5 +1,6 @@
 package org.capnproto;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -162,7 +163,7 @@ final class RpcState<VatId> {
     final class Import {
         final int importId;
         ImportDisposer disposer;
-        Integer fd;
+        FileDescriptor fd;
         int remoteRefCount;
         RpcClient appClient;
         CompletableFuture<ClientHook> promise;
@@ -176,7 +177,7 @@ final class RpcState<VatId> {
             this.remoteRefCount++;
         }
 
-        void setFdIfMissing(Integer fd) {
+        void setFdIfMissing(FileDescriptor fd) {
             if (this.fd == null) {
                 this.fd = fd;
             }
@@ -541,7 +542,7 @@ final class RpcState<VatId> {
                 ? caps[0]
                 : Capability.newNullCap();
 
-        var fds = List.<Integer>of();
+        var fds = List.<FileDescriptor>of();
         response.setFds(List.of());
 
         answer.resultExports = writeDescriptors(caps, payload, fds);
@@ -872,7 +873,7 @@ final class RpcState<VatId> {
         }
     }
 
-    private int[] writeDescriptors(ClientHook[] capTable, RpcProtocol.Payload.Builder payload, List<Integer> fds) {
+    private int[] writeDescriptors(ClientHook[] capTable, RpcProtocol.Payload.Builder payload, List<FileDescriptor> fds) {
         if (capTable.length == 0) {
             return new int[0];
         }
@@ -897,7 +898,7 @@ final class RpcState<VatId> {
                 .toArray();
     }
 
-    private Integer writeDescriptor(ClientHook cap, RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
+    private Integer writeDescriptor(ClientHook cap, RpcProtocol.CapDescriptor.Builder descriptor, List<FileDescriptor> fds) {
         ClientHook inner = cap;
         for (;;) {
             var resolved = inner.getResolved();
@@ -982,7 +983,7 @@ final class RpcState<VatId> {
             var message = connection.newOutgoingMessage(sizeHint);
             var resolve = message.getBody().initAs(RpcProtocol.Message.factory).initResolve();
             resolve.setPromiseId(exportId);
-            var fds = List.<Integer>of();
+            var fds = List.<FileDescriptor>of();
             writeDescriptor(exp.clientHook, resolve.initCap(), fds);
             message.setFds(fds);
             LOGGER.fine(() -> this.toString() + ": > RESOLVE export=" + exportId);
@@ -1027,7 +1028,7 @@ final class RpcState<VatId> {
         }
     }
 
-    private List<ClientHook> receiveCaps(StructList.Reader<RpcProtocol.CapDescriptor.Reader> capTable, List<Integer> fds) {
+    private List<ClientHook> receiveCaps(StructList.Reader<RpcProtocol.CapDescriptor.Reader> capTable, List<FileDescriptor> fds) {
         var result = new ArrayList<ClientHook>();
         for (var cap: capTable) {
             result.add(receiveCap(cap, fds));
@@ -1035,10 +1036,8 @@ final class RpcState<VatId> {
         return result;
     }
 
-    private ClientHook receiveCap(RpcProtocol.CapDescriptor.Reader descriptor, List<Integer> fds) {
-        // TODO AutoCloseFd
-        Integer fd = null;
-
+    private ClientHook receiveCap(RpcProtocol.CapDescriptor.Reader descriptor, List<FileDescriptor> fds) {
+        FileDescriptor fd = null;
         int fdIndex = descriptor.getAttachedFd();
         if (fdIndex >= 0 && fdIndex < fds.size()) {
             fd = fds.get(fdIndex);
@@ -1097,10 +1096,8 @@ final class RpcState<VatId> {
         }
     }
 
-    private ClientHook importCap(int importId, boolean isPromise, Integer fd) {
+    private ClientHook importCap(int importId, boolean isPromise, FileDescriptor fd) {
         // Receive a new import.
-
-
         var imp = imports.put(importId);
 
         ImportClient importClient;
@@ -1260,7 +1257,7 @@ final class RpcState<VatId> {
 
         int[] send() {
             var capTable = this.capTable.getTable();
-            var fds = List.<Integer>of();
+            var fds = List.<FileDescriptor>of();
             var exports = writeDescriptors(capTable, payload, fds);
             // TODO process FDs
             message.setFds(fds);
@@ -1606,7 +1603,7 @@ final class RpcState<VatId> {
 
     abstract class RpcClient implements ClientHook {
 
-        public abstract Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds);
+        public abstract Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<FileDescriptor> fds);
 
         public abstract ClientHook writeTarget(RpcProtocol.MessageTarget.Builder target);
 
@@ -1708,7 +1705,7 @@ final class RpcState<VatId> {
 
         QuestionRef sendInternal(boolean isTailCall) {
             // TODO refactor
-            var fds = List.<Integer>of();
+            var fds = List.<FileDescriptor>of();
             var exports = writeDescriptors(capTable.getTable(), callBuilder.getParams(), fds);
             message.setFds(fds);
             var question = questions.next();
@@ -1790,7 +1787,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
+        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<FileDescriptor> fds) {
             descriptor.setReceiverHosted(this.importRef.importId);
             return null;
         }
@@ -1807,7 +1804,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer getFd() {
+        public FileDescriptor getFd() {
             var imp = imports.find(this.importRef.importId);
             return imp != null ? imp.fd : null;
         }
@@ -1871,7 +1868,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder target, List<Integer> fds) {
+        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder target, List<FileDescriptor> fds) {
             this.receivedCall = true;
             return RpcState.this.writeDescriptor(this.cap, target, fds);
         }
@@ -1913,7 +1910,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer getFd() {
+        public FileDescriptor getFd() {
             if (this.isResolved()) {
                 return this.cap.getFd();
             }
@@ -2023,7 +2020,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<Integer> fds) {
+        public Integer writeDescriptor(RpcProtocol.CapDescriptor.Builder descriptor, List<FileDescriptor> fds) {
             var promisedAnswer = descriptor.initReceiverAnswer();
             promisedAnswer.setQuestionId(questionRef.questionId);
             FromPipelineOps(ops, promisedAnswer);
@@ -2134,7 +2131,7 @@ final class RpcState<VatId> {
         }
 
         @Override
-        public Integer getFd() {
+        public FileDescriptor getFd() {
             return this.inner.getFd();
         }
     }
