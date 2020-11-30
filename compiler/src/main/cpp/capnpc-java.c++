@@ -414,6 +414,8 @@ private:
           return kj::strTree("org.capnproto.Capability.", suffix);
         case schema::Type::AnyPointer::Unconstrained::STRUCT:
           return kj::strTree("org.capnproto.AnyStruct.", suffix);
+        case schema::Type::AnyPointer::Unconstrained::LIST:
+          return kj::strTree("org.capnproto.AnyList.", suffix);
         default:
           return kj::strTree("org.capnproto.AnyPointer.", suffix);
         }
@@ -781,6 +783,8 @@ private:
           return kj::str("org.capnproto.Capability.factory");
         case  schema::Type::AnyPointer::Unconstrained::STRUCT:
           return kj::str("org.capnproto.AnyStruct.factory");
+        case  schema::Type::AnyPointer::Unconstrained::LIST:
+          return kj::str("org.capnproto.AnyList.factory");
         default:
           return kj::str("org.capnproto.AnyPointer.factory");
         }
@@ -1042,7 +1046,8 @@ private:
             kind = FieldKind::ANY_POINTER;
             break;
           case schema::Type::AnyPointer::Unconstrained::LIST:
-            kind = FieldKind::LIST;
+            kind = FieldKind::ANY_POINTER;
+            break;
           case schema::Type::AnyPointer::Unconstrained::CAPABILITY:
             kind = FieldKind::INTERFACE;
             break;
