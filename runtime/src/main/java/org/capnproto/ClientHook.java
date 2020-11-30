@@ -8,8 +8,25 @@ public interface ClientHook {
     Object NULL_CAPABILITY_BRAND = new Object();
     Object BROKEN_CAPABILITY_BRAND = new Object();
 
+    /**
+     * Start a new call, allowing the client to allocate request/response objects as it sees fit.
+     * This version is used when calls are made from application code in the local process.
+     */
     Request<AnyPointer.Builder> newCall(long interfaceId, short methodId);
 
+    /**
+     * Call the object, but the caller controls allocation of the request/response objects.  If the
+     * callee insists on allocating these objects itself, it must make a copy.  This version is used
+     * when calls come in over the network via an RPC system.
+     *
+     * Since the caller of this method chooses the CallContext implementation, it is the caller's
+     * responsibility to ensure that the returned promise is not canceled unless allowed via
+     * the context's `allowCancellation()`.
+     *
+     * The call must not begin synchronously; the callee must arrange for the call to begin in a
+     * later turn of the event loop. Otherwise, application code may call back and affect the
+     * callee's state in an unexpected way.
+     */
     VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context);
 
     /**
