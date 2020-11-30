@@ -1939,10 +1939,10 @@ final class RpcState<VatId> {
                 // We resolved to some other RPC capability hosted by the same peer.
                 var promise = replacement.whenMoreResolved();
                 if (promise != null) {
-                    var other = (PromiseClient)replacement;
+                    var other = (PromiseClient) replacement;
                     while (other.resolutionType == ResolutionType.MERGED) {
                         replacement = other.cap;
-                        other = (PromiseClient)replacement;
+                        other = (PromiseClient) replacement;
                         assert replacement.getBrand() == replacementBrand;
                     }
 
@@ -1958,14 +1958,11 @@ final class RpcState<VatId> {
                     resolutionType = ResolutionType.REMOTE;
                 }
             }
+            else if (replacement.isNull() || replacement.isError()) {
+                resolutionType = ResolutionType.BROKEN;
+            }
             else {
-                if (replacementBrand == NULL_CAPABILITY_BRAND
-                        || replacementBrand == BROKEN_CAPABILITY_BRAND) {
-                    resolutionType = ResolutionType.BROKEN;
-                }
-                else {
-                    resolutionType = ResolutionType.REFLECTED;
-                }
+                resolutionType = ResolutionType.REFLECTED;
             }
 
             assert isResolved();

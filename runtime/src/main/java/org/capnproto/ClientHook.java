@@ -5,9 +5,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ClientHook {
 
-    Object NULL_CAPABILITY_BRAND = new Object();
-    Object BROKEN_CAPABILITY_BRAND = new Object();
-
     /**
      * Start a new call, allowing the client to allocate request/response objects as it sees fit.
      * This version is used when calls are made from application code in the local process.
@@ -56,9 +53,7 @@ public interface ClientHook {
      discover when a capability it needs to marshal is one that it created in the first place, and
      therefore it can transfer the capability without proxying.
     */
-    default Object getBrand() {
-        return NULL_CAPABILITY_BRAND;
-    }
+    Object getBrand();
 
     /**
      *  Repeatedly calls whenMoreResolved() until it returns nullptr.
@@ -75,14 +70,14 @@ public interface ClientHook {
      * reading a null pointer out of a Cap'n Proto message.
      */
     default boolean isNull() {
-        return getBrand() == NULL_CAPABILITY_BRAND;
+        return getBrand() == Capability.NULL_CAPABILITY_BRAND;
     }
 
     /**
      * Returns true if the capability was created by newBrokenCap().
      */
     default boolean isError() {
-        return getBrand() == BROKEN_CAPABILITY_BRAND;
+        return getBrand() == Capability.BROKEN_CAPABILITY_BRAND;
     }
 
     /**

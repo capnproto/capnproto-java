@@ -7,6 +7,9 @@ import java.util.concurrent.CompletionStage;
 
 public final class Capability {
 
+    static final Object NULL_CAPABILITY_BRAND = new Object();
+    static final Object BROKEN_CAPABILITY_BRAND = new Object();
+
     static class BuilderContext {
         CapTableBuilder capTable;
     }
@@ -645,15 +648,15 @@ public final class Capability {
     }
 
     public static ClientHook newBrokenCap(String reason) {
-        return newBrokenClient(reason, false, ClientHook.BROKEN_CAPABILITY_BRAND);
+        return newBrokenClient(reason, false, BROKEN_CAPABILITY_BRAND);
     }
 
     public static ClientHook newBrokenCap(Throwable exc) {
-        return newBrokenClient(exc, false, ClientHook.BROKEN_CAPABILITY_BRAND);
+        return newBrokenClient(exc, false, BROKEN_CAPABILITY_BRAND);
     }
 
     public static ClientHook newNullCap() {
-        return newBrokenClient(RpcException.failed("Called null capability"), true, ClientHook.NULL_CAPABILITY_BRAND);
+        return newBrokenClient(RpcException.failed("Called null capability"), true, NULL_CAPABILITY_BRAND);
     }
 
     private static ClientHook newBrokenClient(String reason, boolean resolved, Object brand) {
@@ -799,6 +802,11 @@ public final class Capability {
         @Override
         public CompletableFuture<ClientHook> whenMoreResolved() {
             return this.promiseForClientResolution.copy();
+        }
+
+        @Override
+        public Object getBrand() {
+            return null;
         }
     }
 
