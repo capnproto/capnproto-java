@@ -6,8 +6,4 @@ public interface PipelineHook {
 
     default void cancel(Throwable exc) {
     }
-
-    static PipelineHook newBrokenPipeline(Throwable exc) {
-        return ops -> Capability.newBrokenCap(exc);
-    }
 }

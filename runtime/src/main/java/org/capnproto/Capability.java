@@ -442,7 +442,7 @@ public final class Capability {
 
             this.callRelease.complete(null);
             assert promiseAndPipeline.pipeline != null;
-            return new RemotePromise<>(promise, new AnyPointer.Pipeline(promiseAndPipeline.pipeline));
+            return new RemotePromise<>(promise, promiseAndPipeline.pipeline);
         }
 
         @Override
@@ -545,7 +545,7 @@ public final class Capability {
         public ClientHook.VoidPromiseAndPipeline directTailCall(RequestHook request) {
             assert this.response == null : "Can't call tailCall() after initializing the results struct.";
             var promise = request.send();
-            var voidPromise = promise._getResponse().thenAccept(tailResponse -> {
+            var voidPromise = promise.response.thenAccept(tailResponse -> {
                 this.response = tailResponse;
             });
             return new ClientHook.VoidPromiseAndPipeline(voidPromise, promise.pipeline().hook);
@@ -619,6 +619,10 @@ public final class Capability {
         };
     }
 
+    static PipelineHook newBrokenPipeline(Throwable exc) {
+        return ops -> newBrokenCap(exc);
+    }
+
     static Request<AnyPointer.Builder> newBrokenRequest(Throwable exc) {
 
         var message = new MessageBuilder();
@@ -628,7 +632,7 @@ public final class Capability {
             @Override
             public RemotePromise<AnyPointer.Reader> send() {
                 return new RemotePromise<>(CompletableFuture.failedFuture(exc),
-                        new AnyPointer.Pipeline(PipelineHook.newBrokenPipeline(exc)));
+                        newBrokenPipeline(exc));
             }
 
             @Override
@@ -665,7 +669,7 @@ public final class Capability {
 
             @Override
             public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
-                return new VoidPromiseAndPipeline(CompletableFuture.failedFuture(exc), PipelineHook.newBrokenPipeline(exc));
+                return new VoidPromiseAndPipeline(CompletableFuture.failedFuture(exc), newBrokenPipeline(exc));
             }
 
             @Override
@@ -696,7 +700,7 @@ public final class Capability {
             this.promise = promise.whenComplete((pipeline, exc) -> {
                 this.redirect = exc == null
                         ? pipeline
-                        : PipelineHook.newBrokenPipeline(exc);
+                        : newBrokenPipeline(exc);
             });
         }
 

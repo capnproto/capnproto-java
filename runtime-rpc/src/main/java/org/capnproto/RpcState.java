@@ -1177,7 +1177,7 @@ final class RpcState<VatId> {
                 }
                 var pipeline = base.pipeline;
                 if (pipeline == null) {
-                    pipeline = PipelineHook.newBrokenPipeline(
+                    pipeline = Capability.newBrokenPipeline(
                             RpcException.failed("Pipeline call on a request that returned no capabilities or was already closed."));
                 }
                 var ops = ToPipelineOps(promisedAnswer);
@@ -1681,7 +1681,8 @@ final class RpcState<VatId> {
         @Override
         public RemotePromise<AnyPointer.Reader> send() {
             if (isDisconnected()) {
-                return new RemotePromise<>(CompletableFuture.failedFuture(disconnected), null);
+                return new RemotePromise<>(CompletableFuture.failedFuture(disconnected),
+                        Capability.newBrokenPipeline(disconnected));
             }
 
             var redirect = this.target.writeTarget(this.callBuilder.getTarget());
@@ -1700,7 +1701,7 @@ final class RpcState<VatId> {
             var appPromise = questionRef.response.thenApply(
                     hook -> new Response<>(hook.getResults(), hook));
 
-            return new RemotePromise<>(appPromise, new AnyPointer.Pipeline(pipeline));
+            return new RemotePromise<>(appPromise, pipeline);
         }
 
         QuestionRef sendInternal(boolean isTailCall) {

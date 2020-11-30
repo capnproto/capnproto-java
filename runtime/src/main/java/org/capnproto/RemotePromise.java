@@ -6,7 +6,7 @@ public class RemotePromise<Results>
         extends CompletableFutureWrapper<Results>
         implements AutoCloseable {
 
-    private final CompletableFuture<Response<Results>> response;
+    final CompletableFuture<Response<Results>> response;
     private final AnyPointer.Pipeline pipeline;
 
     public RemotePromise(FromPointerReader<Results> factory,
@@ -20,6 +20,11 @@ public class RemotePromise<Results>
     }
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
+                         PipelineHook pipeline) {
+        this(promise, new AnyPointer.Pipeline(pipeline));
+    }
+
+    public RemotePromise(CompletableFuture<Response<Results>> promise,
                          AnyPointer.Pipeline pipeline) {
         super(promise.thenApply(Response::getResults));
         this.response = promise;
@@ -30,10 +35,6 @@ public class RemotePromise<Results>
     public void close() {
         this.pipeline.cancel(RpcException.failed("Cancelled"));
         this.join();
-    }
-
-    CompletableFuture<Response<Results>> _getResponse() {
-        return this.response;
     }
 
     public AnyPointer.Pipeline pipeline() {
