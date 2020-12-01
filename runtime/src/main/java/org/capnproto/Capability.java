@@ -738,8 +738,8 @@ public final class Capability {
         // resolves).
 
         private ClientHook redirect;
-        private final Queue<CompletableFuture<ClientHook>> queuedCalls = new ArrayDeque<>();
-        private final Queue<LocalRequest> pendingCalls = new ArrayDeque<>();
+        private final List<CompletableFuture<ClientHook>> queuedCalls = new ArrayList<>();
+        private final List<LocalRequest> pendingCalls = new ArrayList<>();
 
         QueuedClient(CompletableFuture<ClientHook> promise) {
             this.selfResolutionOp = promise.handle((inner, exc) -> {
@@ -759,6 +759,9 @@ public final class Capability {
                 for (var hook: this.pendingCalls) {
                     hook.releaseCall();
                 }
+
+                this.queuedCalls.clear();
+                this.pendingCalls.clear();
 
                 return null;
             });
