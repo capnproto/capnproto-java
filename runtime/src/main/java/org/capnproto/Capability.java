@@ -782,18 +782,16 @@ public final class Capability {
 
         @Override
         public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook ctx) {
-            var promise = new CompletableFuture<ClientHook>();
-            if (this.redirect == null) {
-                this.queuedCalls.add(promise);
-            }
-            else {
-                promise.complete(this.redirect);
+            if (this.redirect != null) {
+                return this.redirect.call(interfaceId, methodId, ctx);
             }
 
+            var promise = new CompletableFuture<ClientHook>();
             var callResult = promise.thenApply(
                     client -> client.call(interfaceId, methodId, ctx));
             var pipelineResult = callResult.thenApply(result -> result.pipeline);
             var pipeline = new QueuedPipeline(pipelineResult);
+            this.queuedCalls.add(promise);
             return new VoidPromiseAndPipeline(pipelineResult.thenRun(() -> {}), pipeline);
         }
 
