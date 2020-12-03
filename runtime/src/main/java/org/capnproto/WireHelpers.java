@@ -503,7 +503,7 @@ final class WireHelpers {
 
         ListPointer.set(allocation.segment.buffer, allocation.refOffset, elementSize, elementCount);
 
-        return factory.constructBuilder(allocation.segment,
+        return factory.constructBuilder(allocation.segment, capTable,
                                         allocation.ptr * Constants.BYTES_PER_WORD,
                                         elementCount, step, dataSize, (short)pointerCount);
     }
@@ -527,7 +527,7 @@ final class WireHelpers {
                                                               WirePointer.STRUCT, elementCount);
         StructPointer.setFromStructSize(allocation.segment.buffer, allocation.ptr, elementSize);
 
-        return factory.constructBuilder(allocation.segment,
+        return factory.constructBuilder(allocation.segment, capTable,
                                         (allocation.ptr + 1) * Constants.BYTES_PER_WORD,
                                         elementCount, wordsPerElement * Constants.BITS_PER_WORD,
                                         elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
@@ -586,7 +586,7 @@ final class WireHelpers {
 
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            return factory.constructBuilder(resolved.segment, resolved.ptr * Constants.BYTES_PER_WORD,
+            return factory.constructBuilder(resolved.segment, capTable, resolved.ptr * Constants.BYTES_PER_WORD,
                                             ListPointer.elementCount(resolved.ref),
                                             step, dataSize, (short) pointerCount);
         }
@@ -629,7 +629,7 @@ final class WireHelpers {
 
             if (oldDataSize >= elementSize.data && oldPointerCount >= elementSize.pointers) {
                 //# Old size is at least as large as we need. Ship it.
-                return factory.constructBuilder(resolved.segment, oldPtr * Constants.BYTES_PER_WORD,
+                return factory.constructBuilder(resolved.segment, capTable, oldPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
                                                 oldStep * Constants.BITS_PER_WORD,
                                                 oldDataSize * Constants.BITS_PER_WORD, oldPointerCount);
@@ -685,7 +685,7 @@ final class WireHelpers {
             memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
                    (byte)0, (1 + oldStep * elementCount) * Constants.BYTES_PER_WORD);
 
-            return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
+            return factory.constructBuilder(allocation.segment, capTable, newPtr * Constants.BYTES_PER_WORD,
                                             elementCount,
                                             newStep * Constants.BITS_PER_WORD,
                                             newDataSize * Constants.BITS_PER_WORD,
@@ -764,7 +764,7 @@ final class WireHelpers {
                 memset(resolved.segment.buffer, resolved.ptr * Constants.BYTES_PER_WORD,
                        (byte)0, roundBitsUpToBytes(oldStep * elementCount));
 
-                return factory.constructBuilder(allocation.segment, newPtr * Constants.BYTES_PER_WORD,
+                return factory.constructBuilder(allocation.segment, capTable, newPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
                                                 newStep * Constants.BITS_PER_WORD,
                                                 newDataSize * Constants.BITS_PER_WORD,

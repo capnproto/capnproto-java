@@ -10,12 +10,12 @@ public final class Capability {
     static final Object NULL_CAPABILITY_BRAND = new Object();
     static final Object BROKEN_CAPABILITY_BRAND = new Object();
 
-    static class BuilderContext {
-        CapTableBuilder capTable;
+    public static class BuilderContext {
+        public CapTableBuilder capTable;
     }
 
-    static class ReaderContext {
-        CapTableReader capTable;
+    public static class ReaderContext {
+        public CapTableReader capTable;
     }
 
     public static abstract class Factory<T extends ClientBase>

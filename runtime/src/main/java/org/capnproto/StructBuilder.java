@@ -44,11 +44,17 @@ public class StructBuilder extends Capability.BuilderContext {
 
     public StructBuilder(SegmentBuilder segment, int data,
                          int pointers, int dataSize, short pointerCount) {
+        this(segment, null, data, pointers, dataSize, pointerCount);
+    }
+
+    public StructBuilder(SegmentBuilder segment, CapTableBuilder capTable, int data,
+            int pointers, int dataSize, short pointerCount) {
         this.segment = segment;
         this.data = data;
         this.pointers = pointers;
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
+        this.capTable = capTable;
     }
 
     protected final boolean _getBooleanField(int offset) {

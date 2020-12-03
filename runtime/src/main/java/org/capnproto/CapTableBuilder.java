@@ -1,6 +1,6 @@
 package org.capnproto;
 
-interface CapTableBuilder extends CapTableReader {
+public interface CapTableBuilder extends CapTableReader {
     int injectCap(ClientHook cap);
 
     void dropCap(int index);

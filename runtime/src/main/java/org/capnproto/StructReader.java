@@ -51,17 +51,13 @@ public class StructReader extends Capability.ReaderContext {
         this.dataSize = 0;
         this.pointerCount = 0;
         this.nestingLimit = 0x7fffffff;
+        this.capTable = null;
     }
 
     public StructReader(SegmentReader segment, int data,
                         int pointers, int dataSize, short pointerCount,
                         int nestingLimit) {
-        this.segment = segment;
-        this.data = data;
-        this.pointers = pointers;
-        this.dataSize = dataSize;
-        this.pointerCount = pointerCount;
-        this.nestingLimit = nestingLimit;
+        this(segment, null, data, pointers, dataSize, pointerCount, nestingLimit);
     }
 
     public StructReader(SegmentReader segment, CapTableReader capTable,
