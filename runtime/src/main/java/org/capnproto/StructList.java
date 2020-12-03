@@ -56,6 +56,27 @@ public final class StructList {
         }
 
         @Override
+        public final Reader<ElementReader> constructReader(SegmentReader segment,
+                CapTableReader capTable,
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount,
+                int nestingLimit) {
+            return new Reader<ElementReader>(factory, capTable,
+                    segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+
+        @Override
+        public final Builder<ElementBuilder> constructBuilder(SegmentBuilder segment,
+                CapTableBuilder capTable,
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount) {
+            return new Builder<ElementBuilder> (factory, capTable,
+                    segment, ptr, elementCount, step, structDataSize, structPointerCount);
+        }
+
+        @Override
         public final Builder<ElementBuilder> fromPointerBuilderRefDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                                                           SegmentReader defaultSegment, int defaultOffset) {
             return WireHelpers.getWritableStructListPointer(this,
@@ -97,6 +118,17 @@ public final class StructList {
             this.factory = factory;
         }
 
+        public Reader(StructReader.Factory<T> factory,
+                CapTableReader capTable,
+                SegmentReader segment,
+                int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount,
+                int nestingLimit) {
+            super(segment, capTable, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+            this.factory = factory;
+        }
+
         public T get(int index) {
             return _getStructElement(factory, index);
         }
@@ -132,7 +164,15 @@ public final class StructList {
                        SegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount){
-            super(segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            this(factory, null, segment, ptr, elementCount, step, structDataSize, structPointerCount);
+        }
+
+        public Builder(StructBuilder.Factory<T> factory,
+                CapTableBuilder capTable,
+                SegmentBuilder segment, int ptr,
+                int elementCount, int step,
+                int structDataSize, short structPointerCount) {
+            super(segment, capTable, ptr, elementCount, step, structDataSize, structPointerCount);
             this.factory = factory;
         }
 

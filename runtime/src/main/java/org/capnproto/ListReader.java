@@ -28,9 +28,9 @@ public class ListReader extends Capability.ReaderContext {
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
                           int nestingLimit);
-        default T constructReader(SegmentBuilder segment, CapTableReader capTable, int ptr,
-                                   int elementCount, int step,
-                                   int structDataSize, short structPointerCount, int nestingLimit) {
+        default T constructReader(SegmentReader segment, CapTableReader capTable, int ptr,
+                                  int elementCount, int step,
+                                  int structDataSize, short structPointerCount, int nestingLimit) {
             var result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
             if (result instanceof Capability.ReaderContext) {
                 ((Capability.ReaderContext) result).capTable = capTable;
@@ -55,12 +55,22 @@ public class ListReader extends Capability.ReaderContext {
         this.structDataSize = 0;
         this.structPointerCount = 0;
         this.nestingLimit = 0x7fffffff;
+        this.capTable = null;
     }
 
     public ListReader(SegmentReader segment, int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
                       int nestingLimit) {
+        this(segment, null, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+    }
+
+    public ListReader(SegmentReader segment,
+            CapTableReader capTable,
+            int ptr,
+            int elementCount, int step,
+            int structDataSize, short structPointerCount,
+            int nestingLimit) {
         this.segment = segment;
         this.ptr = ptr;
         this.elementCount = elementCount;
@@ -68,12 +78,11 @@ public class ListReader extends Capability.ReaderContext {
         this.structDataSize = structDataSize;
         this.structPointerCount = structPointerCount;
         this.nestingLimit = nestingLimit;
+        this.capTable = capTable;
     }
 
     ListReader imbue(CapTableReader capTable) {
-        var result = new ListReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
-        result.capTable = capTable;
-        return result;
+        return new ListReader(segment, capTable, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
     }
 
     public int size() {
@@ -117,7 +126,7 @@ public class ListReader extends Capability.ReaderContext {
         int structData = this.ptr + (int)(indexBit / Constants.BITS_PER_BYTE);
         int structPointers = structData + (this.structDataSize / Constants.BITS_PER_BYTE);
 
-        return factory.constructReader(this.segment, structData, structPointers / 8, this.structDataSize,
+        return factory.constructReader(this.segment, this.capTable, structData, structPointers / 8, this.structDataSize,
                                        this.structPointerCount, this.nestingLimit - 1);
     }
 

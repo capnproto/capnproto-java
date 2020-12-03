@@ -1222,7 +1222,7 @@ final class WireHelpers {
 
         if (WirePointer.isNull(ref)) {
             if (defaultSegment == null) {
-                return factory.constructReader(SegmentReader.EMPTY, 0, 0, 0, 0, (short) 0, 0x7fffffff);
+                return factory.constructReader(SegmentReader.EMPTY, capTable, 0, 0, 0, 0, (short) 0, 0x7fffffff);
             } else {
                 segment = defaultSegment;
                 refOffset = defaultOffset;
@@ -1264,7 +1264,7 @@ final class WireHelpers {
 
             // TODO check whether the size is compatible
 
-            return factory.constructReader(resolved.segment,
+            return factory.constructReader(resolved.segment, capTable,
                                              ptr * Constants.BYTES_PER_WORD,
                                              size,
                                              wordsPerElement * Constants.BITS_PER_WORD,
@@ -1311,6 +1311,7 @@ final class WireHelpers {
             }
 
             return factory.constructReader(resolved.segment,
+                                             capTable,
                                              resolved.ptr * Constants.BYTES_PER_WORD,
                                              ListPointer.elementCount(resolved.ref),
                                              step,

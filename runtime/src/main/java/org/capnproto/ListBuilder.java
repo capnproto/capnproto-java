@@ -49,12 +49,19 @@ public class ListBuilder extends Capability.BuilderContext {
     public ListBuilder(SegmentBuilder segment, int ptr,
                        int elementCount, int step,
                        int structDataSize, short structPointerCount) {
+        this(segment, null, ptr, elementCount, step, structDataSize, structPointerCount);
+    }
+
+    public ListBuilder(SegmentBuilder segment, CapTableBuilder capTable, int ptr,
+            int elementCount, int step,
+            int structDataSize, short structPointerCount) {
         this.segment = segment;
         this.ptr = ptr;
         this.elementCount = elementCount;
         this.step = step;
         this.structDataSize = structDataSize;
         this.structPointerCount = structPointerCount;
+        this.capTable = capTable;
     }
 
     public int size() {
