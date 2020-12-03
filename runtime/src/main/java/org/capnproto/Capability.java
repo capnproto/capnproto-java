@@ -439,10 +439,6 @@ public final class Capability {
                 return context.response;
             });
 
-            cancel.whenComplete((void_, exc) -> {
-               promiseAndPipeline.promise.cancel(false);
-            });
-
             this.callRelease.complete(null);
             assert promiseAndPipeline.pipeline != null;
             return new RemotePromise<>(promise, promiseAndPipeline.pipeline);
