@@ -1622,10 +1622,12 @@ final class RpcState<VatId> {
         }
 
         public VoidPromiseAndPipeline callNoIntercept(long interfaceId, short methodId, CallContextHook ctx) {
+            // Implement call() by copying params and results messages.
             var params = ctx.getParams();
             var request = newCallNoIntercept(interfaceId, methodId);
-            ctx.allowCancellation();
+            request.getParams().setAs(AnyPointer.factory, params);
             ctx.releaseParams();
+            ctx.allowCancellation();
             return ctx.directTailCall(request.getHook());
         }
 
@@ -2005,11 +2007,6 @@ final class RpcState<VatId> {
         PipelineClient(QuestionRef questionRef, short[] ops) {
             this.questionRef = questionRef;
             this.ops = ops.clone();
-        }
-
-        @Override
-        public VoidPromiseAndPipeline call(long interfaceId, short methodId, CallContextHook context) {
-            return null;
         }
 
         @Override
