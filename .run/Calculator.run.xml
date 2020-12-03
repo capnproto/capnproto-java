@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Calculator" type="CompoundRunConfigurationType">
+    <toRun name="CalculatorServer" type="Application" />
+    <toRun name="CalculatorClient" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>
