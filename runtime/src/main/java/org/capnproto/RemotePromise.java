@@ -3,7 +3,7 @@ package org.capnproto;
 import java.util.concurrent.CompletableFuture;
 
 public class RemotePromise<Results>
-        extends CompletableFutureWrapper<Results>
+        extends CompletableFuture<Results>
         implements AutoCloseable {
 
     final CompletableFuture<Response<Results>> response;
@@ -11,12 +11,7 @@ public class RemotePromise<Results>
 
     public RemotePromise(FromPointerReader<Results> factory,
                          RemotePromise<AnyPointer.Reader> other) {
-        super(other.thenApply(response -> response.getAs(factory)));
-        this.response = other.response.thenApply(
-                response -> new Response<>(
-                        response.getResults().getAs(factory),
-                        response.getHook()));
-        this.pipeline = other.pipeline;
+        this(other.response.thenApply(response -> Response.fromTypeless(factory, response)), other.pipeline);
     }
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
@@ -26,8 +21,15 @@ public class RemotePromise<Results>
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
                          AnyPointer.Pipeline pipeline) {
-        super(promise.thenApply(Response::getResults));
-        this.response = promise;
+        this.response = promise
+                .thenApply(response -> {
+                    this.complete(response.getResults());
+                    return response;
+                })
+                .exceptionallyCompose(exc -> {
+                    this.completeExceptionally(exc);
+                    return CompletableFuture.failedFuture(exc);
+                });
         this.pipeline = pipeline;
     }
 
@@ -39,14 +41,6 @@ public class RemotePromise<Results>
 
     public AnyPointer.Pipeline pipeline() {
         return this.pipeline;
-    }
-
-    public static <R> RemotePromise<R> fromTypeless(
-            FromPointerReader<R> resultsFactory,
-            RemotePromise<AnyPointer.Reader> typeless) {
-        var promise = typeless.response.thenApply(
-                response -> Response.fromTypeless(resultsFactory, response));
-        return new RemotePromise<>(promise, typeless.pipeline);
     }
 }
 
