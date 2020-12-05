@@ -1,12 +1,8 @@
 package org.capnproto;
 
-
 import org.capnproto.rpctest.Test;
 import org.junit.Assert;
-
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 public class EzRpcTest {
 
