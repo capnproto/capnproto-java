@@ -265,7 +265,7 @@ public final class Capability {
             @Override
             public CompletableFuture<ClientHook> whenMoreResolved() {
                 if (this.resolved != null) {
-                    return CompletableFuture.completedFuture(this.resolved);
+                    return null;
                 }
                 else if (this.resolveTask != null) {
                     return this.resolveTask.thenApply(void_ -> this.resolved);
