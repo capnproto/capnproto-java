@@ -2,7 +2,6 @@ package org.capnproto;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.concurrent.CompletableFuture;
@@ -15,11 +14,11 @@ public class EzRpcServer {
     private final TwoPartyServer twoPartyRpc;
     private final int port;
 
-    public EzRpcServer(Capability.Server bootstrapInterface, SocketAddress address) throws IOException {
+    public EzRpcServer(Capability.Server bootstrapInterface, InetSocketAddress address) throws IOException {
         this(new Capability.Client(bootstrapInterface), address);
     }
 
-    public EzRpcServer(Capability.Client bootstrapInterface, SocketAddress address) throws IOException {
+    public EzRpcServer(Capability.Client bootstrapInterface, InetSocketAddress address) throws IOException {
         this.channelgroup = AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(1));
         this.serverAcceptSocket = AsynchronousServerSocketChannel.open(this.channelgroup);
         this.serverAcceptSocket.bind(address);
