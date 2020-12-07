@@ -441,6 +441,7 @@ final class RpcState<VatId> {
 
     private void handleMessage(IncomingRpcMessage message) throws RpcException {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
+        LOGGER.fine(() -> this.toString() + ": < RPC message: " + reader.which().toString());
         switch (reader.which()) {
             case UNIMPLEMENTED -> handleUnimplemented(reader.getUnimplemented());
             case ABORT -> handleAbort(reader.getAbort());
@@ -463,8 +464,7 @@ final class RpcState<VatId> {
             }
         }
 
-        this.cleanupImports();
-        this.cleanupQuestions();
+        this.cleanupReferences();
     }
 
     void handleUnimplemented(RpcProtocol.Message.Reader message) {
@@ -1813,17 +1813,15 @@ final class RpcState<VatId> {
         }
     }
 
-    private void cleanupImports() {
+    private void cleanupReferences() {
         while (true) {
             var disposer = (ImportDisposer)this.importRefs.poll();
             if (disposer == null) {
-                return;
+                break;
             }
             disposer.dispose();
         }
-    }
 
-    private void cleanupQuestions() {
         while (true) {
             var disposer = (QuestionDisposer)this.questionRefs.poll();
             if (disposer == null) {
