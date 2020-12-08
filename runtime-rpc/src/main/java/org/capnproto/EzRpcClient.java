@@ -10,7 +10,7 @@ public class EzRpcClient {
 
     public EzRpcClient(AsynchronousSocketChannel socket) {
         this.twoPartyRpc = new TwoPartyClient(socket);
-        this.client = new Capability.Client(this.twoPartyRpc.bootstrap());
+        this.client = this.twoPartyRpc.bootstrap();
     }
 
     public Capability.Client getMain() {
