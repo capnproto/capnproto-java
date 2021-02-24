@@ -1,0 +1,18 @@
+image: maven:latest
+
+stages:
+  - build
+  - quality
+
+build:
+  stage: build
+  script:
+    - mvn -e -X clean compile
+
+test:
+  stage: quality
+  dependencies:
+    - build
+  script:
+    - mvn -e -X test
+
