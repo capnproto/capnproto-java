@@ -537,9 +537,9 @@ public class RpcTest {
 
         AtomicBoolean returned = new AtomicBoolean(false);
 
-        var req = client.callHeldRequest().send().exceptionallyCompose(exc -> {
+        var req = client.callHeldRequest().send().exceptionally(exc -> {
             returned.set(true);
-            return CompletableFuture.failedFuture(exc);
+            return null;
         }).thenAccept(results -> {
             returned.set(true);
         });

@@ -343,7 +343,7 @@ final class RpcState<VatId> {
         }
 
         var shutdownPromise = this.connection.shutdown()
-                .exceptionallyCompose(ioExc -> {
+                .exceptionally(ioExc -> {
 
             assert !(ioExc instanceof IOException);
 
@@ -352,17 +352,18 @@ final class RpcState<VatId> {
 
                 // Don't report disconnects as an error
                 if (rpcExc.getType() == RpcException.Type.DISCONNECTED) {
-                    return CompletableFuture.completedFuture(null);
+                    return null;
                 }
             }
             else if (ioExc instanceof CompletionException) {
                 var compExc = (CompletionException)ioExc;
                 if (compExc.getCause() instanceof ClosedChannelException) {
-                    return CompletableFuture.completedFuture(null);
+                    return null;
                 }
             }
 
-            return CompletableFuture.failedFuture(ioExc);
+            return null;
+            //return CompletableFuture.failedFuture(ioExc);
         });
 
         this.disconnected = networkExc;
@@ -443,16 +444,16 @@ final class RpcState<VatId> {
         var reader = message.getBody().getAs(RpcProtocol.Message.factory);
         LOGGER.fine(() -> this.toString() + ": < RPC message: " + reader.which().toString());
         switch (reader.which()) {
-            case UNIMPLEMENTED -> handleUnimplemented(reader.getUnimplemented());
-            case ABORT -> handleAbort(reader.getAbort());
-            case BOOTSTRAP -> handleBootstrap(reader.getBootstrap());
-            case CALL -> handleCall(message, reader.getCall());
-            case RETURN -> handleReturn(message, reader.getReturn());
-            case FINISH -> handleFinish(reader.getFinish());
-            case RESOLVE -> handleResolve(message, reader.getResolve());
-            case DISEMBARGO -> handleDisembargo(reader.getDisembargo());
-            case RELEASE -> handleRelease(reader.getRelease());
-            default -> {
+            case UNIMPLEMENTED: handleUnimplemented(reader.getUnimplemented()); break;
+            case ABORT:  handleAbort(reader.getAbort()); break;
+            case BOOTSTRAP: handleBootstrap(reader.getBootstrap()); break;
+            case CALL: handleCall(message, reader.getCall()); break;
+            case RETURN: handleReturn(message, reader.getReturn()); break;
+            case FINISH: handleFinish(reader.getFinish()); break;
+            case RESOLVE: handleResolve(message, reader.getResolve()); break;
+            case DISEMBARGO: handleDisembargo(reader.getDisembargo()); break;
+            case RELEASE: handleRelease(reader.getRelease()); break;
+            default: {
                 LOGGER.warning(() -> this.toString() + ": < Unhandled RPC message: " + reader.which().toString());
                 if (!isDisconnected()) {
                     // boomin' back atcha
@@ -569,9 +570,9 @@ final class RpcState<VatId> {
 
         boolean redirectResults;
         switch (call.getSendResultsTo().which()) {
-            case CALLER -> redirectResults = false;
-            case YOURSELF -> redirectResults = true;
-            default -> {
+            case CALLER: redirectResults = false; break;
+            case YOURSELF: redirectResults = true; break;
+            default: {
                 assert false : "Unsupported 'Call.sendResultsTo'.";
                 return;
             }
@@ -785,15 +786,17 @@ final class RpcState<VatId> {
 
         // This import is an unfulfilled promise.
         switch (resolve.which()) {
-            case CAP -> {
+            case CAP:{
                 var cap = receiveCap(resolve.getCap(), message.getAttachedFds());
                 imp.promise.complete(cap);
+                break;
             }
-            case EXCEPTION -> {
+            case EXCEPTION: {
                 var exc = ToException(resolve.getException());
                 imp.promise.completeExceptionally(exc);
+                break;
             }
-            default -> {
+            default: {
                 assert false : "Unknown 'Resolve' type.";
             }
         }
@@ -1157,7 +1160,7 @@ final class RpcState<VatId> {
 
     ClientHook getMessageTarget(RpcProtocol.MessageTarget.Reader target) {
         switch (target.which()) {
-            case IMPORTED_CAP -> {
+            case IMPORTED_CAP: {
                 var exp = exports.find(target.getImportedCap());
                 if (exp != null) {
                     return exp.clientHook;
@@ -1167,7 +1170,7 @@ final class RpcState<VatId> {
                     return null;
                 }
             }
-            case PROMISED_ANSWER -> {
+            case PROMISED_ANSWER: {
                 var promisedAnswer = target.getPromisedAnswer();
                 var questionId = promisedAnswer.getQuestionId();
                 var base = answers.put(questionId);
@@ -1186,7 +1189,7 @@ final class RpcState<VatId> {
                 }
                 return pipeline.getPipelinedCap(ops);
             }
-            default -> {
+            default: {
                 assert false: "Unknown message target type. " + target.which();
                 return null;
             }
@@ -1570,28 +1573,30 @@ final class RpcState<VatId> {
             }
 
             return this.clientMap.computeIfAbsent(key, k -> {
-                return switch (state) {
-                    case WAITING -> {
+                switch (state) {
+                    case WAITING: {
                         var pipelineClient = new PipelineClient(this.questionRef, ops);
                         if (this.redirectLater == null) {
                             // This pipeline will never get redirected, so just return the PipelineClient.
-                            yield pipelineClient;
+                            return pipelineClient;
                         }
 
                         assert this.resolveSelf != null;
                         var resolutionPromise = this.resolveSelf.thenApply(
                                 response -> response.getResults().getPipelinedCap(ops));
-                        yield new PromiseClient(pipelineClient, resolutionPromise, null);
+                        return new PromiseClient(pipelineClient, resolutionPromise, null);
                     }
-                    case RESOLVED -> {
+                    case RESOLVED: {
                         assert this.resolved != null;
-                        yield this.resolved.getResults().getPipelinedCap(ops);
+                        return this.resolved.getResults().getPipelinedCap(ops);
                     }
-                    case BROKEN -> {
+                    case BROKEN: {
                         assert this.broken != null;
-                        yield Capability.newBrokenCap(broken);
+                        return Capability.newBrokenCap(broken);
                     }
                 };
+                assert false;
+                return null;
             });
         }
 
@@ -2066,11 +2071,11 @@ final class RpcState<VatId> {
         var type = RpcProtocol.Exception.Type.FAILED;
         if (exc instanceof RpcException) {
             var rpcExc = (RpcException) exc;
-            type = switch (rpcExc.getType()) {
-                case FAILED -> RpcProtocol.Exception.Type.FAILED;
-                case OVERLOADED -> RpcProtocol.Exception.Type.OVERLOADED;
-                case DISCONNECTED -> RpcProtocol.Exception.Type.DISCONNECTED;
-                case UNIMPLEMENTED -> RpcProtocol.Exception.Type.UNIMPLEMENTED;
+            switch (rpcExc.getType()) {
+                case FAILED: type = RpcProtocol.Exception.Type.FAILED; break;
+                case OVERLOADED: type = RpcProtocol.Exception.Type.OVERLOADED; break;
+                case DISCONNECTED: type = RpcProtocol.Exception.Type.DISCONNECTED; break;
+                case UNIMPLEMENTED: type = RpcProtocol.Exception.Type.UNIMPLEMENTED; break;
             };
         }
         builder.setType(type);
@@ -2081,11 +2086,12 @@ final class RpcState<VatId> {
     }
 
     static RpcException ToException(RpcProtocol.Exception.Reader reader) {
-        var type = switch (reader.getType()) {
-            case OVERLOADED -> RpcException.Type.OVERLOADED;
-            case DISCONNECTED -> RpcException.Type.DISCONNECTED;
-            case UNIMPLEMENTED -> RpcException.Type.UNIMPLEMENTED;
-            default -> RpcException.Type.FAILED;
+        var type = RpcException.Type.FAILED;
+        switch (reader.getType()) {
+            case OVERLOADED: type = RpcException.Type.OVERLOADED; break;
+            case DISCONNECTED: type = RpcException.Type.DISCONNECTED; break;
+            case UNIMPLEMENTED: type = RpcException.Type.UNIMPLEMENTED; break;
+            default: type = RpcException.Type.FAILED; break;
         };
         return new RpcException(type, reader.getReason().toString());
     }
