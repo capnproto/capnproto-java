@@ -1,4 +1,4 @@
-image: maven:latest
+image: capnproto-gitlab-builder
 
 stages:
   - build
