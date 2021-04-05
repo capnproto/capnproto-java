@@ -58,8 +58,8 @@ public class RpcDumper {
     }
 
     String dump(RpcProtocol.Message.Reader message, RpcTwoPartyProtocol.Side sender) {
-        return switch (message.which()) {
-            case CALL -> {
+        switch (message.which()) {
+            case CALL: {
                 var call = message.getCall();
                 var iface = call.getInterfaceId();
 
@@ -93,14 +93,14 @@ public class RpcDumper {
                     }
                 }*/
 
-                yield sender.name() + "(" + call.getQuestionId() + "): call " +
+                return sender.name() + "(" + call.getQuestionId() + "): call " +
                         call.getTarget() + " <- " + interfaceName + "." +
                         methodName + " " + params.getClass().getName() + " caps:[" +
                         dumpCaps(payload.getCapTable()) + "]" +
                         (sendResultsTo.isCaller() ? "" : (" sendResultsTo:" + sendResultsTo));
             }
 
-            case RETURN -> {
+            case RETURN: {
                 var ret = message.getReturn();
                 var text = sender.name() + "(" + ret.getAnswerId() + "): ";
                 var returnType = getReturnType(
@@ -108,56 +108,60 @@ public class RpcDumper {
                                 ? RpcTwoPartyProtocol.Side.SERVER
                                 : RpcTwoPartyProtocol.Side.CLIENT,
                         ret.getAnswerId());
-                yield switch (ret.which()) {
-                    case RESULTS -> {
+                switch (ret.which()) {
+                    case RESULTS: {
                         var payload = ret.getResults();
-                        yield text + "return " + payload +
+                        return text + "return " + payload +
                                 " caps:[" + dumpCaps(payload.getCapTable()) + "]";
                     }
-                    case EXCEPTION -> {
+                    case EXCEPTION: {
                         var exc = ret.getException();
-                        yield text + "exception "
+                        return text + "exception "
                                 + exc.getType().toString() +
                                 " " + exc.getReason();
                     }
-                    default -> {
-                        yield text + ret.which().name();
+                    default: {
+                        return text + ret.which().name();
                     }
-                };
+                }
             }
 
-            case BOOTSTRAP -> {
+            case BOOTSTRAP: {
                 var restore = message.getBootstrap();
                 setReturnType(sender, restore.getQuestionId(), 0);
-                yield sender.name() + "(" + restore.getQuestionId() + "): bootstrap " +
+                return sender.name() + "(" + restore.getQuestionId() + "): bootstrap " +
                         restore.getDeprecatedObjectId();
             }
 
-            case ABORT -> {
+            case ABORT: {
                 var abort = message.getAbort();
-                yield sender.name() + ": abort "
+                return sender.name() + ": abort "
                         + abort.getType().toString()
                         + " \"" + abort.getReason().toString() + "\"";
             }
 
-            case RESOLVE -> {
+            case RESOLVE: {
                 var resolve = message.getResolve();
                 var id = resolve.getPromiseId();
-                var text = switch (resolve.which()) {
-                    case CAP -> {
+                String text;
+                switch (resolve.which()) {
+                    case CAP: {
                         var cap = resolve.getCap();
-                        yield cap.which().toString();
+                        text =  cap.which().toString();
+                        break;
                     }
-                    case EXCEPTION -> {
+                    case EXCEPTION: {
                         var exc = resolve.getException();
-                        yield exc.getType().toString() + ": " + exc.getReason().toString();
+                        text = exc.getType().toString() + ": " + exc.getReason().toString();
+                        break;
                     }
-                    default -> resolve.which().toString();
+                    default: text = resolve.which().toString(); break;
                 };
-                yield sender.name() + "(" + id + "): resolve " + text;
+                return sender.name() + "(" + id + "): resolve " + text;
             }
 
-            default -> sender.name() + ": " + message.which().name();
-        };
+            default:
+                return sender.name() + ": " + message.which().name();
+        }
     }
 }

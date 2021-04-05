@@ -36,8 +36,8 @@
     </developers>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>14</maven.compiler.source>
-      <maven.compiler.target>14</maven.compiler.target>
+      <maven.compiler.source>11</maven.compiler.source>
+      <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -67,8 +67,8 @@
           <version>3.3</version>
           <configuration>
             <compilerArgument>-Xlint:unchecked</compilerArgument>
-              <source>14</source>
-              <target>14</target>
+              <source>11</source>
+              <target>11</target>
           </configuration>
         </plugin>
       </plugins>

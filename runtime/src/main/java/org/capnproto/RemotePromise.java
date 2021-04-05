@@ -21,15 +21,15 @@ public class RemotePromise<Results>
 
     public RemotePromise(CompletableFuture<Response<Results>> promise,
                          AnyPointer.Pipeline pipeline) {
-        this.response = promise
-                .thenApply(response -> {
-                    this.complete(response.getResults());
-                    return response;
-                })
-                .exceptionallyCompose(exc -> {
-                    this.completeExceptionally(exc);
-                    return CompletableFuture.failedFuture(exc);
-                });
+        this.response = promise.whenComplete((response, exc) -> {
+           if (exc != null) {
+               this.completeExceptionally(exc);
+           }
+           else {
+               this.complete(response.getResults());
+           }
+        });
+
         this.pipeline = pipeline;
     }
 

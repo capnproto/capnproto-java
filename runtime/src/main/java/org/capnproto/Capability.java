@@ -306,10 +306,10 @@ public final class Capability {
                 }
                 else {
                     this.blocked = true;
-                    return result.promise.exceptionallyCompose(exc -> {
-                        this.brokenException = exc;
-                        return CompletableFuture.failedFuture(exc);
-                    }).whenComplete((void_, exc) -> {
+                    return result.promise.whenComplete((void_, exc) -> {
+                        if (exc != null) {
+                            this.brokenException = exc;
+                        }
                         this.unblock();
                     });
                 }
