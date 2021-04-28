@@ -145,7 +145,7 @@ public final class Serialize {
         }
         bb.position(segmentBase + totalWords * Constants.BYTES_PER_WORD);
 
-        if (totalWords > options.traversalLimitInWords) {
+        if (options.traversalLimitInWords != -1 && totalWords > options.traversalLimitInWords) {
             throw new DecodeException("Message size exceeds traversal limit.");
         }
 
