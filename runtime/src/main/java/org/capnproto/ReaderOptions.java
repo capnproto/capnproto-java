@@ -22,7 +22,18 @@
 package org.capnproto;
 
 public final class ReaderOptions {
+    /**
+       How many words are allowed to be read before an exception is thrown,
+       to protect against denial of service attacks.
+
+       -1 means "no limit".
+    */
     public final long traversalLimitInWords;
+
+    /**
+       How many pointer indirections deep a message may be before an exception
+       is thrown.
+    */
     public final int nestingLimit;
 
     public ReaderOptions(long traversalLimitInWords, int nestingLimit) {
