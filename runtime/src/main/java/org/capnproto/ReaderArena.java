@@ -45,11 +45,13 @@ public final class ReaderArena implements Arena {
     }
 
     @Override
-    public final void checkReadLimit(int numBytes) {
-        if (numBytes > limit) {
+    public final void checkReadLimit(int numWords) {
+        if (limit == -1) {
+            return;
+        } else if (numWords > limit) {
             throw new DecodeException("Read limit exceeded.");
         } else {
-            limit -= numBytes;
+            limit -= numWords;
         }
     }
 }
