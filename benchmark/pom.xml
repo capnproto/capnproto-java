@@ -5,7 +5,7 @@
     <artifactId>benchmark</artifactId>
     <packaging>jar</packaging>
     <description>capnproto-java benchmark</description>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.6</version>
     <name>capnproto-java benchmark</name>
     <organization>
         <name>org.capnproto</name>
