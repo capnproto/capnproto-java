@@ -54,7 +54,7 @@ public final class BuilderArena implements Arena {
 
     public BuilderArena(ReaderArena arena) {
         this.segments = new ArrayList<SegmentBuilder>();
-        int largestSegment = SUGGESTED_FIRST_SEGMENT_WORDS;
+        int largestSegment = SUGGESTED_FIRST_SEGMENT_WORDS*Constants.BYTES_PER_WORD;
         for (SegmentReader segment : arena.segments) {
             segments.add(new SegmentBuilder(segment.buffer, this));
             // find the biggest segment for the allocation strategy
