@@ -37,4 +37,16 @@ public final class MessageReader {
         AnyPointer.Reader any = new AnyPointer.Reader(segment, 0, this.nestingLimit);
         return any.getAs(factory);
     }
+
+    /**
+     * Constructs a {@link MessageBuilder} from the Memory of the MessageReader.
+     * The Memory is not copied.
+     * This is useful if you have shared Memory with another application or just
+     * need to modify an existing message, and don't want to copy the whole data.
+     *
+     * @return a MessageBuilder, sharing the same memory.
+     */
+    public MessageBuilder asBuilder() {
+        return new MessageBuilder(arena);
+    }
 }

@@ -52,6 +52,20 @@ public final class BuilderArena implements Arena {
         this.allocator = allocator;
     }
 
+    public BuilderArena(ReaderArena arena) {
+        this.segments = new ArrayList<SegmentBuilder>();
+        int largestSegment = SUGGESTED_FIRST_SEGMENT_WORDS;
+        for (SegmentReader segment : arena.segments) {
+            segments.add(new SegmentBuilder(segment.buffer, this));
+            // find the biggest segment for the allocation strategy
+            largestSegment = Math.max(largestSegment, segment.buffer.capacity());
+        }
+        DefaultAllocator defaultAllocator = new DefaultAllocator(SUGGESTED_ALLOCATION_STRATEGY);
+        // use biggest segment as next size
+        defaultAllocator.setNextAllocationSizeBytes(largestSegment * Constants.BYTES_PER_WORD);
+        this.allocator = defaultAllocator;
+    }
+
     public BuilderArena(Allocator allocator, ByteBuffer firstSegment) {
         this.segments = new ArrayList<SegmentBuilder>();
         SegmentBuilder newSegment = new SegmentBuilder(

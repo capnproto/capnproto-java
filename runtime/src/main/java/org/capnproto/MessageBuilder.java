@@ -48,6 +48,15 @@ public final class MessageBuilder {
     }
 
     /**
+     * Constructs a new MessageBuilder from a ReaderArena. Used to create a Builder on an already read Message.
+     *
+     * @param arena The Arena created by the Reader.
+     */
+    public MessageBuilder(ReaderArena arena) {
+        this.arena = new BuilderArena(arena);
+    }
+
+    /**
      * Constructs a new MessageBuilder from an Allocator and a given first segment buffer.
      * This is useful for reusing the first segment buffer between messages, to avoid
      * repeated allocations.
