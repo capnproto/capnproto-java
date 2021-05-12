@@ -18,6 +18,17 @@ public class DefaultAllocator implements Allocator {
     public AllocationStrategy allocationStrategy =
         AllocationStrategy.GROW_HEURISTICALLY;
 
+    /**
+       The largest number of bytes to try allocating when using `GROW_HEURISTICALLY`.
+
+       Set this value smaller if you get the error:
+
+           java.lang.OutOfMemoryError: Requested array size exceeds VM limit
+
+       Experimentally, `Integer.MAX_VALUE - 2` seems to work on most systems.
+    */
+    public int maxSegmentBytes = Integer.MAX_VALUE - 2;
+
     public DefaultAllocator() {}
 
     public DefaultAllocator(AllocationStrategy allocationStrategy) {
@@ -52,13 +63,16 @@ public class DefaultAllocator implements Allocator {
 
         switch (this.allocationStrategy) {
             case GROW_HEURISTICALLY:
-                this.nextSize += size;
+                if (size < this.maxSegmentBytes - this.nextSize) {
+                    this.nextSize += size;
+                } else {
+                    this.nextSize = maxSegmentBytes;
+                }
                 break;
             case FIXED_SIZE:
                 break;
         }
 
-        this.nextSize += size;
         return result;
     }
 }
