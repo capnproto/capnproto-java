@@ -5,19 +5,22 @@ import org.junit.Test;
 
 public class DefaultAllocatorTest {
     @Test
-    public void checkNoOverflow() {
+    public void maxSegmentBytes() {
       DefaultAllocator allocator = new DefaultAllocator();
       Assert.assertEquals(allocator.allocationStrategy,
                           BuilderArena.AllocationStrategy.GROW_HEURISTICALLY);
-      allocator.setNextAllocationSizeBytes(1 << 30);
+      allocator.maxSegmentBytes = (1 << 25) - 1;
 
-      Assert.assertEquals(1 << 30,
-                          allocator.allocateSegment(1 << 30).capacity());
+      int allocationSize = 1 << 24;
+      allocator.setNextAllocationSizeBytes(allocationSize);
+
+      Assert.assertEquals(allocationSize,
+                          allocator.allocateSegment(allocationSize).capacity());
 
       Assert.assertEquals(allocator.maxSegmentBytes,
-                          allocator.allocateSegment(1 << 30).capacity());
+                          allocator.allocateSegment(allocationSize).capacity());
 
       Assert.assertEquals(allocator.maxSegmentBytes,
-                          allocator.allocateSegment(1 << 30).capacity());
+                          allocator.allocateSegment(allocationSize).capacity());
     }
 }
