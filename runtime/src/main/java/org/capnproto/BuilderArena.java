@@ -62,7 +62,7 @@ public final class BuilderArena implements Arena {
         }
         DefaultAllocator defaultAllocator = new DefaultAllocator(SUGGESTED_ALLOCATION_STRATEGY);
         // use biggest segment as next size
-        defaultAllocator.setNextAllocationSizeBytes(largestSegment * Constants.BYTES_PER_WORD);
+        defaultAllocator.setNextAllocationSizeBytes(largestSegment);
         this.allocator = defaultAllocator;
     }
 
