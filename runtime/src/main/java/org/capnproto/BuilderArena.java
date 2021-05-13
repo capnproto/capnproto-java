@@ -87,6 +87,10 @@ public final class BuilderArena implements Arena {
         }
     }
 
+    /**
+     *  Allocates `amount` words in an existing segment or, if no suitable segment
+     *  exists, in a new segment.
+     */
     public AllocateResult allocate(int amount) {
         int len = this.segments.size();
 
@@ -96,6 +100,10 @@ public final class BuilderArena implements Arena {
             if (result != SegmentBuilder.FAILED_ALLOCATION) {
                 return new AllocateResult(this.segments.get(len - 1), result);
             }
+        }
+        if (amount >= 1 << 28) {
+            // Computing `amount * Constants.BYTES_PER_WORD` would overflow.
+            throw new RuntimeException("Too many words to allocate: " + amount);
         }
         SegmentBuilder newSegment = new SegmentBuilder(
             this.allocator.allocateSegment(amount * Constants.BYTES_PER_WORD),
