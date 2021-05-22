@@ -162,9 +162,19 @@ public final class Serialize {
         return new MessageReader(segmentSlices, options);
     }
 
+    public static long computeSerializedSizeInWords(MessageReader message) {
+        final ByteBuffer[] segments = message.arena.getSegmentsForOutput();
+
+        return computeSerializedSizeInWords(segments);
+    }
+
     public static long computeSerializedSizeInWords(MessageBuilder message) {
         final ByteBuffer[] segments = message.getSegmentsForOutput();
 
+        return computeSerializedSizeInWords(segments);
+    }
+
+    private static long computeSerializedSizeInWords(final ByteBuffer[] segments) {
         // From the capnproto documentation:
         // "When transmitting over a stream, the following should be sent..."
         long bytes = 0;
@@ -187,8 +197,15 @@ public final class Serialize {
     }
 
     public static void write(WritableByteChannel outputChannel,
+                             MessageReader message) throws IOException {
+        writeSegments(message.arena.getSegmentsForOutput(), outputChannel);
+    }
+    public static void write(WritableByteChannel outputChannel,
                              MessageBuilder message) throws IOException {
-        ByteBuffer[] segments = message.getSegmentsForOutput();
+        writeSegments(message.getSegmentsForOutput(), outputChannel);
+    }
+
+    private static void writeSegments(ByteBuffer[] segments, WritableByteChannel outputChannel) throws IOException {
         int tableSize = (segments.length + 2) & (~1);
 
         ByteBuffer table = ByteBuffer.allocate(4 * tableSize);

@@ -18,11 +18,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
 
 import java.util.ArrayList;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public final class ReaderArena implements Arena {
 
@@ -34,7 +34,7 @@ public final class ReaderArena implements Arena {
     public ReaderArena(ByteBuffer[] segmentSlices, long traversalLimitInWords) {
         this.limit = traversalLimitInWords;
         this.segments = new ArrayList<SegmentReader>();
-        for(int ii = 0; ii < segmentSlices.length; ++ii) {
+        for (int ii = 0; ii < segmentSlices.length; ++ii) {
             this.segments.add(new SegmentReader(segmentSlices[ii], this));
         }
     }
@@ -54,5 +54,17 @@ public final class ReaderArena implements Arena {
         } else {
             limit -= numWords;
         }
+    }
+
+    ByteBuffer[] getSegmentsForOutput() {
+        ByteBuffer[] result = new ByteBuffer[this.segments.size()];
+        for (int ii = 0; ii < this.segments.size(); ++ii) {
+            SegmentReader segment = segments.get(ii);
+            segment.buffer.rewind();
+            ByteBuffer slice = segment.buffer.slice();
+            slice.order(ByteOrder.LITTLE_ENDIAN);
+            result[ii] = slice;
+        }
+        return result;
     }
 }
