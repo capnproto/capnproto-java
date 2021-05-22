@@ -52,7 +52,14 @@ public final class BuilderArena implements Arena {
         this.allocator = allocator;
     }
 
-    public BuilderArena(ReaderArena arena) {
+    /**
+     * Constructs a BuilderArena from a ReaderArena and uses the size of the largest segment as next allocation size.
+     *
+     * This is deemed unsafe and should only be used by {@link UnsafeOperations }
+     *
+     * @param arena The arena containing the Capnp data.
+     */
+    BuilderArena(ReaderArena arena) {
         this.segments = new ArrayList<SegmentBuilder>();
         int largestSegment = SUGGESTED_FIRST_SEGMENT_WORDS*Constants.BYTES_PER_WORD;
         for (SegmentReader segment : arena.segments) {

@@ -18,33 +18,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 package org.capnproto;
+
+import java.util.Objects;
 
 public final class MessageBuilder {
 
     private final BuilderArena arena;
 
     public MessageBuilder() {
-        this.arena = new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
-                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+        this(new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
+                BuilderArena.SUGGESTED_ALLOCATION_STRATEGY));
     }
 
     public MessageBuilder(int firstSegmentWords) {
-        this.arena = new BuilderArena(firstSegmentWords,
-                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+        this(new BuilderArena(firstSegmentWords,
+                BuilderArena.SUGGESTED_ALLOCATION_STRATEGY));
     }
 
     public MessageBuilder(int firstSegmentWords, BuilderArena.AllocationStrategy allocationStrategy) {
-        this.arena = new BuilderArena(firstSegmentWords,
-                                      allocationStrategy);
+        this(new BuilderArena(firstSegmentWords, allocationStrategy));
     }
 
     /**
      * Constructs a new MessageBuilder from an Allocator.
      */
     public MessageBuilder(Allocator allocator) {
-        this.arena = new BuilderArena(allocator);
+        this(new BuilderArena(allocator));
     }
 
     /**
@@ -66,7 +66,7 @@ public final class MessageBuilder {
      * clearFirstSegment() on that message.
      */
     public MessageBuilder(Allocator allocator, java.nio.ByteBuffer firstSegment) {
-        this.arena = new BuilderArena(allocator, firstSegment);
+        this(new BuilderArena(allocator, firstSegment));
     }
 
     /**
@@ -77,9 +77,17 @@ public final class MessageBuilder {
      * clearFirstSegment() on that message.
      */
     public MessageBuilder(java.nio.ByteBuffer firstSegment) {
-        this.arena = new BuilderArena(new DefaultAllocator(), firstSegment);
+        this(new BuilderArena(new DefaultAllocator(), firstSegment));
     }
 
+    /**
+     * Constructs a new MessageBuilder from an {@link BuilderArena}.
+     *
+     * @param arena The arena.
+     */
+    MessageBuilder(BuilderArena arena) {
+        this.arena = Objects.requireNonNull(arena);
+    }
 
     private AnyPointer.Builder getRootInternal() {
         if (this.arena.segments.isEmpty()) {
