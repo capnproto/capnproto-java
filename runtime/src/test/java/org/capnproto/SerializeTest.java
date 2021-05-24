@@ -55,6 +55,10 @@ public class SerializeTest {
     {
       MessageReader messageReader = Serialize.read(new ArrayInputStream(ByteBuffer.wrap(exampleBytes)));
       checkSegmentContents(exampleSegmentCount, messageReader.arena);
+
+      byte[] outputBytes = new byte[exampleBytes.length];
+      Serialize.write(new ArrayOutputStream(ByteBuffer.wrap(outputBytes)), messageReader);
+      Assert.assertArrayEquals(exampleBytes, outputBytes);
     }
 
     // ------

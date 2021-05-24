@@ -28,6 +28,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+/**
+ * Serialization using the standard (unpacked) stream encoding:
+ * https://capnproto.org/encoding.html#serialization-over-a-stream
+ */
 public final class Serialize {
 
     static ByteBuffer makeByteBuffer(int bytes) {
@@ -186,9 +190,8 @@ public final class Serialize {
         return bytes / Constants.BYTES_PER_WORD;
     }
 
-    public static void write(WritableByteChannel outputChannel,
-                             MessageBuilder message) throws IOException {
-        ByteBuffer[] segments = message.getSegmentsForOutput();
+    private static void writeSegmentTable(WritableByteChannel outputChannel,
+                              ByteBuffer[] segments) throws IOException {
         int tableSize = (segments.length + 2) & (~1);
 
         ByteBuffer table = ByteBuffer.allocate(4 * tableSize);
@@ -204,6 +207,34 @@ public final class Serialize {
         while (table.hasRemaining()) {
             outputChannel.write(table);
         }
+    }
+
+    /**
+     * Serializes a MessageBuilder to a WritableByteChannel.
+     */
+    public static void write(WritableByteChannel outputChannel,
+                             MessageBuilder message) throws IOException {
+        ByteBuffer[] segments = message.getSegmentsForOutput();
+        writeSegmentTable(outputChannel, segments);
+
+        for (ByteBuffer buffer : segments) {
+            while(buffer.hasRemaining()) {
+                outputChannel.write(buffer);
+            }
+        }
+    }
+
+    /**
+     * Serializes a MessageReader to a WritableByteChannel.
+     */
+    public static void write(WritableByteChannel outputChannel,
+                             MessageReader message) throws IOException {
+        ByteBuffer[] segments = new ByteBuffer[message.arena.segments.size()];
+        for (int ii = 0 ; ii < message.arena.segments.size(); ++ii) {
+            segments[ii] = message.arena.segments.get(ii).buffer.duplicate();
+        }
+
+        writeSegmentTable(outputChannel, segments);
 
         for (ByteBuffer buffer : segments) {
             while(buffer.hasRemaining()) {
