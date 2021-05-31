@@ -5,7 +5,7 @@
     <artifactId>benchmark</artifactId>
     <packaging>jar</packaging>
     <description>capnproto-java benchmark</description>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.8</version>
     <name>capnproto-java benchmark</name>
     <organization>
         <name>org.capnproto</name>
@@ -38,7 +38,7 @@
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.8-SNAPSHOT</version>
+          <version>0.1.8</version>
         </dependency>
     </dependencies>
 
