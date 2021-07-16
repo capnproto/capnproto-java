@@ -5,7 +5,7 @@
     <artifactId>compiler</artifactId>
     <packaging>jar</packaging>
     <description>schema compiler plugin for java</description>
-    <version>0.1.9-SNAPSHOT</version>
+    <version>0.1.9</version>
     <name>capnpc-java</name>
     <organization>
         <name>org.capnproto</name>
@@ -45,7 +45,7 @@
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.9-SNAPSHOT</version>
+          <version>0.1.9</version>
         </dependency>
     </dependencies>
 
