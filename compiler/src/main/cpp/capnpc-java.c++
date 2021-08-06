@@ -31,7 +31,15 @@
 #include <kj/vector.h>
 #include <capnp/schema-loader.h>
 #include <capnp/dynamic.h>
+#ifdef _MSC_VER
+#include <io.h>
+#include <direct.h>
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+#else
 #include <unistd.h>
+#endif
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
@@ -1937,7 +1945,11 @@ private:
       makeDirectory(kj::str(path.slice(0, *slashpos)));
     }
 
+#ifdef _MSC_VER
+    if (_mkdir(path.cStr()) < 0) {
+#else
     if (mkdir(path.cStr(), 0777) < 0) {
+#endif
       int error = errno;
       if (error != EEXIST) {
         KJ_FAIL_SYSCALL("mkdir(path)", error, path);
@@ -1954,7 +1966,11 @@ private:
     }
 
     int fd;
+#ifdef _MSC_VER
+    KJ_SYSCALL(fd = _open(filename.cStr(), O_CREAT | O_WRONLY | O_TRUNC, 0666), filename);
+#else
     KJ_SYSCALL(fd = open(filename.cStr(), O_CREAT | O_WRONLY | O_TRUNC, 0666), filename);
+#endif
     kj::FdOutputStream out((kj::AutoCloseFd(fd)));
 
     text.visit(

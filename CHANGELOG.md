@@ -1,3 +1,6 @@
+## Pending
+- Support MSVC compiler
+
 ## v0.1.15
 - Fix bugs in handling of upgraded list of pointers.
 
