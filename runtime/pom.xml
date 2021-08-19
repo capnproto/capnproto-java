@@ -76,12 +76,12 @@
 
     <profiles>
         <profile>
-            <id>jdk9FF</id>
+            <id>jdk11FF</id>
             <activation>
-                <jdk>(1.8,)</jdk>
+                <jdk>(11,)</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.release>11</maven.compiler.release>
             </properties>
         </profile>
       <profile>
