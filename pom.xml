@@ -4,7 +4,7 @@
     <groupId>org.capnproto</groupId>
     <artifactId>capnproto-java</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.10-SNAPSHOT</version>
     <name>Cap'n Proto for Java</name>
     <url>https://capnproto.org/</url>
     <modules>

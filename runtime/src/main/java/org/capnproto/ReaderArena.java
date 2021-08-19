@@ -26,8 +26,8 @@ import java.nio.ByteBuffer;
 
 public final class ReaderArena implements Arena {
 
+    // Current limit. -1 means no limit.
     public long limit;
-    // current limit
 
     public final ArrayList<SegmentReader> segments;
 
@@ -45,11 +45,14 @@ public final class ReaderArena implements Arena {
     }
 
     @Override
-    public final void checkReadLimit(int numBytes) {
-        if (numBytes > limit) {
+    public final void checkReadLimit(int numWords) {
+        if (limit == -1) {
+            // No limit.
+            return;
+        } else if (numWords > limit) {
             throw new DecodeException("Read limit exceeded.");
         } else {
-            limit -= numBytes;
+            limit -= numWords;
         }
     }
 }

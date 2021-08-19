@@ -5,7 +5,7 @@
     <artifactId>examples</artifactId>
     <packaging>jar</packaging>
     <description>capnproto-java examples</description>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.10-SNAPSHOT</version>
     <name>capnproto-java examples</name>
     <organization>
         <name>org.capnproto</name>
@@ -38,7 +38,7 @@
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.6-SNAPSHOT</version>
+          <version>0.1.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -46,8 +46,8 @@
             <artifactId>runtime-rpc</artifactId>
             <version>0.1.6-SNAPSHOT</version>
         </dependency>
- 
-        <dependency>
+
+	<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
