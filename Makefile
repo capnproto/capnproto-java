@@ -1,4 +1,5 @@
-CAPNP_CXX_FLAGS=$(shell pkg-config capnp --cflags --libs)
+PKG_CONFIG ?= pkg-config
+CAPNP_CXX_FLAGS=$(shell $(PKG_CONFIG) capnp --cflags --libs)
 
 ifeq ($(CAPNP_CXX_FLAGS),)
 $(warning "Warning: pkg-config failed to find compilation configuration for capnp.")

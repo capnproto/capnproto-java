@@ -103,6 +103,30 @@ public final class BuilderArena implements Arena {
         return this.localCapTable;
     }
 
+    /**
+     * Constructs a BuilderArena from a ReaderArena and uses the size of the largest segment
+     * as the next allocation size.
+     */
+    BuilderArena(ReaderArena arena) {
+        this.segments = new ArrayList<SegmentBuilder>();
+        int largestSegment = SUGGESTED_FIRST_SEGMENT_WORDS*Constants.BYTES_PER_WORD;
+        for (int ii = 0; ii < arena.segments.size(); ++ii) {
+            SegmentReader segment = arena.segments.get(ii);
+            SegmentBuilder segmentBuilder = new SegmentBuilder(segment.buffer, this);
+            segmentBuilder.id = ii;
+            segmentBuilder.pos = segmentBuilder.capacity(); // buffer is pre-filled
+            segments.add(segmentBuilder);
+
+            // Find the largest segment for the allocation strategy.
+            largestSegment = Math.max(largestSegment, segment.buffer.capacity());
+        }
+        DefaultAllocator defaultAllocator = new DefaultAllocator(SUGGESTED_ALLOCATION_STRATEGY);
+
+        // Use largest segment as next size.
+        defaultAllocator.setNextAllocationSizeBytes(largestSegment);
+        this.allocator = defaultAllocator;
+    }
+
     @Override
     public final SegmentReader tryGetSegment(int id) {
         return this.segments.get(id);
@@ -126,6 +150,10 @@ public final class BuilderArena implements Arena {
         }
     }
 
+    /**
+     *  Allocates `amount` words in an existing segment or, if no suitable segment
+     *  exists, in a new segment.
+     */
     public AllocateResult allocate(int amount) {
         int len = this.segments.size();
 
@@ -135,6 +163,10 @@ public final class BuilderArena implements Arena {
             if (result != SegmentBuilder.FAILED_ALLOCATION) {
                 return new AllocateResult(this.segments.get(len - 1), result);
             }
+        }
+        if (amount >= 1 << 28) {
+            // Computing `amount * Constants.BYTES_PER_WORD` would overflow.
+            throw new RuntimeException("Too many words to allocate: " + amount);
         }
         SegmentBuilder newSegment = new SegmentBuilder(
             this.allocator.allocateSegment(amount * Constants.BYTES_PER_WORD),

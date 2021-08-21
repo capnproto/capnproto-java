@@ -5,7 +5,7 @@
     <artifactId>compiler</artifactId>
     <packaging>jar</packaging>
     <description>schema compiler plugin for java</description>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.10-SNAPSHOT</version>
     <name>capnpc-java</name>
     <organization>
         <name>org.capnproto</name>
@@ -31,6 +31,8 @@
     </developers>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <maven.compiler.source>14</maven.compiler.source>
+      <maven.compiler.target>14</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -42,7 +44,7 @@
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.6-SNAPSHOT</version>
+          <version>0.1.10-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

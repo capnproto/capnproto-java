@@ -71,6 +71,22 @@ public final class MessageBuilder {
         this.arena = new BuilderArena(new DefaultAllocator(), firstSegment);
     }
 
+   /**
+    * Constructs a MessageBuilder from a MessageReader. This constructor is private
+    * because it is unsafe. To use it, you must call `unsafeConstructFromMessageReader()`.
+    */
+    private MessageBuilder(MessageReader messageReader) {
+        this.arena = new BuilderArena(messageReader.arena);
+    }
+
+    /**
+     * Constructs a MessageBuilder from a MessageReader without copying the segments.
+     * This method should only be used on trusted data. Otherwise you may observe infinite
+     * loops or large memory allocations or index-out-of-bounds errors.
+     */
+    public static MessageBuilder unsafeConstructFromMessageReader(MessageReader messageReader) {
+        return new MessageBuilder(messageReader);
+    }
 
     private AnyPointer.Builder getRootInternal() {
         if (this.arena.segments.isEmpty()) {

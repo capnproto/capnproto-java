@@ -21,6 +21,9 @@
 
 package org.capnproto;
 
+/**
+ * Serialization using the packed encoding: https://capnproto.org/encoding.html#packing
+ */
 public final class SerializePacked {
 
     public static MessageReader read(BufferedInputStream input) throws java.io.IOException {
@@ -42,16 +45,42 @@ public final class SerializePacked {
         return Serialize.read(packedInput, options);
     }
 
+    /**
+     * Serializes a MessageBuilder to a BufferedOutputStream.
+     */
     public static void write(BufferedOutputStream output,
                              MessageBuilder message) throws java.io.IOException {
         PackedOutputStream packedOutputStream = new PackedOutputStream(output);
         Serialize.write(packedOutputStream, message);
     }
 
+    /**
+     * Serializes a MessageReader to a BufferedOutputStream.
+     */
+    public static void write(BufferedOutputStream output,
+                             MessageReader message) throws java.io.IOException {
+        PackedOutputStream packedOutputStream = new PackedOutputStream(output);
+        Serialize.write(packedOutputStream, message);
+    }
+
+    /**
+     * Serializes a MessageBuilder to an unbuffered output stream.
+     */
     public static void writeToUnbuffered(java.nio.channels.WritableByteChannel output,
                                        MessageBuilder message) throws java.io.IOException {
         BufferedOutputStreamWrapper buffered = new BufferedOutputStreamWrapper(output);
         write(buffered, message);
         buffered.flush();
     }
+
+    /**
+     * Serializes a MessageReader to an unbuffered output stream.
+     */
+    public static void writeToUnbuffered(java.nio.channels.WritableByteChannel output,
+                                         MessageReader message) throws java.io.IOException {
+        BufferedOutputStreamWrapper buffered = new BufferedOutputStreamWrapper(output);
+        write(buffered, message);
+        buffered.flush();
+    }
+
 }
