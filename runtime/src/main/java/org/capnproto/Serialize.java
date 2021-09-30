@@ -82,6 +82,10 @@ public final class Serialize {
             segment0Size = firstWord.getInt(4);
         }
 
+        if (segment0Size < 0) {
+            throw new DecodeException("segment 0 has more than 2^31 words, which is unsupported");
+        }
+
         long totalWords = segment0Size;
 
         // in words
@@ -92,6 +96,11 @@ public final class Serialize {
             fillBuffer(moreSizesRaw, bc);
             for (int ii = 0; ii < segmentCount - 1; ++ii) {
                 int size = moreSizesRaw.getInt(ii * 4);
+                if (size < 0) {
+                    throw new DecodeException("segment " + (ii + 1) +
+                                              " has more than 2^31 words, which is unsupported");
+                }
+
                 moreSizes.add(size);
                 totalWords += size;
             }
