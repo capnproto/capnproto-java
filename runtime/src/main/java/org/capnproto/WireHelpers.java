@@ -1165,6 +1165,10 @@ final class WireHelpers {
 
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
+            throw new DecodeException("Message contains non-list pointer where list was expected.");
+        }
+
         byte elementSize = ListPointer.elementSize(resolved.ref);
         switch (elementSize) {
         case ElementSize.INLINE_COMPOSITE : {
