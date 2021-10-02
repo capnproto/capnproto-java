@@ -38,6 +38,14 @@ final class WireHelpers {
         return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
     }
 
+    // ByteBuffer already does bounds checking, but we still want
+    // to check bounds in some places to avoid cpu amplification attacks.
+    static boolean bounds_check(SegmentReader segment,
+                                int start,
+                                int size) {
+        return segment == null || segment.in_bounds(start, size);
+    }
+
     static class AllocateResult {
         public final int ptr;
         public final int refOffset;
@@ -1166,6 +1174,9 @@ final class WireHelpers {
             int ptr = resolved.ptr + 1;
 
             resolved.segment.arena.checkReadLimit(wordCount + 1);
+            if (!bounds_check(resolved.segment, resolved.ptr, wordCount + 1)) {
+                throw new DecodeException("Message contains out-of-bounds list pointer");
+            }
 
             int size = WirePointer.inlineCompositeListElementCount(tag);
 
@@ -1201,8 +1212,12 @@ final class WireHelpers {
             int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            resolved.segment.arena.checkReadLimit(
-                roundBitsUpToWords(elementCount * step));
+            int wordCount = roundBitsUpToWords((long)elementCount * step);
+            resolved.segment.arena.checkReadLimit(wordCount);
+
+            if (!bounds_check(resolved.segment, resolved.ptr, wordCount)) {
+                throw new DecodeException("Message contains out-of-bounds list pointer");
+            }
 
             if (elementSize == ElementSize.VOID) {
                 // Watch out for lists of void, which can claim to be arbitrarily large without
