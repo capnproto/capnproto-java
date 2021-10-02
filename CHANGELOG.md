@@ -1,3 +1,6 @@
+## v0.1.11
+- Fix memory and cpu amplification vulnerabilities found by Martin Dindoffer.
+
 ## v0.1.10
 - Make even more compatible with Java 8.
 
