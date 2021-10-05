@@ -34,7 +34,7 @@ final class StructPointer{
     }
 
     public static int wordSize(long ref) {
-        return (int)dataSize(ref) + (int)ptrCount(ref);
+        return Short.toUnsignedInt(dataSize(ref)) + Short.toUnsignedInt(ptrCount(ref));
     }
 
     public static void setFromStructSize(ByteBuffer buffer, int offset, StructSize size) {
