@@ -1,3 +1,6 @@
+## v0.1.12
+- Fix bug in StructPointer.wordSize() found by Martin Dindoffer.
+
 ## v0.1.11
 - Fix memory and cpu amplification vulnerabilities found by Martin Dindoffer.
 

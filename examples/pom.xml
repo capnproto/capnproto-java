@@ -5,7 +5,7 @@
     <artifactId>examples</artifactId>
     <packaging>jar</packaging>
     <description>capnproto-java examples</description>
-    <version>0.1.12-SNAPSHOT</version>
+    <version>0.1.12</version>
     <name>capnproto-java examples</name>
     <organization>
         <name>org.capnproto</name>
@@ -39,7 +39,7 @@
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.12-SNAPSHOT</version>
+          <version>0.1.12</version>
         </dependency>
     </dependencies>
 
