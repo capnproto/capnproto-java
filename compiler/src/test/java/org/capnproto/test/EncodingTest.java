@@ -875,4 +875,40 @@ public class EncodingTest {
 
       TestUtil.checkTestMessage(root2.getAs(Test.TestAllTypes.factory));
   }
+
+  @org.junit.Test
+  public void testZeroPointerUnderflow() throws DecodeException {
+      byte[] bytes = new byte[8 + 8 * 65535];
+      bytes[4] = -1;
+      bytes[5] = -1; // struct pointer with 65535 words of data section.
+      for (int ii = 0; ii < 8 * 65535; ++ii) {
+          bytes[8 + ii] = 101; // populate the data section with sentinel data
+      }
+      ByteBuffer segment = ByteBuffer.wrap(bytes);
+      segment.order(ByteOrder.LITTLE_ENDIAN);
+      MessageReader message1 = new MessageReader(new ByteBuffer[]{segment},
+                                                ReaderOptions.DEFAULT_READER_OPTIONS);
+      Test.TestAnyPointer.Reader message1RootReader = message1.getRoot(Test.TestAnyPointer.factory);
+
+      MessageBuilder message2Builder =
+          new MessageBuilder(3 * 65535); // ample space to avoid far pointers
+      Test.TestAnyPointer.Builder message2RootBuilder =
+          message2Builder.getRoot(Test.TestAnyPointer.factory);
+
+      // Copy the struct that has the sentinel data.
+      message2RootBuilder.getAnyPointerField().setAs(Test.TestAnyPointer.factory, message1RootReader);
+
+      // Now clear the struct pointer.
+      message2RootBuilder.getAnyPointerField().clear();
+
+      java.nio.ByteBuffer[] outputSegments = message2Builder.getSegmentsForOutput();
+      Assert.assertEquals(1, outputSegments.length);
+      Assert.assertEquals(0L, outputSegments[0].getLong(8)); // null because cleared
+
+      Assert.assertEquals(16 + 8 * 65535, outputSegments[0].limit());
+      for (int ii = 0; ii < 65535; ++ii) {
+          // All of the data should have been cleared.
+          Assert.assertEquals(0L, outputSegments[0].getLong((2 + ii) * 8));
+      }
+    }
 }

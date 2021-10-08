@@ -24,17 +24,17 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 
 final class StructPointer{
-    public static short dataSize(long ref) {
+    public static int dataSize(long ref) {
         // in words.
-        return (short)(WirePointer.upper32Bits(ref) & 0xffff);
+        return WirePointer.upper32Bits(ref) & 0xffff;
     }
 
-    public static short ptrCount(long ref) {
-        return (short)(WirePointer.upper32Bits(ref) >>> 16);
+    public static int ptrCount(long ref) {
+        return WirePointer.upper32Bits(ref) >>> 16;
     }
 
     public static int wordSize(long ref) {
-        return Short.toUnsignedInt(dataSize(ref)) + Short.toUnsignedInt(ptrCount(ref));
+        return dataSize(ref) + ptrCount(ref);
     }
 
     public static void setFromStructSize(ByteBuffer buffer, int offset, StructSize size) {
