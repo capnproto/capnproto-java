@@ -1,3 +1,6 @@
+## v0.1.13
+- Improved robustness to StructPointer integer wrapping problems.
+
 ## v0.1.12
 - Fix bug in StructPointer.wordSize() found by Martin Dindoffer.
 
