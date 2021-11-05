@@ -758,10 +758,12 @@ final class RpcState<VatId> {
         if (ctx != null) {
             ctx.requestCancel();
         }
-        else {
-            var questionId = finish.getQuestionId();
-            answers.erase(questionId);
-        }
+
+        // Remove question id
+        // this is a different then c++ implementation, but it is required as java's promises doesn't support
+        // all features of kj's promises
+        var questionId = finish.getQuestionId();
+        answers.erase(questionId);
 
         if (exportsToRelease != null) {
             this.releaseExports(exportsToRelease);
