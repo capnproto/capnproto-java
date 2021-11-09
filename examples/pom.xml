@@ -5,7 +5,7 @@
     <artifactId>examples</artifactId>
     <packaging>jar</packaging>
     <description>capnproto-java examples</description>
-    <version>0.1.10-SNAPSHOT</version>
+    <version>0.1.14-SNAPSHOT</version>
     <name>capnproto-java examples</name>
     <organization>
         <name>org.capnproto</name>
@@ -33,18 +33,19 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.source>14</maven.compiler.source>
       <maven.compiler.target>14</maven.compiler.target>
+      <maven.compiler.release>14</maven.compiler.release>
     </properties>
     <dependencies>
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.10-SNAPSHOT</version>
+          <version>0.1.14-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.capnproto</groupId>
             <artifactId>runtime-rpc</artifactId>
-            <version>0.1.10-SNAPSHOT</version>
+            <version>0.1.14-SNAPSHOT</version>
         </dependency>
 
 	<dependency>
