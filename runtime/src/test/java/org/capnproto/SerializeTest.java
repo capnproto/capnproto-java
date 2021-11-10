@@ -176,4 +176,22 @@ public class SerializeTest {
         3, 0, 0, 0, 0, 0, 0, 0
       });
   }
+
+  @Test(expected=DecodeException.class)
+  public void testSegment0SizeOverflow() throws java.io.IOException {
+        byte[] input = {0, 0, 0, 0, -1, -1, -1, -113};
+        java.nio.channels.ReadableByteChannel channel =
+            java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
+        MessageReader message = Serialize.read(channel);
+  }
+
+  @Test(expected=DecodeException.class)
+  public void testSegment1SizeOverflow() throws java.io.IOException {
+      byte[] input = {
+          1, 0, 0, 0, 1, 0, 0, 0,
+          -1, -1, -1, -113, 0, 0, 0, 0};
+        java.nio.channels.ReadableByteChannel channel =
+            java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
+        MessageReader message = Serialize.read(channel);
+  }
 }

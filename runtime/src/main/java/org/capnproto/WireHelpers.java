@@ -38,6 +38,14 @@ final class WireHelpers {
         return (int)((bits + 63) / ((long) Constants.BITS_PER_WORD));
     }
 
+    // ByteBuffer already does bounds checking, but we still want
+    // to check bounds in some places to avoid cpu amplification attacks.
+    static boolean bounds_check(SegmentReader segment,
+                                int start,
+                                int size) {
+        return segment == null || segment.in_bounds(start, size);
+    }
+
     static class AllocateResult {
         public final int ptr;
         public final int refOffset;
@@ -434,8 +442,8 @@ final class WireHelpers {
         }
         FollowBuilderFarsResult resolved = followBuilderFars(ref, target, segment);
 
-        short oldDataSize = StructPointer.dataSize(resolved.ref);
-        short oldPointerCount = StructPointer.ptrCount(resolved.ref);
+        int oldDataSize = StructPointer.dataSize(resolved.ref);
+        int oldPointerCount = StructPointer.ptrCount(resolved.ref);
         int oldPointerSection = resolved.ptr + oldDataSize;
 
         if (oldDataSize < size.data || oldPointerCount < size.pointers) {
@@ -482,7 +490,7 @@ final class WireHelpers {
         } else {
             return factory.constructBuilder(resolved.segment, capTable, resolved.ptr * Constants.BYTES_PER_WORD,
                                             oldPointerSection, oldDataSize * Constants.BITS_PER_WORD,
-                                            oldPointerCount);
+                                            (short)oldPointerCount);
         }
 
     }
@@ -623,7 +631,7 @@ final class WireHelpers {
                 throw new DecodeException("INLINE_COMPOSITE list with non-STRUCT elements not supported.");
             }
             int oldDataSize = StructPointer.dataSize(oldTag);
-            short oldPointerCount = StructPointer.ptrCount(oldTag);
+            int oldPointerCount = StructPointer.ptrCount(oldTag);
             int oldStep = (oldDataSize + oldPointerCount * Constants.POINTER_SIZE_IN_WORDS);
             int elementCount = WirePointer.inlineCompositeListElementCount(oldTag);
 
@@ -632,7 +640,8 @@ final class WireHelpers {
                 return factory.constructBuilder(resolved.segment, capTable, oldPtr * Constants.BYTES_PER_WORD,
                                                 elementCount,
                                                 oldStep * Constants.BITS_PER_WORD,
-                                                oldDataSize * Constants.BITS_PER_WORD, oldPointerCount);
+                                                oldDataSize * Constants.BITS_PER_WORD,
+                                                (short)oldPointerCount);
             }
 
             //# The structs in this list are smaller than expected, probably written using an older
@@ -951,7 +960,7 @@ final class WireHelpers {
                                         resolved.ptr * Constants.BYTES_PER_WORD,
                                         (resolved.ptr + dataSizeWords),
                                         dataSizeWords * Constants.BITS_PER_WORD,
-                                        StructPointer.ptrCount(resolved.ref),
+                                        (short)StructPointer.ptrCount(resolved.ref),
                                         nestingLimit - 1);
 
     }
@@ -993,18 +1002,18 @@ final class WireHelpers {
                 resolved.ptr * Constants.BYTES_PER_WORD,
                 (resolved.ptr + dataSizeWords),
                 dataSizeWords * Constants.BITS_PER_WORD,
-                StructPointer.ptrCount(resolved.ref),
+                (short)StructPointer.ptrCount(resolved.ref),
                 nestingLimit - 1);
 
     }
 
     static SegmentBuilder setStructPointer(SegmentBuilder segment, CapTableBuilder capTable, int refOffset, StructReader value) {
-        short dataSize = (short)roundBitsUpToWords(value.dataSize);
+        int dataSize = roundBitsUpToWords(value.dataSize);
         int totalSize = dataSize + value.pointerCount * Constants.POINTER_SIZE_IN_WORDS;
 
         AllocateResult allocation = allocate(refOffset, segment, capTable, totalSize, WirePointer.STRUCT);
         StructPointer.set(allocation.segment.buffer, allocation.refOffset,
-                          dataSize, value.pointerCount);
+                          (short)dataSize, value.pointerCount);
 
         if (value.dataSize == 1) {
             throw new RuntimeException("single bit case not handled");
@@ -1131,7 +1140,7 @@ final class WireHelpers {
                                                      resolved.ptr * Constants.BYTES_PER_WORD,
                                                      resolved.ptr + StructPointer.dataSize(resolved.ref),
                                                      StructPointer.dataSize(resolved.ref) * Constants.BITS_PER_WORD,
-                                                     StructPointer.ptrCount(resolved.ref),
+                                                     (short)StructPointer.ptrCount(resolved.ref),
                                                      nestingLimit - 1));
         case WirePointer.LIST :
             byte elementSize = ListPointer.elementSize(resolved.ref);
@@ -1167,7 +1176,7 @@ final class WireHelpers {
                                                      elementCount,
                                                      wordsPerElement * Constants.BITS_PER_WORD,
                                                      StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
-                                                     StructPointer.ptrCount(tag),
+                                                     (short)StructPointer.ptrCount(tag),
                                                      nestingLimit - 1));
             } else {
                 int dataSize = ElementSize.dataBitsPerElement(elementSize);
@@ -1238,6 +1247,10 @@ final class WireHelpers {
 
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
+        if (WirePointer.kind(resolved.ref) != WirePointer.LIST) {
+            throw new DecodeException("Message contains non-list pointer where list was expected.");
+        }
+
         byte elementSize = ListPointer.elementSize(resolved.ref);
         switch (elementSize) {
         case ElementSize.INLINE_COMPOSITE : {
@@ -1247,6 +1260,9 @@ final class WireHelpers {
             int ptr = resolved.ptr + 1;
 
             resolved.segment.arena.checkReadLimit(wordCount + 1);
+            if (!bounds_check(resolved.segment, resolved.ptr, wordCount + 1)) {
+                throw new DecodeException("Message contains out-of-bounds list pointer");
+            }
 
             int size = WirePointer.inlineCompositeListElementCount(tag);
 
@@ -1269,7 +1285,7 @@ final class WireHelpers {
                                              size,
                                              wordsPerElement * Constants.BITS_PER_WORD,
                                              StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
-                                             StructPointer.ptrCount(tag),
+                                           (short)StructPointer.ptrCount(tag),
                                              nestingLimit - 1);
         }
         default : {
@@ -1282,8 +1298,12 @@ final class WireHelpers {
             int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
-            resolved.segment.arena.checkReadLimit(
-                roundBitsUpToWords(elementCount * step));
+            int wordCount = roundBitsUpToWords((long)elementCount * step);
+            resolved.segment.arena.checkReadLimit(wordCount);
+
+            if (!bounds_check(resolved.segment, resolved.ptr, wordCount)) {
+                throw new DecodeException("Message contains out-of-bounds list pointer");
+            }
 
             if (elementSize == ElementSize.VOID) {
                 // Watch out for lists of void, which can claim to be arbitrarily large without

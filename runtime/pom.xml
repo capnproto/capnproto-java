@@ -5,7 +5,7 @@
     <artifactId>runtime</artifactId>
     <packaging>jar</packaging>
     <description>runtime</description>
-    <version>0.1.10-SNAPSHOT</version>
+    <version>0.1.14-SNAPSHOT</version>
     <name>Cap'n Proto runtime library</name>
     <organization>
         <name>org.capnproto</name>
