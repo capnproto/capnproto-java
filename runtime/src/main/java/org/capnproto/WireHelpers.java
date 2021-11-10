@@ -1008,7 +1008,7 @@ final class WireHelpers {
     }
 
     static SegmentBuilder setStructPointer(SegmentBuilder segment, CapTableBuilder capTable, int refOffset, StructReader value) {
-        short dataSize = (short)roundBitsUpToWords(value.dataSize);
+        int dataSize = roundBitsUpToWords(value.dataSize);
         int totalSize = dataSize + value.pointerCount * Constants.POINTER_SIZE_IN_WORDS;
 
         AllocateResult allocation = allocate(refOffset, segment, capTable, totalSize, WirePointer.STRUCT);
