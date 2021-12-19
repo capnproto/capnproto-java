@@ -8,7 +8,7 @@ CAPNP_PREFIX=$(shell dirname $(shell which capnp))/..
 CAPNP_CXX_FLAGS=-I $(CAPNP_PREFIX)/include -L $(CAPNP_PREFIX)/lib -lkj -lcapnp
 endif
 
-PREFIX ?= /usr/local
+PREFIX ?= /usr
 
 CXX ?= g++
 CXX_FLAGS=-std=c++14 $(CAPNP_CXX_FLAGS)
