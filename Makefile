@@ -23,7 +23,7 @@ clean :
 	rm -f capnpc-java capnpc-java.exe
 
 capnpc-java : $(CAPNPC_JAVA_SOURCES)
-	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -o capnpc-java
+	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) $(CFLAGS) $(LDFLAGS) -o capnpc-java
 
 install:
 	mkdir -p ${PREFIX}/bin
