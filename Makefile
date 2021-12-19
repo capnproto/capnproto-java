@@ -26,10 +26,8 @@ capnpc-java : $(CAPNPC_JAVA_SOURCES)
 	$(CXX) $(CAPNPC_JAVA_SOURCES) $(CXX_FLAGS) -o capnpc-java
 
 install:
-	mkdir -p ${PREFIX}/bin
-	mkdir -p ${PREFIX}/include/capnp/
-	cp capnpc-java ${PREFIX}/bin
-	cp compiler/src/main/schema/capnp/java.capnp ${PREFIX}/include/capnp/
+	install -D capnpc-java "${DESTDIR}/${PREFIX}"/bin/capnpc-java
+	install -D compiler/src/main/schema/capnp/java.capnp "${DESTDIR}/${PREFIX}"/include/capnp/java.capnp
 
 MINGW_LIBS=~/src/capnproto/c++/build-mingw/.libs/libcapnp.a ~/src/capnproto/c++/build-mingw/.libs/libkj.a
 MINGW_CXX=i686-w64-mingw32-g++
