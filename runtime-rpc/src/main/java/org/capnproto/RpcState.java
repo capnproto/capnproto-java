@@ -1896,7 +1896,7 @@ final class RpcState<VatId> {
         @Override
         public Request<AnyPointer.Builder> newCall(long interfaceId, short methodId) {
             this.receivedCall = true;
-            return this.cap.newCall(interfaceId, methodId);
+            return super.newCall(interfaceId, methodId);
         }
 
         @Override
