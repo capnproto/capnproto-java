@@ -10,14 +10,6 @@ import static org.capnproto.ClientHook.NULL_CAPABILITY_BRAND;
 
 public final class Capability {
 
-    public static class BuilderContext {
-        public CapTableBuilder capTable;
-    }
-
-    public static class ReaderContext {
-        public CapTableReader capTable;
-    }
-
     public static abstract class Factory<T extends ClientBase>
             implements FromPointerReader<T>,
                        FromPointerBuilder<T>,
