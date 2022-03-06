@@ -5,10 +5,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-public final class Capability {
+import static org.capnproto.ClientHook.BROKEN_CAPABILITY_BRAND;
+import static org.capnproto.ClientHook.NULL_CAPABILITY_BRAND;
 
-    static final Object NULL_CAPABILITY_BRAND = new Object();
-    static final Object BROKEN_CAPABILITY_BRAND = new Object();
+public final class Capability {
 
     public static class BuilderContext {
         public CapTableBuilder capTable;
