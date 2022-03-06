@@ -1,7 +1,5 @@
 package org.capnproto;
 
-import java.util.concurrent.CompletableFuture;
-
 public interface Request<Params>
     extends RequestBase<Params> {
 
