@@ -48,7 +48,7 @@ public final class AnyPointer {
     }
     public static final Factory factory = new Factory();
 
-    public final static class Reader extends Capability.ReaderContext {
+    public final static class Reader extends CapTableReader.ReaderContext {
         final SegmentReader segment;
         final int pointer; // offset in words
         final int nestingLimit;
@@ -93,7 +93,7 @@ public final class AnyPointer {
         }
     }
 
-    public static final class Builder extends Capability.BuilderContext {
+    public static final class Builder extends CapTableBuilder.BuilderContext {
         final SegmentBuilder segment;
         final int pointer;
 
