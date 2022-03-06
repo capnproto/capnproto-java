@@ -61,7 +61,7 @@ public interface ClientHook {
      *  Repeatedly calls whenMoreResolved() until it returns nullptr.
      */
     default CompletableFuture<java.lang.Void> whenResolved() {
-        var promise = whenMoreResolved();
+        CompletableFuture<ClientHook> promise = whenMoreResolved();
         return promise != null
                 ? promise.thenCompose(ClientHook::whenResolved)
                 : CompletableFuture.completedFuture(null);
@@ -83,7 +83,7 @@ public interface ClientHook {
     }
 
     /**
-     *  Implements {@link Capability.Client.getFd}. If this returns null but whenMoreResolved() returns
+     *  Implements Capability.Client.getFd. If this returns null but whenMoreResolved() returns
      *  non-null, then Capability::Client::getFd() waits for resolution and tries again.
      */
     default FileDescriptor getFd() {
