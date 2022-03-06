@@ -19,7 +19,7 @@ abstract class ExportTable<T> implements Iterable<T> {
     }
 
     public T erase(int id, T entry) {
-        var value = slots.get(id);
+        T value = slots.get(id);
         if (value == entry) {
             freeIds.add(id);
             return slots.remove(id);
@@ -30,8 +30,8 @@ abstract class ExportTable<T> implements Iterable<T> {
 
     public T next() {
         int id = freeIds.isEmpty() ? max++ : freeIds.remove();
-        var value = newExportable(id);
-        var prev = slots.put(id, value);
+        T value = newExportable(id);
+        T prev = slots.put(id, value);
         assert prev == null;
         return value;
     }

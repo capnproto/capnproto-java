@@ -67,7 +67,7 @@ public final class AnyPointer {
         }
 
         final Reader imbue(CapTableReader capTable) {
-            var result = new Reader(segment, pointer, nestingLimit);
+            Reader result = new Reader(segment, pointer, nestingLimit);
             result.capTable = capTable;
             return result;
         }
@@ -83,9 +83,9 @@ public final class AnyPointer {
         public final ClientHook getPipelinedCap(short[] ops) {
             AnyPointer.Reader any = this;
 
-            for (var pointerIndex: ops) {
+            for (short pointerIndex: ops) {
                 if (pointerIndex >= 0) {
-                    var reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
+                    StructReader reader = WireHelpers.readStructPointer(any.segment, any.capTable, any.pointer, null, 0, any.nestingLimit);
                     any = reader._getPointerField(AnyPointer.factory, pointerIndex);
                 }
             }
@@ -176,7 +176,7 @@ public final class AnyPointer {
         }
 
         public Pipeline getPointerField(short pointerIndex) {
-            var newOps = new short[this.ops.length + 1];
+            short[] newOps = new short[this.ops.length + 1];
             System.arraycopy(this.ops, 0, newOps, 0, this.ops.length);
             newOps[this.ops.length] = pointerIndex;
             return new Pipeline(this.hook, newOps);
