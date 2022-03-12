@@ -21,7 +21,7 @@
 
 package org.capnproto;
 
-public class ListReader extends Capability.ReaderContext {
+public class ListReader extends CapTableReader.ReaderContext {
     public interface Factory<T> {
         T constructReader(SegmentReader segment,
                           int ptr,
@@ -31,9 +31,9 @@ public class ListReader extends Capability.ReaderContext {
         default T constructReader(SegmentReader segment, CapTableReader capTable, int ptr,
                                   int elementCount, int step,
                                   int structDataSize, short structPointerCount, int nestingLimit) {
-            var result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
-            if (result instanceof Capability.ReaderContext) {
-                ((Capability.ReaderContext) result).capTable = capTable;
+            T result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+            if (result instanceof CapTableReader.ReaderContext) {
+                ((CapTableReader.ReaderContext) result).capTable = capTable;
             }
             return result;
         }

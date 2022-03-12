@@ -23,7 +23,7 @@ package org.capnproto;
 
 import java.util.List;
 
-public class ListBuilder extends Capability.BuilderContext {
+public class ListBuilder extends CapTableBuilder.BuilderContext {
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int ptr,
                            int elementCount, int step,
@@ -31,9 +31,9 @@ public class ListBuilder extends Capability.BuilderContext {
         default T constructBuilder(SegmentBuilder segment, CapTableBuilder capTable, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount) {
-            var result = constructBuilder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            if (result instanceof Capability.BuilderContext) {
-                ((Capability.BuilderContext) result).capTable = capTable;
+            T result = constructBuilder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
+            if (result instanceof CapTableBuilder.BuilderContext) {
+                ((CapTableBuilder.BuilderContext) result).capTable = capTable;
             }
             return result;
         }

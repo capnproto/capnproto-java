@@ -19,7 +19,7 @@ abstract class ImportTable<T> implements Iterable<T> {
     }
 
     public T erase(int id, T entry) {
-        var removed = slots.remove(id, entry);
+        boolean removed = slots.remove(id, entry);
         assert removed;
         return entry;
     }

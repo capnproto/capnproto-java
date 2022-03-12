@@ -21,15 +21,15 @@
 
 package org.capnproto;
 
-public class StructBuilder extends Capability.BuilderContext {
+public class StructBuilder extends CapTableBuilder.BuilderContext {
     public interface Factory<T> {
         T constructBuilder(SegmentBuilder segment, int data, int pointers, int dataSize,
                            short pointerCount);
         default T constructBuilder(SegmentBuilder segment, CapTableBuilder capTable, int data, int pointers, int dataSize,
                            short pointerCount) {
-            var result = constructBuilder(segment, data, pointers, dataSize, pointerCount);
-            if (result instanceof Capability.BuilderContext) {
-                ((Capability.BuilderContext) result).capTable = capTable;
+            T result = constructBuilder(segment, data, pointers, dataSize, pointerCount);
+            if (result instanceof CapTableBuilder.BuilderContext) {
+                ((CapTableBuilder.BuilderContext) result).capTable = capTable;
             }
             return result;
         }

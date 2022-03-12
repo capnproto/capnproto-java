@@ -5,18 +5,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import static org.capnproto.ClientHook.BROKEN_CAPABILITY_BRAND;
+import static org.capnproto.ClientHook.NULL_CAPABILITY_BRAND;
+
 public final class Capability {
-
-    static final Object NULL_CAPABILITY_BRAND = new Object();
-    static final Object BROKEN_CAPABILITY_BRAND = new Object();
-
-    public static class BuilderContext {
-        public CapTableBuilder capTable;
-    }
-
-    public static class ReaderContext {
-        public CapTableReader capTable;
-    }
 
     public static abstract class Factory<T extends ClientBase>
             implements FromPointerReader<T>,
