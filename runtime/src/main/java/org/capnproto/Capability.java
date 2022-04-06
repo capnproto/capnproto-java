@@ -11,8 +11,7 @@ import static org.capnproto.ClientHook.NULL_CAPABILITY_BRAND;
 public final class Capability {
 
     public static abstract class Factory<T extends ClientBase>
-            implements FromPointerReader<T>,
-                       FromPointerBuilder<T>,
+            implements PointerFactory<T, T>,
                        SetPointerBuilder<T, T> {
 
         public abstract T newClient(ClientHook hook);

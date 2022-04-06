@@ -338,18 +338,22 @@ private:
       if (liteMode) {
         return kj::strTree("org.capnproto.Capability.", suffix);
       }
+      auto interfaceSuffix = kj::str(suffix);
+      if(suffix == kj::str("Builder") || suffix == kj::str("Reader")) {
+        interfaceSuffix = kj::str("Client");
+      }
       auto interfaceSchema = type.asInterface();
       if (interfaceSchema.getProto().getIsGeneric()) {
         auto typeArgs = getTypeArguments(interfaceSchema, interfaceSchema, kj::str(suffix));
         return kj::strTree(
-          javaFullName(interfaceSchema), ".", suffix, "<",
+          javaFullName(interfaceSchema), ".", interfaceSuffix, "<",
           kj::StringTree(KJ_MAP(arg, typeArgs){
               return kj::strTree(arg);
             }, ", "),
           ">"
           );
       } else {
-        return kj::strTree(javaFullName(type.asInterface()), ".", suffix);
+        return kj::strTree(javaFullName(type.asInterface()), ".", interfaceSuffix);
       }
     }
     case schema::Type::LIST:
