@@ -63,6 +63,29 @@ public class LayoutTest {
         Assert.assertEquals(reader._getBooleanField(64), false);
     }
 
+    /**
+     * @see <a href="https://github.com/capnproto/capnproto-java/issues/122">#122</a>
+     */
+    @Test(expected = DecodeException.class)
+    public void readStructPointerShouldThrowDecodeExceptionOnOutOfBoundsStructPointer() {
+        byte[] brokenMSG = new byte[]{
+                0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, //declare word size of 7, with payload of only 6 words
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        ByteBuffer buffer = ByteBuffer.wrap(brokenMSG);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
+
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, 0x7fffffff);
+    }
+
     private class BareStructBuilder implements StructBuilder.Factory<StructBuilder> {
         private StructSize structSize;
 
