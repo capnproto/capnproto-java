@@ -918,19 +918,24 @@ final class WireHelpers {
         int refTarget = WirePointer.target(refOffset, ref);
         FollowFarsResult resolved = followFars(ref, refTarget, segment);
 
-        int dataSizeWords = StructPointer.dataSize(resolved.ref);
-
         if (WirePointer.kind(resolved.ref) != WirePointer.STRUCT) {
             throw new DecodeException("Message contains non-struct pointer where struct pointer was expected.");
         }
 
-        resolved.segment.arena.checkReadLimit(StructPointer.wordSize(resolved.ref));
+        int dataSizeWords = StructPointer.dataSize(resolved.ref);
+        int ptrCount = StructPointer.ptrCount(resolved.ref);
+        int wordSize = dataSizeWords + ptrCount;
+
+        resolved.segment.arena.checkReadLimit(wordSize);
+        if (!bounds_check(resolved.segment, resolved.ptr, wordSize)) {
+            throw new DecodeException("Message contains out-of-bounds struct pointer");
+        }
 
         return factory.constructReader(resolved.segment,
                                        resolved.ptr * Constants.BYTES_PER_WORD,
                                        (resolved.ptr + dataSizeWords),
                                        dataSizeWords * Constants.BITS_PER_WORD,
-                                       (short)StructPointer.ptrCount(resolved.ref),
+                                       (short) ptrCount,
                                        nestingLimit - 1);
 
     }

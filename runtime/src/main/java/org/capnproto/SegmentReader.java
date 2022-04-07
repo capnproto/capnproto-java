@@ -44,6 +44,6 @@ public class SegmentReader {
     public final boolean in_bounds(int start, int size) {
         if (start < 0 || size < 0) return false;
         long sizeInWords = size * Constants.BYTES_PER_WORD;
-        return (long) start + sizeInWords < (long) this.buffer.capacity();
+        return (long) start + sizeInWords <= (long) this.buffer.capacity();
     }
 }
