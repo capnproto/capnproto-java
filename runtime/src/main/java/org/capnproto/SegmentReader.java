@@ -39,11 +39,13 @@ public class SegmentReader {
         return buffer.getLong(index * Constants.BYTES_PER_WORD);
     }
 
-    // Verify that the `size`-long (in words) range starting at word index
-    // `start` is within bounds.
-    public final boolean in_bounds(int start, int size) {
+    /**
+     * Verify that the `size`-long (in words) range starting at word index
+     * `start` is within bounds.
+     */
+    public final boolean isInBounds(int start, int size) {
         if (start < 0 || size < 0) return false;
-        long sizeInWords = size * Constants.BYTES_PER_WORD;
-        return (long) start + sizeInWords <= (long) this.buffer.capacity();
+        long sizeInWords = (long) size * Constants.BYTES_PER_WORD;
+        return start + sizeInWords <= this.buffer.capacity();
     }
 }
