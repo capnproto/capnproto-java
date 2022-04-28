@@ -43,7 +43,7 @@ final class WireHelpers {
     static boolean bounds_check(SegmentReader segment,
                                 int start,
                                 int size) {
-        return segment == null || segment.in_bounds(start, size);
+        return segment == null || segment.isInBounds(start, size);
     }
 
     static class AllocateResult {

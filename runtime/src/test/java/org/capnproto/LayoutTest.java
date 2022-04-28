@@ -86,6 +86,34 @@ public class LayoutTest {
         StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, 0x7fffffff);
     }
 
+
+    private static class BareListReader implements ListReader.Factory<ListReader> {
+        BareListReader() {
+        }
+
+        @Override
+        public ListReader constructReader(SegmentReader segment, int ptr, int elementCount, int step, int structDataSize, short structPointerCount, int nestingLimit) {
+            return new ListReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+        }
+    }
+
+    @Test(expected = DecodeException.class)
+    public void readListPointerShouldThrowDecodeExceptionOnOutOfBoundsCompositeListPointer() {
+        byte[] brokenMSG = {
+                // set list pointer bits to 1, elementSize to 7 to indicate composite list and number of words in the list (minus tag) to 0x1FFFFFFF (max value possible in 29b limit)
+                0x01, 0x00, 0x00, 0x00, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
+                0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,//tag with element wordSize of 1
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        ByteBuffer buffer = ByteBuffer.wrap(brokenMSG);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        ReaderArena arena = new ReaderArena(new ByteBuffer[]{buffer}, 0x7fffffffffffffffL);
+
+        ListReader reader = WireHelpers.readListPointer(new BareListReader(), arena.tryGetSegment(0), 0, null, 0, (byte) 0, 0x7fffffff);
+    }
+
     private class BareStructBuilder implements StructBuilder.Factory<StructBuilder> {
         private StructSize structSize;
 
