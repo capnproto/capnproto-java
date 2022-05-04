@@ -21,10 +21,15 @@
 
 package org.capnproto;
 
-import java.nio.ByteBuffer;
-
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SerializeTest {
 
@@ -147,4 +152,13 @@ public class SerializeTest {
             java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
         MessageReader message = Serialize.read(channel);
   }
+
+    @Test
+    @Ignore("Ignored by default because the huge array used in the test results in a long execution")
+    public void computeSerializedSizeInWordsShouldNotOverflowOnLargeSegmentCounts() {
+        ByteBuffer dummySegmentBuffer = ByteBuffer.allocate(0);
+        ByteBuffer[] segments = new ByteBuffer[Integer.MAX_VALUE / 2];
+        Arrays.fill(segments, dummySegmentBuffer);
+        assertThat(Serialize.computeSerializedSizeInWords(segments), is((segments.length * 4L + 4) / Constants.BYTES_PER_WORD));
+    }
 }
