@@ -54,7 +54,7 @@ public final class DataList {
             return _getPointerElement(Data.factory, index);
         }
 
-        public final class Iterator implements java.util.Iterator<Data.Reader> {
+        public static final class Iterator implements java.util.Iterator<Data.Reader> {
             public Reader list;
             public int idx = 0;
             public Iterator(Reader list) {
@@ -99,7 +99,7 @@ public final class DataList {
                               java.lang.Integer.MAX_VALUE);
         }
 
-        public final class Iterator implements java.util.Iterator<Data.Builder> {
+        public static final class Iterator implements java.util.Iterator<Data.Builder> {
             public Builder list;
             public int idx = 0;
             public Iterator(Builder list) {

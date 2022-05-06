@@ -33,7 +33,7 @@ public final class ReaderArena implements Arena {
 
     public ReaderArena(ByteBuffer[] segmentSlices, long traversalLimitInWords) {
         this.limit = traversalLimitInWords;
-        this.segments = new ArrayList<SegmentReader>();
+        this.segments = new ArrayList<>(segmentSlices.length);
         for(int ii = 0; ii < segmentSlices.length; ++ii) {
             this.segments.add(new SegmentReader(segmentSlices[ii], this));
         }
