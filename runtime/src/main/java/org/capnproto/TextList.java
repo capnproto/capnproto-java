@@ -54,7 +54,7 @@ public final class TextList {
             return _getPointerElement(Text.factory, index);
         }
 
-        public final class Iterator implements java.util.Iterator<Text.Reader> {
+        public static final class Iterator implements java.util.Iterator<Text.Reader> {
             public Reader list;
             public int idx = 0;
             public Iterator(Reader list) {
@@ -99,7 +99,7 @@ public final class TextList {
                               java.lang.Integer.MAX_VALUE);
         }
 
-        public final class Iterator implements java.util.Iterator<Text.Builder> {
+        public static final class Iterator implements java.util.Iterator<Text.Builder> {
             public Builder list;
             public int idx = 0;
             public Iterator(Builder list) {

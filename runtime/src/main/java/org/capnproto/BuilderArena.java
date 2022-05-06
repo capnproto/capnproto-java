@@ -36,7 +36,7 @@ public final class BuilderArena implements Arena {
         AllocationStrategy.GROW_HEURISTICALLY;
 
     public final ArrayList<SegmentBuilder> segments;
-    private Allocator allocator;
+    private final Allocator allocator;
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
         this.segments = new ArrayList<SegmentBuilder>();

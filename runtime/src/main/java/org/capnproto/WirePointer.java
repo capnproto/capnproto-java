@@ -34,7 +34,7 @@ final class WirePointer {
     }
 
     public static int offsetAndKind(long wirePointer) {
-        return (int)(wirePointer & 0xffffffff);
+        return (int) wirePointer;
     }
 
     public static byte kind(long wirePointer) {
