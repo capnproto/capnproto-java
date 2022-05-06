@@ -99,7 +99,7 @@ public class ListBuilder extends CapTableBuilder.BuilderContext {
     }
 
     protected void _setBooleanElement(int index, boolean value) {
-        long bitOffset = index * this.step;
+        long bitOffset = (long) index * this.step;
         byte bitnum = (byte)(bitOffset % 8);
         int position = (int)(this.ptr + (bitOffset / 8));
         byte oldValue = this.segment.buffer.get(position);
