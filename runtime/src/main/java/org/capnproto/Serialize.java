@@ -43,7 +43,7 @@ public final class Serialize {
         return result;
     }
 
-    static int MAX_SEGMENT_WORDS = (1 << 28) - 1;
+    static final int MAX_SEGMENT_WORDS = (1 << 28) - 1;
 
     static ByteBuffer makeByteBufferForWords(int words) throws IOException {
         if (words > MAX_SEGMENT_WORDS) {
@@ -79,10 +79,7 @@ public final class Serialize {
 
         int segmentCount = 1 + rawSegmentCount;
 
-        int segment0Size = 0;
-        if (segmentCount > 0) {
-            segment0Size = firstWord.getInt(4);
-        }
+        int segment0Size = firstWord.getInt(4);
 
         if (segment0Size < 0) {
             throw new DecodeException("segment 0 has more than 2^31 words, which is unsupported");
@@ -91,7 +88,7 @@ public final class Serialize {
         long totalWords = segment0Size;
 
         // in words
-        ArrayList<Integer> moreSizes = new ArrayList<Integer>();
+        ArrayList<Integer> moreSizes = new ArrayList<>(segmentCount -1);
 
         if (segmentCount > 1) {
             ByteBuffer moreSizesRaw = makeByteBuffer(4 * (segmentCount & ~1));
@@ -118,7 +115,6 @@ public final class Serialize {
         fillBuffer(segmentSlices[0], bc);
         segmentSlices[0].rewind();
 
-        int offset = segment0Size;
         for (int ii = 1; ii < segmentCount; ++ii) {
             segmentSlices[ii] = makeByteBufferForWords(moreSizes.get(ii - 1));
             fillBuffer(segmentSlices[ii], bc);

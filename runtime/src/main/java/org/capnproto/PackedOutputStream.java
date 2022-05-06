@@ -111,7 +111,7 @@ public final class PackedOutputStream implements WritableByteChannel {
             out.position(out.position() + bit7 - 1);
             inPtr += 1;
 
-            byte tag = (byte)((bit0 << 0) | (bit1 << 1) | (bit2 << 2) | (bit3 << 3) |
+            byte tag = (byte)((bit0) | (bit1 << 1) | (bit2 << 2) | (bit3 << 3) |
                               (bit4 << 4) | (bit5 << 5) | (bit6 << 6) | (bit7 << 7));
 
             out.put(tagPos, tag);
