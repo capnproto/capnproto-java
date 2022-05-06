@@ -964,7 +964,7 @@ final class WireHelpers {
     };
 
     static SegmentBuilder setListPointer(SegmentBuilder segment, int refOffset, ListReader value) {
-        int totalSize = roundBitsUpToWords(value.elementCount * value.step);
+        int totalSize = roundBitsUpToWords((long) value.elementCount * value.step);
 
         if (value.step <= Constants.BITS_PER_WORD) {
             //# List of non-structs.
