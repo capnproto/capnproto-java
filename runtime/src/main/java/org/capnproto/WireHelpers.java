@@ -247,10 +247,10 @@ final class WireHelpers {
             case ElementSize.TWO_BYTES:
             case ElementSize.FOUR_BYTES:
             case ElementSize.EIGHT_BYTES: {
-                memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte)0,
-                       roundBitsUpToWords(
-                           ListPointer.elementCount(tag) *
-                           ElementSize.dataBitsPerElement(ListPointer.elementSize(tag))) * Constants.BYTES_PER_WORD);
+                memset(segment.buffer, ptr * Constants.BYTES_PER_WORD, (byte) 0,
+                        roundBitsUpToWords(
+                                (long) ListPointer.elementCount(tag) *
+                                        ElementSize.dataBitsPerElement(ListPointer.elementSize(tag))) * Constants.BYTES_PER_WORD);
                 break;
             }
             case ElementSize.POINTER: {
