@@ -1297,8 +1297,8 @@ final class WireHelpers {
             //# lists can also be interpreted as struct lists. We
             //# need to compute the data size and pointer count for
             //# such structs.
-            int dataSize = ElementSize.dataBitsPerElement(ListPointer.elementSize(resolved.ref));
-            int pointerCount = ElementSize.pointersPerElement(ListPointer.elementSize(resolved.ref));
+            int dataSize = ElementSize.dataBitsPerElement(elementSize);
+            int pointerCount = ElementSize.pointersPerElement(elementSize);
             int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
@@ -1337,7 +1337,7 @@ final class WireHelpers {
             return factory.constructReader(resolved.segment,
                                              capTable,
                                              resolved.ptr * Constants.BYTES_PER_WORD,
-                                             ListPointer.elementCount(resolved.ref),
+                                             elementCount,
                                              step,
                                              dataSize,
                                              (short)pointerCount,
