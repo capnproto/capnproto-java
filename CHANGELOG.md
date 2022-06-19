@@ -1,3 +1,6 @@
+## v0.1.14
+- Optimizations and bugfixes.
+
 ## v0.1.13
 - Improved robustness to StructPointer integer wrapping problems.
 
