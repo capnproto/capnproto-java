@@ -1,6 +1,6 @@
 package org.capnproto;
 
-import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.AsynchronousByteChannel;
 import java.util.concurrent.CompletableFuture;
 
 public class TwoPartyClient {
@@ -8,15 +8,15 @@ public class TwoPartyClient {
     private final TwoPartyVatNetwork network;
     private final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
 
-    public TwoPartyClient(AsynchronousSocketChannel channel) {
+    public TwoPartyClient(AsynchronousByteChannel channel) {
         this(channel, null);
     }
 
-    public TwoPartyClient(AsynchronousSocketChannel channel, Capability.Client bootstrapInterface) {
+    public TwoPartyClient(AsynchronousByteChannel channel, Capability.Client bootstrapInterface) {
         this(channel, bootstrapInterface, RpcTwoPartyProtocol.Side.CLIENT);
     }
 
-    public TwoPartyClient(AsynchronousSocketChannel channel,
+    public TwoPartyClient(AsynchronousByteChannel channel,
                           Capability.Client bootstrapInterface,
                           RpcTwoPartyProtocol.Side side) {
         this.network = new TwoPartyVatNetwork(channel, side);

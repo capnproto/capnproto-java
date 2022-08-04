@@ -8,11 +8,11 @@ import java.util.concurrent.CompletableFuture;
 public class TwoPartyServer {
 
     private class AcceptedConnection {
-        private final AsynchronousSocketChannel connection;
+        private final AsynchronousByteChannel connection;
         private final TwoPartyVatNetwork network;
         private final RpcSystem<RpcTwoPartyProtocol.VatId.Reader> rpcSystem;
 
-        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousSocketChannel connection) {
+        AcceptedConnection(Capability.Client bootstrapInterface, AsynchronousByteChannel connection) {
             this.connection = connection;
             this.network = new TwoPartyVatNetwork(this.connection, RpcTwoPartyProtocol.Side.SERVER);
             this.rpcSystem = new RpcSystem<>(network, bootstrapInterface);
@@ -31,7 +31,7 @@ public class TwoPartyServer {
         this(new Capability.Client(bootstrapServer));
     }
 
-    public void accept(AsynchronousSocketChannel channel) {
+    public void accept(AsynchronousByteChannel channel) {
         var connection = new AcceptedConnection(this.bootstrapInterface, channel);
         this.connections.add(connection);
         connection.network.onDisconnect().whenComplete((x, exc) -> {
@@ -39,11 +39,11 @@ public class TwoPartyServer {
         });
     }
 
-    public CompletableFuture<java.lang.Void> listen(AsynchronousServerSocketChannel listener) {
-        var result = new CompletableFuture<AsynchronousSocketChannel>();
+    public CompletableFuture<java.lang.Void> listen(AsynchronousByteListenChannel listener) {
+        var result = new CompletableFuture<AsynchronousByteChannel>();
         listener.accept(null, new CompletionHandler<>() {
             @Override
-            public void completed(AsynchronousSocketChannel channel, Object attachment) {
+            public void completed(AsynchronousByteChannel channel, Object attachment) {
                 accept(channel);
                 result.complete(null);
             }

@@ -1,7 +1,7 @@
 package org.capnproto;
 
 import java.io.FileDescriptor;
-import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.AsynchronousByteChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,12 +11,12 @@ public class TwoPartyVatNetwork
 
     private CompletableFuture<java.lang.Void> previousWrite = CompletableFuture.completedFuture(null);
     private final CompletableFuture<java.lang.Void> disconnectPromise = new CompletableFuture<>();
-    private final AsynchronousSocketChannel channel;
+    private final AsynchronousByteChannel channel;
     private final RpcTwoPartyProtocol.Side side;
     private final MessageBuilder peerVatId = new MessageBuilder(4);
     private boolean accepted;
 
-    public TwoPartyVatNetwork(AsynchronousSocketChannel channel, RpcTwoPartyProtocol.Side side) {
+    public TwoPartyVatNetwork(AsynchronousByteChannel channel, RpcTwoPartyProtocol.Side side) {
         this.channel = channel;
         this.side = side;
         this.peerVatId.initRoot(RpcTwoPartyProtocol.VatId.factory).setSide(
