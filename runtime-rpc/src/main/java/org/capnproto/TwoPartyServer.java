@@ -39,11 +39,11 @@ public class TwoPartyServer {
         });
     }
 
-    public CompletableFuture<java.lang.Void> listen(AsynchronousByteListenChannel listener) {
-        var result = new CompletableFuture<AsynchronousByteChannel>();
+    public CompletableFuture<java.lang.Void> listen(AsynchronousServerSocketChannel listener) {
+        var result = new CompletableFuture<AsynchronousSocketChannel>();
         listener.accept(null, new CompletionHandler<>() {
             @Override
-            public void completed(AsynchronousByteChannel channel, Object attachment) {
+            public void completed(AsynchronousSocketChannel channel, Object attachment) {
                 accept(channel);
                 result.complete(null);
             }

@@ -2,6 +2,7 @@ package org.capnproto;
 
 import java.io.FileDescriptor;
 import java.nio.channels.AsynchronousByteChannel;
+import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -71,7 +72,9 @@ public class TwoPartyVatNetwork
 
         var result = this.previousWrite.whenComplete((void_, exc) -> {
             try {
-                this.channel.shutdownOutput();
+              if (this.channel instanceof AsynchronousSocketChannel) {
+                ((AsynchronousSocketChannel)this.channel).shutdownOutput();
+              }
             }
             catch (Exception ignored) {
             }

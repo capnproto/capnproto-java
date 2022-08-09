@@ -31,21 +31,6 @@ public class EzRpcServer {
     }
 
     public CompletableFuture<java.lang.Void> start() {
-        return this.twoPartyRpc.listen(new AsynchronousByteListenChannel() {
-            @Override
-            public <A> void accept(A attachment, CompletionHandler<AsynchronousByteChannel, ? super A> handler) {
-                serverAcceptSocket.accept(attachment, new CompletionHandler<>() {
-                    @Override
-                    public void completed(AsynchronousSocketChannel result, A attachment) {
-                        handler.completed(result, attachment);
-                    }
-
-                    @Override
-                    public void failed(Throwable exc, A attachment) {
-                        handler.failed(exc, attachment);
-                    }
-                });
-            }
-        });
+        return this.twoPartyRpc.listen(this.serverAcceptSocket);
     }
 }
