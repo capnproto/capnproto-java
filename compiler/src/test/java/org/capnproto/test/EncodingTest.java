@@ -113,6 +113,38 @@ public class EncodingTest {
     }
 
     @org.junit.Test
+    public void testUpgradeStructReadAsOld() {
+      MessageBuilder builder = new MessageBuilder();
+      Test.TestAnyPointer.Builder root = builder.initRoot(Test.TestAnyPointer.factory);
+
+      {
+        Test.TestNewVersion.Builder newVersion = root.getAnyPointerField().initAs(Test.TestNewVersion.factory);
+        newVersion.setOld1(123);
+        newVersion.setOld2("foo");
+        Test.TestNewVersion.Builder sub = newVersion.initOld3();
+        sub.setOld1(456);
+        sub.setOld2("bar");
+
+        StructList.Builder<Test.TestNewVersion.UpgradedFromText.Builder> names =
+          newVersion.initOld4(2);
+
+        names.get(0).setTextField("alice");
+        names.get(1).setTextField("bob");
+      }
+
+      {
+        Test.TestOldVersion.Reader oldVersion = root.getAnyPointerField().asReader().getAs(Test.TestOldVersion.factory);
+        Assert.assertEquals(oldVersion.getOld1(), 123);
+        Assert.assertEquals(oldVersion.getOld2().toString(), "foo");
+
+        TextList.Reader names = oldVersion.getOld4();
+        Assert.assertEquals(names.size(), 2);
+        Assert.assertEquals("alice", names.get(0).toString());
+        Assert.assertEquals("bob", names.get(1).toString());
+      }
+    }
+
+    @org.junit.Test
     public void testUpgradeStructInBuilder() {
         MessageBuilder builder = new MessageBuilder();
         Test.TestAnyPointer.Builder root = builder.initRoot(Test.TestAnyPointer.factory);

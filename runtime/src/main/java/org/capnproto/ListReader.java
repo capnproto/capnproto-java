@@ -108,9 +108,13 @@ public class ListReader {
     }
 
     protected <T> T _getPointerElement(FromPointerReader<T> factory, int index) {
-        return factory.fromPointerReader(this.segment,
-                                         (this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE)) / Constants.BYTES_PER_WORD,
-                                         this.nestingLimit);
+      return factory.fromPointerReader(
+        this.segment,
+        (this.ptr +
+         (this.structDataSize / Constants.BITS_PER_BYTE) +
+         (int)((long)index * this.step / Constants.BITS_PER_BYTE))
+          / Constants.BYTES_PER_WORD,
+        this.nestingLimit);
     }
 
     protected <T> T _getPointerElement(FromPointerReaderBlobDefault<T> factory, int index,

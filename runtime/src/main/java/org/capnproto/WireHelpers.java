@@ -1175,8 +1175,8 @@ final class WireHelpers {
             throw new DecodeException("Message contains non-list pointer where list was expected.");
         }
 
-        byte elementSize = ListPointer.elementSize(resolved.ref);
-        switch (elementSize) {
+        byte oldSize = ListPointer.elementSize(resolved.ref);
+        switch (oldSize) {
         case ElementSize.INLINE_COMPOSITE : {
             int wordCount = ListPointer.inlineCompositeWordCount(resolved.ref);
 
@@ -1189,7 +1189,8 @@ final class WireHelpers {
             }
 
             int size = WirePointer.inlineCompositeListElementCount(tag);
-
+            int dataSize = StructPointer.dataSize(tag);
+            short ptrCount = (short)StructPointer.ptrCount(tag);
             int wordsPerElement = StructPointer.wordSize(tag);
 
             if ((long)size * wordsPerElement > wordCount) {
@@ -1202,23 +1203,42 @@ final class WireHelpers {
                 resolved.segment.arena.checkReadLimit(size);
             }
 
-            // TODO check whether the size is compatible
+            switch (expectedElementSize) {
+              case ElementSize.VOID: break;
+              case ElementSize.BIT: {
+                throw new DecodeException("Found struct list where bit list was expected");
+              }
+              case ElementSize.BYTE:
+              case ElementSize.TWO_BYTES:
+              case ElementSize.FOUR_BYTES:
+              case ElementSize.EIGHT_BYTES:
+                if (dataSize == 0) {
+                  throw new DecodeException(
+                    "Expected a primitive list, but got a list of pointer-only structs");
+                }
+              case ElementSize.POINTER:
+                if (ptrCount == 0) {
+                  throw new DecodeException(
+                    "Expected a pointer list, but got a list of data-only structs");
+                }
+              default: break;
+            }
 
             return factory.constructReader(resolved.segment,
-                                             ptr * Constants.BYTES_PER_WORD,
-                                             size,
-                                             wordsPerElement * Constants.BITS_PER_WORD,
-                                             StructPointer.dataSize(tag) * Constants.BITS_PER_WORD,
-                                           (short)StructPointer.ptrCount(tag),
-                                             nestingLimit - 1);
+                                       ptr * Constants.BYTES_PER_WORD,
+                                       size,
+                                       wordsPerElement * Constants.BITS_PER_WORD,
+                                       dataSize * Constants.BITS_PER_WORD,
+                                       ptrCount,
+                                       nestingLimit - 1);
         }
         default : {
             //# This is a primitive or pointer list, but all such
             //# lists can also be interpreted as struct lists. We
             //# need to compute the data size and pointer count for
             //# such structs.
-            int dataSize = ElementSize.dataBitsPerElement(elementSize);
-            int pointerCount = ElementSize.pointersPerElement(elementSize);
+            int dataSize = ElementSize.dataBitsPerElement(oldSize);
+            int pointerCount = ElementSize.pointersPerElement(oldSize);
             int elementCount = ListPointer.elementCount(resolved.ref);
             int step = dataSize + pointerCount * Constants.BITS_PER_POINTER;
 
@@ -1229,7 +1249,7 @@ final class WireHelpers {
                 throw new DecodeException("Message contains out-of-bounds list pointer");
             }
 
-            if (elementSize == ElementSize.VOID) {
+            if (oldSize == ElementSize.VOID) {
                 // Watch out for lists of void, which can claim to be arbitrarily large without
                 // having sent actual data.
                 resolved.segment.arena.checkReadLimit(elementCount);
