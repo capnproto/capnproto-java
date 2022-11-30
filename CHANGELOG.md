@@ -1,4 +1,7 @@
 ## v0.1.14
+- Fix bugs in handling of upgraded list of pointers.
+
+## v0.1.14
 - Optimizations and bugfixes.
 
 ## v0.1.13
