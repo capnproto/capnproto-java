@@ -25,6 +25,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -133,6 +135,36 @@ public class SerializeTest {
         3, 0, 0, 0, 0, 0, 0, 0,
         3, 0, 0, 0, 0, 0, 0, 0
       });
+  }
+
+  @Test
+  public void testTryReadByteBuffer() throws IOException {
+    // `tryRead` returns a non-null `MessageReader` when given correct input
+    {
+      byte[] input = new byte[]{
+              0, 0, 0, 0, // 1 segment
+              0, 0, 0, 0  // Segment 0 contains 0 bytes
+              // No padding
+              // Segment 0 (empty)
+      };
+      MessageReader messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input)));
+      Assert.assertNotNull(messageReader);
+    }
+
+    // `tryRead` returns null when given no input
+    {
+      MessageReader messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(new byte[]{})));
+      Assert.assertNull(messageReader);
+    }
+
+    // `tryRead` throws when given too few bytes to form the first word
+    {
+      byte[] input = new byte[]{
+              0, 0, 0, 0, // 1 segment
+              0, 0, 0     // Premature end of stream after 7 bytes
+      };
+      Assert.assertThrows(IOException.class, () -> Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input))));
+    }
   }
 
   @Test(expected=DecodeException.class)

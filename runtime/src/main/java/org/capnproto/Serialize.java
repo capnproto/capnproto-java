@@ -51,14 +51,63 @@ public final class Serialize {
         return makeByteBuffer(words * Constants.BYTES_PER_WORD);
     }
 
+    /**
+     * Attempts to fill the provided byte buffer using bytes from the provided ReadableByteChannel. Once the buffer has
+     * been filled *or* the ReadableByteChannel has reached end-of-stream, returns the number of bytes read.
+     */
+    private static int tryFillBuffer(ByteBuffer buffer, ReadableByteChannel bc) throws IOException {
+        int initialPosition = buffer.position();
+
+        while (buffer.hasRemaining()) {
+            int r = bc.read(buffer);
+            if (r == 0) {
+                throw new IOException("Read zero bytes. Is the channel in non-blocking mode?");
+            } else if (r < 0) {
+                break;
+            }
+        }
+
+        return buffer.position() - initialPosition;
+    }
+
     public static void fillBuffer(ByteBuffer buffer, ReadableByteChannel bc) throws IOException {
-        while(buffer.hasRemaining()) {
+        while (buffer.hasRemaining()) {
             int r = bc.read(buffer);
             if (r < 0) {
                 throw new IOException("premature EOF");
             } else if (r == 0) {
                 throw new IOException("Read zero bytes. Is the channel in non-blocking mode?");
             }
+        }
+    }
+
+    /**
+     * Attempts to read a message from the provided BufferedInputStream with default options. Returns null if the input
+     * stream reached end-of-stream on first read.
+     */
+    public static MessageReader tryRead(ReadableByteChannel bc) throws IOException {
+        return tryRead(bc, ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
+
+    /**
+     * Attempts to read a message from the provided BufferedInputStream with the provided options. Returns null if the
+     * input stream reached end-of-stream on first read.
+     */
+    public static MessageReader tryRead(ReadableByteChannel bc, ReaderOptions options) throws IOException {
+        ByteBuffer firstWord = makeByteBufferForWords(1);
+        int nBytes = tryFillBuffer(firstWord, bc);
+        if (firstWord.hasRemaining()) {
+            // We failed to read a whole word
+            if (0 == nBytes) {
+                // We were unable to read anything at all: the byte channel has reached end-of-stream
+                return null;
+            } else {
+                // We read fewer than 1 word's worth of bytes
+                throw new IOException("premature EOF");
+            }
+        } else {
+            // We filled the buffer
+            return doRead(bc, options, firstWord);
         }
     }
 
@@ -69,7 +118,12 @@ public final class Serialize {
     public static MessageReader read(ReadableByteChannel bc, ReaderOptions options) throws IOException {
         ByteBuffer firstWord = makeByteBufferForWords(1);
         fillBuffer(firstWord, bc);
+        return doRead(bc, options, firstWord);
+    }
 
+    private static MessageReader doRead(ReadableByteChannel bc,
+                                        ReaderOptions options,
+                                        ByteBuffer firstWord) throws IOException {
         int rawSegmentCount = firstWord.getInt(0);
         if (rawSegmentCount < 0 || rawSegmentCount > 511) {
             throw new DecodeException("segment count must be between 0 and 512");
