@@ -22,6 +22,15 @@
 package org.capnproto;
 
 public interface FromPointerBuilder<T> {
-    T fromPointerBuilder(SegmentBuilder segment, int pointer);
-    T initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount);
+    default T fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        return fromPointerBuilder(segment, null, pointer);
+    }
+
+    T fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer);
+
+    default T initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+        return initFromPointerBuilder(segment, null, pointer, elementCount);
+    }
+
+    T initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount);
 }
