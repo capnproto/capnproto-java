@@ -52,7 +52,7 @@ public final class BuilderArena implements Arena {
 
         @Override
         public void dropCap(int index) {
-            if (index < this.capTable.size()) {
+            if (index >= this.capTable.size()) {
                 assert false : "Invalid capability descriptor in message.";
                 return;
             }
