@@ -26,16 +26,36 @@ public final class AnyPointer {
             implements PointerFactory<Builder, Reader>,
                        SetPointerBuilder<Builder, Reader>
     {
+        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+            return new Reader(segment, pointer, nestingLimit);
+        }
         public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
             return new Reader(segment, capTable, pointer, nestingLimit);
         }
+        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+            return new Builder(segment, pointer);
+        }
         public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
             return new Builder(segment, capTable, pointer);
+        }
+        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
+            Builder result = new Builder(segment, pointer);
+            result.clear();
+            return result;
         }
         public final Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
             Builder result = new Builder(segment, capTable, pointer);
             result.clear();
             return result;
+        }
+        public void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
+            if (value.isNull()) {
+                WireHelpers.zeroObject(segment, null, pointer);
+                WireHelpers.zeroPointerAndFars(segment, pointer);
+            }
+            else {
+                WireHelpers.copyPointer(segment, null, pointer, value.segment, value.capTable, value.pointer, value.nestingLimit);
+            }
         }
         public void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
             if (value.isNull()) {
