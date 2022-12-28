@@ -22,7 +22,7 @@
 package org.capnproto;
 
 public class StructReader extends CapTableReader.ReaderContext {
-    public interface Factory<T> {
+    public interface Factory<T extends CapTableReader.ReaderContext> {
         T constructReader(SegmentReader segment, int data, int pointers,
                                    int dataSize, short pointerCount,
                                    int nestingLimit);
@@ -30,9 +30,7 @@ public class StructReader extends CapTableReader.ReaderContext {
                           int dataSize, short pointerCount,
                           int nestingLimit) {
             T result = constructReader(segment, data, pointers, dataSize, pointerCount, nestingLimit);
-            if (result instanceof CapTableReader.ReaderContext) {
-                ((CapTableReader.ReaderContext) result).capTable = capTable;
-            }
+            result.capTable = capTable;
             return result;
         }
     }

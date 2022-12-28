@@ -22,7 +22,7 @@
 package org.capnproto;
 
 public class ListReader extends CapTableReader.ReaderContext {
-    public interface Factory<T> {
+    public interface Factory<T extends CapTableReader.ReaderContext> {
         T constructReader(SegmentReader segment,
                           int ptr,
                           int elementCount, int step,
@@ -32,9 +32,7 @@ public class ListReader extends CapTableReader.ReaderContext {
                                   int elementCount, int step,
                                   int structDataSize, short structPointerCount, int nestingLimit) {
             T result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
-            if (result instanceof CapTableReader.ReaderContext) {
-                ((CapTableReader.ReaderContext) result).capTable = capTable;
-            }
+            result.capTable = capTable;
             return result;
         }
     }
@@ -119,7 +117,7 @@ public class ListReader extends CapTableReader.ReaderContext {
         return this.segment.buffer.getDouble(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
-    protected <T> T _getStructElement(StructReader.Factory<T> factory, int index) {
+    protected <T extends CapTableReader.ReaderContext> T _getStructElement(StructReader.Factory<T> factory, int index) {
         // TODO check nesting limit
 
         long indexBit = (long)index * this.step;

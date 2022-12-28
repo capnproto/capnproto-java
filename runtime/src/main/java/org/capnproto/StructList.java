@@ -105,7 +105,7 @@ public final class StructList {
         }
     }
 
-    public static final class Reader<T> extends ListReader implements Iterable<T> {
+    public static final class Reader<T extends CapTableReader.ReaderContext> extends ListReader implements Iterable<T> {
         public final StructReader.Factory<T> factory;
 
         public Reader(StructReader.Factory<T> factory,

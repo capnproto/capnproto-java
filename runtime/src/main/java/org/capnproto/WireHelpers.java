@@ -405,14 +405,14 @@ final class WireHelpers {
 
     }
 
-    static <T> T initStructPointer(StructBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T initStructPointer(StructBuilder.Factory<T> factory,
                                    int refOffset,
                                    SegmentBuilder segment,
                                    StructSize size) {
         return initStructPointer(factory, refOffset, segment, null, size);
     }
 
-    static <T> T initStructPointer(StructBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T initStructPointer(StructBuilder.Factory<T> factory,
                                    int refOffset,
                                    SegmentBuilder segment,
                                    CapTableBuilder capTable,
@@ -424,7 +424,7 @@ final class WireHelpers {
                                          size.data * 64, size.pointers);
     }
 
-    static <T> T getWritableStructPointer(StructBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T getWritableStructPointer(StructBuilder.Factory<T> factory,
                                           int refOffset,
                                           SegmentBuilder segment,
                                           CapTableBuilder capTable,
@@ -495,7 +495,7 @@ final class WireHelpers {
 
     }
 
-    static <T> T initListPointer(ListBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T initListPointer(ListBuilder.Factory<T> factory,
                                  CapTableBuilder capTable,
                                  int refOffset,
                                  SegmentBuilder segment,
@@ -516,7 +516,7 @@ final class WireHelpers {
                                         elementCount, step, dataSize, (short)pointerCount);
     }
 
-    static <T> T initStructListPointer(ListBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T initStructListPointer(ListBuilder.Factory<T> factory,
                                        CapTableBuilder capTable,
                                        int refOffset,
                                        SegmentBuilder segment,
@@ -541,7 +541,7 @@ final class WireHelpers {
                                         elementSize.data * Constants.BITS_PER_WORD, elementSize.pointers);
     }
 
-    static <T> T getWritableListPointer(ListBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T getWritableListPointer(ListBuilder.Factory<T> factory,
                                         int origRefOffset,
                                         SegmentBuilder origSegment,
                                         CapTableBuilder capTable,
@@ -600,7 +600,7 @@ final class WireHelpers {
         }
     }
 
-    static <T> T getWritableStructListPointer(ListBuilder.Factory<T> factory,
+    static <T extends CapTableBuilder.BuilderContext> T getWritableStructListPointer(ListBuilder.Factory<T> factory,
                                               CapTableBuilder capTable,
                                               int origRefOffset,
                                               SegmentBuilder origSegment,
@@ -922,7 +922,7 @@ final class WireHelpers {
 
     }
 
-    static <T> T readStructPointer(StructReader.Factory<T> factory,
+    static <T extends CapTableReader.ReaderContext> T readStructPointer(StructReader.Factory<T> factory,
                                    SegmentReader segment,
                                    CapTableReader capTable,
                                    int refOffset,
@@ -1180,7 +1180,7 @@ final class WireHelpers {
         throw new RuntimeException("unreachable");
     }
 
-    static <T> T readListPointer(ListReader.Factory<T> factory,
+    static <T extends CapTableReader.ReaderContext> T readListPointer(ListReader.Factory<T> factory,
                                  SegmentReader segment,
                                  int refOffset,
                                  CapTableReader capTable,

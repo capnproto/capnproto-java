@@ -22,7 +22,7 @@
 package org.capnproto;
 
 public class ListBuilder extends CapTableBuilder.BuilderContext {
-    public interface Factory<T> {
+    public interface Factory<T extends CapTableBuilder.BuilderContext> {
         T constructBuilder(SegmentBuilder segment, int ptr,
                            int elementCount, int step,
                            int structDataSize, short structPointerCount);
@@ -30,9 +30,7 @@ public class ListBuilder extends CapTableBuilder.BuilderContext {
                            int elementCount, int step,
                            int structDataSize, short structPointerCount) {
             T result = constructBuilder(segment, ptr, elementCount, step, structDataSize, structPointerCount);
-            if (result instanceof CapTableBuilder.BuilderContext) {
-                ((CapTableBuilder.BuilderContext) result).capTable = capTable;
-            }
+            result.capTable = capTable;
             return result;
         }
     }
@@ -129,7 +127,7 @@ public class ListBuilder extends CapTableBuilder.BuilderContext {
         this.segment.buffer.putDouble(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE), value);
     }
 
-    protected final <T> T _getStructElement(StructBuilder.Factory<T> factory, int index) {
+    protected final <T extends CapTableBuilder.BuilderContext> T _getStructElement(StructBuilder.Factory<T> factory, int index) {
         long indexBit = (long) index * this.step;
         int structData = this.ptr + (int)(indexBit / Constants.BITS_PER_BYTE);
         int structPointers = (structData + (this.structDataSize / 8)) / 8;
