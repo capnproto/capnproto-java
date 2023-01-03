@@ -27,6 +27,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Serialization using the standard (unpacked) stream encoding:
@@ -85,7 +86,7 @@ public final class Serialize {
      * Attempts to read a message from the provided BufferedInputStream with default options. Returns null if the input
      * stream reached end-of-stream on first read.
      */
-    public static MessageReader tryRead(ReadableByteChannel bc) throws IOException {
+    public static Optional<MessageReader> tryRead(ReadableByteChannel bc) throws IOException {
         return tryRead(bc, ReaderOptions.DEFAULT_READER_OPTIONS);
     }
 
@@ -93,21 +94,21 @@ public final class Serialize {
      * Attempts to read a message from the provided BufferedInputStream with the provided options. Returns null if the
      * input stream reached end-of-stream on first read.
      */
-    public static MessageReader tryRead(ReadableByteChannel bc, ReaderOptions options) throws IOException {
+    public static Optional<MessageReader> tryRead(ReadableByteChannel bc, ReaderOptions options) throws IOException {
         ByteBuffer firstWord = makeByteBufferForWords(1);
         int nBytes = tryFillBuffer(firstWord, bc);
         if (firstWord.hasRemaining()) {
             // We failed to read a whole word
             if (0 == nBytes) {
                 // We were unable to read anything at all: the byte channel has reached end-of-stream
-                return null;
+                return Optional.empty();
             } else {
                 // We read fewer than 1 word's worth of bytes
                 throw new IOException("premature EOF");
             }
         } else {
             // We filled the buffer
-            return doRead(bc, options, firstWord);
+            return Optional.of(doRead(bc, options, firstWord));
         }
     }
 
