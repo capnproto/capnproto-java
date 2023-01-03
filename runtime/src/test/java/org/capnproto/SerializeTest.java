@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -146,14 +147,14 @@ public class SerializeTest {
               // No padding
               // Segment 0 (empty)
       };
-      MessageReader messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input)));
-      Assert.assertNotNull(messageReader);
+      Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input)));
+      Assert.assertTrue(messageReader.isPresent());
     }
 
     // `tryRead` returns null when given no input
     {
-      MessageReader messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(new byte[]{})));
-      Assert.assertNull(messageReader);
+      Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(new byte[]{})));
+      Assert.assertFalse(messageReader.isPresent());
     }
 
     // `tryRead` throws when given too few bytes to form the first word
