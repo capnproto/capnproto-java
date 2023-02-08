@@ -32,16 +32,11 @@
 #include <kj/vector.h>
 #include <capnp/schema-loader.h>
 #include <capnp/dynamic.h>
-#include <unistd.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
 #include <kj/main.h>
 #include <algorithm>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #if HAVE_CONFIG_H
 #include "config.h"
