@@ -1973,9 +1973,6 @@ private:
       schemaLoader.load(node);
     }
 
-    kj::FdOutputStream rawOut(STDOUT_FILENO);
-    kj::BufferedOutputStreamWrapper out(rawOut);
-
     for (auto requestedFile: request.getRequestedFiles()) {
       auto schema = schemaLoader.get(requestedFile.getId());
 
