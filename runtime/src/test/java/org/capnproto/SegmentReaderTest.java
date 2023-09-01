@@ -39,7 +39,7 @@ public class SegmentReaderTest {
         int refTarget;
         int dataSizeWords;
         int wordSize;
-        
+
         /*
         Binary data:
             echo -n
@@ -52,14 +52,23 @@ public class SegmentReaderTest {
         https://gitlab.com/diskuv/dksdk-schema/-/blob/afbf9564a60f2670f6b9dfb3c423fc55dd4c3013/src/dksdk_std_schema.capnp
         */
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {
+            // Struct pointer, offset of 5 words. 1 data section word, 1 pointer section word.
             (byte)0x14, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x01, (byte)0x00,
+
             (byte)0xC9, (byte)0xAA, (byte)0xD2, (byte)0xB6, (byte)0x70, (byte)0x1A, (byte)0x49, (byte)0x85,
             (byte)0x9D, (byte)0x8B, (byte)0x50, (byte)0x45, (byte)0x4C, (byte)0x91, (byte)0x86, (byte)0xE5,
             (byte)0xC9, (byte)0xAA, (byte)0xD2, (byte)0xB6, (byte)0x70, (byte)0x1A, (byte)0x49, (byte)0x85,
             (byte)0x9D, (byte)0x8B, (byte)0x50, (byte)0x45, (byte)0x4C, (byte)0x91, (byte)0x86, (byte)0xE1,
+
+            // List pointer, offset -5, Byte elements, length 32.
             (byte)0xED, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x02, (byte)0x01, (byte)0x00, (byte)0x00,
+
+            // Root struct data section.
             (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
-            (byte)0xF4, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00            
+
+            // Root struct pointer section.
+            // Struct pointer, offset -3 words. 0 data section words, 1 pointer section word.
+            (byte)0xF4, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00
         }).order(ByteOrder.LITTLE_ENDIAN);
         SegmentReader segment = new SegmentReader(byteBuffer, null);
 
@@ -77,7 +86,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        MatcherAssert.assertThat(segment.isInBounds(refTarget, wordSize), is(true));    
+        MatcherAssert.assertThat(segment.isInBounds(refTarget, wordSize), is(true));
     }
 
 }
