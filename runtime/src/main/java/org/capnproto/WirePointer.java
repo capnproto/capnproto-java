@@ -42,7 +42,9 @@ final class WirePointer {
     }
 
     public static int target(int offset, long wirePointer) {
-        return offset + 1 + (offsetAndKind(wirePointer) >>> 2);
+        /* The [wirePointer] Offset (the "B" section) is "Signed",
+           so use signed >> operator. */
+        return offset + 1 + (offsetAndKind(wirePointer) >> 2);
     }
 
     public static void setKindAndTarget(ByteBuffer buffer, int offset, byte kind, int targetOffset) {

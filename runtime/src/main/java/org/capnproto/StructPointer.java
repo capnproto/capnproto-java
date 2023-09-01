@@ -30,6 +30,9 @@ final class StructPointer{
     }
 
     public static int ptrCount(long ref) {
+        /* The [ref] Pointer Section Size (the "D" section) is not specified
+           as Signed or Unsigned, but section size is inherently non-negative.
+           So use unsigned >>> operator. */
         return WirePointer.upper32Bits(ref) >>> 16;
     }
 

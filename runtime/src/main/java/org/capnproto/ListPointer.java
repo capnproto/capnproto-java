@@ -29,6 +29,9 @@ final class ListPointer {
     }
 
     public static int elementCount(long ref) {
+        /* The [ref] List Size (the "D" section) is not specified
+           as Signed or Unsigned, but number of elements is inherently non-negative.
+           So use unsigned >>> operator. */
         return WirePointer.upper32Bits(ref) >>> 3;
     }
 
