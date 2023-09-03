@@ -22,5 +22,8 @@
 package org.capnproto;
 
 public interface FromPointerReader<T> {
-    T fromPointerReader(SegmentReader segment, int pointer, int nestingLimit);
+    default T fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+        return fromPointerReader(segment, null, pointer, nestingLimit);
+    }
+    T fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit);
 }

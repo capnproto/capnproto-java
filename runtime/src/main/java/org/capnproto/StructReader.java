@@ -21,11 +21,20 @@
 
 package org.capnproto;
 
-public class StructReader {
+public class StructReader extends CapTableReader.ReaderContext {
     public interface Factory<T> {
-        abstract T constructReader(SegmentReader segment, int data, int pointers,
+        T constructReader(SegmentReader segment, int data, int pointers,
                                    int dataSize, short pointerCount,
                                    int nestingLimit);
+        default T constructReader(SegmentReader segment, CapTableReader capTable, int data, int pointers,
+                          int dataSize, short pointerCount,
+                          int nestingLimit) {
+            T result = constructReader(segment, data, pointers, dataSize, pointerCount, nestingLimit);
+            if (result instanceof CapTableReader.ReaderContext) {
+                ((CapTableReader.ReaderContext) result).capTable = capTable;
+            }
+            return result;
+        }
     }
 
     protected final SegmentReader segment;
@@ -42,9 +51,17 @@ public class StructReader {
         this.dataSize = 0;
         this.pointerCount = 0;
         this.nestingLimit = 0x7fffffff;
+        this.capTable = null;
     }
 
     public StructReader(SegmentReader segment, int data,
+                        int pointers, int dataSize, short pointerCount,
+                        int nestingLimit) {
+        this(segment, null, data, pointers, dataSize, pointerCount, nestingLimit);
+    }
+
+    public StructReader(SegmentReader segment, CapTableReader capTable,
+                        int data,
                         int pointers, int dataSize, short pointerCount,
                         int nestingLimit) {
         this.segment = segment;
@@ -53,6 +70,7 @@ public class StructReader {
         this.dataSize = dataSize;
         this.pointerCount = pointerCount;
         this.nestingLimit = nestingLimit;
+        this.capTable = capTable;
     }
 
     protected final boolean _getBooleanField(int offset) {
@@ -157,10 +175,12 @@ public class StructReader {
     protected final <T> T _getPointerField(FromPointerReader<T> factory, int ptrIndex) {
         if (ptrIndex < this.pointerCount) {
             return factory.fromPointerReader(this.segment,
+                                             this.capTable,
                                              this.pointers + ptrIndex,
                                              this.nestingLimit);
         } else {
             return factory.fromPointerReader(SegmentReader.EMPTY,
+                                             this.capTable,
                                              0,
                                              this.nestingLimit);
         }
@@ -171,12 +191,14 @@ public class StructReader {
                                            SegmentReader defaultSegment, int defaultOffset) {
         if (ptrIndex < this.pointerCount) {
             return factory.fromPointerReaderRefDefault(this.segment,
+                                                       this.capTable,
                                                        this.pointers + ptrIndex,
                                                        defaultSegment,
                                                        defaultOffset,
                                                        this.nestingLimit);
         } else {
             return factory.fromPointerReaderRefDefault(SegmentReader.EMPTY,
+                                                       this.capTable,
                                                        0,
                                                        defaultSegment,
                                                        defaultOffset,
