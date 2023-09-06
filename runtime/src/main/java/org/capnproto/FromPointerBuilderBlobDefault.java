@@ -22,6 +22,11 @@
 package org.capnproto;
 
 public interface FromPointerBuilderBlobDefault<T> {
-    T fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
+    default T fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
+                                    java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        return fromPointerBuilderBlobDefault(segment, null, pointer, defaultBuffer, defaultOffset, defaultSize);
+    }
+
+    T fromPointerBuilderBlobDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize);
 }

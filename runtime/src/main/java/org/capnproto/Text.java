@@ -37,35 +37,37 @@ public final class Text {
         }
 
         @Override
-        public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
+        public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
             return WireHelpers.readTextPointer(segment, pointer, null, 0, 0);
         }
 
         @Override
-        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, int pointer,
-                                                     java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
+        public final Builder fromPointerBuilderBlobDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
+                                                           java.nio.ByteBuffer defaultBuffer, int defaultOffset, int defaultSize) {
             return WireHelpers.getWritableTextPointer(pointer,
                                                       segment,
+                                                      capTable,
                                                       defaultBuffer,
                                                       defaultOffset,
                                                       defaultSize);
         }
 
         @Override
-        public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+        public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
             return WireHelpers.getWritableTextPointer(pointer,
                                                       segment,
+                                                      capTable,
                                                       null, 0, 0);
         }
 
         @Override
-        public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int size) {
-            return WireHelpers.initTextPointer(pointer, segment, size);
+        public Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int size) {
+            return WireHelpers.initTextPointer(pointer, segment, capTable, size);
         }
 
         @Override
-        public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
-            WireHelpers.setTextPointer(pointer, segment, value);
+        public void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+            WireHelpers.setTextPointer(pointer, segment, capTable, value);
         }
     }
     public static final Factory factory = new Factory();
