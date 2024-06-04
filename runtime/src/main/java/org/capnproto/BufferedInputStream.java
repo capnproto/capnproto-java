@@ -25,5 +25,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 public interface BufferedInputStream extends ReadableByteChannel {
-    public ByteBuffer getReadBuffer() throws java.io.IOException;
+
+    /**
+     * Returns a {@link ByteBuffer} to read data from.
+     * If there is no more data to read, throws a {@link DecodeException}.
+     *
+     * @return a {@link ByteBuffer} with data to read from, if any available
+     * @throws java.io.IOException when an I/O error occurs
+     * @throws DecodeException     when trying to read more data than available
+     */
+    ByteBuffer getReadBuffer() throws java.io.IOException;
 }

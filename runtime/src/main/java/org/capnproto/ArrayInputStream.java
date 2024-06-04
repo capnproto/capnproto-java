@@ -23,11 +23,10 @@ package org.capnproto;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
-public final class ArrayInputStream implements BufferedInputStream {
+public class ArrayInputStream implements BufferedInputStream {
 
-    public final ByteBuffer buf;
+    private final ByteBuffer buf;
 
     public ArrayInputStream(ByteBuffer buf) {
         this.buf = buf.asReadOnlyBuffer();
@@ -52,7 +51,11 @@ public final class ArrayInputStream implements BufferedInputStream {
 
     @Override
     public final ByteBuffer getReadBuffer() {
-        return this.buf;
+        if (buf.remaining() > 0) {
+            return buf;
+        } else {
+            throw new DecodeException("Premature EOF while reading buffer");
+        }
     }
 
     @Override
