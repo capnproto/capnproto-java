@@ -82,4 +82,16 @@ public class SerializePackedTest {
             Assert.assertTrue(Arrays.equals(bytes, unpacked));
         }
     }
+
+    @Test(timeout = 1000, expected = DecodeException.class)
+    public void read_shouldThrowDecodingExceptionOnEmptyArrayInputStream() throws IOException {
+        byte[] emptyByteArray = {};
+        MessageReader reader = SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(emptyByteArray)), ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
+
+    @Test(timeout = 1000, expected = DecodeException.class)
+    public void read_shouldThrowDecodingExceptionWhenTryingToReadMoreThanAvailableFromArrayInputStream() throws IOException {
+        byte[] bytes = {17, 0, 127, 0, 0, 0, 0}; //segment0 size of 127 words, which is way larger than the tiny 7 byte input
+        MessageReader reader = SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(bytes)), ReaderOptions.DEFAULT_READER_OPTIONS);
+    }
 }
