@@ -22,7 +22,7 @@
 package org.capnproto;
 
 public final class ListList {
-    public static final class Factory<ElementBuilder, ElementReader extends ListReader>
+    public static final class Factory<ElementBuilder extends ListBuilder, ElementReader extends ListReader>
         extends ListFactory<Builder<ElementBuilder>, Reader<ElementReader>> {
 
         public final ListFactory<ElementBuilder, ElementReader> factory;
@@ -68,7 +68,7 @@ public final class ListList {
         }
     }
 
-    public static final class Builder<T> extends ListBuilder {
+    public static final class Builder<T extends ListBuilder> extends ListBuilder {
         private final ListFactory<T, ?> factory;
 
         public Builder(ListFactory<T, ?> factory,
