@@ -1,3 +1,6 @@
+## v0.1.17
+- Fixed infinite loop in PackedInputStream on too-small input.
+
 ## v0.1.16
 - Fix handling of negative pointer offsets.
 - Fix SegmentReader.inInBounds() offset arithmetic.
