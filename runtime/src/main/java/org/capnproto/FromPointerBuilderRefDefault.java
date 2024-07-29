@@ -22,5 +22,10 @@
 package org.capnproto;
 
 public interface FromPointerBuilderRefDefault<T> {
-    T fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer, SegmentReader defaultSegment, int defaultOffset);
+
+    default T fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer, SegmentReader defaultSegment, int defaultOffset) {
+        return fromPointerBuilderRefDefault(segment, null, pointer, defaultSegment, defaultOffset);
+    }
+
+    T fromPointerBuilderRefDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer, SegmentReader defaultSegment, int defaultOffset);
 }

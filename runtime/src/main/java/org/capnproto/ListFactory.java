@@ -21,7 +21,7 @@
 
 package org.capnproto;
 
-public abstract class ListFactory<Builder, Reader extends ListReader>
+public abstract class ListFactory<Builder extends ListBuilder, Reader extends ListReader>
     implements ListBuilder.Factory<Builder>,
     FromPointerBuilderRefDefault<Builder>,
     SetPointerBuilder<Builder, Reader>,
@@ -32,45 +32,48 @@ public abstract class ListFactory<Builder, Reader extends ListReader>
     final byte elementSize;
     ListFactory(byte elementSize) {this.elementSize = elementSize;}
 
-    public final Reader fromPointerReaderRefDefault(SegmentReader segment, int pointer,
+    public final Reader fromPointerReaderRefDefault(SegmentReader segment, CapTableReader capTable, int pointer,
                                                     SegmentReader defaultSegment, int defaultOffset,
                                                     int nestingLimit) {
         return WireHelpers.readListPointer(this,
                                            segment,
                                            pointer,
+                                           capTable,
                                            defaultSegment,
                                            defaultOffset,
                                            this.elementSize,
                                            nestingLimit);
     }
 
-    public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
-        return fromPointerReaderRefDefault(segment, pointer, null, 0, nestingLimit);
+    public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+        return fromPointerReaderRefDefault(segment, capTable, pointer, null, 0, nestingLimit);
     }
 
-    public Builder fromPointerBuilderRefDefault(SegmentBuilder segment, int pointer,
+    public Builder fromPointerBuilderRefDefault(SegmentBuilder segment, CapTableBuilder capTable, int pointer,
                                                 SegmentReader defaultSegment, int defaultOffset) {
         return WireHelpers.getWritableListPointer(this,
                                                   pointer,
                                                   segment,
+                                                  capTable,
                                                   this.elementSize,
                                                   defaultSegment,
                                                   defaultOffset);
     }
 
-    public Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
+    public Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
         return WireHelpers.getWritableListPointer(this,
                                                   pointer,
                                                   segment,
+                                                  capTable,
                                                   this.elementSize,
                                                   null, 0);
     }
 
-    public Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
-        return WireHelpers.initListPointer(this, pointer, segment, elementCount, this.elementSize);
+    public Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
+        return WireHelpers.initListPointer(this, capTable, pointer, segment, elementCount, this.elementSize);
     }
 
-    public final void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
-        WireHelpers.setListPointer(segment, pointer, value);
+    public final void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+        WireHelpers.setListPointer(segment, capTable, pointer, value);
     }
 }

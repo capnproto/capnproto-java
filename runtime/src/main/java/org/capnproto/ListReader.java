@@ -21,13 +21,20 @@
 
 package org.capnproto;
 
-public class ListReader {
-    public interface Factory<T> {
+public class ListReader extends CapTableReader.ReaderContext {
+    public interface Factory<T extends CapTableReader.ReaderContext> {
         T constructReader(SegmentReader segment,
                           int ptr,
                           int elementCount, int step,
                           int structDataSize, short structPointerCount,
                           int nestingLimit);
+        default T constructReader(SegmentReader segment, CapTableReader capTable, int ptr,
+                                  int elementCount, int step,
+                                  int structDataSize, short structPointerCount, int nestingLimit) {
+            T result = constructReader(segment, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+            result.capTable = capTable;
+            return result;
+        }
     }
 
     final SegmentReader segment;
@@ -46,12 +53,22 @@ public class ListReader {
         this.structDataSize = 0;
         this.structPointerCount = 0;
         this.nestingLimit = 0x7fffffff;
+        this.capTable = null;
     }
 
     public ListReader(SegmentReader segment, int ptr,
                       int elementCount, int step,
                       int structDataSize, short structPointerCount,
                       int nestingLimit) {
+        this(segment, null, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
+    }
+
+    public ListReader(SegmentReader segment,
+            CapTableReader capTable,
+            int ptr,
+            int elementCount, int step,
+            int structDataSize, short structPointerCount,
+            int nestingLimit) {
         this.segment = segment;
         this.ptr = ptr;
         this.elementCount = elementCount;
@@ -59,7 +76,11 @@ public class ListReader {
         this.structDataSize = structDataSize;
         this.structPointerCount = structPointerCount;
         this.nestingLimit = nestingLimit;
+        this.capTable = capTable;
+    }
 
+    ListReader imbue(CapTableReader capTable) {
+        return new ListReader(segment, capTable, ptr, elementCount, step, structDataSize, structPointerCount, nestingLimit);
     }
 
     public int size() {
@@ -96,20 +117,21 @@ public class ListReader {
         return this.segment.buffer.getDouble(this.ptr + (int)((long)index * this.step / Constants.BITS_PER_BYTE));
     }
 
-    protected <T> T _getStructElement(StructReader.Factory<T> factory, int index) {
+    protected <T extends CapTableReader.ReaderContext> T _getStructElement(StructReader.Factory<T> factory, int index) {
         // TODO check nesting limit
 
         long indexBit = (long)index * this.step;
         int structData = this.ptr + (int)(indexBit / Constants.BITS_PER_BYTE);
         int structPointers = structData + (this.structDataSize / Constants.BITS_PER_BYTE);
 
-        return factory.constructReader(this.segment, structData, structPointers / 8, this.structDataSize,
+        return factory.constructReader(this.segment, this.capTable, structData, structPointers / 8, this.structDataSize,
                                        this.structPointerCount, this.nestingLimit - 1);
     }
 
     protected <T> T _getPointerElement(FromPointerReader<T> factory, int index) {
       return factory.fromPointerReader(
         this.segment,
+        this.capTable,
         (this.ptr +
          (this.structDataSize / Constants.BITS_PER_BYTE) +
          (int)((long)index * this.step / Constants.BITS_PER_BYTE))

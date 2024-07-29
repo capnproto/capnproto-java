@@ -29,27 +29,47 @@ public final class AnyPointer {
         public final Reader fromPointerReader(SegmentReader segment, int pointer, int nestingLimit) {
             return new Reader(segment, pointer, nestingLimit);
         }
+        public final Reader fromPointerReader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            return new Reader(segment, capTable, pointer, nestingLimit);
+        }
         public final Builder fromPointerBuilder(SegmentBuilder segment, int pointer) {
             return new Builder(segment, pointer);
+        }
+        public final Builder fromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+            return new Builder(segment, capTable, pointer);
         }
         public final Builder initFromPointerBuilder(SegmentBuilder segment, int pointer, int elementCount) {
             Builder result = new Builder(segment, pointer);
             result.clear();
             return result;
         }
+        public final Builder initFromPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, int elementCount) {
+            Builder result = new Builder(segment, capTable, pointer);
+            result.clear();
+            return result;
+        }
         public void setPointerBuilder(SegmentBuilder segment, int pointer, Reader value) {
             if (value.isNull()) {
-                WireHelpers.zeroObject(segment, pointer);
+                WireHelpers.zeroObject(segment, null, pointer);
                 WireHelpers.zeroPointerAndFars(segment, pointer);
             }
             else {
-                WireHelpers.copyPointer(segment, pointer, value.segment, value.pointer, value.nestingLimit);
+                WireHelpers.copyPointer(segment, null, pointer, value.segment, value.capTable, value.pointer, value.nestingLimit);
+            }
+        }
+        public void setPointerBuilder(SegmentBuilder segment, CapTableBuilder capTable, int pointer, Reader value) {
+            if (value.isNull()) {
+                WireHelpers.zeroObject(segment, capTable, pointer);
+                WireHelpers.zeroPointerAndFars(segment, pointer);
+            }
+            else {
+                WireHelpers.copyPointer(segment, capTable, pointer, value.segment, value.capTable, value.pointer, value.nestingLimit);
             }
         }
     }
     public static final Factory factory = new Factory();
 
-    public final static class Reader {
+    public final static class Reader extends CapTableReader.ReaderContext {
         final SegmentReader segment;
         final int pointer; // offset in words
         final int nestingLimit;
@@ -60,16 +80,29 @@ public final class AnyPointer {
             this.nestingLimit = nestingLimit;
         }
 
+        public Reader(SegmentReader segment, CapTableReader capTable, int pointer, int nestingLimit) {
+            this.segment = segment;
+            this.pointer = pointer;
+            this.nestingLimit = nestingLimit;
+            this.capTable = capTable;
+        }
+
+        final Reader imbue(CapTableReader capTable) {
+            Reader result = new Reader(segment, pointer, nestingLimit);
+            result.capTable = capTable;
+            return result;
+        }
+
         public final boolean isNull() {
             return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerReader<T> factory) {
-            return factory.fromPointerReader(this.segment, this.pointer, this.nestingLimit);
+            return factory.fromPointerReader(this.segment, this.capTable, this.pointer, this.nestingLimit);
         }
     }
 
-    public static final class Builder {
+    public static final class Builder extends CapTableBuilder.BuilderContext {
         final SegmentBuilder segment;
         final int pointer;
 
@@ -78,34 +111,43 @@ public final class AnyPointer {
             this.pointer = pointer;
         }
 
+        Builder(SegmentBuilder segment, CapTableBuilder capTable, int pointer) {
+            this.segment = segment;
+            this.pointer = pointer;
+            this.capTable = capTable;
+        }
+
+        final Builder imbue(CapTableBuilder capTable) {
+            return new Builder(segment, capTable, pointer);
+        }
+
         public final boolean isNull() {
             return WirePointer.isNull(this.segment.buffer.getLong(this.pointer * Constants.BYTES_PER_WORD));
         }
 
         public final <T> T getAs(FromPointerBuilder<T> factory) {
-            return factory.fromPointerBuilder(this.segment, this.pointer);
+            return factory.fromPointerBuilder(this.segment, this.capTable, this.pointer);
         }
 
         public final <T> T initAs(FromPointerBuilder<T> factory) {
-            return factory.initFromPointerBuilder(this.segment, this.pointer, 0);
+            return factory.initFromPointerBuilder(this.segment, this.capTable, this.pointer, 0);
         }
 
         public final <T> T initAs(FromPointerBuilder<T> factory, int elementCount) {
-            return factory.initFromPointerBuilder(this.segment, this.pointer, elementCount);
+            return factory.initFromPointerBuilder(this.segment, this.capTable, this.pointer, elementCount);
         }
 
         public final <T, U> void setAs(SetPointerBuilder<T, U> factory, U reader) {
-            factory.setPointerBuilder(this.segment, this.pointer, reader);
+            factory.setPointerBuilder(this.segment, this.capTable, this.pointer, reader);
         }
 
         public final Reader asReader() {
-            return new Reader(segment, pointer, java.lang.Integer.MAX_VALUE);
+            return new Reader(segment, this.capTable, pointer, java.lang.Integer.MAX_VALUE);
         }
 
         public final void clear() {
-            WireHelpers.zeroObject(this.segment, this.pointer);
+            WireHelpers.zeroObject(this.segment, this.capTable, this.pointer);
             this.segment.buffer.putLong(this.pointer * 8, 0L);
         }
     }
-
 }

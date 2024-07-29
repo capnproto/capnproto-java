@@ -28,7 +28,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
 
-        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, MAX_NESTING_LIMIT);
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), null, 0, null, 0, MAX_NESTING_LIMIT);
 
         Assert.assertEquals(reader._getLongField(0), 0xefcdab8967452301L);
         Assert.assertEquals(reader._getLongField(1), 0L);
@@ -86,7 +86,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
 
-        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, MAX_NESTING_LIMIT);
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), null, 0, null, 0, MAX_NESTING_LIMIT);
     }
 
 
@@ -114,7 +114,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{buffer}, 0x7fffffffffffffffL);
 
-        ListReader reader = WireHelpers.readListPointer(new BareListReader(), arena.tryGetSegment(0), 0, null, 0, (byte) 0, MAX_NESTING_LIMIT);
+        ListReader reader = WireHelpers.readListPointer(new BareListReader(), arena.tryGetSegment(0), 0, null, null, 0, (byte) 0, MAX_NESTING_LIMIT);
     }
 
     private class BareStructBuilder implements StructBuilder.Factory<StructBuilder> {
