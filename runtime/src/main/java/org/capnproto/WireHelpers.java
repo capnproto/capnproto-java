@@ -850,7 +850,14 @@ final class WireHelpers {
                                        SegmentBuilder segment,
                                        Data.Reader value) {
         Data.Builder builder = initDataPointer(refOffset, segment, value.size);
+        int originalSrcPosition = value.buffer.position();
+        int originalDstPosition = builder.buffer.position();
+        builder.buffer.position(builder.offset);
+        //# copy from src offset until src end
         builder.buffer.put(value.buffer);
+        //# restore original positions
+        builder.buffer.position(originalDstPosition);
+        value.buffer.position(originalSrcPosition);
         return builder;
     }
 
