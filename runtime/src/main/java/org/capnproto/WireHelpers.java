@@ -850,11 +850,7 @@ final class WireHelpers {
                                        SegmentBuilder segment,
                                        Data.Reader value) {
         Data.Builder builder = initDataPointer(refOffset, segment, value.size);
-
-        // TODO is there a way to do this with bulk methods?
-        for (int i = 0; i < builder.size; ++i) {
-            builder.buffer.put(builder.offset + i, value.buffer.get(value.offset + i));
-        }
+        builder.buffer.put(value.buffer);
         return builder;
     }
 
