@@ -943,4 +943,21 @@ public class EncodingTest {
           Assert.assertEquals(0L, outputSegments[0].getLong((2 + ii) * 8));
       }
     }
+
+    // This test fails on https://github.com/capnproto/capnproto-java/pull/143,
+    // illustrating why https://github.com/capnproto/capnproto-java/commit/28ab5ced
+    // is needed.
+    @org.junit.Test
+    public void setDataPointer() {
+        MessageBuilder message1 = new MessageBuilder();
+        Test.TestAllTypes.Builder allTypes1 = message1.initRoot(Test.TestAllTypes.factory);
+        TestUtil.initTestMessage(allTypes1);
+        MessageBuilder message2 = new MessageBuilder();
+        Test.TestAllTypes.Builder allTypes2 = message2.initRoot(Test.TestAllTypes.factory);
+        TestUtil.initTestMessage(allTypes2);
+
+        allTypes1.setDataField(allTypes2.asReader().getDataField());
+        TestUtil.checkTestMessage(allTypes1);
+        TestUtil.checkTestMessage(allTypes1.asReader());
+    }
 }
