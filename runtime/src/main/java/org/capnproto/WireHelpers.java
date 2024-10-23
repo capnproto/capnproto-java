@@ -802,10 +802,12 @@ final class WireHelpers {
                 return new Text.Builder();
             } else {
                 Text.Builder builder = initTextPointer(refOffset, segment, defaultSize);
-                // TODO is there a way to do this with bulk methods?
-                for (int i = 0; i < builder.size; ++i) {
-                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset * 8 + i));
-                }
+
+                ByteBuffer slice = defaultBuffer.duplicate();
+                slice.position(defaultOffset * 8);
+                slice.limit(defaultOffset * 8 + defaultSize);
+                builder.buffer.position(builder.offset);
+                builder.buffer.put(slice);
                 return builder;
             }
         }
@@ -872,10 +874,12 @@ final class WireHelpers {
                 return new Data.Builder();
             } else {
                 Data.Builder builder = initDataPointer(refOffset, segment, defaultSize);
-                // TODO is there a way to do this with bulk methods?
-                for (int i = 0; i < builder.size; ++i) {
-                    builder.buffer.put(builder.offset + i, defaultBuffer.get(defaultOffset * 8 + i));
-                }
+
+                ByteBuffer slice = defaultBuffer.duplicate();
+                slice.position(defaultOffset * 8);
+                slice.limit(defaultOffset * 8 + defaultSize);
+                builder.buffer.position(builder.offset);
+                builder.buffer.put(slice);
                 return builder;
             }
         }
