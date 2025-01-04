@@ -3,45 +3,47 @@ package org.capnproto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class StructPointerTest {
     @Test
     public void testDataSize() {
-        Assertions.assertEquals(
+        assertEquals(
             2,
             StructPointer.dataSize(0x0001000200000000L));
     }
 
     @Test
     public void testDataSizeUnderflow() {
-        Assertions.assertEquals(
+        assertEquals(
             0xffff,
             StructPointer.dataSize(0x0001ffff00000000L));
     }
 
     @Test
     public void testPtrCount() {
-        Assertions.assertEquals(
+        assertEquals(
             1,
             StructPointer.ptrCount(0x0001000200000000L));
     }
 
     @Test
     public void testPtrCountUnderflow() {
-        Assertions.assertEquals(
+        assertEquals(
             0xffff,
             StructPointer.ptrCount(0xffff000200000000L));
     }
 
     @Test
     public void testWordSize() {
-        Assertions.assertEquals(
+        assertEquals(
             3,
             StructPointer.wordSize(0x0001000200000000L));
     }
 
     @Test
     public void testWordSizeUnderflow() {
-        Assertions.assertEquals(
+        assertEquals(
             0x1fffe,
             StructPointer.wordSize(0xffffffff00000000L));
     }

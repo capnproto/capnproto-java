@@ -7,27 +7,29 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class SegmentReaderTest {
 
     @Test
     public void in_boundsCalculationShouldNotOverflow() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        Assertions.assertEquals(segmentReader.isInBounds(0, Integer.MAX_VALUE), false);
+        assertEquals(segmentReader.isInBounds(0, Integer.MAX_VALUE), false);
     }
 
     @Test
     public void oneWordAtLastWordShouldBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        Assertions.assertEquals(segmentReader.isInBounds(7, 1), true);
+        assertEquals(segmentReader.isInBounds(7, 1), true);
     }
 
     @Test
     public void twoWordsAtLastWordShouldNotBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        Assertions.assertEquals(segmentReader.isInBounds(7, 2), false);
+        assertEquals(segmentReader.isInBounds(7, 2), false);
     }
 
     @Test
@@ -76,7 +78,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        Assertions.assertEquals(segment.isInBounds(refTarget, wordSize), true);
+        assertEquals(segment.isInBounds(refTarget, wordSize), true);
 
         /* Read inner Struct: ComObject. */
         refOffset = refTarget + dataSizeWords; /* At the inner STRUCT POINTER */
@@ -84,7 +86,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        Assertions.assertEquals(segment.isInBounds(refTarget, wordSize), true);
+        assertEquals(segment.isInBounds(refTarget, wordSize), true);
     }
 
 }

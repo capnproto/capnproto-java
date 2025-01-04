@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ArrayInputStreamTest {
   @Test
   public void testEmptyArray() throws java.io.IOException {
@@ -34,7 +36,7 @@ public class ArrayInputStreamTest {
 
     // read() should return -1 at the end of the stream
     // https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html
-    Assertions.assertEquals(stream.read(dst), -1);
+    assertEquals(stream.read(dst), -1);
   }
 
   @Test
@@ -42,7 +44,7 @@ public class ArrayInputStreamTest {
     byte[] oneByte = new byte[]{42};
     ArrayInputStream stream = new ArrayInputStream(ByteBuffer.wrap(oneByte));
     ByteBuffer dst = ByteBuffer.allocate(10);
-    Assertions.assertEquals(stream.read(dst), 1);
-    Assertions.assertEquals(stream.read(dst), -1); // end of stream
+    assertEquals(stream.read(dst), 1);
+    assertEquals(stream.read(dst), -1); // end of stream
   }
 }

@@ -3,13 +3,21 @@ package org.capnproto.test;
 import org.capnproto.*;
 import org.capnproto.Void;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class EncodingTest {
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAllTypes() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -18,7 +26,7 @@ public class EncodingTest {
         TestUtil.checkTestMessage(allTypes.asReader());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAllTypesMultiSegment() {
         MessageBuilder message = new MessageBuilder(5, BuilderArena.AllocationStrategy.FIXED_SIZE);
         org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -28,7 +36,7 @@ public class EncodingTest {
         TestUtil.checkTestMessage(allTypes.asReader());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testSetters() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -44,7 +52,7 @@ public class EncodingTest {
         TestUtil.checkTestMessage(reader);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testZeroing() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -68,12 +76,12 @@ public class EncodingTest {
         ByteBuffer[] segments = message.getSegmentsForOutput();
         for (ByteBuffer segment : segments) {
             for (int j = 0; j < segment.limit(); j++) {
-                Assertions.assertEquals(segment.get(j), 0);
+                assertEquals(segment.get(j), 0);
             }
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testDoubleFarPointers() throws IOException {
         byte[] bytes = new byte[]{2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0,
                 6, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0,
@@ -83,12 +91,12 @@ public class EncodingTest {
         MessageReader message = org.capnproto.Serialize.read(input);
         org.capnproto.test.Test.TestAllTypes.Reader root = message.getRoot(org.capnproto.test.Test.TestAllTypes.factory);
 
-        Assertions.assertTrue(root.getBoolField());
-        Assertions.assertEquals(root.getInt8Field(), 7);
-        Assertions.assertEquals(root.getInt16Field(), 32767);
+        assertTrue(root.getBoolField());
+        assertEquals(root.getInt8Field(), 7);
+        assertEquals(root.getInt16Field(), 32767);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testUpgradeStruct() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
@@ -104,15 +112,15 @@ public class EncodingTest {
 
       {
         org.capnproto.test.Test.TestNewVersion.Reader newVersion = root.getAnyPointerField().asReader().getAs(org.capnproto.test.Test.TestNewVersion.factory);
-        Assertions.assertEquals(newVersion.getOld1(), 123);
-        Assertions.assertEquals(newVersion.getOld2().toString(), "foo");
-        Assertions.assertEquals(newVersion.getNew2().toString(),  "baz");
-        Assertions.assertEquals(newVersion.hasNew2(), false);
-        Assertions.assertEquals(newVersion.hasNew3(), false);
+        assertEquals(newVersion.getOld1(), 123);
+        assertEquals(newVersion.getOld2().toString(), "foo");
+        assertEquals(newVersion.getNew2().toString(),  "baz");
+        assertEquals(newVersion.hasNew2(), false);
+        assertEquals(newVersion.hasNew3(), false);
       }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testUpgradeStructReadAsOld() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
@@ -134,17 +142,17 @@ public class EncodingTest {
 
       {
         org.capnproto.test.Test.TestOldVersion.Reader oldVersion = root.getAnyPointerField().asReader().getAs(org.capnproto.test.Test.TestOldVersion.factory);
-        Assertions.assertEquals(oldVersion.getOld1(), 123);
-        Assertions.assertEquals(oldVersion.getOld2().toString(), "foo");
+        assertEquals(oldVersion.getOld1(), 123);
+        assertEquals(oldVersion.getOld2().toString(), "foo");
 
         TextList.Reader names = oldVersion.getOld4();
-        Assertions.assertEquals(names.size(), 2);
-        Assertions.assertEquals("alice", names.get(0).toString());
-        Assertions.assertEquals("bob", names.get(1).toString());
+        assertEquals(names.size(), 2);
+        assertEquals("alice", names.get(0).toString());
+        assertEquals("bob", names.get(1).toString());
       }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testUpgradeStructInBuilder() {
         MessageBuilder builder = new MessageBuilder();
         org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
@@ -159,13 +167,13 @@ public class EncodingTest {
         }
         {
             org.capnproto.test.Test.TestNewVersion.Builder newVersion = root.getAnyPointerField().getAs(org.capnproto.test.Test.TestNewVersion.factory);
-            Assertions.assertEquals(newVersion.getOld1(), 123);
-            Assertions.assertEquals(newVersion.getOld2().toString(), "foo");
-            Assertions.assertEquals(newVersion.getNew1(), 987);
-            Assertions.assertEquals(newVersion.getNew2().toString(), "baz");
+            assertEquals(newVersion.getOld1(), 123);
+            assertEquals(newVersion.getOld2().toString(), "foo");
+            assertEquals(newVersion.getNew1(), 987);
+            assertEquals(newVersion.getNew2().toString(), "baz");
             org.capnproto.test.Test.TestNewVersion.Builder sub = newVersion.getOld3();
-            Assertions.assertEquals(sub.getOld1(), 456);
-            Assertions.assertEquals(sub.getOld2().toString(), "bar");
+            assertEquals(sub.getOld1(), 456);
+            assertEquals(sub.getOld2().toString(), "bar");
 
             newVersion.setOld1(234);
             newVersion.setOld2("qux");
@@ -174,12 +182,12 @@ public class EncodingTest {
         }
         {
             org.capnproto.test.Test.TestOldVersion.Builder oldVersion = root.getAnyPointerField().getAs(org.capnproto.test.Test.TestOldVersion.factory);
-            Assertions.assertEquals(oldVersion.getOld1(), 234);
-            Assertions.assertEquals(oldVersion.getOld2().toString(), "qux");
+            assertEquals(oldVersion.getOld1(), 234);
+            assertEquals(oldVersion.getOld2().toString(), "qux");
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testStructListUpgrade() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestAnyPointer.Builder root = message.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
@@ -193,16 +201,16 @@ public class EncodingTest {
         }
         {
             StructList.Reader<org.capnproto.test.Test.TestOldVersion.Reader> olds = any.asReader().getAs(org.capnproto.test.Test.TestOldVersion.listFactory);
-            Assertions.assertEquals(olds.get(0).getOld1(), 123);
-            Assertions.assertEquals(olds.get(1).getOld1(), 456);
-            Assertions.assertEquals(olds.get(2).getOld1(), 789);
+            assertEquals(olds.get(0).getOld1(), 123);
+            assertEquals(olds.get(1).getOld1(), 456);
+            assertEquals(olds.get(2).getOld1(), 789);
         }
         {
             StructList.Builder<org.capnproto.test.Test.TestOldVersion.Builder> olds = any.getAs(org.capnproto.test.Test.TestOldVersion.listFactory);
-            Assertions.assertEquals(olds.size(), 3);
-            Assertions.assertEquals(olds.get(0).getOld1(), 123);
-            Assertions.assertEquals(olds.get(1).getOld1(), 456);
-            Assertions.assertEquals(olds.get(2).getOld1(), 789);
+            assertEquals(olds.size(), 3);
+            assertEquals(olds.get(0).getOld1(), 123);
+            assertEquals(olds.get(1).getOld1(), 456);
+            assertEquals(olds.get(2).getOld1(), 789);
 
             olds.get(0).setOld2("zero");
             olds.get(1).setOld2("one");
@@ -210,19 +218,19 @@ public class EncodingTest {
         }
         {
             StructList.Builder<org.capnproto.test.Test.TestNewVersion.Builder> news = any.getAs(org.capnproto.test.Test.TestNewVersion.listFactory);
-            Assertions.assertEquals(news.size(), 3);
-            Assertions.assertEquals(news.get(0).getOld1(), 123);
-            Assertions.assertEquals(news.get(0).getOld2().toString(), "zero");
+            assertEquals(news.size(), 3);
+            assertEquals(news.get(0).getOld1(), 123);
+            assertEquals(news.get(0).getOld2().toString(), "zero");
 
-            Assertions.assertEquals(news.get(1).getOld1(), 456);
-            Assertions.assertEquals(news.get(1).getOld2().toString(), "one");
+            assertEquals(news.get(1).getOld1(), 456);
+            assertEquals(news.get(1).getOld2().toString(), "one");
 
-            Assertions.assertEquals(news.get(2).getOld1(), 789);
-            Assertions.assertEquals(news.get(2).getOld2().toString(), "two");
+            assertEquals(news.get(2).getOld1(), 789);
+            assertEquals(news.get(2).getOld2().toString(), "two");
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testStructListUpgradeDoubleFar() {
       byte[] bytes = new byte[]{
             1,0,0,0,0x1f,0,0,0, // list, inline composite, 3 words
@@ -238,9 +246,9 @@ public class EncodingTest {
 
       StructList.Reader<org.capnproto.test.Test.TestOldVersion.Reader> oldVersion = messageReader.getRoot(StructList.newFactory(org.capnproto.test.Test.TestOldVersion.factory));
 
-      Assertions.assertEquals(oldVersion.size(), 1);
-      Assertions.assertEquals(oldVersion.get(0).getOld1(), 91);
-      Assertions.assertEquals(oldVersion.get(0).getOld2().toString(), "hello!!");
+      assertEquals(oldVersion.size(), 1);
+      assertEquals(oldVersion.get(0).getOld1(), 91);
+      assertEquals(oldVersion.get(0).getOld2().toString(), "hello!!");
 
       // Make the first segment exactly large enough to fit the original message.
       // This leaves no room for a far pointer landing pad in the first segment.
@@ -248,91 +256,91 @@ public class EncodingTest {
       message.setRoot(StructList.newFactory(org.capnproto.test.Test.TestOldVersion.factory), oldVersion);
 
       ByteBuffer[] segments = message.getSegmentsForOutput();
-      Assertions.assertEquals(segments.length, 1);
-      Assertions.assertEquals(segments[0].limit(), 6 * 8);
+      assertEquals(segments.length, 1);
+      assertEquals(segments[0].limit(), 6 * 8);
 
       StructList.Builder<org.capnproto.test.Test.TestNewVersion.Builder> newVersion =
         message.getRoot(new StructList.Factory<org.capnproto.test.Test.TestNewVersion.Builder, org.capnproto.test.Test.TestNewVersion.Reader>(org.capnproto.test.Test.TestNewVersion.factory));
-      Assertions.assertEquals(newVersion.size(), 1);
-      Assertions.assertEquals(newVersion.get(0).getOld1(), 91);
-      Assertions.assertEquals(newVersion.get(0).getOld2().toString(), "hello!!");
+      assertEquals(newVersion.size(), 1);
+      assertEquals(newVersion.get(0).getOld1(), 91);
+      assertEquals(newVersion.get(0).getOld2().toString(), "hello!!");
 
       ByteBuffer[] segments1 = message.getSegmentsForOutput();
-      Assertions.assertEquals(segments[0].limit(), 6 * 8);
+      assertEquals(segments[0].limit(), 6 * 8);
       for (int ii = 8; ii < (5 * 8) - 1; ++ii) {
         // Check the the old list, including the tag, was zeroed.
-        Assertions.assertEquals(segments[0].get(ii), 0);
+        assertEquals(segments[0].get(ii), 0);
       }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testListBuilderAsReader() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
 
       allTypes.initVoidList(10);
-      Assertions.assertEquals(allTypes.getVoidList().asReader().size(), 10);
+      assertEquals(allTypes.getVoidList().asReader().size(), 10);
 
       PrimitiveList.Boolean.Builder boolList = allTypes.initBoolList(7);
       boolList.set(3, true);
       PrimitiveList.Boolean.Reader boolListReader = boolList.asReader();
-      Assertions.assertEquals(boolListReader.size(), 7);
-      Assertions.assertEquals(boolListReader.get(0), false);
-      Assertions.assertEquals(boolListReader.get(1), false);
-      Assertions.assertEquals(boolListReader.get(2), false);
-      Assertions.assertEquals(boolListReader.get(3), true);
-      Assertions.assertEquals(boolListReader.get(4), false);
+      assertEquals(boolListReader.size(), 7);
+      assertEquals(boolListReader.get(0), false);
+      assertEquals(boolListReader.get(1), false);
+      assertEquals(boolListReader.get(2), false);
+      assertEquals(boolListReader.get(3), true);
+      assertEquals(boolListReader.get(4), false);
 
       PrimitiveList.Byte.Builder int8List = allTypes.initInt8List(9);
       int8List.set(4, (byte)100);
       int8List.set(8, (byte)11);
       PrimitiveList.Byte.Reader int8ListReader = int8List.asReader();
-      Assertions.assertEquals(int8ListReader.size(), 9);
-      Assertions.assertEquals(int8ListReader.get(0), 0);
-      Assertions.assertEquals(int8ListReader.get(4), 100);
-      Assertions.assertEquals(int8ListReader.get(8), 11);
+      assertEquals(int8ListReader.size(), 9);
+      assertEquals(int8ListReader.get(0), 0);
+      assertEquals(int8ListReader.get(4), 100);
+      assertEquals(int8ListReader.get(8), 11);
 
       PrimitiveList.Short.Builder int16List = allTypes.initInt16List(2);
       int16List.set(0, (short)1);
       PrimitiveList.Short.Reader int16ListReader = int16List.asReader();
-      Assertions.assertEquals(int16ListReader.size(), 2);
-      Assertions.assertEquals(int16ListReader.get(0), 1);
-      Assertions.assertEquals(int16ListReader.get(1), 0);
+      assertEquals(int16ListReader.size(), 2);
+      assertEquals(int16ListReader.get(0), 1);
+      assertEquals(int16ListReader.get(1), 0);
 
       // TODO other primitive lists
 
       TextList.Builder textList = allTypes.initTextList(1);
       textList.set(0, new Text.Reader("abcdefg"));
       TextList.Reader textListReader = textList.asReader();
-      Assertions.assertEquals(textListReader.size(), 1);
-      Assertions.assertEquals(textListReader.get(0).toString(), "abcdefg");
+      assertEquals(textListReader.size(), 1);
+      assertEquals(textListReader.get(0).toString(), "abcdefg");
 
       DataList.Builder dataList = allTypes.initDataList(1);
       dataList.set(0, new Data.Reader(new byte[]{1,2,3,4}));
       DataList.Reader dataListReader = dataList.asReader();
-      Assertions.assertEquals(dataListReader.size(), 1);
-      Assertions.assertTrue(java.util.Arrays.equals(dataListReader.get(0).toArray(), new byte[]{1,2,3,4}));
+      assertEquals(dataListReader.size(), 1);
+      assertTrue(java.util.Arrays.equals(dataListReader.get(0).toArray(), new byte[]{1,2,3,4}));
 
       StructList.Builder<org.capnproto.test.Test.TestAllTypes.Builder> structList = allTypes.initStructList(2);
       structList.get(0).setInt8Field((byte)5);
       structList.get(1).setInt8Field((byte)9);
       StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> structListReader = structList.asReader(org.capnproto.test.Test.TestAllTypes.factory);
-      Assertions.assertEquals(structListReader.size(), 2);
-      Assertions.assertEquals(structListReader.get(0).getInt8Field(), 5);
-      Assertions.assertEquals(structListReader.get(1).getInt8Field(), 9);
+      assertEquals(structListReader.size(), 2);
+      assertEquals(structListReader.get(0).getInt8Field(), 5);
+      assertEquals(structListReader.get(1).getInt8Field(), 9);
 
       EnumList.Builder<org.capnproto.test.Test.TestEnum> enumList = allTypes.initEnumList(3);
       enumList.set(0, org.capnproto.test.Test.TestEnum.FOO);
       enumList.set(1, org.capnproto.test.Test.TestEnum.BAR);
       enumList.set(2, org.capnproto.test.Test.TestEnum.BAZ);
       EnumList.Reader<org.capnproto.test.Test.TestEnum> enumListReader = enumList.asReader();
-      Assertions.assertEquals(enumListReader.size(), 3);
-      Assertions.assertEquals(enumListReader.get(0), org.capnproto.test.Test.TestEnum.FOO);
-      Assertions.assertEquals(enumListReader.get(1), org.capnproto.test.Test.TestEnum.BAR);
-      Assertions.assertEquals(enumListReader.get(2), org.capnproto.test.Test.TestEnum.BAZ);
+      assertEquals(enumListReader.size(), 3);
+      assertEquals(enumListReader.get(0), org.capnproto.test.Test.TestEnum.FOO);
+      assertEquals(enumListReader.get(1), org.capnproto.test.Test.TestEnum.BAR);
+      assertEquals(enumListReader.get(2), org.capnproto.test.Test.TestEnum.BAZ);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testNestedListBuilderAsReader() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestLists.Builder root = builder.initRoot(org.capnproto.test.Test.TestLists.factory);
@@ -348,19 +356,19 @@ public class EncodingTest {
 
       ListList.Reader<StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader>> structListListReader =
         structListList.asReader(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory));
-      Assertions.assertEquals(structListListReader.size(), 3);
+      assertEquals(structListListReader.size(), 3);
       StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> structList0Reader = structListListReader.get(0);
-      Assertions.assertEquals(structList0Reader.size(), 1);
-      Assertions.assertEquals(structList0Reader.get(0).getInt16Field(), 1);
-      Assertions.assertEquals(structListListReader.get(1).size(), 0);
+      assertEquals(structList0Reader.size(), 1);
+      assertEquals(structList0Reader.get(0).getInt16Field(), 1);
+      assertEquals(structListListReader.get(1).size(), 0);
       StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> structList2Reader = structListListReader.get(2);
-      Assertions.assertEquals(structList2Reader.size(), 3);
-      Assertions.assertEquals(structList2Reader.get(0).getInt16Field(), 22);
-      Assertions.assertEquals(structList2Reader.get(1).getInt16Field(), 333);
-      Assertions.assertEquals(structList2Reader.get(2).getInt16Field(), 4444);
+      assertEquals(structList2Reader.size(), 3);
+      assertEquals(structList2Reader.get(0).getInt16Field(), 22);
+      assertEquals(structList2Reader.get(1).getInt16Field(), 333);
+      assertEquals(structList2Reader.get(2).getInt16Field(), 4444);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testGenerics() {
         MessageBuilder message = new MessageBuilder();
 
@@ -382,13 +390,13 @@ public class EncodingTest {
             root.asReader(org.capnproto.test.Test.TestGenerics.newFactory(org.capnproto.test.Test.TestAllTypes.factory, Text.factory));
         TestUtil.checkTestMessage(rootReader.getFoo());
         org.capnproto.test.Test.TestGenerics.Builder<Text.Builder, PrimitiveList.Byte.Builder> dubReader = root.getDub();
-        Assertions.assertEquals(dubReader.getFoo().toString(), "Hello");
+        assertEquals(dubReader.getFoo().toString(), "Hello");
         PrimitiveList.Byte.Builder barReader = dubReader.getBar();
-        Assertions.assertEquals(1, barReader.size());
-        Assertions.assertEquals(11, barReader.get(0));
+        assertEquals(1, barReader.size());
+        assertEquals(11, barReader.get(0));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testUseGenerics() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestUseGenerics.Builder root = message.initRoot(org.capnproto.test.Test.TestUseGenerics.factory);
@@ -401,10 +409,10 @@ public class EncodingTest {
             root.setUnspecified(factory2, root2.asReader(factory2));
         }
 
-        Assertions.assertEquals("foobar", root.getUnspecified().getDub().getFoo().toString());
+        assertEquals("foobar", root.getUnspecified().getDub().getFoo().toString());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testDefaults() {
         MessageBuilder message = new MessageBuilder();
         org.capnproto.test.Test.TestDefaults.Builder defaults = message.initRoot(org.capnproto.test.Test.TestDefaults.factory);
@@ -414,19 +422,19 @@ public class EncodingTest {
         TestUtil.checkSettedDefaultMessage(defaults.asReader());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testUnions() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestUnion.Builder root = builder.initRoot(org.capnproto.test.Test.TestUnion.factory);
       org.capnproto.test.Test.TestUnion.Union0.Builder u0 = root.initUnion0();
       u0.initU0f1sp(10);
-      Assertions.assertEquals(u0.which(), org.capnproto.test.Test.TestUnion.Union0.Which.U0F1SP);
+      assertEquals(u0.which(), org.capnproto.test.Test.TestUnion.Union0.Which.U0F1SP);
 
       u0.initPrimitiveList(10);
-      Assertions.assertEquals(u0.which(), org.capnproto.test.Test.TestUnion.Union0.Which.PRIMITIVE_LIST);
+      assertEquals(u0.which(), org.capnproto.test.Test.TestUnion.Union0.Which.PRIMITIVE_LIST);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testGroups() {
         MessageBuilder builder = new MessageBuilder();
         org.capnproto.test.Test.TestGroups.Builder root = builder.initRoot(org.capnproto.test.Test.TestGroups.factory);
@@ -436,9 +444,9 @@ public class EncodingTest {
             foo.setGrault(123456789012345L);
             foo.setGarply(new Text.Reader("foobar"));
 
-            Assertions.assertEquals(12345678, foo.getCorge());
-            Assertions.assertEquals(123456789012345L, foo.getGrault());
-            Assertions.assertEquals("foobar", foo.getGarply().toString());
+            assertEquals(12345678, foo.getCorge());
+            assertEquals(123456789012345L, foo.getGrault());
+            assertEquals("foobar", foo.getGarply().toString());
         }
         {
             org.capnproto.test.Test.TestGroups.Groups.Bar.Builder bar = root.getGroups().initBar();
@@ -446,9 +454,9 @@ public class EncodingTest {
             bar.setGrault(new Text.Reader("barbaz"));
             bar.setGarply(234567890123456L);
 
-            Assertions.assertEquals(23456789, bar.getCorge());
-            Assertions.assertEquals("barbaz", bar.getGrault().toString());
-            Assertions.assertEquals(234567890123456L, bar.getGarply());
+            assertEquals(23456789, bar.getCorge());
+            assertEquals("barbaz", bar.getGrault().toString());
+            assertEquals(234567890123456L, bar.getGarply());
         }
         {
             org.capnproto.test.Test.TestGroups.Groups.Baz.Builder baz = root.getGroups().initBaz();
@@ -456,13 +464,13 @@ public class EncodingTest {
             baz.setGrault(new Text.Reader("bazqux"));
             baz.setGarply(new Text.Reader("quxquux"));
 
-            Assertions.assertEquals(34567890, baz.getCorge());
-            Assertions.assertEquals("bazqux", baz.getGrault().toString());
-            Assertions.assertEquals("quxquux", baz.getGarply().toString());
+            assertEquals(34567890, baz.getCorge());
+            assertEquals("bazqux", baz.getGrault().toString());
+            assertEquals("quxquux", baz.getGarply().toString());
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testNestedLists() {
         MessageBuilder builder = new MessageBuilder();
         org.capnproto.test.Test.TestLists.Builder root = builder.initRoot(org.capnproto.test.Test.TestLists.factory);
@@ -479,118 +487,118 @@ public class EncodingTest {
         {
             org.capnproto.test.Test.TestLists.Reader reader = root.asReader();
             ListList.Reader<PrimitiveList.Int.Reader> intListList = reader.getInt32ListList();
-            Assertions.assertEquals(2, intListList.size());
+            assertEquals(2, intListList.size());
             PrimitiveList.Int.Reader intList0 = intListList.get(0);
-            Assertions.assertEquals(4, intList0.size());
-            Assertions.assertEquals(1, intList0.get(0));
-            Assertions.assertEquals(2, intList0.get(1));
-            Assertions.assertEquals(3, intList0.get(2));
-            Assertions.assertEquals(4, intList0.get(3));
+            assertEquals(4, intList0.size());
+            assertEquals(1, intList0.get(0));
+            assertEquals(2, intList0.get(1));
+            assertEquals(3, intList0.get(2));
+            assertEquals(4, intList0.get(3));
             PrimitiveList.Int.Reader intList1 = intListList.get(1);
-            Assertions.assertEquals(1, intList1.size());
-            Assertions.assertEquals(100, intList1.get(0));
+            assertEquals(1, intList1.size());
+            assertEquals(100, intList1.get(0));
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testConstants() {
-        Assertions.assertEquals(Void.VOID, org.capnproto.test.Test.TestConstants.VOID_CONST);
-        Assertions.assertEquals(true, org.capnproto.test.Test.TestConstants.BOOL_CONST);
-        Assertions.assertEquals(-123, org.capnproto.test.Test.TestConstants.INT8_CONST);
-        Assertions.assertEquals(-12345, org.capnproto.test.Test.TestConstants.INT16_CONST);
-        Assertions.assertEquals(-12345678, org.capnproto.test.Test.TestConstants.INT32_CONST);
-        Assertions.assertEquals(-123456789012345L, org.capnproto.test.Test.TestConstants.INT64_CONST);
+        assertEquals(Void.VOID, org.capnproto.test.Test.TestConstants.VOID_CONST);
+        assertEquals(true, org.capnproto.test.Test.TestConstants.BOOL_CONST);
+        assertEquals(-123, org.capnproto.test.Test.TestConstants.INT8_CONST);
+        assertEquals(-12345, org.capnproto.test.Test.TestConstants.INT16_CONST);
+        assertEquals(-12345678, org.capnproto.test.Test.TestConstants.INT32_CONST);
+        assertEquals(-123456789012345L, org.capnproto.test.Test.TestConstants.INT64_CONST);
 
-        Assertions.assertEquals(-22, org.capnproto.test.Test.TestConstants.UINT8_CONST);
-        Assertions.assertEquals(-19858, org.capnproto.test.Test.TestConstants.UINT16_CONST);
-        Assertions.assertEquals(-838178284, org.capnproto.test.Test.TestConstants.UINT32_CONST);
-        Assertions.assertEquals(-6101065172474983726L, org.capnproto.test.Test.TestConstants.UINT64_CONST);
+        assertEquals(-22, org.capnproto.test.Test.TestConstants.UINT8_CONST);
+        assertEquals(-19858, org.capnproto.test.Test.TestConstants.UINT16_CONST);
+        assertEquals(-838178284, org.capnproto.test.Test.TestConstants.UINT32_CONST);
+        assertEquals(-6101065172474983726L, org.capnproto.test.Test.TestConstants.UINT64_CONST);
 
-        Assertions.assertEquals(1234.5f, org.capnproto.test.Test.TestConstants.FLOAT32_CONST, TestUtil.DELTA);
-        Assertions.assertEquals(-123e45, org.capnproto.test.Test.TestConstants.FLOAT64_CONST, TestUtil.DELTA);
+        assertEquals(1234.5f, org.capnproto.test.Test.TestConstants.FLOAT32_CONST, TestUtil.DELTA);
+        assertEquals(-123e45, org.capnproto.test.Test.TestConstants.FLOAT64_CONST, TestUtil.DELTA);
 
-        Assertions.assertEquals("foo", org.capnproto.test.Test.TestConstants.TEXT_CONST.toString());
-        Assertions.assertArrayEquals(TestUtil.data("bar"), org.capnproto.test.Test.TestConstants.DATA_CONST.toArray());
+        assertEquals("foo", org.capnproto.test.Test.TestConstants.TEXT_CONST.toString());
+        assertArrayEquals(TestUtil.data("bar"), org.capnproto.test.Test.TestConstants.DATA_CONST.toArray());
 
-        Assertions.assertEquals(org.capnproto.test.Test.TestEnum.CORGE, org.capnproto.test.Test.TestConstants.ENUM_CONST);
+        assertEquals(org.capnproto.test.Test.TestEnum.CORGE, org.capnproto.test.Test.TestConstants.ENUM_CONST);
         {
             org.capnproto.test.Test.TestAllTypes.Reader subReader = org.capnproto.test.Test.TestConstants.STRUCT_CONST;
-            Assertions.assertEquals(subReader.getBoolField(), true);
-            Assertions.assertEquals(subReader.getInt8Field(), -12);
-            Assertions.assertEquals(subReader.getInt16Field(), 3456);
-            Assertions.assertEquals(subReader.getInt32Field(), -78901234);
-            Assertions.assertEquals(subReader.getInt64Field(), 56789012345678L);
-            Assertions.assertEquals(subReader.getUInt8Field(), 90);
-            Assertions.assertEquals(subReader.getUInt16Field(), 1234);
-            Assertions.assertEquals(subReader.getUInt32Field(), 56789012);
-            Assertions.assertEquals(subReader.getUInt64Field(), 345678901234567890L);
-            Assertions.assertEquals(subReader.getFloat32Field(), -1.25e-10f, TestUtil.DELTA);
-            Assertions.assertEquals(subReader.getFloat64Field(), 345, TestUtil.DELTA);
-            Assertions.assertEquals(subReader.getTextField().toString(), "baz");
+            assertEquals(subReader.getBoolField(), true);
+            assertEquals(subReader.getInt8Field(), -12);
+            assertEquals(subReader.getInt16Field(), 3456);
+            assertEquals(subReader.getInt32Field(), -78901234);
+            assertEquals(subReader.getInt64Field(), 56789012345678L);
+            assertEquals(subReader.getUInt8Field(), 90);
+            assertEquals(subReader.getUInt16Field(), 1234);
+            assertEquals(subReader.getUInt32Field(), 56789012);
+            assertEquals(subReader.getUInt64Field(), 345678901234567890L);
+            assertEquals(subReader.getFloat32Field(), -1.25e-10f, TestUtil.DELTA);
+            assertEquals(subReader.getFloat64Field(), 345, TestUtil.DELTA);
+            assertEquals(subReader.getTextField().toString(), "baz");
         }
 
-        Assertions.assertEquals(6, org.capnproto.test.Test.TestConstants.VOID_LIST_CONST.size());
+        assertEquals(6, org.capnproto.test.Test.TestConstants.VOID_LIST_CONST.size());
 
         {
             PrimitiveList.Boolean.Reader listReader = org.capnproto.test.Test.TestConstants.BOOL_LIST_CONST;
-            Assertions.assertEquals(4, listReader.size());
-            Assertions.assertEquals(true, listReader.get(0));
-            Assertions.assertEquals(false, listReader.get(1));
-            Assertions.assertEquals(false, listReader.get(2));
-            Assertions.assertEquals(true, listReader.get(3));
+            assertEquals(4, listReader.size());
+            assertEquals(true, listReader.get(0));
+            assertEquals(false, listReader.get(1));
+            assertEquals(false, listReader.get(2));
+            assertEquals(true, listReader.get(3));
         }
 
         {
             TextList.Reader listReader = org.capnproto.test.Test.TestConstants.TEXT_LIST_CONST;
-            Assertions.assertEquals(3, listReader.size());
-            Assertions.assertEquals("plugh", listReader.get(0).toString());
-            Assertions.assertEquals("xyzzy", listReader.get(1).toString());
-            Assertions.assertEquals("thud", listReader.get(2).toString());
+            assertEquals(3, listReader.size());
+            assertEquals("plugh", listReader.get(0).toString());
+            assertEquals("xyzzy", listReader.get(1).toString());
+            assertEquals("thud", listReader.get(2).toString());
         }
 
         {
             StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> listReader = org.capnproto.test.Test.TestConstants.STRUCT_LIST_CONST;
-            Assertions.assertEquals(3, listReader.size());
-            Assertions.assertEquals("structlist 1", listReader.get(0).getTextField().toString());
-            Assertions.assertEquals("structlist 2", listReader.get(1).getTextField().toString());
-            Assertions.assertEquals("structlist 3", listReader.get(2).getTextField().toString());
+            assertEquals(3, listReader.size());
+            assertEquals("structlist 1", listReader.get(0).getTextField().toString());
+            assertEquals("structlist 2", listReader.get(1).getTextField().toString());
+            assertEquals("structlist 3", listReader.get(2).getTextField().toString());
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testGlobalConstants() {
-        Assertions.assertEquals(org.capnproto.test.Test.GLOBAL_INT, 12345);
+        assertEquals(org.capnproto.test.Test.GLOBAL_INT, 12345);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testEmptyStruct() {
         MessageBuilder builder = new MessageBuilder();
         org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
 
-        Assertions.assertFalse(root.hasAnyPointerField());
+        assertFalse(root.hasAnyPointerField());
 
         AnyPointer.Builder any = root.getAnyPointerField();
-        Assertions.assertTrue(any.isNull());
+        assertTrue(any.isNull());
         any.initAs(org.capnproto.test.Test.TestEmptyStruct.factory);
-        Assertions.assertFalse(any.isNull());
-        Assertions.assertTrue(root.hasAnyPointerField());
+        assertFalse(any.isNull());
+        assertTrue(root.hasAnyPointerField());
 
         {
             org.capnproto.test.Test.TestAnyPointer.Reader reader = root.asReader();
-            Assertions.assertTrue(reader.hasAnyPointerField());
-            Assertions.assertNotNull(reader.getAnyPointerField());
+            assertTrue(reader.hasAnyPointerField());
+            assertNotNull(reader.getAnyPointerField());
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testTextBuilderIntUnderflow() {
         MessageBuilder builder = new MessageBuilder();
         org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
         root.getAnyPointerField().initAs(Data.factory, 0);
-        Assertions.assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(Text.factory));
+        assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(Text.factory));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testInlineCompositeListIntOverflow() throws DecodeException {
 
         byte[] bytes = new byte[]{0,0,0,0, 0,0,1,0, 1,0,0,0, 0x17,0,0,0, 0,0,0,-128, 16,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -600,10 +608,10 @@ public class EncodingTest {
         MessageReader message = new MessageReader(new ByteBuffer[]{segment}, ReaderOptions.DEFAULT_READER_OPTIONS);
 
         org.capnproto.test.Test.TestAnyPointer.Reader root = message.getRoot(org.capnproto.test.Test.TestAnyPointer.factory);
-        Assertions.assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
+        assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testInlineCompositeListIntOverflow2() throws DecodeException {
 
         byte[] bytes = new byte[]{0,0,0,0, 0,0,1,0, 1,0,0,0, 0x17,0,0,0, 0,0,0,-128, 16,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -616,41 +624,41 @@ public class EncodingTest {
 
         MessageBuilder messageBuilder = new MessageBuilder();
         org.capnproto.test.Test.TestAnyPointer.Builder builderRoot = messageBuilder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
-        Assertions.assertThrows(DecodeException.class, () -> builderRoot.getAnyPointerField().setAs(org.capnproto.test.Test.TestAnyPointer.factory, root));
+        assertThrows(DecodeException.class, () -> builderRoot.getAnyPointerField().setAs(org.capnproto.test.Test.TestAnyPointer.factory, root));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testVoidListAmplification() throws DecodeException {
         MessageBuilder builder = new MessageBuilder();
         builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory).getAnyPointerField().initAs(PrimitiveList.Void.factory, 1 << 28);
 
         ByteBuffer[] segments = builder.getSegmentsForOutput();
-        Assertions.assertEquals(1, segments.length);
+        assertEquals(1, segments.length);
 
         MessageReader reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
         org.capnproto.test.Test.TestAnyPointer.Reader root = reader.getRoot(org.capnproto.test.Test.TestAnyPointer.factory);
-        Assertions.assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
+        assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testEmptyStructListAmplification() {
         MessageBuilder builder = new MessageBuilder();
         builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory).getAnyPointerField()
                 .initAs(StructList.newFactory(org.capnproto.test.Test.TestEmptyStruct.factory), (1 << 29) - 1);
 
         ByteBuffer[] segments = builder.getSegmentsForOutput();
-        Assertions.assertEquals(1, segments.length);
+        assertEquals(1, segments.length);
 
         MessageReader reader = new MessageReader(segments, ReaderOptions.DEFAULT_READER_OPTIONS);
         org.capnproto.test.Test.TestAnyPointer.Reader root = reader.getRoot(org.capnproto.test.Test.TestAnyPointer.factory);
-        Assertions.assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
+        assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
     }
 
     // Test that we throw an exception on out-of-bounds list pointers.
     // Before v0.1.11, we were vulnerable to a cpu amplification attack:
     // reading an out-of-bounds pointer to list a huge number of elements of size BIT,
     // when read as a struct list, would return without error.
-    @org.junit.jupiter.api.Test
+    @Test
     public void testListPointerOutOfBounds() throws DecodeException {
         byte[] bytes = new byte[]
                     {0,0,0,0, 0,0,1,0, // struct, one pointer
@@ -661,118 +669,118 @@ public class EncodingTest {
                                                   ReaderOptions.DEFAULT_READER_OPTIONS);
 
         org.capnproto.test.Test.TestAnyPointer.Reader root = message.getRoot(org.capnproto.test.Test.TestAnyPointer.factory);
-        Assertions.assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
+        assertThrows(DecodeException.class, () -> root.getAnyPointerField().getAs(StructList.newFactory(org.capnproto.test.Test.TestAllTypes.factory)));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongUint8List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 28) + 1;
       PrimitiveList.Byte.Builder list = allTypes.initUInt8List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, (byte)3);
-      Assertions.assertEquals(list.get(length - 1), 3);
-      Assertions.assertEquals(allTypes.asReader().getUInt8List().get(length - 1), 3);
+      assertEquals(list.get(length - 1), 3);
+      assertEquals(allTypes.asReader().getUInt8List().get(length - 1), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongUint16List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 27) + 1;
       PrimitiveList.Short.Builder list = allTypes.initUInt16List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, (short)3);
-      Assertions.assertEquals(list.get(length - 1), 3);
-      Assertions.assertEquals(allTypes.asReader().getUInt16List().get(length - 1), 3);
+      assertEquals(list.get(length - 1), 3);
+      assertEquals(allTypes.asReader().getUInt16List().get(length - 1), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongUint32List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 26) + 1;
       PrimitiveList.Int.Builder list = allTypes.initUInt32List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, 3);
-      Assertions.assertEquals(list.get(length - 1), 3);
-      Assertions.assertEquals(allTypes.asReader().getUInt32List().get(length - 1), 3);
+      assertEquals(list.get(length - 1), 3);
+      assertEquals(allTypes.asReader().getUInt32List().get(length - 1), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongUint64List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 25) + 1;
       PrimitiveList.Long.Builder list = allTypes.initUInt64List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, 3);
-      Assertions.assertEquals(list.get(length - 1), 3);
-      Assertions.assertEquals(allTypes.asReader().getUInt64List().get(length - 1), 3);
+      assertEquals(list.get(length - 1), 3);
+      assertEquals(allTypes.asReader().getUInt64List().get(length - 1), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongFloat32List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 26) + 1;
       PrimitiveList.Float.Builder list = allTypes.initFloat32List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, 3.14f);
-      Assertions.assertEquals(list.get(length - 1), 3.14f, 0.0f);
-      Assertions.assertEquals(allTypes.asReader().getFloat32List().get(length - 1), 3.14f, 0.0f);
+      assertEquals(list.get(length - 1), 3.14f, 0.0f);
+      assertEquals(allTypes.asReader().getFloat32List().get(length - 1), 3.14f, 0.0f);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongFloat64List() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 25) + 1;
       PrimitiveList.Double.Builder list = allTypes.initFloat64List(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, 3.14);
-      Assertions.assertEquals(list.get(length - 1), 3.14, 0.0);
-      Assertions.assertEquals(allTypes.asReader().getFloat64List().get(length - 1), 3.14, 0.0);
+      assertEquals(list.get(length - 1), 3.14, 0.0);
+      assertEquals(allTypes.asReader().getFloat64List().get(length - 1), 3.14, 0.0);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongStructList() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 21) + 1;
       StructList.Builder<org.capnproto.test.Test.TestAllTypes.Builder> list = allTypes.initStructList(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.get(length - 1).setUInt8Field((byte)3);
-      Assertions.assertEquals(list.get(length - 1).getUInt8Field(), 3);
-      Assertions.assertEquals(allTypes.asReader().getStructList().get(length - 1).getUInt8Field(), 3);
+      assertEquals(list.get(length - 1).getUInt8Field(), 3);
+      assertEquals(allTypes.asReader().getStructList().get(length - 1).getUInt8Field(), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongTextList() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
       int length = (1 << 25) + 1;
       TextList.Builder list = allTypes.initTextList(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.set(length - 1, new Text.Reader("foo"));
-      Assertions.assertEquals(list.get(length - 1).toString(), "foo");
-      Assertions.assertEquals(allTypes.asReader().getTextList().get(length - 1).toString(), "foo");
+      assertEquals(list.get(length - 1).toString(), "foo");
+      assertEquals(allTypes.asReader().getTextList().get(length - 1).toString(), "foo");
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testLongListList() {
       MessageBuilder message = new MessageBuilder();
       org.capnproto.test.Test.TestLists.Builder root = message.initRoot(org.capnproto.test.Test.TestLists.factory);
       int length = (1 << 25) + 1;
       ListList.Builder<StructList.Builder<org.capnproto.test.Test.TestAllTypes.Builder>> list = root.initStructListList(length);
-      Assertions.assertEquals(list.size(), length);
+      assertEquals(list.size(), length);
       list.init(length - 1, 3);
-      Assertions.assertEquals(list.get(length - 1).size(), 3);
-      Assertions.assertEquals(root.asReader().getStructListList().get(length - 1).size(), 3);
+      assertEquals(list.get(length - 1).size(), 3);
+      assertEquals(root.asReader().getStructListList().get(length - 1).size(), 3);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testStructSetters() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder root = builder.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -799,7 +807,7 @@ public class EncodingTest {
       }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testSerializedSize() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestAnyPointer.Builder root = builder.initRoot(org.capnproto.test.Test.TestAnyPointer.factory);
@@ -808,10 +816,10 @@ public class EncodingTest {
       // one word for segment table, one for the root pointer,
       // one for the body of the TestAnyPointer struct,
       // and one for the body of the Text.
-      Assertions.assertEquals(Serialize.computeSerializedSizeInWords(builder), 4);
+      assertEquals(Serialize.computeSerializedSizeInWords(builder), 4);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testImport() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.testimport.TestImport.Foo.Builder root = builder.initRoot(org.capnproto.testimport.TestImport.Foo.factory);
@@ -821,7 +829,7 @@ public class EncodingTest {
       TestUtil.checkTestMessage(field.asReader());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testGenericMap() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.GenericMap.Factory<Text.Builder, Text.Reader, org.capnproto.test.Test.TestAllTypes.Builder, org.capnproto.test.Test.TestAllTypes.Reader> mapFactory
@@ -857,20 +865,20 @@ public class EncodingTest {
            root.asReader(mapFactory).getEntries(entryFactory);
 
          org.capnproto.test.Test.GenericMap.Entry.Reader<Text.Reader, org.capnproto.test.Test.TestAllTypes.Reader> entry0 = entries.get(0);
-         Assertions.assertEquals(entry0.getKey().toString(), "foo");
-         Assertions.assertEquals(entry0.getValue().getInt64Field(), 101);
+         assertEquals(entry0.getKey().toString(), "foo");
+         assertEquals(entry0.getValue().getInt64Field(), 101);
 
          org.capnproto.test.Test.GenericMap.Entry.Reader<Text.Reader, org.capnproto.test.Test.TestAllTypes.Reader> entry1 = entries.get(1);
-         Assertions.assertEquals(entry1.getKey().toString(), "bar");
-         Assertions.assertEquals(entry1.getValue().getInt64Field(), 202);
+         assertEquals(entry1.getKey().toString(), "bar");
+         assertEquals(entry1.getValue().getInt64Field(), 202);
 
          org.capnproto.test.Test.GenericMap.Entry.Reader<Text.Reader, org.capnproto.test.Test.TestAllTypes.Reader> entry2 = entries.get(2);
-         Assertions.assertEquals(entry2.getKey().toString(), "baz");
-         Assertions.assertEquals(entry2.getValue().getInt64Field(), 303);
+         assertEquals(entry2.getKey().toString(), "baz");
+         assertEquals(entry2.getValue().getInt64Field(), 303);
       }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testSetWithCaveats() {
       MessageBuilder builder = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder root = builder.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -891,11 +899,11 @@ public class EncodingTest {
       }
 
       StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> listReader = list.asReader(org.capnproto.test.Test.TestAllTypes.factory);
-      Assertions.assertEquals(listReader.get(0).getInt8Field(), 11);
+      assertEquals(listReader.get(0).getInt8Field(), 11);
       TestUtil.checkTestMessage(listReader.get(1));
   }
 
-  @org.junit.jupiter.api.Test
+  @Test
   public void testCopyAnyPointer() {
       MessageBuilder message1 = new MessageBuilder();
       org.capnproto.test.Test.TestAllTypes.Builder root1 = message1.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
@@ -908,7 +916,7 @@ public class EncodingTest {
       TestUtil.checkTestMessage(root2.getAs(org.capnproto.test.Test.TestAllTypes.factory));
   }
 
-  @org.junit.jupiter.api.Test
+  @Test
   public void testZeroPointerUnderflow() throws DecodeException {
       byte[] bytes = new byte[8 + 8 * 65535];
       bytes[4] = -1;
@@ -934,20 +942,20 @@ public class EncodingTest {
       message2RootBuilder.getAnyPointerField().clear();
 
       java.nio.ByteBuffer[] outputSegments = message2Builder.getSegmentsForOutput();
-      Assertions.assertEquals(1, outputSegments.length);
-      Assertions.assertEquals(0L, outputSegments[0].getLong(8)); // null because cleared
+      assertEquals(1, outputSegments.length);
+      assertEquals(0L, outputSegments[0].getLong(8)); // null because cleared
 
-      Assertions.assertEquals(16 + 8 * 65535, outputSegments[0].limit());
+      assertEquals(16 + 8 * 65535, outputSegments[0].limit());
       for (int ii = 0; ii < 65535; ++ii) {
           // All of the data should have been cleared.
-          Assertions.assertEquals(0L, outputSegments[0].getLong((2 + ii) * 8));
+          assertEquals(0L, outputSegments[0].getLong((2 + ii) * 8));
       }
     }
 
     // This test fails on https://github.com/capnproto/capnproto-java/pull/143,
     // illustrating why https://github.com/capnproto/capnproto-java/commit/28ab5ced
     // is needed.
-    @org.junit.jupiter.api.Test
+    @Test
     public void setDataPointer() {
         MessageBuilder message1 = new MessageBuilder();
         org.capnproto.test.Test.TestAllTypes.Builder allTypes1 = message1.initRoot(org.capnproto.test.Test.TestAllTypes.factory);

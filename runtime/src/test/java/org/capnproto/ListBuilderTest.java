@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class ListBuilderTest {
 
     @Test
@@ -14,6 +16,6 @@ public class ListBuilderTest {
         SegmentBuilder segmentBuilder = new SegmentBuilder(buffer, builderArena);
         ListBuilder listBuilder = new ListBuilder(segmentBuilder, 0, 0, 2, 0, (short) 0);
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> listBuilder._setBooleanElement(Integer.MAX_VALUE, true));
+        assertThrows(IndexOutOfBoundsException.class, () -> listBuilder._setBooleanElement(Integer.MAX_VALUE, true));
     }
 }

@@ -30,21 +30,27 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class SerializeTest {
 
   /**
    * @param arena: segment `i` contains `i` words each set to `i`
    */
   private void checkSegmentContents(int exampleSegmentCount, ReaderArena arena) {
-    Assertions.assertEquals(arena.segments.size(), exampleSegmentCount);
+    assertEquals(arena.segments.size(), exampleSegmentCount);
     for (int i = 0; i < exampleSegmentCount; ++i) {
       SegmentReader segment = arena.segments.get(i);
       java.nio.LongBuffer segmentWords = segment.buffer.asLongBuffer();
 
-      Assertions.assertEquals(segmentWords.capacity(), i);
+      assertEquals(segmentWords.capacity(), i);
       segmentWords.rewind();
       while (segmentWords.hasRemaining()) {
-        Assertions.assertEquals(segmentWords.get(), i);
+        assertEquals(segmentWords.get(), i);
       }
     }
   }
@@ -62,7 +68,7 @@ public class SerializeTest {
 
       byte[] outputBytes = new byte[exampleBytes.length];
       Serialize.write(new ArrayOutputStream(ByteBuffer.wrap(outputBytes)), messageReader);
-      Assertions.assertArrayEquals(exampleBytes, outputBytes);
+      assertArrayEquals(exampleBytes, outputBytes);
     }
 
     // ------
@@ -145,13 +151,13 @@ public class SerializeTest {
               // Segment 0 (empty)
       };
       Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input)));
-      Assertions.assertTrue(messageReader.isPresent());
+      assertTrue(messageReader.isPresent());
     }
 
     // `tryRead` returns null when given no input
     {
       Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(new byte[]{})));
-      Assertions.assertFalse(messageReader.isPresent());
+      assertFalse(messageReader.isPresent());
     }
 
     // `tryRead` throws when given too few bytes to form the first word
@@ -160,7 +166,7 @@ public class SerializeTest {
               0, 0, 0, 0, // 1 segment
               0, 0, 0     // Premature end of stream after 7 bytes
       };
-      Assertions.assertThrows(IOException.class, () -> Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input))));
+      assertThrows(IOException.class, () -> Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input))));
     }
   }
 
@@ -169,7 +175,7 @@ public class SerializeTest {
         byte[] input = {0, 0, 0, 0, -1, -1, -1, -113};
         java.nio.channels.ReadableByteChannel channel =
             java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
-        Assertions.assertThrows(DecodeException.class, () -> Serialize.read(channel));
+        assertThrows(DecodeException.class, () -> Serialize.read(channel));
   }
 
   @Test
@@ -179,7 +185,7 @@ public class SerializeTest {
           -1, -1, -1, -113, 0, 0, 0, 0};
         java.nio.channels.ReadableByteChannel channel =
             java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
-        Assertions.assertThrows(DecodeException.class, () -> Serialize.read(channel));
+        assertThrows(DecodeException.class, () -> Serialize.read(channel));
   }
 
     @Test
@@ -188,6 +194,6 @@ public class SerializeTest {
         ByteBuffer dummySegmentBuffer = ByteBuffer.allocate(0);
         ByteBuffer[] segments = new ByteBuffer[Integer.MAX_VALUE / 2];
         Arrays.fill(segments, dummySegmentBuffer);
-        Assertions.assertEquals(Serialize.computeSerializedSizeInWords(segments), (segments.length * 4L + 4) / Constants.BYTES_PER_WORD);
+        assertEquals(Serialize.computeSerializedSizeInWords(segments), (segments.length * 4L + 4) / Constants.BYTES_PER_WORD);
     }
 }

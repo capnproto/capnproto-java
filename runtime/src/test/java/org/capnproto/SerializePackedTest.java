@@ -9,6 +9,11 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class SerializePackedTest {
 
     @Test
@@ -63,10 +68,10 @@ public class SerializePackedTest {
             try {
                 packedOutputStream.write(ByteBuffer.wrap(unpacked));
             } catch (IOException e) {
-                Assertions.fail("Failed writing to PackedOutputStream");
+                fail("Failed writing to PackedOutputStream");
             }
 
-            Assertions.assertTrue(Arrays.equals(bytes, packed));
+            assertTrue(Arrays.equals(bytes, packed));
         }
 
         {
@@ -77,11 +82,11 @@ public class SerializePackedTest {
             try {
                 n = stream.read(ByteBuffer.wrap(bytes));
             } catch (IOException e) {
-                Assertions.fail("Failed reading from PackedInputStream");
+                fail("Failed reading from PackedInputStream");
             }
 
-            Assertions.assertEquals(n, unpacked.length);
-            Assertions.assertTrue(Arrays.equals(bytes, unpacked));
+            assertEquals(n, unpacked.length);
+            assertTrue(Arrays.equals(bytes, unpacked));
         }
     }
 
@@ -89,13 +94,13 @@ public class SerializePackedTest {
     @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
     public void read_shouldThrowDecodingExceptionOnEmptyArrayInputStream() throws IOException {
         byte[] emptyByteArray = {};
-        Assertions.assertThrows(DecodeException.class, () -> SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(emptyByteArray)), ReaderOptions.DEFAULT_READER_OPTIONS));
+        assertThrows(DecodeException.class, () -> SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(emptyByteArray)), ReaderOptions.DEFAULT_READER_OPTIONS));
     }
 
     @Test
     @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
     public void read_shouldThrowDecodingExceptionWhenTryingToReadMoreThanAvailableFromArrayInputStream() throws IOException {
         byte[] bytes = {17, 0, 127, 0, 0, 0, 0}; //segment0 size of 127 words, which is way larger than the tiny 7 byte input
-        Assertions.assertThrows(DecodeException.class, () -> SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(bytes)), ReaderOptions.DEFAULT_READER_OPTIONS));
+        assertThrows(DecodeException.class, () -> SerializePacked.read(new ArrayInputStream(ByteBuffer.wrap(bytes)), ReaderOptions.DEFAULT_READER_OPTIONS));
     }
 }
