@@ -36,7 +36,7 @@ public class ArrayInputStreamTest {
 
     // read() should return -1 at the end of the stream
     // https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html
-    assertEquals(stream.read(dst), -1);
+    assertEquals(-1, stream.read(dst));
   }
 
   @Test
@@ -44,7 +44,7 @@ public class ArrayInputStreamTest {
     byte[] oneByte = new byte[]{42};
     ArrayInputStream stream = new ArrayInputStream(ByteBuffer.wrap(oneByte));
     ByteBuffer dst = ByteBuffer.allocate(10);
-    assertEquals(stream.read(dst), 1);
-    assertEquals(stream.read(dst), -1); // end of stream
+    assertEquals(1, stream.read(dst));
+    assertEquals(-1, stream.read(dst)); // end of stream
   }
 }

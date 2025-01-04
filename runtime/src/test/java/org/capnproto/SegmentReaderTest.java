@@ -15,21 +15,21 @@ public class SegmentReaderTest {
     public void in_boundsCalculationShouldNotOverflow() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        assertEquals(segmentReader.isInBounds(0, Integer.MAX_VALUE), false);
+        assertEquals(false, segmentReader.isInBounds(0, Integer.MAX_VALUE));
     }
 
     @Test
     public void oneWordAtLastWordShouldBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        assertEquals(segmentReader.isInBounds(7, 1), true);
+        assertEquals(true, segmentReader.isInBounds(7, 1));
     }
 
     @Test
     public void twoWordsAtLastWordShouldNotBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        assertEquals(segmentReader.isInBounds(7, 2), false);
+        assertEquals(false, segmentReader.isInBounds(7, 2));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        assertEquals(segment.isInBounds(refTarget, wordSize), true);
+        assertEquals(true, segment.isInBounds(refTarget, wordSize));
 
         /* Read inner Struct: ComObject. */
         refOffset = refTarget + dataSizeWords; /* At the inner STRUCT POINTER */
@@ -86,7 +86,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        assertEquals(segment.isInBounds(refTarget, wordSize), true);
+        assertEquals(true, segment.isInBounds(refTarget, wordSize));
     }
 
 }

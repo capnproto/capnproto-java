@@ -33,40 +33,40 @@ public class LayoutTest {
 
         StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, MAX_NESTING_LIMIT);
 
-        assertEquals(reader._getLongField(0), 0xefcdab8967452301L);
-        assertEquals(reader._getLongField(1), 0L);
+        assertEquals(0xefcdab8967452301L, reader._getLongField(0));
+        assertEquals(0L, reader._getLongField(1));
 
-        assertEquals(reader._getIntField(0), 0x67452301);
-        assertEquals(reader._getIntField(1), 0xefcdab89);
-        assertEquals(reader._getIntField(2), 0);
+        assertEquals(0x67452301, reader._getIntField(0));
+        assertEquals(0xefcdab89, reader._getIntField(1));
+        assertEquals(0, reader._getIntField(2));
 
-        assertEquals(reader._getShortField(0), (short)0x2301);
-        assertEquals(reader._getShortField(1), (short)0x6745);
-        assertEquals(reader._getShortField(2), (short)0xab89);
-        assertEquals(reader._getShortField(3), (short)0xefcd);
-        assertEquals(reader._getShortField(4), (short)0);
+        assertEquals((short)0x2301, reader._getShortField(0));
+        assertEquals((short)0x6745, reader._getShortField(1));
+        assertEquals((short)0xab89, reader._getShortField(2));
+        assertEquals((short)0xefcd, reader._getShortField(3));
+        assertEquals((short)0, reader._getShortField(4));
 
-        assertEquals(reader._getBooleanField(0), true);
-        assertEquals(reader._getBooleanField(1), false);
-        assertEquals(reader._getBooleanField(2), false);
+        assertEquals(true, reader._getBooleanField(0));
+        assertEquals(false, reader._getBooleanField(1));
+        assertEquals(false, reader._getBooleanField(2));
 
-        assertEquals(reader._getBooleanField(3), false);
-        assertEquals(reader._getBooleanField(4), false);
-        assertEquals(reader._getBooleanField(5), false);
-        assertEquals(reader._getBooleanField(6), false);
-        assertEquals(reader._getBooleanField(7), false);
+        assertEquals(false, reader._getBooleanField(3));
+        assertEquals(false, reader._getBooleanField(4));
+        assertEquals(false, reader._getBooleanField(5));
+        assertEquals(false, reader._getBooleanField(6));
+        assertEquals(false, reader._getBooleanField(7));
 
-        assertEquals(reader._getBooleanField(8), true);
-        assertEquals(reader._getBooleanField(9), true);
-        assertEquals(reader._getBooleanField(10), false);
-        assertEquals(reader._getBooleanField(11), false);
-        assertEquals(reader._getBooleanField(12), false);
-        assertEquals(reader._getBooleanField(13), true);
-        assertEquals(reader._getBooleanField(14), false);
-        assertEquals(reader._getBooleanField(15), false);
+        assertEquals(true, reader._getBooleanField(8));
+        assertEquals(true, reader._getBooleanField(9));
+        assertEquals(false, reader._getBooleanField(10));
+        assertEquals(false, reader._getBooleanField(11));
+        assertEquals(false, reader._getBooleanField(12));
+        assertEquals(true, reader._getBooleanField(13));
+        assertEquals(false, reader._getBooleanField(14));
+        assertEquals(false, reader._getBooleanField(15));
 
-        assertEquals(reader._getBooleanField(63), true);
-        assertEquals(reader._getBooleanField(64), false);
+        assertEquals(true, reader._getBooleanField(63));
+        assertEquals(false, reader._getBooleanField(64));
     }
 
     /**

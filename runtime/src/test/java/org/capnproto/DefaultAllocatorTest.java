@@ -9,8 +9,7 @@ public class DefaultAllocatorTest {
     @Test
     public void maxSegmentBytes() {
       DefaultAllocator allocator = new DefaultAllocator();
-      assertEquals(allocator.allocationStrategy,
-                          BuilderArena.AllocationStrategy.GROW_HEURISTICALLY);
+      assertEquals(BuilderArena.AllocationStrategy.GROW_HEURISTICALLY, allocator.allocationStrategy);
       allocator.maxSegmentBytes = (1 << 25) - 1;
 
       int allocationSize = 1 << 24;
