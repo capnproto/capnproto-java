@@ -1,13 +1,11 @@
 package org.capnproto;
 
 import org.capnproto.WireHelpers.FollowFarsResult;
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import static org.hamcrest.CoreMatchers.is;
 
 public class SegmentReaderTest {
 
@@ -15,21 +13,21 @@ public class SegmentReaderTest {
     public void in_boundsCalculationShouldNotOverflow() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        MatcherAssert.assertThat(segmentReader.isInBounds(0, Integer.MAX_VALUE), is(false));
+        Assertions.assertEquals(segmentReader.isInBounds(0, Integer.MAX_VALUE), false);
     }
 
     @Test
     public void oneWordAtLastWordShouldBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        MatcherAssert.assertThat(segmentReader.isInBounds(7, 1), is(true));
+        Assertions.assertEquals(segmentReader.isInBounds(7, 1), true);
     }
 
     @Test
     public void twoWordsAtLastWordShouldNotBeInBounds() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
         SegmentReader segmentReader = new SegmentReader(byteBuffer, null);
-        MatcherAssert.assertThat(segmentReader.isInBounds(7, 2), is(false));
+        Assertions.assertEquals(segmentReader.isInBounds(7, 2), false);
     }
 
     @Test
@@ -78,7 +76,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        MatcherAssert.assertThat(segment.isInBounds(refTarget, wordSize), is(true));
+        Assertions.assertEquals(segment.isInBounds(refTarget, wordSize), true);
 
         /* Read inner Struct: ComObject. */
         refOffset = refTarget + dataSizeWords; /* At the inner STRUCT POINTER */
@@ -86,7 +84,7 @@ public class SegmentReaderTest {
         refTarget = WirePointer.target(refOffset, ref);
         dataSizeWords = StructPointer.dataSize(ref);
         wordSize = dataSizeWords + StructPointer.ptrCount(ref);
-        MatcherAssert.assertThat(segment.isInBounds(refTarget, wordSize), is(true));
+        Assertions.assertEquals(segment.isInBounds(refTarget, wordSize), true);
     }
 
 }

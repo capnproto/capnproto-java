@@ -1,7 +1,7 @@
 package org.capnproto.test;
 
 import org.capnproto.*;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.UnsupportedEncodingException;
 
@@ -10,14 +10,14 @@ public class TestUtil {
         try {
             return string.getBytes("ISO_8859-1");
         } catch (UnsupportedEncodingException e) {
-            Assert.fail("Could not decode");
+            Assertions.fail("Could not decode");
             return null;
         }
     }
 
     public static final double DELTA = 1e-15;
 
-    public static void initTestMessage(Test.TestAllTypes.Builder builder) {
+    public static void initTestMessage(org.capnproto.test.Test.TestAllTypes.Builder builder) {
         builder.setVoidField(org.capnproto.Void.VOID);
         builder.setBoolField(true);
         builder.setInt8Field((byte) -123);
@@ -33,7 +33,7 @@ public class TestUtil {
         builder.setTextField("foo");
         builder.setDataField(data("bar"));
         {
-            Test.TestAllTypes.Builder subBuilder = builder.initStructField();
+            org.capnproto.test.Test.TestAllTypes.Builder subBuilder = builder.initStructField();
             subBuilder.setVoidField(org.capnproto.Void.VOID);
             subBuilder.setBoolField(true);
             subBuilder.setInt8Field((byte) -12);
@@ -49,11 +49,11 @@ public class TestUtil {
             subBuilder.setTextField(new Text.Reader("baz"));
             subBuilder.setDataField(data("qux"));
             {
-                Test.TestAllTypes.Builder subSubBuilder = subBuilder.initStructField();
+                org.capnproto.test.Test.TestAllTypes.Builder subSubBuilder = subBuilder.initStructField();
                 subSubBuilder.setTextField(new Text.Reader("nested"));
                 subSubBuilder.initStructField().setTextField(new Text.Reader("really nested"));
             }
-            subBuilder.setEnumField(Test.TestEnum.BAZ);
+            subBuilder.setEnumField(org.capnproto.test.Test.TestEnum.BAZ);
 
             PrimitiveList.Boolean.Builder boolList = subBuilder.initBoolList(5);
             boolList.set(0, false);
@@ -63,7 +63,7 @@ public class TestUtil {
             boolList.set(4, true);
         }
 
-        builder.setEnumField(Test.TestEnum.CORGE);
+        builder.setEnumField(org.capnproto.test.Test.TestEnum.CORGE);
         builder.initVoidList(6);
 
         PrimitiveList.Boolean.Builder boolList = builder.initBoolList(4);
@@ -83,239 +83,239 @@ public class TestUtil {
         textList.set(1, new Text.Reader("xyzzy"));
         textList.set(2, new Text.Reader("thud"));
 
-        StructList.Builder<Test.TestAllTypes.Builder> structList = builder.initStructList(3);
+        StructList.Builder<org.capnproto.test.Test.TestAllTypes.Builder> structList = builder.initStructList(3);
         structList.get(0).setTextField(new Text.Reader("structlist 1"));
         structList.get(1).setTextField(new Text.Reader("structlist 2"));
         structList.get(2).setTextField(new Text.Reader("structlist 3"));
 
-        EnumList.Builder<Test.TestEnum> enumList = builder.initEnumList(2);
-        enumList.set(0, Test.TestEnum.FOO);
-        enumList.set(1, Test.TestEnum.GARPLY);
+        EnumList.Builder<org.capnproto.test.Test.TestEnum> enumList = builder.initEnumList(2);
+        enumList.set(0, org.capnproto.test.Test.TestEnum.FOO);
+        enumList.set(1, org.capnproto.test.Test.TestEnum.GARPLY);
     }
 
-    public static void checkTestMessage(Test.TestAllTypes.Builder builder) {
+    public static void checkTestMessage(org.capnproto.test.Test.TestAllTypes.Builder builder) {
         builder.getVoidField();
-        Assert.assertEquals(builder.getBoolField(), true);
-        Assert.assertEquals(builder.getInt8Field(), -123);
-        Assert.assertEquals(builder.getInt16Field(), -12345);
-        Assert.assertEquals(builder.getInt32Field(), -12345678);
-        Assert.assertEquals(builder.getInt64Field(), -123456789012345L);
-        Assert.assertEquals(builder.getUInt8Field(), (byte) 0xea);
-        Assert.assertEquals(builder.getUInt16Field(), 0x4567);
-        Assert.assertEquals(builder.getUInt32Field(), 0x34567890);
-        Assert.assertEquals(builder.getUInt64Field(), 0x1234567890123456L);
-        Assert.assertEquals(builder.getFloat32Field(), 1234.5f, DELTA);
-        Assert.assertEquals(builder.getFloat64Field(), -123e45, DELTA);
-        Assert.assertEquals(builder.getTextField().toString(), "foo");
+        Assertions.assertEquals(builder.getBoolField(), true);
+        Assertions.assertEquals(builder.getInt8Field(), -123);
+        Assertions.assertEquals(builder.getInt16Field(), -12345);
+        Assertions.assertEquals(builder.getInt32Field(), -12345678);
+        Assertions.assertEquals(builder.getInt64Field(), -123456789012345L);
+        Assertions.assertEquals(builder.getUInt8Field(), (byte) 0xea);
+        Assertions.assertEquals(builder.getUInt16Field(), 0x4567);
+        Assertions.assertEquals(builder.getUInt32Field(), 0x34567890);
+        Assertions.assertEquals(builder.getUInt64Field(), 0x1234567890123456L);
+        Assertions.assertEquals(builder.getFloat32Field(), 1234.5f, DELTA);
+        Assertions.assertEquals(builder.getFloat64Field(), -123e45, DELTA);
+        Assertions.assertEquals(builder.getTextField().toString(), "foo");
 
         {
-            Test.TestAllTypes.Builder subBuilder = builder.getStructField();
+            org.capnproto.test.Test.TestAllTypes.Builder subBuilder = builder.getStructField();
             subBuilder.getVoidField();
-            Assert.assertEquals(subBuilder.getBoolField(), true);
-            Assert.assertEquals(subBuilder.getInt8Field(), -12);
-            Assert.assertEquals(subBuilder.getInt16Field(), 3456);
-            Assert.assertEquals(subBuilder.getInt32Field(), -78901234);
-            Assert.assertEquals(subBuilder.getInt64Field(), 56789012345678L);
-            Assert.assertEquals(subBuilder.getUInt8Field(), 90);
-            Assert.assertEquals(subBuilder.getUInt16Field(), 1234);
-            Assert.assertEquals(subBuilder.getUInt32Field(), 56789012);
-            Assert.assertEquals(subBuilder.getUInt64Field(), 345678901234567890L);
-            Assert.assertEquals(subBuilder.getFloat32Field(), -1.25e-10f, DELTA);
-            Assert.assertEquals(subBuilder.getFloat64Field(), 345, DELTA);
+            Assertions.assertEquals(subBuilder.getBoolField(), true);
+            Assertions.assertEquals(subBuilder.getInt8Field(), -12);
+            Assertions.assertEquals(subBuilder.getInt16Field(), 3456);
+            Assertions.assertEquals(subBuilder.getInt32Field(), -78901234);
+            Assertions.assertEquals(subBuilder.getInt64Field(), 56789012345678L);
+            Assertions.assertEquals(subBuilder.getUInt8Field(), 90);
+            Assertions.assertEquals(subBuilder.getUInt16Field(), 1234);
+            Assertions.assertEquals(subBuilder.getUInt32Field(), 56789012);
+            Assertions.assertEquals(subBuilder.getUInt64Field(), 345678901234567890L);
+            Assertions.assertEquals(subBuilder.getFloat32Field(), -1.25e-10f, DELTA);
+            Assertions.assertEquals(subBuilder.getFloat64Field(), 345, DELTA);
 
             {
-                Test.TestAllTypes.Builder subSubBuilder = subBuilder.getStructField();
-                Assert.assertEquals(subSubBuilder.getTextField().toString(), "nested");
+                org.capnproto.test.Test.TestAllTypes.Builder subSubBuilder = subBuilder.getStructField();
+                Assertions.assertEquals(subSubBuilder.getTextField().toString(), "nested");
             }
 
-            Assert.assertEquals(subBuilder.getEnumField(), Test.TestEnum.BAZ);
+            Assertions.assertEquals(subBuilder.getEnumField(), org.capnproto.test.Test.TestEnum.BAZ);
 
             PrimitiveList.Boolean.Builder boolList = subBuilder.getBoolList();
-            Assert.assertEquals(boolList.get(0), false);
-            Assert.assertEquals(boolList.get(1), true);
-            Assert.assertEquals(boolList.get(2), false);
-            Assert.assertEquals(boolList.get(3), true);
-            Assert.assertEquals(boolList.get(4), true);
+            Assertions.assertEquals(boolList.get(0), false);
+            Assertions.assertEquals(boolList.get(1), true);
+            Assertions.assertEquals(boolList.get(2), false);
+            Assertions.assertEquals(boolList.get(3), true);
+            Assertions.assertEquals(boolList.get(4), true);
 
         }
-        Assert.assertEquals(builder.getEnumField(), Test.TestEnum.CORGE);
+        Assertions.assertEquals(builder.getEnumField(), org.capnproto.test.Test.TestEnum.CORGE);
 
-        Assert.assertEquals(builder.getVoidList().size(), 6);
+        Assertions.assertEquals(builder.getVoidList().size(), 6);
 
         PrimitiveList.Boolean.Builder boolList = builder.getBoolList();
-        Assert.assertEquals(boolList.get(0), true);
-        Assert.assertEquals(boolList.get(1), false);
-        Assert.assertEquals(boolList.get(2), false);
-        Assert.assertEquals(boolList.get(3), true);
+        Assertions.assertEquals(boolList.get(0), true);
+        Assertions.assertEquals(boolList.get(1), false);
+        Assertions.assertEquals(boolList.get(2), false);
+        Assertions.assertEquals(boolList.get(3), true);
 
         PrimitiveList.Double.Builder float64List = builder.getFloat64List();
-        Assert.assertEquals(float64List.get(0), 7777.75, DELTA);
-        Assert.assertEquals(float64List.get(1), Double.POSITIVE_INFINITY, DELTA);
-        Assert.assertEquals(float64List.get(2), Double.NEGATIVE_INFINITY, DELTA);
-        Assert.assertEquals(float64List.get(3), Double.NaN, DELTA);
+        Assertions.assertEquals(float64List.get(0), 7777.75, DELTA);
+        Assertions.assertEquals(float64List.get(1), Double.POSITIVE_INFINITY, DELTA);
+        Assertions.assertEquals(float64List.get(2), Double.NEGATIVE_INFINITY, DELTA);
+        Assertions.assertEquals(float64List.get(3), Double.NaN, DELTA);
 
         TextList.Builder textList = builder.getTextList();
-        Assert.assertEquals(textList.size(), 3);
-        Assert.assertEquals(textList.get(0).toString(), "plugh");
-        Assert.assertEquals(textList.get(1).toString(), "xyzzy");
-        Assert.assertEquals(textList.get(2).toString(), "thud");
+        Assertions.assertEquals(textList.size(), 3);
+        Assertions.assertEquals(textList.get(0).toString(), "plugh");
+        Assertions.assertEquals(textList.get(1).toString(), "xyzzy");
+        Assertions.assertEquals(textList.get(2).toString(), "thud");
 
-        StructList.Builder<Test.TestAllTypes.Builder> structList = builder.getStructList();
-        Assert.assertEquals(3, structList.size());
-        Assert.assertEquals(structList.get(0).getTextField().toString(), "structlist 1");
-        Assert.assertEquals(structList.get(1).getTextField().toString(), "structlist 2");
-        Assert.assertEquals(structList.get(2).getTextField().toString(), "structlist 3");
+        StructList.Builder<org.capnproto.test.Test.TestAllTypes.Builder> structList = builder.getStructList();
+        Assertions.assertEquals(3, structList.size());
+        Assertions.assertEquals(structList.get(0).getTextField().toString(), "structlist 1");
+        Assertions.assertEquals(structList.get(1).getTextField().toString(), "structlist 2");
+        Assertions.assertEquals(structList.get(2).getTextField().toString(), "structlist 3");
 
-        EnumList.Builder<Test.TestEnum> enumList = builder.getEnumList();
-        Assert.assertEquals(enumList.get(0), Test.TestEnum.FOO);
-        Assert.assertEquals(enumList.get(1), Test.TestEnum.GARPLY);
+        EnumList.Builder<org.capnproto.test.Test.TestEnum> enumList = builder.getEnumList();
+        Assertions.assertEquals(enumList.get(0), org.capnproto.test.Test.TestEnum.FOO);
+        Assertions.assertEquals(enumList.get(1), org.capnproto.test.Test.TestEnum.GARPLY);
     }
 
-    public static void checkTestMessage(Test.TestAllTypes.Reader reader) {
+    public static void checkTestMessage(org.capnproto.test.Test.TestAllTypes.Reader reader) {
         reader.getVoidField();
-        Assert.assertEquals(reader.getBoolField(), true);
-        Assert.assertEquals(reader.getInt8Field(), -123);
-        Assert.assertEquals(reader.getInt16Field(), -12345);
-        Assert.assertEquals(reader.getInt32Field(), -12345678);
-        Assert.assertEquals(reader.getInt64Field(), -123456789012345L);
-        Assert.assertEquals(reader.getUInt8Field(), (byte)0xea);
-        Assert.assertEquals(reader.getUInt16Field(), 0x4567);
-        Assert.assertEquals(reader.getUInt32Field(), 0x34567890);
-        Assert.assertEquals(reader.getUInt64Field(), 0x1234567890123456L);
-        Assert.assertEquals(reader.getFloat32Field(), 1234.5f, DELTA);
-        Assert.assertEquals(reader.getFloat64Field(), -123e45, DELTA);
-        Assert.assertEquals(reader.getTextField().toString(), "foo");
+        Assertions.assertEquals(reader.getBoolField(), true);
+        Assertions.assertEquals(reader.getInt8Field(), -123);
+        Assertions.assertEquals(reader.getInt16Field(), -12345);
+        Assertions.assertEquals(reader.getInt32Field(), -12345678);
+        Assertions.assertEquals(reader.getInt64Field(), -123456789012345L);
+        Assertions.assertEquals(reader.getUInt8Field(), (byte)0xea);
+        Assertions.assertEquals(reader.getUInt16Field(), 0x4567);
+        Assertions.assertEquals(reader.getUInt32Field(), 0x34567890);
+        Assertions.assertEquals(reader.getUInt64Field(), 0x1234567890123456L);
+        Assertions.assertEquals(reader.getFloat32Field(), 1234.5f, DELTA);
+        Assertions.assertEquals(reader.getFloat64Field(), -123e45, DELTA);
+        Assertions.assertEquals(reader.getTextField().toString(), "foo");
 
         {
-            Test.TestAllTypes.Reader subReader = reader.getStructField();
+            org.capnproto.test.Test.TestAllTypes.Reader subReader = reader.getStructField();
             subReader.getVoidField();
-            Assert.assertEquals(subReader.getBoolField(), true);
-            Assert.assertEquals(subReader.getInt8Field(), -12);
-            Assert.assertEquals(subReader.getInt16Field(), 3456);
-            Assert.assertEquals(subReader.getInt32Field(), -78901234);
-            Assert.assertEquals(subReader.getInt64Field(), 56789012345678L);
-            Assert.assertEquals(subReader.getUInt8Field(), 90);
-            Assert.assertEquals(subReader.getUInt16Field(), 1234);
-            Assert.assertEquals(subReader.getUInt32Field(), 56789012);
-            Assert.assertEquals(subReader.getUInt64Field(), 345678901234567890L);
-            Assert.assertEquals(subReader.getFloat32Field(), -1.25e-10f, DELTA);
-            Assert.assertEquals(subReader.getFloat64Field(), 345, DELTA);
+            Assertions.assertEquals(subReader.getBoolField(), true);
+            Assertions.assertEquals(subReader.getInt8Field(), -12);
+            Assertions.assertEquals(subReader.getInt16Field(), 3456);
+            Assertions.assertEquals(subReader.getInt32Field(), -78901234);
+            Assertions.assertEquals(subReader.getInt64Field(), 56789012345678L);
+            Assertions.assertEquals(subReader.getUInt8Field(), 90);
+            Assertions.assertEquals(subReader.getUInt16Field(), 1234);
+            Assertions.assertEquals(subReader.getUInt32Field(), 56789012);
+            Assertions.assertEquals(subReader.getUInt64Field(), 345678901234567890L);
+            Assertions.assertEquals(subReader.getFloat32Field(), -1.25e-10f, DELTA);
+            Assertions.assertEquals(subReader.getFloat64Field(), 345, DELTA);
 
             {
-                Test.TestAllTypes.Reader subSubReader = subReader.getStructField();
-                Assert.assertEquals(subSubReader.getTextField().toString(), "nested");
+                org.capnproto.test.Test.TestAllTypes.Reader subSubReader = subReader.getStructField();
+                Assertions.assertEquals(subSubReader.getTextField().toString(), "nested");
             }
             PrimitiveList.Boolean.Reader boolList = subReader.getBoolList();
-            Assert.assertEquals(boolList.get(0), false);
-            Assert.assertEquals(boolList.get(1), true);
-            Assert.assertEquals(boolList.get(2), false);
-            Assert.assertEquals(boolList.get(3), true);
-            Assert.assertEquals(boolList.get(4), true);
+            Assertions.assertEquals(boolList.get(0), false);
+            Assertions.assertEquals(boolList.get(1), true);
+            Assertions.assertEquals(boolList.get(2), false);
+            Assertions.assertEquals(boolList.get(3), true);
+            Assertions.assertEquals(boolList.get(4), true);
 
         }
 
-        Assert.assertEquals(reader.getVoidList().size(), 6);
+        Assertions.assertEquals(reader.getVoidList().size(), 6);
 
         PrimitiveList.Boolean.Reader boolList = reader.getBoolList();
-        Assert.assertEquals(boolList.get(0), true);
-        Assert.assertEquals(boolList.get(1), false);
-        Assert.assertEquals(boolList.get(2), false);
-        Assert.assertEquals(boolList.get(3), true);
+        Assertions.assertEquals(boolList.get(0), true);
+        Assertions.assertEquals(boolList.get(1), false);
+        Assertions.assertEquals(boolList.get(2), false);
+        Assertions.assertEquals(boolList.get(3), true);
 
         PrimitiveList.Double.Reader float64List = reader.getFloat64List();
-        Assert.assertEquals(float64List.get(0), 7777.75, DELTA);
-        Assert.assertEquals(float64List.get(1), Double.POSITIVE_INFINITY, DELTA);
-        Assert.assertEquals(float64List.get(2), Double.NEGATIVE_INFINITY, DELTA);
-        Assert.assertEquals(float64List.get(3), Double.NaN, DELTA);
+        Assertions.assertEquals(float64List.get(0), 7777.75, DELTA);
+        Assertions.assertEquals(float64List.get(1), Double.POSITIVE_INFINITY, DELTA);
+        Assertions.assertEquals(float64List.get(2), Double.NEGATIVE_INFINITY, DELTA);
+        Assertions.assertEquals(float64List.get(3), Double.NaN, DELTA);
 
         TextList.Reader textList = reader.getTextList();
-        Assert.assertEquals(textList.size(), 3);
-        Assert.assertEquals(textList.get(0).toString(), "plugh");
-        Assert.assertEquals(textList.get(1).toString(), "xyzzy");
-        Assert.assertEquals(textList.get(2).toString(), "thud");
-        StructList.Reader<Test.TestAllTypes.Reader> structList = reader.getStructList();
-        Assert.assertEquals(3, structList.size());
-        Assert.assertEquals(structList.get(0).getTextField().toString(), "structlist 1");
-        Assert.assertEquals(structList.get(1).getTextField().toString(), "structlist 2");
-        Assert.assertEquals(structList.get(2).getTextField().toString(), "structlist 3");
+        Assertions.assertEquals(textList.size(), 3);
+        Assertions.assertEquals(textList.get(0).toString(), "plugh");
+        Assertions.assertEquals(textList.get(1).toString(), "xyzzy");
+        Assertions.assertEquals(textList.get(2).toString(), "thud");
+        StructList.Reader<org.capnproto.test.Test.TestAllTypes.Reader> structList = reader.getStructList();
+        Assertions.assertEquals(3, structList.size());
+        Assertions.assertEquals(structList.get(0).getTextField().toString(), "structlist 1");
+        Assertions.assertEquals(structList.get(1).getTextField().toString(), "structlist 2");
+        Assertions.assertEquals(structList.get(2).getTextField().toString(), "structlist 3");
 
-        EnumList.Reader<Test.TestEnum> enumList = reader.getEnumList();
-        Assert.assertEquals(enumList.get(0), Test.TestEnum.FOO);
-        Assert.assertEquals(enumList.get(1), Test.TestEnum.GARPLY);
+        EnumList.Reader<org.capnproto.test.Test.TestEnum> enumList = reader.getEnumList();
+        Assertions.assertEquals(enumList.get(0), org.capnproto.test.Test.TestEnum.FOO);
+        Assertions.assertEquals(enumList.get(1), org.capnproto.test.Test.TestEnum.GARPLY);
     }
 
-    public static void checkDefaultMessage(Test.TestDefaults.Builder builder) {
+    public static void checkDefaultMessage(org.capnproto.test.Test.TestDefaults.Builder builder) {
         builder.getVoidField();
-        Assert.assertTrue(builder.getBoolField());
-        Assert.assertEquals(builder.getInt8Field(), -123);
-        Assert.assertEquals(builder.getInt16Field(), -12345);
-        Assert.assertEquals(builder.getInt32Field(), -12345678);
-        Assert.assertEquals(builder.getInt64Field(), -123456789012345L);
-        Assert.assertEquals(builder.getUInt8Field(), (byte)0xea);
-        Assert.assertEquals(builder.getUInt16Field(), (short)45678);
-        Assert.assertEquals(builder.getUInt32Field(), 0xce0a6a14);
-        Assert.assertEquals(builder.getUInt64Field(), 0xab54a98ceb1f0ad2L);
-        Assert.assertEquals(builder.getFloat32Field(), 1234.5f, DELTA);
-        Assert.assertEquals(builder.getFloat64Field(), -123e45, DELTA);
-        Assert.assertEquals(builder.getEnumField(), Test.TestEnum.CORGE);
+        Assertions.assertTrue(builder.getBoolField());
+        Assertions.assertEquals(builder.getInt8Field(), -123);
+        Assertions.assertEquals(builder.getInt16Field(), -12345);
+        Assertions.assertEquals(builder.getInt32Field(), -12345678);
+        Assertions.assertEquals(builder.getInt64Field(), -123456789012345L);
+        Assertions.assertEquals(builder.getUInt8Field(), (byte)0xea);
+        Assertions.assertEquals(builder.getUInt16Field(), (short)45678);
+        Assertions.assertEquals(builder.getUInt32Field(), 0xce0a6a14);
+        Assertions.assertEquals(builder.getUInt64Field(), 0xab54a98ceb1f0ad2L);
+        Assertions.assertEquals(builder.getFloat32Field(), 1234.5f, DELTA);
+        Assertions.assertEquals(builder.getFloat64Field(), -123e45, DELTA);
+        Assertions.assertEquals(builder.getEnumField(), org.capnproto.test.Test.TestEnum.CORGE);
 
-        Assert.assertEquals(builder.getTextField().toString(), "foo");
-        Assert.assertArrayEquals(builder.getDataField().toArray(), new byte[]{0x62, 0x61, 0x72});
+        Assertions.assertEquals(builder.getTextField().toString(), "foo");
+        Assertions.assertArrayEquals(builder.getDataField().toArray(), new byte[]{0x62, 0x61, 0x72});
     }
 
-    public static void checkDefaultMessage(Test.TestDefaults.Reader reader) {
+    public static void checkDefaultMessage(org.capnproto.test.Test.TestDefaults.Reader reader) {
         reader.getVoidField();
-        Assert.assertEquals(reader.getBoolField(), true);
-        Assert.assertEquals(reader.getInt8Field(), -123);
-        Assert.assertEquals(reader.getInt16Field(), -12345);
-        Assert.assertEquals(reader.getInt32Field(), -12345678);
-        Assert.assertEquals(reader.getInt64Field(), -123456789012345L);
-        Assert.assertEquals(reader.getUInt8Field(), (byte)0xea);
-        Assert.assertEquals(reader.getUInt16Field(), (short)45678);
-        Assert.assertEquals(reader.getUInt32Field(), 0xce0a6a14);
-        Assert.assertEquals(reader.getUInt64Field(), 0xab54a98ceb1f0ad2L);
-        Assert.assertEquals(reader.getFloat32Field(), 1234.5f, DELTA);
-        Assert.assertEquals(reader.getFloat64Field(), -123e45, DELTA);
-        Assert.assertEquals(reader.getTextField().toString(), "foo");
-        Assert.assertArrayEquals(reader.getDataField().toArray(), new byte[]{0x62, 0x61, 0x72});
+        Assertions.assertEquals(reader.getBoolField(), true);
+        Assertions.assertEquals(reader.getInt8Field(), -123);
+        Assertions.assertEquals(reader.getInt16Field(), -12345);
+        Assertions.assertEquals(reader.getInt32Field(), -12345678);
+        Assertions.assertEquals(reader.getInt64Field(), -123456789012345L);
+        Assertions.assertEquals(reader.getUInt8Field(), (byte)0xea);
+        Assertions.assertEquals(reader.getUInt16Field(), (short)45678);
+        Assertions.assertEquals(reader.getUInt32Field(), 0xce0a6a14);
+        Assertions.assertEquals(reader.getUInt64Field(), 0xab54a98ceb1f0ad2L);
+        Assertions.assertEquals(reader.getFloat32Field(), 1234.5f, DELTA);
+        Assertions.assertEquals(reader.getFloat64Field(), -123e45, DELTA);
+        Assertions.assertEquals(reader.getTextField().toString(), "foo");
+        Assertions.assertArrayEquals(reader.getDataField().toArray(), new byte[]{0x62, 0x61, 0x72});
         {
-            Test.TestAllTypes.Reader subReader = reader.getStructField();
+            org.capnproto.test.Test.TestAllTypes.Reader subReader = reader.getStructField();
             subReader.getVoidField();
-            Assert.assertTrue(subReader.getBoolField());
-            Assert.assertEquals(subReader.getInt8Field(), -12);
-            Assert.assertEquals(subReader.getInt16Field(), 3456);
-            Assert.assertEquals(subReader.getInt32Field(), -78901234);
+            Assertions.assertTrue(subReader.getBoolField());
+            Assertions.assertEquals(subReader.getInt8Field(), -12);
+            Assertions.assertEquals(subReader.getInt16Field(), 3456);
+            Assertions.assertEquals(subReader.getInt32Field(), -78901234);
             // ...
-            Assert.assertEquals(subReader.getTextField().toString(), "baz");
+            Assertions.assertEquals(subReader.getTextField().toString(), "baz");
 
             {
-                Test.TestAllTypes.Reader subSubReader = subReader.getStructField();
-                Assert.assertEquals(subSubReader.getTextField().toString(), "nested");
+                org.capnproto.test.Test.TestAllTypes.Reader subSubReader = subReader.getStructField();
+                Assertions.assertEquals(subSubReader.getTextField().toString(), "nested");
             }
 
         }
 
-        Assert.assertEquals(reader.getEnumField(), Test.TestEnum.CORGE);
-        Assert.assertEquals(reader.getVoidList().size(), 6);
+        Assertions.assertEquals(reader.getEnumField(), org.capnproto.test.Test.TestEnum.CORGE);
+        Assertions.assertEquals(reader.getVoidList().size(), 6);
 
         {
             PrimitiveList.Boolean.Reader listReader = reader.getBoolList();
-            Assert.assertEquals(listReader.size(), 4);
-            Assert.assertTrue(listReader.get(0));
-            Assert.assertFalse(listReader.get(1));
-            Assert.assertFalse(listReader.get(2));
-            Assert.assertTrue(listReader.get(3));
+            Assertions.assertEquals(listReader.size(), 4);
+            Assertions.assertTrue(listReader.get(0));
+            Assertions.assertFalse(listReader.get(1));
+            Assertions.assertFalse(listReader.get(2));
+            Assertions.assertTrue(listReader.get(3));
         }
 
         {
             PrimitiveList.Byte.Reader listReader = reader.getInt8List();
-            Assert.assertEquals(listReader.size(), 2);
-            Assert.assertEquals(listReader.get(0), 111);
-            Assert.assertEquals(listReader.get(1), -111);
+            Assertions.assertEquals(listReader.size(), 2);
+            Assertions.assertEquals(listReader.get(0), 111);
+            Assertions.assertEquals(listReader.get(1), -111);
         }
     }
 
-    public static void setDefaultMessage(Test.TestDefaults.Builder builder) {
+    public static void setDefaultMessage(org.capnproto.test.Test.TestDefaults.Builder builder) {
         builder.setBoolField(false);
         builder.setInt8Field((byte) -122);
         builder.setInt16Field((short) -12344);
@@ -328,21 +328,21 @@ public class TestUtil {
         builder.setFloat32Field(1234.4f);
         builder.setFloat64Field(-123e44);
         builder.setTextField(new Text.Reader("bar"));
-        builder.setEnumField(Test.TestEnum.QUX);
+        builder.setEnumField(org.capnproto.test.Test.TestEnum.QUX);
     }
 
-    public static void checkSettedDefaultMessage(Test.TestDefaults.Reader reader) {
-        Assert.assertEquals(reader.getBoolField(), false);
-        Assert.assertEquals(reader.getInt8Field(), -122);
-        Assert.assertEquals(reader.getInt16Field(), -12344);
-        Assert.assertEquals(reader.getInt32Field(), -12345677);
-        Assert.assertEquals(reader.getInt64Field(), -123456789012344L);
-        Assert.assertEquals(reader.getUInt8Field(), (byte) 0xe9);
-        Assert.assertEquals(reader.getUInt16Field(), (short) 45677);
-        Assert.assertEquals(reader.getUInt32Field(), 0xce0a6a13);
-        Assert.assertEquals(reader.getUInt64Field(), 0xab54a98ceb1f0ad1L);
-        Assert.assertEquals(reader.getFloat32Field(), 1234.4f, DELTA);
-        Assert.assertEquals(reader.getFloat64Field(), -123e44, DELTA);
-        Assert.assertEquals(reader.getEnumField(), Test.TestEnum.QUX);
+    public static void checkSettedDefaultMessage(org.capnproto.test.Test.TestDefaults.Reader reader) {
+        Assertions.assertEquals(reader.getBoolField(), false);
+        Assertions.assertEquals(reader.getInt8Field(), -122);
+        Assertions.assertEquals(reader.getInt16Field(), -12344);
+        Assertions.assertEquals(reader.getInt32Field(), -12345677);
+        Assertions.assertEquals(reader.getInt64Field(), -123456789012344L);
+        Assertions.assertEquals(reader.getUInt8Field(), (byte) 0xe9);
+        Assertions.assertEquals(reader.getUInt16Field(), (short) 45677);
+        Assertions.assertEquals(reader.getUInt32Field(), 0xce0a6a13);
+        Assertions.assertEquals(reader.getUInt64Field(), 0xab54a98ceb1f0ad1L);
+        Assertions.assertEquals(reader.getFloat32Field(), 1234.4f, DELTA);
+        Assertions.assertEquals(reader.getFloat64Field(), -123e44, DELTA);
+        Assertions.assertEquals(reader.getEnumField(), org.capnproto.test.Test.TestEnum.QUX);
     }
 }
