@@ -21,10 +21,12 @@
 
 package org.capnproto;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArrayInputStreamTest {
   @Test
@@ -34,7 +36,7 @@ public class ArrayInputStreamTest {
 
     // read() should return -1 at the end of the stream
     // https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html
-    Assert.assertEquals(stream.read(dst), -1);
+    assertEquals(-1, stream.read(dst));
   }
 
   @Test
@@ -42,7 +44,7 @@ public class ArrayInputStreamTest {
     byte[] oneByte = new byte[]{42};
     ArrayInputStream stream = new ArrayInputStream(ByteBuffer.wrap(oneByte));
     ByteBuffer dst = ByteBuffer.allocate(10);
-    Assert.assertEquals(stream.read(dst), 1);
-    Assert.assertEquals(stream.read(dst), -1); // end of stream
+    assertEquals(1, stream.read(dst));
+    assertEquals(-1, stream.read(dst)); // end of stream
   }
 }
