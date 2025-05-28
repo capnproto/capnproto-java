@@ -27,17 +27,28 @@ public final class MessageBuilder {
 
     public MessageBuilder() {
         this.arena = new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
-                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY,
+                                      BuilderArena.SUGGESTED_ALLOCATOR_TYPE);
     }
 
     public MessageBuilder(int firstSegmentWords) {
         this.arena = new BuilderArena(firstSegmentWords,
-                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY);
+                                      BuilderArena.SUGGESTED_ALLOCATION_STRATEGY,
+                                      BuilderArena.SUGGESTED_ALLOCATOR_TYPE);
     }
 
-    public MessageBuilder(int firstSegmentWords, BuilderArena.AllocationStrategy allocationStrategy) {
+    public MessageBuilder(int firstSegmentWords, Allocator.AllocationStrategy allocationStrategy) {
         this.arena = new BuilderArena(firstSegmentWords,
-                                      allocationStrategy);
+                                      allocationStrategy,
+                                      BuilderArena.SUGGESTED_ALLOCATOR_TYPE);
+    }
+
+
+    public MessageBuilder(int firstSegmentWords, Allocator.AllocationStrategy allocationStrategy,
+                          BuilderArena.AllocatorType allocatorType) {
+        this.arena = new BuilderArena(firstSegmentWords,
+                                      allocationStrategy,
+                                      allocatorType);
     }
 
     /**
