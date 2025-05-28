@@ -28,7 +28,7 @@ public class EncodingTest {
 
     @Test
     public void testAllTypesMultiSegment() {
-        MessageBuilder message = new MessageBuilder(5, BuilderArena.AllocationStrategy.FIXED_SIZE);
+        MessageBuilder message = new MessageBuilder(5, Allocator.AllocationStrategy.FIXED_SIZE);
         org.capnproto.test.Test.TestAllTypes.Builder allTypes = message.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
         TestUtil.initTestMessage(allTypes);
 
