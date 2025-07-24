@@ -5,7 +5,7 @@
     <artifactId>compiler</artifactId>
     <packaging>jar</packaging>
     <description>schema compiler plugin for java</description>
-    <version>0.1.14-SNAPSHOT</version>
+    <version>0.1.17-SNAPSHOT</version>
     <name>capnpc-java</name>
     <organization>
         <name>org.capnproto</name>
@@ -36,15 +36,15 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
-          <version>0.1.14-SNAPSHOT</version>
+          <version>0.1.17-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

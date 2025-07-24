@@ -1,18 +1,19 @@
 package org.capnproto;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.ByteBuffer;
 
 public class ListBuilderTest {
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test
     public void _setBooleanElementShouldNotOverflowDuringPositionOffsetCalculation() {
         ByteBuffer buffer = ByteBuffer.allocate(10);
         BuilderArena builderArena = new BuilderArena(new DefaultAllocator());
         SegmentBuilder segmentBuilder = new SegmentBuilder(buffer, builderArena);
         ListBuilder listBuilder = new ListBuilder(segmentBuilder, 0, 0, 2, 0, (short) 0);
 
-        listBuilder._setBooleanElement(Integer.MAX_VALUE, true);
+        assertThrows(IndexOutOfBoundsException.class, () -> listBuilder._setBooleanElement(Integer.MAX_VALUE, true));
     }
 }

@@ -29,10 +29,14 @@ final class FarPointer {
     }
 
     public static int positionInSegment(long ref) {
+        /* The [ref] Offset (the "C" section) is "Unsigned",
+           so use unsigned >>> operator. */
         return WirePointer.offsetAndKind(ref) >>> 3;
     }
 
     public static boolean isDoubleFar(long ref) {
+        /* The [ref] Offset (the "C" section) is "Unsigned",
+           so use unsigned >>> operator. */
         return ((WirePointer.offsetAndKind(ref) >>> 2) & 1) != 0;
     }
 

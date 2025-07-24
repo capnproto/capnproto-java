@@ -43,9 +43,10 @@ public class SegmentReader {
      * Verify that the `size`-long (in words) range starting at word index
      * `start` is within bounds.
      */
-    public final boolean isInBounds(int start, int size) {
-        if (start < 0 || size < 0) return false;
-        long sizeInWords = (long) size * Constants.BYTES_PER_WORD;
-        return start + sizeInWords <= this.buffer.capacity();
+    public final boolean isInBounds(int startInWords, int sizeInWords) {
+        if (startInWords < 0 || sizeInWords < 0) return false;
+        long startInBytes = (long) startInWords * Constants.BYTES_PER_WORD;
+        long sizeInBytes = (long) sizeInWords * Constants.BYTES_PER_WORD;
+        return startInBytes + sizeInBytes <= this.buffer.capacity();
     }
 }

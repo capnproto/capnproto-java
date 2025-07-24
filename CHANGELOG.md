@@ -1,3 +1,13 @@
+## v0.1.16
+- Fix handling of negative pointer offsets.
+- Fix SegmentReader.inInBounds() offset arithmetic.
+
+## v0.1.15
+- Fix bugs in handling of upgraded list of pointers.
+
+## v0.1.14
+- Optimizations and bugfixes.
+
 ## v0.1.13
 - Improved robustness to StructPointer integer wrapping problems.
 

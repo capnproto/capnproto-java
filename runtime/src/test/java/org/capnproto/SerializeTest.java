@@ -21,23 +21,28 @@
 
 package org.capnproto;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Optional;
+
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SerializeTest {
 
@@ -45,15 +50,15 @@ public class SerializeTest {
    * @param arena: segment `i` contains `i` words each set to `i`
    */
   private void checkSegmentContents(int exampleSegmentCount, ReaderArena arena) {
-    Assert.assertEquals(arena.segments.size(), exampleSegmentCount);
+    assertEquals(arena.segments.size(), exampleSegmentCount);
     for (int i = 0; i < exampleSegmentCount; ++i) {
       SegmentReader segment = arena.segments.get(i);
       java.nio.LongBuffer segmentWords = segment.buffer.asLongBuffer();
 
-      Assert.assertEquals(segmentWords.capacity(), i);
+      assertEquals(segmentWords.capacity(), i);
       segmentWords.rewind();
       while (segmentWords.hasRemaining()) {
-        Assert.assertEquals(segmentWords.get(), i);
+        assertEquals(segmentWords.get(), i);
       }
     }
   }
@@ -71,7 +76,7 @@ public class SerializeTest {
 
       byte[] outputBytes = new byte[exampleBytes.length];
       Serialize.write(new ArrayOutputStream(ByteBuffer.wrap(outputBytes)), messageReader);
-      Assert.assertArrayEquals(exampleBytes, outputBytes);
+      assertArrayEquals(exampleBytes, outputBytes);
     }
 
     // ------
@@ -119,7 +124,7 @@ public class SerializeTest {
       done.get();
     }
     catch (InterruptedException | ExecutionException exc) {
-      Assert.fail(exc.getMessage());
+      fail(exc.getMessage());
     }
   }
 
@@ -184,30 +189,60 @@ public class SerializeTest {
       });
   }
 
-  @Test(expected=DecodeException.class)
+  @Test
+  public void testTryReadByteBuffer() throws IOException {
+    // `tryRead` returns a non-null `MessageReader` when given correct input
+    {
+      byte[] input = new byte[]{
+              0, 0, 0, 0, // 1 segment
+              0, 0, 0, 0  // Segment 0 contains 0 bytes
+              // No padding
+              // Segment 0 (empty)
+      };
+      Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input)));
+      assertTrue(messageReader.isPresent());
+    }
+
+    // `tryRead` returns null when given no input
+    {
+      Optional<MessageReader> messageReader = Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(new byte[]{})));
+      assertFalse(messageReader.isPresent());
+    }
+
+    // `tryRead` throws when given too few bytes to form the first word
+    {
+      byte[] input = new byte[]{
+              0, 0, 0, 0, // 1 segment
+              0, 0, 0     // Premature end of stream after 7 bytes
+      };
+      assertThrows(IOException.class, () -> Serialize.tryRead(new ArrayInputStream(ByteBuffer.wrap(input))));
+    }
+  }
+
+  @Test
   public void testSegment0SizeOverflow() throws java.io.IOException {
         byte[] input = {0, 0, 0, 0, -1, -1, -1, -113};
         java.nio.channels.ReadableByteChannel channel =
             java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
-        MessageReader message = Serialize.read(channel);
+        assertThrows(DecodeException.class, () -> Serialize.read(channel));
   }
 
-  @Test(expected=DecodeException.class)
+  @Test
   public void testSegment1SizeOverflow() throws java.io.IOException {
       byte[] input = {
           1, 0, 0, 0, 1, 0, 0, 0,
           -1, -1, -1, -113, 0, 0, 0, 0};
         java.nio.channels.ReadableByteChannel channel =
             java.nio.channels.Channels.newChannel(new java.io.ByteArrayInputStream(input));
-        MessageReader message = Serialize.read(channel);
+        assertThrows(DecodeException.class, () -> Serialize.read(channel));
   }
 
     @Test
-    @Ignore("Ignored by default because the huge array used in the test results in a long execution")
+    @Disabled("Ignored by default because the huge array used in the test results in a long execution")
     public void computeSerializedSizeInWordsShouldNotOverflowOnLargeSegmentCounts() {
         ByteBuffer dummySegmentBuffer = ByteBuffer.allocate(0);
         ByteBuffer[] segments = new ByteBuffer[Integer.MAX_VALUE / 2];
         Arrays.fill(segments, dummySegmentBuffer);
-        assertThat(Serialize.computeSerializedSizeInWords(segments), is((segments.length * 4L + 4) / Constants.BYTES_PER_WORD));
+        assertEquals(Serialize.computeSerializedSizeInWords(segments), (segments.length * 4L + 4) / Constants.BYTES_PER_WORD);
     }
 }

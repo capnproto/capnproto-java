@@ -26,29 +26,25 @@
 #include <capnp/schema.capnp.h>
 #include <capnp/serialize.h>
 #include <kj/debug.h>
+#include <kj/filesystem.h>
 #include <kj/io.h>
 #include <kj/string-tree.h>
 #include <kj/vector.h>
 #include <capnp/schema-loader.h>
 #include <capnp/dynamic.h>
-#include <unistd.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
 #include <set>
 #include <kj/main.h>
 #include <algorithm>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#if CAPNP_VERSION < 5000
-#error "This version of capnpc-java requires Cap'n Proto version 0.5 or higher."
+#if CAPNP_VERSION < 7000
+#error "This version of capnpc-java requires Cap'n Proto version 0.7.0 or higher."
 #endif
 
 #ifndef VERSION
@@ -2318,9 +2314,7 @@ private:
         KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }, indent);
 
     return NodeText {
-      kj::strTree(
-          kj::mv(top.outerTypeDef),
-          KJ_MAP(n, nestedTexts) { return kj::mv(n.outerTypeDef); }),
+      kj::mv(top.outerTypeDef),
 
       kj::strTree(
           kj::mv(top.readerBuilderDefs),
@@ -2498,36 +2492,13 @@ private:
 
   // -----------------------------------------------------------------
 
-  void makeDirectory(kj::StringPtr path) {
-    KJ_IF_MAYBE(slashpos, path.findLast('/')) {
-      // Make the parent dir.
-      makeDirectory(kj::str(path.slice(0, *slashpos)));
-    }
-
-    if (mkdir(path.cStr(), 0777) < 0) {
-      int error = errno;
-      if (error != EEXIST) {
-        KJ_FAIL_SYSCALL("mkdir(path)", error, path);
-      }
-    }
-  }
+  kj::Own<kj::Filesystem> fs = kj::newDiskFilesystem();
 
   void writeFile(kj::StringPtr filename, const kj::StringTree& text) {
-    if (!filename.startsWith("/")) {
-      KJ_IF_MAYBE(slashpos, filename.findLast('/')) {
-        // Make the parent dir.
-        makeDirectory(kj::str(filename.slice(0, *slashpos)));
-      }
-    }
-
-    int fd;
-    KJ_SYSCALL(fd = open(filename.cStr(), O_CREAT | O_WRONLY | O_TRUNC, 0666), filename);
-    kj::FdOutputStream out((kj::AutoCloseFd(fd)));
-
-    text.visit(
-        [&](kj::ArrayPtr<const char> text) {
-          out.write(text.begin(), text.size());
-        });
+    const auto path = kj::Path::parse(filename);
+    auto file = fs->getCurrent().openFile(path,
+        kj::WriteMode::CREATE | kj::WriteMode::MODIFY | kj::WriteMode::CREATE_PARENT);
+    file->writeAll(text.flatten());
   }
 
   kj::MainBuilder::Validity run() {
@@ -2538,15 +2509,12 @@ private:
 
     ReaderOptions options;
     options.traversalLimitInWords = 1 << 30;  // Don't limit.
-    StreamFdMessageReader reader(STDIN_FILENO, options);
+    StreamFdMessageReader reader(0, options);
     auto request = reader.getRoot<schema::CodeGeneratorRequest>();
 
     for (auto node: request.getNodes()) {
       schemaLoader.load(node);
     }
-
-    kj::FdOutputStream rawOut(STDOUT_FILENO);
-    kj::BufferedOutputStreamWrapper out(rawOut);
 
     for (auto requestedFile: request.getRequestedFiles()) {
       auto schema = schemaLoader.get(requestedFile.getId());
