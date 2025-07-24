@@ -1,6 +1,5 @@
 package org.capnproto.test;
 
-import org.capnproto.test.Test;
 import org.capnproto.*;
 import org.capnproto.Void;
 import org.junit.jupiter.api.Assertions;
@@ -904,24 +903,24 @@ public class EncodingTest {
       TestUtil.checkTestMessage(listReader.get(1));
   }
 
-    @org.junit.Test
+    @Test
     public void testAnyStruct() {
         MessageBuilder builder = new MessageBuilder();
-        var root = builder.initRoot(Test.TestAnyOthers.factory);
+        var root = builder.initRoot(org.capnproto.test.Test.TestAnyOthers.factory);
         var anyStruct = root.initAnyStructField();
     }
 
-    @org.junit.Test
+    @Test
     public void testCopyAnyPointer() {
         MessageBuilder message1 = new MessageBuilder();
-        Test.TestAllTypes.Builder root1 = message1.initRoot(Test.TestAllTypes.factory);
+        org.capnproto.test.Test.TestAllTypes.Builder root1 = message1.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
         TestUtil.initTestMessage(root1);
 
         MessageBuilder message2 = new MessageBuilder();
         AnyPointer.Builder root2 = message2.initRoot(AnyPointer.factory);
         root2.setAs(AnyPointer.factory, message1.getRoot(AnyPointer.factory).asReader());
 
-        TestUtil.checkTestMessage(root2.getAs(Test.TestAllTypes.factory));
+        TestUtil.checkTestMessage(root2.getAs(org.capnproto.test.Test.TestAllTypes.factory));
   }
 
   @Test

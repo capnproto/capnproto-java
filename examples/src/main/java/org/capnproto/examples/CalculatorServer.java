@@ -123,12 +123,22 @@ public class CalculatorServer {
             var x = params.get(0);
             var y = params.get(1);
 
-            double result = switch (op) {
-                case ADD -> x + y;
-                case SUBTRACT -> x - y;
-                case MULTIPLY -> x * y;
-                case DIVIDE -> x / y;
-                default -> Double.NaN;
+            double result;
+            switch (op) {
+                case ADD:
+                    result = x + y;
+                    break;
+                case SUBTRACT:
+                    result = x - y;
+                    break;
+                case MULTIPLY:
+                    result = x * y;
+                    break;
+                case DIVIDE:
+                    result = x / y;
+                    break;
+                default:
+                    result = Double.NaN;
             };
 
             context.getResults().setValue(result);
