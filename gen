@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -eux
+
+export PATH=/usr/local/bin:/usr/bin:/bin
+
+make CXX=g++-8 capnpc-java 
+
+capnp compile -I./compiler/src/main/schema/ -o/bin/cat ./runtime/src/test/schema/test.capnp > ./runtime/src/test/schema/test.raw
+capnp compile -I./compiler/src/main/schema/ -oc++ ./runtime/src/test/schema/test.capnp
+env CAPNP_LITE=1 capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/test.capnp
+cp ./runtime/src/test/schema/Test.java ./runtime/src/test/schema/TestLite.java
+capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/test.capnp 
+#cp ./runtime/src/test/schema/Test.java ./runtime/src/test/java/org/capnproto/test/
+
+#capnp compile -I./compiler/src/main/schema/ -oc++ ./runtime/src/test/schema/demo.capnp
+#capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/demo.capnp
+#cp ./runtime/src/test/schema/Demo.java ./runtime/src/test/java/org/capnproto/demo/
+
+#capnp compile -I./compiler/src/main/schema/ -o/bin/cat ./runtime/src/test/schema/generics.capnp > ./runtime/src/test/schema/generics.raw
+#capnp compile -I./compiler/src/main/schema/ -oc++ ./runtime/src/test/schema/generics.capnp
+#capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./runtime/src/test/schema/generics.capnp
+#cp ./runtime/src/test/schema/TestGenerics.java ./runtime/src/test/java/org/capnproto/demo/
+
+#capnp compile -I./compiler/src/main/schema/ -o./capnpc-java ./examples/src/main/schema/addressbook.capnp
+#cp ./examples/src/main/schema/Addressbook.java ./examples/src/main/java/org/capnproto/examples/
+

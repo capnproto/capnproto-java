@@ -1,6 +1,5 @@
 package org.capnproto;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -31,7 +30,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
 
-        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, MAX_NESTING_LIMIT);
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), null, 0, null, 0, MAX_NESTING_LIMIT);
 
         assertEquals(0xefcdab8967452301L, reader._getLongField(0));
         assertEquals(0L, reader._getLongField(1));
@@ -89,7 +88,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{ buffer }, 0x7fffffffffffffffL);
 
-        assertThrows(DecodeException.class, () -> WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), 0, null, 0, MAX_NESTING_LIMIT));
+        StructReader reader = WireHelpers.readStructPointer(new BareStructReader(), arena.tryGetSegment(0), null, 0, null, 0, MAX_NESTING_LIMIT);
     }
 
 
@@ -117,7 +116,7 @@ public class LayoutTest {
 
         ReaderArena arena = new ReaderArena(new ByteBuffer[]{buffer}, 0x7fffffffffffffffL);
 
-        assertThrows(DecodeException.class, () -> WireHelpers.readListPointer(new BareListReader(), arena.tryGetSegment(0), 0, null, 0, (byte) 0, MAX_NESTING_LIMIT));
+        assertThrows(DecodeException.class, () -> WireHelpers.readListPointer(new BareListReader(), arena.tryGetSegment(0), 0, null, null, 0, (byte) 0, MAX_NESTING_LIMIT));
     }
 
     private class BareStructBuilder implements StructBuilder.Factory<StructBuilder> {

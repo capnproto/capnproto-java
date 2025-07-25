@@ -24,6 +24,7 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class BuilderArena implements Arena {
     public enum AllocationStrategy {
@@ -37,6 +38,34 @@ public final class BuilderArena implements Arena {
 
     public final ArrayList<SegmentBuilder> segments;
     private final Allocator allocator;
+
+    private final CapTableBuilder localCapTable = new CapTableBuilder() {
+
+        private final List<ClientHook> capTable = new ArrayList<>();
+
+        @Override
+        public int injectCap(ClientHook cap) {
+            int result = this.capTable.size();
+            this.capTable.add(cap);
+            return result;
+        }
+
+        @Override
+        public void dropCap(int index) {
+            if (index < this.capTable.size()) {
+                assert false : "Invalid capability descriptor in message.";
+                return;
+            }
+            this.capTable.set(index, null);
+        }
+
+        @Override
+        public ClientHook extractCap(int index) {
+            return index < this.capTable.size()
+                    ? this.capTable.get(index)
+                    : null;
+        }
+    };
 
     public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
         this.segments = new ArrayList<SegmentBuilder>();
@@ -64,7 +93,17 @@ public final class BuilderArena implements Arena {
         this.allocator = allocator;
     }
 
-     /**
+    /**
+     * Return a CapTableBuilder that merely implements local loopback. That is, you can set
+     * capabilities, then read the same capabilities back, but there is no intent ever to transmit
+     * these capabilities. A MessageBuilder that isn't imbued with some other CapTable uses this
+     * by default.
+     */
+    public CapTableBuilder getLocalCapTable() {
+        return this.localCapTable;
+    }
+
+    /**
      * Constructs a BuilderArena from a ReaderArena and uses the size of the largest segment
      * as the next allocation size.
      */

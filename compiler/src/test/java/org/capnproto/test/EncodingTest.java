@@ -903,17 +903,24 @@ public class EncodingTest {
       TestUtil.checkTestMessage(listReader.get(1));
   }
 
-  @Test
-  public void testCopyAnyPointer() {
-      MessageBuilder message1 = new MessageBuilder();
-      org.capnproto.test.Test.TestAllTypes.Builder root1 = message1.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
-      TestUtil.initTestMessage(root1);
+    @Test
+    public void testAnyStruct() {
+        MessageBuilder builder = new MessageBuilder();
+        var root = builder.initRoot(org.capnproto.test.Test.TestAnyOthers.factory);
+        var anyStruct = root.initAnyStructField();
+    }
 
-      MessageBuilder message2 = new MessageBuilder();
-      AnyPointer.Builder root2 = message2.initRoot(AnyPointer.factory);
-      root2.setAs(AnyPointer.factory, message1.getRoot(AnyPointer.factory).asReader());
+    @Test
+    public void testCopyAnyPointer() {
+        MessageBuilder message1 = new MessageBuilder();
+        org.capnproto.test.Test.TestAllTypes.Builder root1 = message1.initRoot(org.capnproto.test.Test.TestAllTypes.factory);
+        TestUtil.initTestMessage(root1);
 
-      TestUtil.checkTestMessage(root2.getAs(org.capnproto.test.Test.TestAllTypes.factory));
+        MessageBuilder message2 = new MessageBuilder();
+        AnyPointer.Builder root2 = message2.initRoot(AnyPointer.factory);
+        root2.setAs(AnyPointer.factory, message1.getRoot(AnyPointer.factory).asReader());
+
+        TestUtil.checkTestMessage(root2.getAs(org.capnproto.test.Test.TestAllTypes.factory));
   }
 
   @Test
