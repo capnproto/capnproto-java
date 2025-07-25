@@ -46,3 +46,4 @@ jobs:
         run: |
             env PATH="${PATH}:/home/runner/bin"
             env PATH="${PATH}:/home/runner/bin" mvn -e -X test
+
