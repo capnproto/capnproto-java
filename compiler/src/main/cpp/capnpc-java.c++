@@ -208,6 +208,14 @@ private:
           package = kj::str(annotation.getValue().getText());
         }
       }
+
+      if (package.size() == 0) {
+        context.exitError(kj::str(node.getDisplayName(), ": no Java package name found. See java.capnp."));
+      }
+      if (className.size() == 0) {
+        context.exitError(kj::str(node.getDisplayName(), ": no Java outer classname found. See java.capnp."));
+      }
+
       return kj::strTree(kj::mv(package), ".", kj::mv(className));
     } else {
       Schema parent = schemaLoader.get(node.getScopeId());
