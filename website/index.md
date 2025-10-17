@@ -42,11 +42,6 @@ latest release of the Cap'n Proto schema compiler.
 Then, running `make` in the root directory of the capnproto-java repository
 should build `capnpc-java`.
 
-On Windows, you can instead
-grab a prebuilt win32 executable from here:
-
- <pre><a href="https://dwrensha.ws/capnproto/capnpc-java.exe.zip">https://dwrensha.ws/capnproto/capnpc-java.exe.zip</a></pre>
-
 
 For help on how to invoke the schema compiler:
 
