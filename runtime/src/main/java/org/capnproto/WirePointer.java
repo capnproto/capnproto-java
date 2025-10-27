@@ -87,4 +87,14 @@ final class WirePointer {
     public static int upper32Bits(long wirePointer) {
         return (int)(wirePointer >>> 32);
     }
+
+    public static boolean isCapability(long wirePointer) {
+        // lower 30 bits are all zero
+        return offsetAndKind(wirePointer) == OTHER;
+    }
+
+    public static void setCapability(ByteBuffer buffer, int offset, int cap) {
+        setOffsetAndKind(buffer, offset, OTHER);
+        buffer.putInt(offset*8 + 4, cap);
+    }
 }

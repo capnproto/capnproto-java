@@ -30,11 +30,19 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Optional;
 
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SerializeTest {
 
@@ -76,6 +84,47 @@ public class SerializeTest {
     {
       MessageReader messageReader = Serialize.read(ByteBuffer.wrap(exampleBytes));
       checkSegmentContents(exampleSegmentCount, messageReader.arena);
+    }
+
+    // read via AsyncChannel
+    expectSerializesToAsyncSocket(exampleSegmentCount, exampleBytes);
+  }
+
+  private void expectSerializesToAsyncSocket(int exampleSegmentCount, byte[] exampleBytes) throws IOException {
+    var done =  new CompletableFuture<java.lang.Void>();
+    var server = AsynchronousServerSocketChannel.open();
+    server.bind(null);
+    server.accept(null, new CompletionHandler<AsynchronousSocketChannel, Object>() {
+      @Override
+      public void completed(AsynchronousSocketChannel socket, Object attachment) {
+        socket.write(ByteBuffer.wrap(exampleBytes), null, new CompletionHandler<Integer, Object>() {
+          @Override
+          public void completed(Integer result, Object attachment) {
+            done.complete(null);
+          }
+
+          @Override
+          public void failed(Throwable exc, Object attachment) {
+            done.completeExceptionally(exc);
+          }
+        });
+      }
+
+      @Override
+      public void failed(Throwable exc, Object attachment) {
+        done.completeExceptionally(exc);
+      }
+    });
+
+    var socket = AsynchronousSocketChannel.open();
+    try {
+      socket.connect(server.getLocalAddress()).get();
+      var messageReader = Serialize.readAsync(socket).get();
+      checkSegmentContents(exampleSegmentCount, messageReader.arena);
+      done.get();
+    }
+    catch (InterruptedException | ExecutionException exc) {
+      fail(exc.getMessage());
     }
   }
 

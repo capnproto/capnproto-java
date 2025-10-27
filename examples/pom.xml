@@ -31,9 +31,9 @@
     </developers>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
-      <maven.compiler.release>8</maven.compiler.release>
+      <maven.compiler.source>10</maven.compiler.source>
+      <maven.compiler.target>10</maven.compiler.target>
+      <maven.compiler.release>10</maven.compiler.release>
     </properties>
     <dependencies>
         <dependency>
@@ -41,10 +41,32 @@
           <artifactId>runtime</artifactId>
           <version>0.1.17-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.capnproto</groupId>
+            <artifactId>runtime-rpc</artifactId>
+            <version>0.1.17-SNAPSHOT</version>
+        </dependency>
+
+	<dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.3</version>
+          <configuration>
+            <compilerArgument>-Xlint:unchecked</compilerArgument>
+          </configuration>
+        </plugin>
+
         <plugin>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.0.0</version>
@@ -54,15 +76,24 @@
               <phase>generate-sources</phase>
               <configuration>
                 <target>
-                  <mkdir dir="src/main/generated"/>
+                  <mkdir dir="src/main/generated/org/capnproto/examples"/>
                   <exec executable="capnp" failonerror="true">
                     <arg value="compile"/>
                     <arg value="-I"/>
                     <arg value="../compiler/src/main/schema/"/>
                     <arg value="--src-prefix=src/main/schema/"/>
-                    <arg value="-o../capnpc-java:src/main/generated"/>
+                    <arg value="-o../capnpc-java:src/main/generated/org/capnproto/examples"/>
                     <arg value="src/main/schema/addressbook.capnp"/>
+                    <env key="CAPNP_LITE" value="1"/>
                   </exec>
+                <exec executable="capnp" failonerror="true">
+                    <arg value="compile"/>
+                    <arg value="-I"/>
+                    <arg value="../compiler/src/main/schema/"/>
+                    <arg value="--src-prefix=src/main/schema/"/>
+                    <arg value="-o../capnpc-java:src/main/generated/org/capnproto/examples"/>
+                    <arg value="src/main/schema/calculator.capnp"/>
+                </exec>
                 </target>
               </configuration>
               <goals>

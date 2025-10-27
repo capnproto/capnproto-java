@@ -28,11 +28,16 @@
             <name>David Renshaw</name>
             <url>https://github.com/dwrensha</url>
         </developer>
+        <developer>
+            <id>vaci</id>
+            <name>Vaci Koblizek</name>
+            <url>https://github.com/vaci</url>
+        </developer>
     </developers>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
+      <maven.compiler.source>11</maven.compiler.source>
+      <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -62,6 +67,8 @@
           <version>3.6.2</version>
           <configuration>
             <compilerArgument>-Xlint:unchecked</compilerArgument>
+              <source>11</source>
+              <target>11</target>
           </configuration>
         </plugin>
       </plugins>
@@ -69,12 +76,12 @@
 
     <profiles>
         <profile>
-            <id>jdk9FF</id>
+            <id>jdk11FF</id>
             <activation>
-                <jdk>(1.8,)</jdk>
+                <jdk>(11,)</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.release>11</maven.compiler.release>
             </properties>
         </profile>
       <profile>

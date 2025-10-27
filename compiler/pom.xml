@@ -41,7 +41,6 @@
             <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
           <groupId>org.capnproto</groupId>
           <artifactId>runtime</artifactId>
@@ -56,6 +55,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.3</version>
           <configuration>
+            <source>11</source>
+            <target>11</target>
             <compilerArgument>-Xlint:unchecked</compilerArgument>
           </configuration>
         </plugin>
@@ -79,21 +80,21 @@
                 <goal>run</goal>
               </goals>
             </execution>
-
             <execution>
               <id>generate-test-sources</id>
               <phase>generate-test-sources</phase>
               <configuration>
                 <target>
-                  <mkdir dir="src/test/generated"/>
+                  <mkdir dir="src/test/generated/org/capnproto/test"/>
                   <exec executable="capnp" failonerror="true">
                     <arg value="compile"/>
                     <arg value="-I"/>
                     <arg value="src/main/schema/"/>
                     <arg value="--src-prefix=src/test/schema/"/>
-                    <arg value="-o../capnpc-java:src/test/generated"/>
+                    <arg value="-o../capnpc-java:src/test/generated/org/capnproto/test"/>
                     <arg value="src/test/schema/test.capnp"/>
                     <arg value="src/test/schema/test-import.capnp"/>
+                    <env key="CAPNP_LITE" value="1"/>
                   </exec>
                 </target>
               </configuration>
