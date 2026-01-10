@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -180,5 +181,98 @@ public class LayoutTest {
         assertEquals(true, builder._getBooleanField(125));
         assertEquals(true, builder._getBooleanField(126));
         assertEquals(false, builder._getBooleanField(127));
+    }
+
+    @Test
+    public void testWireHelpersZeroObjectFarPointer() {
+        byte ffff = (byte)0xff;
+        byte[][] segments;
+        byte[][] expect;
+
+        segments = new byte[][] {
+            {
+                // Far pointer, offset = 2, segment id = 1.
+                0x12, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                // Landing pad, offset = 1, list of 6 bytes.
+                0x05, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                // List data.
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+        };
+        expect = new byte[][] {
+            {
+                0x12, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+        };
+        doTestWireHelpersZeroObject(segments, expect);
+
+        segments = new byte[][] {
+            {
+                // Double-far pointer, offset = 2, segment id = 1.
+                0x16, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                // Landing pad far pointer, offset = 1, segment id = 2.
+                0x0e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                // Landing pad tag, list of 6 bytes.
+                0x01, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                // List data.
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+        };
+        expect = new byte[][] {
+            {
+                0x16, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+            {
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ffff, ffff, ffff, ffff, ffff, ffff, ffff, ffff,
+            },
+        };
+        doTestWireHelpersZeroObject(segments, expect);
+    }
+
+    private void doTestWireHelpersZeroObject(byte[][] segments, byte[][] expect) {
+        ByteBuffer[] buffers = new ByteBuffer[segments.length];
+        for (int i = 0; i < segments.length; i++) {
+            buffers[i] = ByteBuffer.wrap(segments[i]);
+            buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+        }
+        BuilderArena arena = new BuilderArena(new ReaderArena(buffers, 0x7fffffffffffffffL));
+        WireHelpers.zeroObject(arena.getSegment(0), 0);
+        assertArrayEquals(expect, segments);
     }
 }
