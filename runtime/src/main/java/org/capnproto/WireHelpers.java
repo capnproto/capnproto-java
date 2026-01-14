@@ -203,9 +203,9 @@ final class WireHelpers {
                 int padOffset = FarPointer.positionInSegment(ref);
                 long pad = segment.get(padOffset);
                 if (FarPointer.isDoubleFar(ref)) {
-                    SegmentBuilder otherSegment = segment.getArena().getSegment(FarPointer.getSegmentId(ref));
+                    SegmentBuilder otherSegment = segment.getArena().getSegment(FarPointer.getSegmentId(pad));
                     if (otherSegment.isWritable()) {
-                        zeroObject(otherSegment, padOffset + 1, FarPointer.positionInSegment(pad));
+                        zeroObject(otherSegment, segment.get(padOffset + 1), FarPointer.positionInSegment(pad));
                     }
                     segment.buffer.putLong(padOffset * 8, 0L);
                     segment.buffer.putLong((padOffset + 1) * 8, 0L);
