@@ -1,14 +1,12 @@
 package org.capnproto;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 public class LayoutTest {
 
@@ -145,7 +143,21 @@ public class LayoutTest {
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
         SegmentBuilder segment = new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
-                BuilderArena.SUGGESTED_ALLOCATION_STRATEGY));
+                BuilderArena.SUGGESTED_ALLOCATION_STRATEGY, BuilderArena.SUGGESTED_ALLOCATOR_TYPE));
+        BareStructBuilder factory = new BareStructBuilder(new StructSize((short) 2, (short) 4));
+        StructBuilder builder  = WireHelpers.initStructPointer(factory, 0, segment, factory.structSize());
+
+        setUpStruct(builder);
+        checkStruct(builder);
+    }
+
+    @Test
+    public void testStructRoundTripOneSegmentMemoryMapped() {
+        ByteBuffer buffer = ByteBuffer.allocate(1024*8);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        SegmentBuilder segment = new SegmentBuilder(buffer, new BuilderArena(BuilderArena.SUGGESTED_FIRST_SEGMENT_WORDS,
+                BuilderArena.SUGGESTED_ALLOCATION_STRATEGY, BuilderArena.AllocatorType.MEMORY_MAPPED));
         BareStructBuilder factory = new BareStructBuilder(new StructSize((short) 2, (short) 4));
         StructBuilder builder  = WireHelpers.initStructPointer(factory, 0, segment, factory.structSize());
 
