@@ -393,7 +393,14 @@ private:
                       "_", kj::hex(brandParam->scopeId), "_", suffix);
 
       } else {
-        return kj::strTree("org.capnproto.AnyPointer.", suffix);
+        switch (type.whichAnyPointerKind()) {
+        case schema::Type::AnyPointer::Unconstrained::STRUCT:
+          return kj::strTree("org.capnproto.AnyStruct.", suffix);
+        case schema::Type::AnyPointer::Unconstrained::LIST:
+          return kj::strTree("org.capnproto.AnyList.", suffix);
+        default:
+          return kj::strTree("org.capnproto.AnyPointer.", suffix);
+        }
       }
     }
     }
@@ -751,7 +758,14 @@ private:
                   "_", kj::hex(brandParam->scopeId), "_Factory");
 
       } else {
-        return kj::str("org.capnproto.AnyPointer.factory");
+        switch (type.whichAnyPointerKind()) {
+        case schema::Type::AnyPointer::Unconstrained::STRUCT:
+          return kj::str("org.capnproto.AnyStruct.factory");
+        case schema::Type::AnyPointer::Unconstrained::LIST:
+          return kj::str("org.capnproto.AnyList.factory");
+        default:
+           return kj::str("org.capnproto.AnyPointer.factory");
+        }
       }
     }
     case schema::Type::STRUCT : {
