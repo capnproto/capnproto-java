@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -231,6 +232,95 @@ public class EncodingTest {
     }
 
     @Test
+    public void testStructListUpgradeFar() {
+        byte[] bytes = new byte[] {
+            // List, offset 0, inline composite, 3 words.
+            0x01, 0x00, 0x00, 0x00, 0x1f, 0x00, 0x00, 0x00,
+            // List tag, 1 element, 1 word data, 2 pointers.
+            0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00,
+
+            // Data: 91.
+            0x5b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+            // List, offset 1, type = BYTE, length 8.
+            0x05, 0x00, 0x00, 0x00, 0x42, 0x00, 0x00, 0x00,
+            // Null pointer.
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+            // "hello!!"
+            0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x21, 0x00,
+        };
+        byte[][] expect = new byte[][] {
+            {
+                // Far pointer, offset 0, segment 1.
+                0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+
+                // The old list was zeroed.
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+                // "hello!!"
+                0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0x21, 0x00,
+
+                // Landing pad, list, offset -1, type = BYTE, length 8.
+                (byte)0xf9, (byte)0xff, (byte)0xff, (byte)0xff, 0x42, 0x00, 0x00, 0x00,
+            },
+            {
+                // List, offset 0, inline composite, 7 words.
+                0x01, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x00,
+                // List tag, 1 element, 2 word data, 5 pointers.
+                0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x05, 0x00,
+
+                // Data: 91.
+                0x5b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+                // Far pointer, offset 6, segment 0.
+                0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                // Null pointers.
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            },
+        };
+
+        ByteBuffer segment = java.nio.ByteBuffer.wrap(bytes);
+        segment.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        MessageReader messageReader =
+            new MessageReader(new ByteBuffer[]{segment}, ReaderOptions.DEFAULT_READER_OPTIONS);
+
+        StructList.Reader<org.capnproto.test.Test.TestOldVersion.Reader> oldVersion =
+            messageReader.getRoot(StructList.newFactory(org.capnproto.test.Test.TestOldVersion.factory));
+
+        assertEquals(1, oldVersion.size());
+        assertEquals(91, oldVersion.get(0).getOld1());
+        assertEquals("hello!!", oldVersion.get(0).getOld2().toString());
+
+        // Make the first segment exactly large enough to fit the original message plus a far
+        // pointer landing pad.
+        MessageBuilder message = new MessageBuilder(6 + 1);
+        message.setRoot(StructList.newFactory(org.capnproto.test.Test.TestOldVersion.factory), oldVersion);
+
+        ByteBuffer[] segments = message.getSegmentsForOutput();
+        assertEquals(1, segments.length);
+        assertEquals(6 * 8, segments[0].limit());
+
+        StructList.Builder<org.capnproto.test.Test.TestNewVersion.Builder> newVersion =
+            message.getRoot(new StructList.Factory<org.capnproto.test.Test.TestNewVersion.Builder, org.capnproto.test.Test.TestNewVersion.Reader>(org.capnproto.test.Test.TestNewVersion.factory));
+        assertEquals(1, newVersion.size());
+        assertEquals(91, newVersion.get(0).getOld1());
+        assertEquals("hello!!", newVersion.get(0).getOld2().toString());
+
+        segments = message.getSegmentsForOutput();
+        assertEquals(2, segments.length);
+        assertArrayEquals(expect[0], segments[0].array());
+        assertArrayEquals(expect[1], Arrays.copyOf(segments[1].array(), expect[1].length));
+    }
+
+    @Test
     public void testStructListUpgradeDoubleFar() {
       byte[] bytes = new byte[]{
             1,0,0,0,0x1f,0,0,0, // list, inline composite, 3 words
@@ -265,7 +355,7 @@ public class EncodingTest {
       assertEquals(91, newVersion.get(0).getOld1());
       assertEquals("hello!!", newVersion.get(0).getOld2().toString());
 
-      ByteBuffer[] segments1 = message.getSegmentsForOutput();
+      segments = message.getSegmentsForOutput();
       assertEquals(6 * 8, segments[0].limit());
       for (int ii = 8; ii < (5 * 8) - 1; ++ii) {
         // Check the the old list, including the tag, was zeroed.
