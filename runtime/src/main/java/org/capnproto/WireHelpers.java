@@ -340,7 +340,6 @@ final class WireHelpers {
         //# OrphanBuilder.
 
         long src = srcSegment.get(srcOffset);
-        long srcTarget = srcSegment.get(srcTargetOffset);
 
         if (dstSegment == srcSegment) {
             //# Same segment, so create a direct pointer.
@@ -383,7 +382,7 @@ final class WireHelpers {
             } else {
                 //# Simple landing pad is just a pointer.
                 WirePointer.setKindAndTarget(srcSegment.buffer, landingPadOffset,
-                                             WirePointer.kind(srcTarget), srcTargetOffset);
+                                             WirePointer.kind(src), srcTargetOffset);
                 srcSegment.buffer.putInt(landingPadOffset * Constants.BYTES_PER_WORD + 4,
                                          srcSegment.buffer.getInt(srcOffset * Constants.BYTES_PER_WORD + 4));
 
