@@ -74,9 +74,7 @@ public final class SegmentBuilder extends SegmentReader {
     }
 
     public final void clear() {
-        for (int ii = 0; ii <  this.pos; ++ii) {
-            this.put(ii, 0);
-        }
-        this.pos = 0;
+        byte[] bytes = new byte[this.pos];
+        this.buffer.put(bytes);
     }
 }

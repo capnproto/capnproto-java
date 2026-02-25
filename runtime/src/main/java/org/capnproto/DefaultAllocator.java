@@ -2,7 +2,6 @@ package org.capnproto;
 
 import java.nio.ByteBuffer;
 
-import org.capnproto.BuilderArena.AllocationStrategy;
 
 public class DefaultAllocator implements Allocator {
 
@@ -45,6 +44,7 @@ public class DefaultAllocator implements Allocator {
         this.allocationStyle = style;
     }
 
+    @Override
     public void setNextAllocationSizeBytes(int nextSize) {
         this.nextSize = nextSize;
     }

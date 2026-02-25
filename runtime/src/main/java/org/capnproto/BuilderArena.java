@@ -24,27 +24,38 @@ package org.capnproto;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import org.capnproto.Allocator.AllocationStrategy;
 
 public final class BuilderArena implements Arena {
-    public enum AllocationStrategy {
-        FIXED_SIZE,
-        GROW_HEURISTICALLY
+    // allocator to use, default BYTE_BUFFER is faster but is limited by
+    // available process memory limit
+    public enum AllocatorType {
+        BYTE_BUFFER,
+        MEMORY_MAPPED
     }
 
     public static final int SUGGESTED_FIRST_SEGMENT_WORDS = 1024;
     public static final AllocationStrategy SUGGESTED_ALLOCATION_STRATEGY =
         AllocationStrategy.GROW_HEURISTICALLY;
 
+    public static final AllocatorType SUGGESTED_ALLOCATOR_TYPE =
+        AllocatorType.BYTE_BUFFER;
+
     public final ArrayList<SegmentBuilder> segments;
     private final Allocator allocator;
 
-    public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
+    // public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy) {
+    //     this.segments = new ArrayList<SegmentBuilder>();
+    //     this.allocator = new DefaultAllocator(allocationStrategy);
+    //     this.allocator.setNextAllocationSizeBytes(
+    //         firstSegmentSizeWords * Constants.BYTES_PER_WORD);
+    // }
+
+    public BuilderArena(int firstSegmentSizeWords, AllocationStrategy allocationStrategy, AllocatorType allocatorType) {
         this.segments = new ArrayList<SegmentBuilder>();
-        {
-            DefaultAllocator allocator = new DefaultAllocator(allocationStrategy);
-            allocator.setNextAllocationSizeBytes(firstSegmentSizeWords * Constants.BYTES_PER_WORD);
-            this.allocator = allocator;
-        }
+        this.allocator = createAllocator(allocatorType, allocationStrategy);
+        this.allocator.setNextAllocationSizeBytes(
+            firstSegmentSizeWords * Constants.BYTES_PER_WORD);
     }
 
     public BuilderArena(Allocator allocator) {
@@ -77,15 +88,12 @@ public final class BuilderArena implements Arena {
             segmentBuilder.id = ii;
             segmentBuilder.pos = segmentBuilder.capacity(); // buffer is pre-filled
             segments.add(segmentBuilder);
-
             // Find the largest segment for the allocation strategy.
             largestSegment = Math.max(largestSegment, segment.buffer.capacity());
         }
-        DefaultAllocator defaultAllocator = new DefaultAllocator(SUGGESTED_ALLOCATION_STRATEGY);
-
-        // Use largest segment as next size.
-        defaultAllocator.setNextAllocationSizeBytes(largestSegment);
-        this.allocator = defaultAllocator;
+        AllocatorType allocatorType = suggestAllocator(largestSegment);
+        this.allocator = createAllocator(allocatorType, SUGGESTED_ALLOCATION_STRATEGY);
+        this.allocator.setNextAllocationSizeBytes(largestSegment);
     }
 
     @Override
@@ -152,4 +160,31 @@ public final class BuilderArena implements Arena {
         }
         return result;
     }
+
+    private static Allocator createAllocator(AllocatorType allocatorType, AllocationStrategy allocationStrategy) {
+        switch (allocatorType) {
+            case BYTE_BUFFER:
+                DefaultAllocator allocator1 = new DefaultAllocator(allocationStrategy);
+                return allocator1;
+                
+            case MEMORY_MAPPED:
+                MemoryMappedAllocator allocator2 = new MemoryMappedAllocator(
+                    "capnp_mmf", allocationStrategy);
+                return allocator2;
+            default:
+                throw new AssertionError(
+                    "Allocator must be BYTE_BUFFER or MEMORY_MAPPED");
+        }
+    }
+
+    public static AllocatorType suggestAllocator(int sizeToAllocate) {
+        Runtime runtime = Runtime.getRuntime();
+        long freeMemory = runtime.freeMemory();         // Free memory in bytes
+        long totalMemory = runtime.totalMemory();       // Total memory in JVM
+        long maxMemory = runtime.maxMemory();           // Max memory the JVM will attempt to use
+        if (freeMemory - sizeToAllocate < 0)
+            return AllocatorType.MEMORY_MAPPED;
+
+        return AllocatorType.BYTE_BUFFER;
+   };
 }
